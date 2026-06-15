@@ -619,12 +619,58 @@ async function run() {
     }
   }
 
-  // Make.com webhook
+  // Google Sheets — כתיבה ישירה ל-A1_Products
+  if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON && process.env.GOOGLE_SHEET_ID) {
+    try {
+      const { GoogleSpreadsheet } = require('google-spreadsheet');
+      const { JWT } = require('google-auth-library');
+      const sa = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
+      const auth = new JWT({ email: sa.client_email, key: sa.private_key, scopes: ['https://www.googleapis.com/auth/spreadsheets'] });
+      const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, auth);
+      await doc.loadInfo();
+
+      let sheet = doc.sheetsByTitle['A1_Products'];
+      if (!sheet) {
+        sheet = await doc.addSheet({ title: 'A1_Products', headerValues: [
+          'Run Date','Product Name','CJ PID','Category','Materials','Platform',
+          'Rating','Orders','Supplier Price','Retail Price','Score',
+          'Image URL','Product URL','Status','Upload Status','Shopify ID','Shopify URL','Upload Date'
+        ]});
+      }
+
+      const runDate = new Date().toLocaleDateString('he-IL');
+      const rows = top10.map(p => {
+        const pr = suggestRetailPrice(p);
+        return {
+          'Run Date': runDate,
+          'Product Name': p.name,
+          'CJ PID': p.pid || '',
+          'Category': p.category,
+          'Materials': p.materials?.join(', ') || '',
+          'Platform': p.source,
+          'Rating': p.rating,
+          'Orders': p.orders,
+          'Supplier Price': p.supplierPrice,
+          'Retail Price': pr.retail,
+          'Score': p.score,
+          'Image URL': p.imageUrl || '',
+          'Product URL': p.url || '',
+          'Status': 'Pending',
+        };
+      });
+      await sheet.addRows(rows);
+      console.log(`✅ ${rows.length} מוצרים נכתבו ל-Google Sheets (A1_Products)`);
+    } catch (e) {
+      console.log(`⚠️  Google Sheets: ${e.message}`);
+    }
+  }
+
+  // Make.com webhook (legacy — אופציונלי)
   const webhookUrl = process.env.MAKE_A1_WEBHOOK;
   if (webhookUrl) {
     try {
       await fetch(webhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(output) });
-      console.log('✅ נשלח ל-Make.com → Google Sheets');
+      console.log('✅ נשלח ל-Make.com');
     } catch (e) { console.log(`⚠️  Webhook: ${e.message}`); }
   }
 

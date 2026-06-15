@@ -2,41 +2,38 @@ name: A1 — Product Research (Weekly)
 
 on:
   schedule:
-    - cron: '0 7 * * 1'  # כל יום שני בשעה 7:00 UTC (10:00 ישראל)
-  workflow_dispatch:       # הרצה ידנית מ-GitHub
+    - cron: '0 7 * * 1'  # כל יום שני 7:00 UTC (10:00 ישראל)
+  workflow_dispatch:
 
 jobs:
   research:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
 
       - name: Install dependencies
-        run: |
-          cd sockacademy/agents/A1_product_research
-          npm install dotenv 2>/dev/null || true
+        working-directory: sockacademy/agents/A1_product_research
+        run: npm install
 
       - name: Run A1 Product Research Agent
+        working-directory: sockacademy/agents/A1_product_research
         env:
           CJ_EMAIL: ${{ secrets.CJ_EMAIL }}
           CJ_PASSWORD: ${{ secrets.CJ_PASSWORD }}
           CJ_API_KEY: ${{ secrets.CJ_API_KEY }}
           SHOPIFY_MASTER_TOKEN: ${{ secrets.SHOPIFY_MASTER_TOKEN }}
           KLAVIYO_PRIVATE_API_KEY: ${{ secrets.KLAVIYO_PRIVATE_API_KEY }}
-          MAKE_A1_WEBHOOK: ${{ secrets.MAKE_A1_WEBHOOK }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-        run: |
-          cd sockacademy/agents/A1_product_research
-          node agent.js
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          MAKE_A1_WEBHOOK: ${{ secrets.MAKE_A1_WEBHOOK }}
+        run: node agent.js
 
-      - name: Upload results as artifact
+      - name: Upload results
         uses: actions/upload-artifact@v4
         with:
           name: a1-results-${{ github.run_number }}

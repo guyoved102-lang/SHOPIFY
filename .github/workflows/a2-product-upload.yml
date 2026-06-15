@@ -1,0 +1,33 @@
+name: A2 — Product Upload (Daily)
+
+on:
+  schedule:
+    - cron: '0 8 * * *'   # כל יום 11:00 ישראל (UTC+3)
+  workflow_dispatch:        # הרצה ידנית
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: sockacademy/agents/A2_product_upload/package-lock.json
+
+      - name: Install dependencies
+        working-directory: sockacademy/agents/A2_product_upload
+        run: npm install
+
+      - name: Run A2 Upload Agent
+        working-directory: sockacademy/agents/A2_product_upload
+        env:
+          SHOPIFY_MASTER_TOKEN: ${{ secrets.SHOPIFY_MASTER_TOKEN }}
+          SHOPIFY_SHOP_DOMAIN: ${{ secrets.SHOPIFY_SHOP_DOMAIN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: node agent.js
