@@ -1,0 +1,30 @@
+name: A3 — Content Agent (Weekly Blog)
+
+on:
+  schedule:
+    - cron: '0 7 * * 1'  # כל שני 07:00 UTC (10:00 ישראל)
+  workflow_dispatch:      # הפעלה ידנית מ-GitHub
+
+jobs:
+  write-blog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: sockacademy/agents/A3_content
+        run: npm install
+
+      - name: Run A3 Blog Writer
+        working-directory: sockacademy/agents/A3_content
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SHOPIFY_MASTER_TOKEN: ${{ secrets.SHOPIFY_MASTER_TOKEN }}
+          SHOPIFY_SHOP_DOMAIN: 11eqwi-ji.myshopify.com
+          BLOG_ID: '97332199622'
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: node agent.js
