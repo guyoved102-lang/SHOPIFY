@@ -1,119 +1,251 @@
-/* SOCKACADEMY — Brand Identity: Black + Gold Premium */
+/* SOCKACADEMY — Brand Theme Override */
+/* Palette: #1A1A1A dark | #C9A84C gold | #F0EDE6 cream | #888888 gray */
+/* Fonts: Playfair Display (headings) + DM Sans (body) */
 
-/* ── CSS Variables ───────────────────────────────────── */
-:root {
-  --sa-black:      #0A0A0A;
-  --sa-dark:       #111111;
-  --sa-gold:       #C9A84C;
-  --sa-gold-light: #E2C97E;
-  --sa-gold-dark:  #8B6914;
-  --sa-white:      #FFFFFF;
-  --sa-gray:       #9CA3AF;
-  --sa-surface:    #1A1A1A;
+/* ── Google Fonts ────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+/* ── Header — dark bar ───────────────────────────────── */
+.header {
+  background-color: #1A1A1A !important;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.2) !important;
 }
 
-/* ── Logo / Brand Name ───────────────────────────────── */
-
-.header__heading-link .h2 {
-  font-size: 2.2rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--sa-black);
-  line-height: 1;
+.header__heading-link .h2,
+.header__heading-link {
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: 2rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: #C9A84C !important;
+  line-height: 1 !important;
 }
 
 @media screen and (min-width: 750px) {
   .header__heading-link .h2 {
-    font-size: 2.8rem;
+    font-size: 2.6rem !important;
   }
 }
 
-/* ── Header ──────────────────────────────────────────── */
+/* Nav links */
+.header__menu-item,
+.header__menu-item a,
+.list-menu__item,
+.list-menu__item a {
+  color: #F0EDE6 !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+}
 
-.header {
-  border-bottom: 1px solid rgba(201, 168, 76, 0.25);
+.header__menu-item:hover a,
+.list-menu__item:hover a {
+  color: #C9A84C !important;
+}
+
+/* Cart + icons */
+.header__icon,
+.header__icon svg {
+  color: #F0EDE6 !important;
+}
+
+.header__icon:hover svg {
+  color: #C9A84C !important;
+}
+
+/* Cart count bubble */
+.cart-count-bubble {
+  background: #C9A84C !important;
+  color: #1A1A1A !important;
+  font-weight: 800 !important;
+}
+
+/* ── Announcement Bar ────────────────────────────────── */
+.announcement-bar {
+  background-color: #111111 !important;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.15) !important;
+}
+
+.announcement-bar__message,
+.announcement-bar a {
+  color: #C9A84C !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: 0.72rem !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase !important;
+  font-weight: 600 !important;
+}
+
+/* ── Body / Page Background ──────────────────────────── */
+body,
+.shopify-section {
+  background-color: #1A1A1A;
+  color: #F0EDE6;
 }
 
 /* ── Primary Buttons ─────────────────────────────────── */
-
+.button,
 .button--primary,
-.shopify-payment-button__button {
-  background-color: var(--sa-black) !important;
-  color: var(--sa-gold) !important;
-  border: 1px solid var(--sa-gold) !important;
-  border-radius: 2px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+.shopify-payment-button__button--unbranded {
+  background-color: #C9A84C !important;
+  color: #1A1A1A !important;
+  border: 1px solid #C9A84C !important;
+  border-radius: 2px !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 0.78rem !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease !important;
 }
 
+.button:hover,
 .button--primary:hover,
-.shopify-payment-button__button:hover {
-  background-color: var(--sa-gold) !important;
-  color: var(--sa-black) !important;
-  transform: translateY(-1px);
+.shopify-payment-button__button--unbranded:hover {
+  background-color: transparent !important;
+  color: #C9A84C !important;
+  transform: translateY(-1px) !important;
 }
 
 /* ── Secondary Buttons ───────────────────────────────── */
-
 .button--secondary {
-  border-color: rgba(201, 168, 76, 0.4) !important;
-  color: var(--sa-black) !important;
+  background-color: transparent !important;
+  border-color: rgba(201, 168, 76, 0.5) !important;
+  color: #F0EDE6 !important;
 }
 
 .button--secondary:hover {
-  border-color: var(--sa-gold) !important;
-  color: var(--sa-gold) !important;
+  border-color: #C9A84C !important;
+  color: #C9A84C !important;
 }
 
 /* ── Product Cards ───────────────────────────────────── */
+.card {
+  background-color: #222222 !important;
+  border-color: #2A2A2A !important;
+}
 
 .card-wrapper:hover .card {
-  border-color: rgba(201, 168, 76, 0.5) !important;
-  box-shadow: 0 4px 20px rgba(201, 168, 76, 0.08);
+  border-color: rgba(201, 168, 76, 0.45) !important;
+  box-shadow: 0 8px 32px rgba(201, 168, 76, 0.1) !important;
+}
+
+.card__heading,
+.card__heading a {
+  color: #F0EDE6 !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-weight: 700 !important;
+}
+
+.card__heading a:hover {
+  color: #C9A84C !important;
 }
 
 /* ── Price ───────────────────────────────────────────── */
+.price__regular,
+.price-item {
+  color: #F0EDE6 !important;
+  font-family: 'DM Sans', sans-serif !important;
+}
 
 .price--sale .price-item--sale {
-  color: var(--sa-gold);
+  color: #C9A84C !important;
+}
+
+.price-item--regular.price-item--last {
+  color: #888888 !important;
+  text-decoration: line-through !important;
 }
 
 /* ── Links ───────────────────────────────────────────── */
-
-.link:hover,
-.full-unstyled-link:hover {
-  color: var(--sa-gold);
+a {
+  color: #F0EDE6;
 }
 
-a:focus-visible {
-  outline-color: var(--sa-gold);
+.link:hover,
+.full-unstyled-link:hover,
+a:hover {
+  color: #C9A84C !important;
 }
 
 /* ── Footer ──────────────────────────────────────────── */
-
 .footer {
-  border-top: 1px solid rgba(201, 168, 76, 0.2);
+  background-color: #111111 !important;
+  border-top: 1px solid rgba(201, 168, 76, 0.2) !important;
+}
+
+.footer__content-top,
+.footer__content-bottom {
+  color: #888888 !important;
+}
+
+.footer__heading {
+  color: #F0EDE6 !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  font-size: 0.78rem !important;
+}
+
+.footer a,
+.footer .link {
+  color: #888888 !important;
+}
+
+.footer a:hover,
+.footer .link:hover {
+  color: #C9A84C !important;
 }
 
 /* ── Badges ──────────────────────────────────────────── */
-
 .badge {
-  background-color: var(--sa-gold);
-  color: var(--sa-black);
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  background-color: #C9A84C !important;
+  color: #1A1A1A !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.08em !important;
+  border-radius: 2px !important;
 }
 
-/* ── Section Headings Accent ─────────────────────────── */
+/* ── Section Headings ────────────────────────────────── */
+h1, h2, h3, h4 {
+  font-family: 'Playfair Display', serif !important;
+  color: #F0EDE6 !important;
+}
 
-.section-heading::after {
-  content: '';
-  display: block;
-  width: 36px;
-  height: 2px;
-  background: var(--sa-gold);
-  margin-top: 8px;
+/* ── Inputs / Forms ──────────────────────────────────── */
+.field__input,
+.select__select,
+input[type="text"],
+input[type="email"],
+textarea {
+  background-color: #222222 !important;
+  border-color: #2A2A2A !important;
+  color: #F0EDE6 !important;
+  font-family: 'DM Sans', sans-serif !important;
+}
+
+.field__input:focus,
+.select__select:focus,
+input:focus {
+  border-color: #C9A84C !important;
+  outline-color: rgba(201, 168, 76, 0.3) !important;
+}
+
+.field__label {
+  color: #888888 !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: 0.78rem !important;
+  letter-spacing: 0.08em !important;
+}
+
+/* ── Pagination ──────────────────────────────────────── */
+.pagination__item--current {
+  background: #C9A84C !important;
+  color: #1A1A1A !important;
+  border-color: #C9A84C !important;
 }
