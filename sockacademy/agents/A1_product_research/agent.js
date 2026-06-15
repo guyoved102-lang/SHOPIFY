@@ -22,37 +22,65 @@ const emailTransporter = nodemailer.createTransport({
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 22 שאילתות חיפוש — כל הקטגוריות
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SockAcademy — חוקי מיקוד מותג
+// רק גרביים פרמיום לגברים/יוניסקס בוגרים.
+// 4 קטגוריות בלבד: Premium Materials / Performance / Dress & Formal / Tactical & Outdoor
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 const SEARCH_QUERIES = [
-  // חומרים פרימיום
-  'merino wool socks men premium',
-  'merino wool ankle socks women',
-  'egyptian cotton dress socks men',
-  'bamboo socks men luxury antibacterial',
-  'cashmere blend socks premium',
-  // ספורט/ביצועים
-  'compression socks running marathon',
+  // Premium Materials — חומרים איכותיים
+  'merino wool crew socks men premium',
+  'merino wool ankle socks performance',
+  'egyptian cotton dress socks men luxury',
+  'bamboo socks men antibacterial premium',
+  'cashmere blend socks men luxury',
+  'copper infused socks odor control men',
+  // Performance / Athletic
+  'compression socks running men athletic',
+  'no show socks men athletic performance',
+  'cycling socks elite sport men',
   'anti-blister hiking socks cushioned wool',
-  'no show socks athletic performance',
-  'cycling socks elite sport',
-  'gym cushioned ankle socks',
-  // סגנון/אופנה
-  'dress socks striped formal men luxury',
-  'argyle socks premium wool men',
-  'patterned dress socks men business',
-  'thin breathable dress socks summer',
-  'loafer socks suede invisible men',
-  // טקטי/עונתי
-  'thermal hiking socks winter wool',
-  'waterproof hiking socks merino outdoor',
-  'copper infused socks odor control antibacterial',
-  'medical compression socks circulation',
-  'toe socks sport five finger running',
-  // מתנות / סטים
+  'gym ankle socks men cushioned performance',
+  // Dress & Formal
+  'dress socks men formal luxury over the calf',
+  'argyle socks premium wool men business',
+  'patterned dress socks men office luxury',
+  'loafer no show socks men premium invisible',
+  'ribbed dress socks men luxury cotton',
+  // Tactical & Outdoor
+  'thermal hiking socks winter merino wool',
+  'waterproof hiking socks merino outdoor men',
+  'tactical boot socks men cushioned',
+  'merino wool outdoor socks men',
+  // Gift Sets
   'dress socks men gift box premium set',
-  'men luxury socks subscription gift',
+  'men luxury socks gift set premium',
 ];
 
-const EXCLUDE_WORDS = ['children', 'kids', 'baby', 'cartoon', 'anime', 'funny', 'novelty', 'christmas', 'halloween'];
+// מה שאסור — לא מתאים לSockAcademy
+const EXCLUDE_WORDS = [
+  // ילדים ובעלי חיים — לא רלוונטי
+  'children', 'kids', 'baby', 'toddler', 'infant',
+  'dog', 'pet', 'cat', 'puppy', 'paw', 'animal', 'horse', 'canine',
+  // נובלטי / זול
+  'cartoon', 'anime', 'funny', 'novelty', 'christmas', 'halloween',
+  'emoji', 'food', 'fruit', 'avocado', 'pizza',
+  // רפואי / ניצ'
+  'diabetic', 'five finger', 'toe separated', 'toe shoe',
+  // ידיים
+  'gloves', 'mittens',
+];
+
+// מה שחייב להיות — לפחות מילה אחת מהרשימה
+const BRAND_KEYWORDS = [
+  'merino', 'cashmere', 'bamboo', 'cotton', 'wool', 'copper', 'thermal',
+  'compression', 'performance', 'athletic', 'sport', 'cycling', 'hiking',
+  'tactical', 'waterproof', 'outdoor',
+  'dress', 'formal', 'argyle', 'business', 'luxury', 'ribbed',
+  'no show', 'no-show', 'invisible', 'loafer',
+  'premium', 'gift', 'set',
+];
 
 // טרנדים 2025 — בסיס סטטי (מתעדכן רבעונית)
 const TRENDING_2025 = [
@@ -555,10 +583,11 @@ async function run() {
     seen.add(key);
     const n = p.name.toLowerCase();
     return (
-      (p.rating >= 4.5 || p.rating === 0) &&
+      (p.rating >= 4.5 || p.rating === 0) &&  // חוק: 4.5+ או unrated (detail יבדוק)
       p.name.length > 10 &&
       n.includes('sock') &&
-      !EXCLUDE_WORDS.some(w => n.includes(w))
+      !EXCLUDE_WORDS.some(w => n.includes(w)) &&
+      BRAND_KEYWORDS.some(k => n.includes(k))  // חייב להיות premium signal
     );
   });
 

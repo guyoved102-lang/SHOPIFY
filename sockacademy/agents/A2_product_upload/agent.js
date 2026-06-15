@@ -53,7 +53,9 @@ async function generateDescription(product) {
     max_tokens: 600,
     messages: [{
       role: 'user',
-      content: `Write a compelling Shopify product description for premium socks.
+      content: `You are writing a product description for SockAcademy — the world's first dedicated sock authority. Think: Nike-level positioning, but for premium socks.
+
+Brand voice: authoritative, precise, understated luxury. No hype. No adjective stacking. The tone is that of an expert who has tested every sock in existence and this is the one worth buying.
 
 Product: ${product.name}
 Category: ${product.category}
@@ -62,10 +64,11 @@ Price: $${product.retailPrice}
 
 Rules:
 - 150-200 words, HTML format (<p> and <ul><li> tags)
-- Focus on quality, comfort, lifestyle
-- 4-5 bullet points of key features
-- No brand names — store brand is SockAcademy
-- End with a short call to action
+- Open with ONE strong declarative sentence (no "introducing" or "meet the")
+- 4-5 bullet points: specific, material-focused, technical where relevant
+- Mention SockAcademy only as the curator/authority, never as the manufacturer
+- No exclamation marks. No generic words: amazing, incredible, perfect, best
+- End with a calm, confident close — no pushy CTA
 - Return ONLY the HTML, no explanation`
     }],
   });

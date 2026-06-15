@@ -14,8 +14,30 @@
 תוך כדי שיחה — אם מגלים משהו חדש על גיא (סגנון, העדפה, דרך חשיבה) — לעדכן `memory/user_guy.md` מיד.
 
 ## 🎯 Brand Voice
-מותג פרימיום, סמכותי, מקצועי. SockAcademy = האקדמיה הראשונה בעולם לגרביים.
+מותג פרמיום, סמכותי, מקצועי. SockAcademy = האקדמיה הראשונה בעולם לגרביים.
 טון: בגרות, ידע, כבוד לפרטים — לא ילדותי, לא קריקטורי.
+
+## 🚨 חוקי מיקוד — לכל האגנטים
+**SockAcademy = גרביים פרמיום לגברים/יוניסקס בוגרים. נקודה.**
+
+### מה מכניסים:
+| קטגוריה | דוגמאות |
+|---|---|
+| Premium Materials | Merino Wool, Cashmere, Bamboo, Egyptian Cotton, Copper |
+| Performance | Compression, No-Show, Athletic, Cycling, Running |
+| Tactical & Outdoor | Hiking, Waterproof, Thermolite, Tactical Boot |
+| Dress & Formal | Dress, Argyle, Business, Over-the-calf, Ribbed |
+| Gift Sets | Premium multi-pair sets, gift boxes |
+
+### מה שאסור בשום אגנט:
+- גרביים לכלבים / חיות מחמד — **BLOCKED**
+- גרביים לילדים / תינוקות — **BLOCKED**
+- נובלטי / פאני / קריקטורים — **BLOCKED**
+- מוצר ללא premium signal ברור — **BLOCKED**
+- תמונות Higgsfield ללא רפרנס מגיא — **BLOCKED**
+
+### מחירים מינימליים (לא לרדת מתחת):
+- Single pair: $18+ | Premium: $28+ | Tactical/Merino: $35+ | Gift Set: $65+
 
 ## ✅ הושלם הכל
 
