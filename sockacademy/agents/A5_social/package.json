@@ -1,0 +1,11 @@
+{
+  "name": "a5-social",
+  "version": "1.0.0",
+  "description": "A5 — SockAcademy Social Content Agent (Instagram)",
+  "main": "agent.js",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.24.0",
+    "dotenv": "^17.0.0",
+    "nodemailer": "^9.0.0"
+  }
+}
