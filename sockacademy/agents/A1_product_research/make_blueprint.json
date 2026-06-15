@@ -1,0 +1,85 @@
+{
+  "name": "A1 — Product Research → Sheets + Email",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": "A1_product_research",
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": { "x": 0, "y": 0 },
+        "restore": { "parameters": { "hook": { "label": "A1 Product Research Webhook" } } },
+        "expect": [
+          { "name": "products", "type": "array", "label": "Products Array" },
+          { "name": "runDate", "type": "text", "label": "Run Date" },
+          { "name": "report", "type": "text", "label": "Weekly Report" }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "module": "google-sheets:addRow",
+      "version": 2,
+      "parameters": {
+        "spreadsheetId": "1ojfN0ClyB4EM83yk03RhKlQImrTjZdYEurZ4dJbuQBg",
+        "sheetId": "A1_Products"
+      },
+      "mapper": {
+        "values": {
+          "A": "{{1.runDate}}",
+          "B": "{{item.name}}",
+          "C": "{{item.source}}",
+          "D": "{{item.rating}}",
+          "E": "{{item.orders}}",
+          "F": "{{item.supplierPrice}}",
+          "G": "{{item.score}}",
+          "H": "{{join(item.reasons, ', ')}}",
+          "I": "{{item.url}}",
+          "J": "Pending"
+        }
+      },
+      "metadata": {
+        "designer": { "x": 300, "y": 0 },
+        "comment": "Write each product to Google Sheets. Column J = Approval Status"
+      }
+    },
+    {
+      "id": 3,
+      "module": "gmail:ActionSendEmail",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "to": "guyoved102@gmail.com",
+        "subject": "🧦 SockAcademy — {{formatDate(1.runDate, 'DD/MM/YYYY')}} — 5 מוצרים לאישור",
+        "content": "{{1.report}}\n\n---\nלאישור: https://docs.google.com/spreadsheets/d/1ojfN0ClyB4EM83yk03RhKlQImrTjZdYEurZ4dJbuQBg\nשנה עמודה J מ-Pending ל-Approved לאשר מוצר.",
+        "contentType": "text"
+      },
+      "metadata": {
+        "designer": { "x": 600, "y": 0 },
+        "comment": "Send weekly email to Guy with product report"
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "slots": null,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": { "orphans": [] },
+    "zone": "eu2.make.com"
+  }
+}

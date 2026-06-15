@@ -31,6 +31,7 @@ jobs:
           SHOPIFY_MASTER_TOKEN: ${{ secrets.SHOPIFY_MASTER_TOKEN }}
           KLAVIYO_PRIVATE_API_KEY: ${{ secrets.KLAVIYO_PRIVATE_API_KEY }}
           MAKE_A1_WEBHOOK: ${{ secrets.MAKE_A1_WEBHOOK }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
         run: |
           cd sockacademy/agents/A1_product_research
           node agent.js

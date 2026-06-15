@@ -7,6 +7,17 @@
 
 require('dotenv').config({ path: '../../.env' });
 const fs = require('fs');
+const nodemailer = require('nodemailer');
+
+const emailTransporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
+  auth: {
+    user: 'sockacademy.store@gmail.com',
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // קריטריוני חיפוש
@@ -248,6 +259,27 @@ function buildReport(top5, totalScanned) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// שליחת מייל שבועי לגיא
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function sendWeeklyEmail(report) {
+  if (!process.env.GMAIL_APP_PASSWORD) {
+    console.log('⚠️  GMAIL_APP_PASSWORD לא מוגדר — דילוג על מייל');
+    return;
+  }
+  try {
+    await emailTransporter.sendMail({
+      from: '"SockAcademy A1 Agent" <sockacademy.store@gmail.com>',
+      to: 'guyoved102@gmail.com',
+      subject: `🧦 SockAcademy — דוח מוצרים שבועי ${new Date().toLocaleDateString('he-IL')}`,
+      text: report,
+    });
+    console.log('✅ מייל שבועי נשלח לגיא');
+  } catch (e) {
+    console.log(`⚠️  שגיאת מייל: ${e.message}`);
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // MAIN
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function run() {
@@ -311,6 +343,9 @@ async function run() {
   // הדפס דוח
   console.log('\n' + output.report);
   console.log('\n✅ last_run.json נשמר');
+
+  // שלח מייל לגיא ישירות
+  await sendWeeklyEmail(output.report);
 
   // שלח ל-Make.com webhook (אם מוגדר)
   const webhookUrl = process.env.MAKE_A1_WEBHOOK;
