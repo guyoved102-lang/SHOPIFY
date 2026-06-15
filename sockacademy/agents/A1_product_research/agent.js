@@ -555,7 +555,7 @@ async function run() {
     seen.add(key);
     const n = p.name.toLowerCase();
     return (
-      p.rating >= 4.5 &&
+      (p.rating >= 4.0 || p.rating === 0) &&
       p.name.length > 10 &&
       n.includes('sock') &&
       !EXCLUDE_WORDS.some(w => n.includes(w))
