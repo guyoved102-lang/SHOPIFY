@@ -1,0 +1,825 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+{%- style -%}
+  #MainProduct-{{ section.id }} {
+    background-color: #1A1A1A;
+    padding: 4rem 2rem 0;
+    color: #F0EDE6;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  #MainProduct-{{ section.id }} .sp__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* ── Breadcrumb ── */
+  #MainProduct-{{ section.id }} .sp__breadcrumb {
+    font-size: 0.78rem;
+    color: #444;
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  #MainProduct-{{ section.id }} .sp__breadcrumb a {
+    color: #555;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  #MainProduct-{{ section.id }} .sp__breadcrumb a:hover { color: #C9A84C; }
+  #MainProduct-{{ section.id }} .sp__breadcrumb span { color: #333; }
+
+  /* ── Two-column layout ── */
+  #MainProduct-{{ section.id }} .sp__layout {
+    display: grid;
+    grid-template-columns: 55% 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  /* ─────────────────────────
+     GALLERY
+  ───────────────────────── */
+  #MainProduct-{{ section.id }} .sp__gallery {
+    position: sticky;
+    top: 2rem;
+  }
+
+  #MainProduct-{{ section.id }} .sp__main-img-wrap {
+    background: #222222;
+    border: 1px solid #1A1A1A;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    position: relative;
+  }
+
+  #MainProduct-{{ section.id }} .sp__main-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.2s ease;
+    display: block;
+  }
+
+  #MainProduct-{{ section.id }} .sp__main-img.sp--swapping {
+    opacity: 0;
+  }
+
+  #MainProduct-{{ section.id }} .sp__thumbs {
+    display: flex;
+    gap: 0.625rem;
+    margin-top: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  #MainProduct-{{ section.id }} .sp__thumb {
+    width: 72px;
+    height: 72px;
+    background: #222222;
+    border: 1.5px solid #1A1A1A;
+    cursor: pointer;
+    overflow: hidden;
+    padding: 0;
+    transition: border-color 0.18s ease;
+    flex-shrink: 0;
+  }
+
+  #MainProduct-{{ section.id }} .sp__thumb:hover {
+    border-color: #C9A84C;
+  }
+
+  #MainProduct-{{ section.id }} .sp__thumb--active {
+    border-color: #C9A84C;
+  }
+
+  #MainProduct-{{ section.id }} .sp__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* ─────────────────────────
+     PRODUCT INFO
+  ───────────────────────── */
+  #MainProduct-{{ section.id }} .sp__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  #MainProduct-{{ section.id }} .sp__vendor {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #C9A84C;
+    margin: 0 0 0.6rem;
+  }
+
+  #MainProduct-{{ section.id }} .sp__title {
+    font-family: 'Playfair Display', sans-serif;
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: #F0EDE6;
+    text-transform: uppercase;
+    line-height: 1;
+    margin: 0 0 1.25rem;
+  }
+
+  /* ── Price ── */
+  #MainProduct-{{ section.id }} .sp__price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  #MainProduct-{{ section.id }} .sp__price {
+    font-family: 'Playfair Display', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 0.04em;
+    color: #C9A84C;
+    line-height: 1;
+  }
+
+  #MainProduct-{{ section.id }} .sp__compare-price {
+    font-size: 1.1rem;
+    color: #444;
+    text-decoration: line-through;
+  }
+
+  #MainProduct-{{ section.id }} .sp__badge-sale {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    background: #C9A84C;
+    padding: 0.2rem 0.6rem;
+    border-radius: 2px;
+  }
+
+  /* ── Short description ── */
+  #MainProduct-{{ section.id }} .sp__short-desc {
+    font-size: 0.925rem;
+    color: #888;
+    line-height: 1.7;
+    margin: 0 0 1.75rem;
+    border-left: 2px solid #1E1E1E;
+    padding-left: 1rem;
+  }
+
+  /* ── Option groups ── */
+  #MainProduct-{{ section.id }} .sp__option-group {
+    margin-bottom: 1.25rem;
+  }
+
+  #MainProduct-{{ section.id }} .sp__option-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #666;
+    margin-bottom: 0.6rem;
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  #MainProduct-{{ section.id }} .sp__option-selected {
+    color: #F0EDE6;
+  }
+
+  #MainProduct-{{ section.id }} .sp__option-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  #MainProduct-{{ section.id }} .sp__opt-btn {
+    background: #222222;
+    border: 1.5px solid #1E1E1E;
+    color: #F0EDE6;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.825rem;
+    font-weight: 600;
+    padding: 0.5rem 1.1rem;
+    cursor: pointer;
+    transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
+    letter-spacing: 0.04em;
+    min-width: 48px;
+    text-align: center;
+  }
+
+  #MainProduct-{{ section.id }} .sp__opt-btn:hover {
+    border-color: #C9A84C;
+    color: #C9A84C;
+  }
+
+  #MainProduct-{{ section.id }} .sp__opt-btn--active {
+    border-color: #C9A84C;
+    color: #C9A84C;
+    background: rgba(201, 168, 76, 0.07);
+  }
+
+  #MainProduct-{{ section.id }} .sp__opt-btn--unavailable {
+    opacity: 0.3;
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+
+  /* ── Form: quantity + ATC ── */
+  #MainProduct-{{ section.id }} .sp__form-row {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    align-items: stretch;
+  }
+
+  #MainProduct-{{ section.id }} .sp__qty-wrap {
+    display: flex;
+    align-items: center;
+    border: 1.5px solid #1E1E1E;
+    background: #222222;
+    flex-shrink: 0;
+  }
+
+  #MainProduct-{{ section.id }} .sp__qty-btn {
+    background: none;
+    border: none;
+    color: #F0EDE6;
+    font-size: 1.2rem;
+    width: 2.5rem;
+    height: 100%;
+    cursor: pointer;
+    transition: color 0.18s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+  }
+
+  #MainProduct-{{ section.id }} .sp__qty-btn:hover { color: #C9A84C; }
+
+  #MainProduct-{{ section.id }} .sp__qty-input {
+    background: none;
+    border: none;
+    border-left: 1px solid #1E1E1E;
+    border-right: 1px solid #1E1E1E;
+    color: #F0EDE6;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+    width: 3rem;
+    padding: 0.5rem 0;
+    outline: none;
+    -moz-appearance: textfield;
+  }
+
+  #MainProduct-{{ section.id }} .sp__qty-input::-webkit-inner-spin-button,
+  #MainProduct-{{ section.id }} .sp__qty-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+  }
+
+  #MainProduct-{{ section.id }} .sp__atc-btn {
+    flex: 1;
+    background: #C9A84C;
+    color: #FFFFFF;
+    border: 2px solid #C9A84C;
+    font-family: 'Playfair Display', sans-serif;
+    font-size: 1.15rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 0 2rem;
+    transition: background 0.22s ease, color 0.22s ease, border-color 0.22s ease;
+    white-space: nowrap;
+  }
+
+  #MainProduct-{{ section.id }} .sp__atc-btn:hover:not(:disabled) {
+    background: #E2C47A;
+    border-color: #C9A84C;
+  }
+
+  #MainProduct-{{ section.id }} .sp__atc-btn:disabled {
+    background: #222;
+    border-color: #222;
+    color: #555;
+    cursor: not-allowed;
+  }
+
+  #MainProduct-{{ section.id }} .sp__atc-btn--loading {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  /* ── Trust badges ── */
+  #MainProduct-{{ section.id }} .sp__trust {
+    display: flex;
+    gap: 0;
+    border: 1px solid #1A1A1A;
+    margin-top: 1.5rem;
+  }
+
+  #MainProduct-{{ section.id }} .sp__trust-badge {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 1rem 0.5rem;
+    border-right: 1px solid #1A1A1A;
+    text-align: center;
+  }
+
+  #MainProduct-{{ section.id }} .sp__trust-badge:last-child {
+    border-right: none;
+  }
+
+  #MainProduct-{{ section.id }} .sp__trust-icon {
+    color: #C9A84C;
+    flex-shrink: 0;
+  }
+
+  #MainProduct-{{ section.id }} .sp__trust-icon svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  #MainProduct-{{ section.id }} .sp__trust-text {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: #666;
+    text-transform: uppercase;
+    line-height: 1.3;
+  }
+
+  /* ─────────────────────────
+     DESCRIPTION SECTION
+  ───────────────────────── */
+  #MainProduct-{{ section.id }} .sp__desc-section {
+    margin-top: 5rem;
+    border-top: 1px solid #1A1A1A;
+    padding: 4rem 0 5rem;
+  }
+
+  #MainProduct-{{ section.id }} .sp__desc-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  #MainProduct-{{ section.id }} .sp__desc-heading {
+    font-family: 'Playfair Display', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 0.08em;
+    color: #F0EDE6;
+    text-transform: uppercase;
+    margin: 0;
+    line-height: 1;
+  }
+
+  #MainProduct-{{ section.id }} .sp__desc-line {
+    flex: 1;
+    height: 1px;
+    background: #1A1A1A;
+  }
+
+  #MainProduct-{{ section.id }} .sp__desc-body {
+    font-size: 0.95rem;
+    color: #888;
+    line-height: 1.8;
+    max-width: 800px;
+    columns: 2;
+    column-gap: 3rem;
+  }
+
+  #MainProduct-{{ section.id }} .sp__desc-body p {
+    margin-top: 0;
+    break-inside: avoid;
+  }
+
+  /* ── Mobile ── */
+  @media screen and (max-width: 899px) {
+    #MainProduct-{{ section.id }} .sp__layout {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+    }
+
+    #MainProduct-{{ section.id }} .sp__gallery {
+      position: static;
+    }
+
+    #MainProduct-{{ section.id }} .sp__desc-body {
+      columns: 1;
+    }
+  }
+
+  @media screen and (max-width: 479px) {
+    #MainProduct-{{ section.id }} {
+      padding: 2.5rem 1.25rem 0;
+    }
+
+    #MainProduct-{{ section.id }} .sp__form-row {
+      flex-direction: column;
+    }
+
+    #MainProduct-{{ section.id }} .sp__atc-btn {
+      padding: 0.9rem;
+    }
+
+    #MainProduct-{{ section.id }} .sp__trust {
+      flex-direction: column;
+    }
+
+    #MainProduct-{{ section.id }} .sp__trust-badge {
+      flex-direction: row;
+      border-right: none;
+      border-bottom: 1px solid #1A1A1A;
+      padding: 0.875rem 1rem;
+      text-align: left;
+      gap: 0.75rem;
+    }
+
+    #MainProduct-{{ section.id }} .sp__trust-badge:last-child {
+      border-bottom: none;
+    }
+  }
+{%- endstyle -%}
+
+{%- assign current_variant = product.selected_or_first_available_variant -%}
+{%- assign first_image = current_variant.featured_image | default: product.featured_image -%}
+
+<section id="MainProduct-{{ section.id }}">
+  <div class="sp__inner">
+
+    {%- comment -%} Breadcrumb {%- endcomment -%}
+    <nav class="sp__breadcrumb" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span aria-hidden="true">›</span>
+      {%- if collection -%}
+        <a href="{{ collection.url }}">{{ collection.title }}</a>
+        <span aria-hidden="true">›</span>
+      {%- else -%}
+        <a href="{{ routes.collections_url }}">Socks</a>
+        <span aria-hidden="true">›</span>
+      {%- endif -%}
+      <span>{{ product.title }}</span>
+    </nav>
+
+    <div class="sp__layout">
+
+      {%- comment -%} ── Gallery ── {%- endcomment -%}
+      <div class="sp__gallery">
+        <div class="sp__main-img-wrap">
+          {%- if first_image -%}
+            <img
+              id="sp-main-img-{{ section.id }}"
+              class="sp__main-img"
+              src="{{ first_image | image_url: width: 900 }}"
+              alt="{{ first_image.alt | escape | default: product.title }}"
+              width="{{ first_image.width }}"
+              height="{{ first_image.height }}"
+              fetchpriority="high"
+            >
+          {%- else -%}
+            {{ 'product-1' | placeholder_svg_tag: 'sp__main-img' }}
+          {%- endif -%}
+        </div>
+
+        {%- if product.images.size > 1 -%}
+          <div class="sp__thumbs">
+            {%- for image in product.images limit: 6 -%}
+              <button
+                type="button"
+                class="sp__thumb{% if forloop.first %} sp__thumb--active{% endif %}"
+                data-src="{{ image | image_url: width: 900 }}"
+                data-index="{{ forloop.index0 }}"
+                aria-label="View image {{ forloop.index }}"
+              >
+                <img
+                  src="{{ image | image_url: width: 150 }}"
+                  alt="{{ image.alt | escape | default: product.title }}"
+                  width="72"
+                  height="72"
+                  loading="lazy"
+                >
+              </button>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%} ── Product info ── {%- endcomment -%}
+      <div class="sp__info">
+
+        {%- if product.vendor != blank -%}
+          <p class="sp__vendor">{{ product.vendor }}</p>
+        {%- endif -%}
+
+        <h1 class="sp__title">{{ product.title }}</h1>
+
+        {%- comment -%} Price {%- endcomment -%}
+        <div class="sp__price-row" id="sp-price-row-{{ section.id }}">
+          <span class="sp__price" id="sp-price-{{ section.id }}">
+            {{ current_variant.price | money }}
+          </span>
+          {%- if current_variant.compare_at_price > current_variant.price -%}
+            <s class="sp__compare-price" id="sp-compare-{{ section.id }}">
+              {{ current_variant.compare_at_price | money }}
+            </s>
+            <span class="sp__badge-sale">Sale</span>
+          {%- else -%}
+            <s class="sp__compare-price" id="sp-compare-{{ section.id }}" style="display:none">
+              {{ current_variant.compare_at_price | money }}
+            </s>
+          {%- endif -%}
+        </div>
+
+        {%- comment -%} Short description {%- endcomment -%}
+        {%- if product.metafields.descriptors.subtitle.value != blank -%}
+          <p class="sp__short-desc">{{ product.metafields.descriptors.subtitle.value }}</p>
+        {%- elsif product.description != blank -%}
+          <p class="sp__short-desc">{{ product.description | strip_html | truncatewords: 28 }}</p>
+        {%- endif -%}
+
+        {%- comment -%} Variant options {%- endcomment -%}
+        {%- unless product.has_only_default_variant -%}
+          {%- for option in product.options_with_values -%}
+            <div class="sp__option-group">
+              <div class="sp__option-label">
+                {{ option.name }}:
+                <span
+                  class="sp__option-selected"
+                  id="sp-opt-val-{{ section.id }}-{{ option.position }}"
+                >{{ option.selected_value }}</span>
+              </div>
+              <div class="sp__option-values">
+                {%- for value in option.values -%}
+                  <button
+                    type="button"
+                    class="sp__opt-btn{% if option.selected_value == value %} sp__opt-btn--active{% endif %}"
+                    data-option-position="{{ option.position }}"
+                    data-option-value="{{ value | escape }}"
+                  >{{ value }}</button>
+                {%- endfor -%}
+              </div>
+            </div>
+          {%- endfor -%}
+        {%- endunless -%}
+
+        {%- comment -%} Form: qty + ATC {%- endcomment -%}
+        {%- form 'product', product,
+          id: 'product-form-{{ section.id }}',
+          novalidate: 'novalidate'
+        -%}
+          <input
+            type="hidden"
+            name="id"
+            id="variant-id-{{ section.id }}"
+            value="{{ current_variant.id }}"
+          >
+
+          <div class="sp__form-row">
+            <div class="sp__qty-wrap">
+              <button type="button" class="sp__qty-btn" data-action="decrease" aria-label="Decrease quantity">−</button>
+              <input
+                type="number"
+                name="quantity"
+                id="sp-qty-{{ section.id }}"
+                class="sp__qty-input"
+                value="1"
+                min="1"
+                aria-label="Quantity"
+              >
+              <button type="button" class="sp__qty-btn" data-action="increase" aria-label="Increase quantity">+</button>
+            </div>
+
+            <button
+              type="submit"
+              id="sp-atc-{{ section.id }}"
+              class="sp__atc-btn"
+              {% unless current_variant.available %}disabled{% endunless %}
+            >
+              {%- if current_variant.available -%}
+                Add to Cart
+              {%- else -%}
+                Sold Out
+              {%- endif -%}
+            </button>
+          </div>
+        {%- endform -%}
+
+        {%- comment -%} Trust badges {%- endcomment -%}
+        <div class="sp__trust">
+          <div class="sp__trust-badge">
+            <span class="sp__trust-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M1 3h15v13H1zM16 8h4l3 3v5h-7V8z"/>
+                <circle cx="5.5" cy="18.5" r="2.5"/>
+                <circle cx="18.5" cy="18.5" r="2.5"/>
+              </svg>
+            </span>
+            <span class="sp__trust-text">Free Shipping<br>over $50</span>
+          </div>
+          <div class="sp__trust-badge">
+            <span class="sp__trust-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <polyline points="1 4 1 10 7 10"/>
+                <path d="M3.51 15a9 9 0 1 0 .49-4.95"/>
+              </svg>
+            </span>
+            <span class="sp__trust-text">30 Day<br>Returns</span>
+          </div>
+          <div class="sp__trust-badge">
+            <span class="sp__trust-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </span>
+            <span class="sp__trust-text">Premium<br>Quality</span>
+          </div>
+        </div>
+
+      </div>{%- comment -%} /.sp__info {%- endcomment -%}
+    </div>{%- comment -%} /.sp__layout {%- endcomment -%}
+
+    {%- comment -%} ── Full-width description ── {%- endcomment -%}
+    {%- if product.description != blank -%}
+      <div class="sp__desc-section">
+        <div class="sp__desc-header">
+          <h2 class="sp__desc-heading">Description</h2>
+          <span class="sp__desc-line" aria-hidden="true"></span>
+        </div>
+        <div class="sp__desc-body">
+          {{ product.description }}
+        </div>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+<script>
+(function () {
+  'use strict';
+
+  var SID      = '{{ section.id }}';
+  var variants = {{ product.variants | json }};
+
+  /* ── Current selected options ── */
+  var selectedOpts = {};
+  {%- for option in product.options_with_values -%}
+    selectedOpts[{{ option.position | json }}] = {{ option.selected_value | json }};
+  {%- endfor -%}
+
+  /* ── Helpers ── */
+  function findVariant() {
+    return variants.find(function (v) {
+      return v.options.every(function (opt, i) {
+        return selectedOpts[i + 1] === opt;
+      });
+    });
+  }
+
+  function formatMoney(cents) {
+    var amount = (cents / 100).toFixed(2);
+    return '{{ cart.currency.symbol }}' + amount;
+  }
+
+  function applyVariant(v) {
+    if (!v) return;
+
+    /* variant ID input */
+    var idInput = document.getElementById('variant-id-' + SID);
+    if (idInput) idInput.value = v.id;
+
+    /* price */
+    var priceEl   = document.getElementById('sp-price-' + SID);
+    var compareEl = document.getElementById('sp-compare-' + SID);
+    if (priceEl)   priceEl.textContent  = formatMoney(v.price);
+    if (compareEl) {
+      if (v.compare_at_price > v.price) {
+        compareEl.textContent    = formatMoney(v.compare_at_price);
+        compareEl.style.display  = '';
+      } else {
+        compareEl.style.display  = 'none';
+      }
+    }
+
+    /* ATC button */
+    var atcBtn = document.getElementById('sp-atc-' + SID);
+    if (atcBtn) {
+      atcBtn.disabled    = !v.available;
+      atcBtn.textContent = v.available ? 'Add to Cart' : 'Sold Out';
+    }
+
+    /* swap to variant image */
+    if (v.featured_image) {
+      switchMainImage(v.featured_image.src, null);
+    }
+  }
+
+  /* ── Gallery ── */
+  function switchMainImage(src, thumbIndex) {
+    var mainImg = document.getElementById('sp-main-img-' + SID);
+    if (!mainImg) return;
+
+    mainImg.classList.add('sp--swapping');
+    setTimeout(function () {
+      mainImg.src = src;
+      mainImg.classList.remove('sp--swapping');
+    }, 150);
+
+    if (thumbIndex !== null) {
+      document.querySelectorAll('#MainProduct-' + SID + ' .sp__thumb').forEach(function (t, i) {
+        t.classList.toggle('sp__thumb--active', i === thumbIndex);
+      });
+    }
+  }
+
+  document.querySelectorAll('#MainProduct-' + SID + ' .sp__thumb').forEach(function (thumb, i) {
+    thumb.addEventListener('click', function () {
+      switchMainImage(thumb.dataset.src, i);
+    });
+  });
+
+  /* ── Option buttons ── */
+  document.querySelectorAll('#MainProduct-' + SID + ' .sp__opt-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var pos = parseInt(btn.dataset.optionPosition, 10);
+      var val = btn.dataset.optionValue;
+
+      /* update active state within group */
+      document.querySelectorAll(
+        '#MainProduct-' + SID + ' [data-option-position="' + pos + '"]'
+      ).forEach(function (b) { b.classList.remove('sp__opt-btn--active'); });
+      btn.classList.add('sp__opt-btn--active');
+
+      /* update label */
+      var labelEl = document.getElementById('sp-opt-val-' + SID + '-' + pos);
+      if (labelEl) labelEl.textContent = val;
+
+      selectedOpts[pos] = val;
+      applyVariant(findVariant());
+    });
+  });
+
+  /* ── Quantity ── */
+  document.querySelectorAll('#MainProduct-' + SID + ' .sp__qty-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var input = document.getElementById('sp-qty-' + SID);
+      if (!input) return;
+      var v = parseInt(input.value, 10) || 1;
+      if (btn.dataset.action === 'increase') {
+        input.value = v + 1;
+      } else if (btn.dataset.action === 'decrease' && v > 1) {
+        input.value = v - 1;
+      }
+    });
+  });
+
+  /* ── ATC loading state ── */
+  var form = document.getElementById('product-form-' + SID);
+  if (form) {
+    form.addEventListener('submit', function () {
+      var atc = document.getElementById('sp-atc-' + SID);
+      if (atc) atc.classList.add('sp__atc-btn--loading');
+    });
+  }
+
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Product",
+  "tag": "section",
+  "class": "section",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [],
+  "presets": [
+    {
+      "name": "Product"
+    }
+  ]
+}
+{% endschema %}

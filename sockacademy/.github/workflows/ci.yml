@@ -1,0 +1,20 @@
+name: CI
+on: [push]
+permissions:
+  contents: write
+  checks: write
+  pull-requests: write
+  actions: write
+  issues: write
+  statuses: write
+  id-token: write
+jobs:
+  theme-check:
+    name: Theme Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Theme Check
+        uses: shopify/theme-check-action@v2
+        with:
+          token: ${{ github.token }}

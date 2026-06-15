@@ -1,0 +1,8 @@
+node_modules/
+.env
+sockacademy/.env
+*.log
+.claude/
+skills-lock.json
+sockacademy/agents/A1_product_research/last_run.json
+.claude/

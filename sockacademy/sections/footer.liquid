@@ -1,0 +1,546 @@
+{%- style -%}
+  #sa-footer-{{ section.id }} {
+    background-color: #222222;
+    border-top: 3px solid #C9A84C;
+    color: #F0EDE6;
+    font-family: 'DM Sans', sans-serif;
+    padding: 6.25rem 2rem 0;
+  }
+
+  #sa-footer-{{ section.id }} .sf__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* ── 4-column grid ── */
+  #sa-footer-{{ section.id }} .sf__cols {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1.6fr;
+    gap: 3rem;
+    padding-bottom: 4rem;
+    border-bottom: 1px solid #1E1E1E;
+  }
+
+  /* ── Brand column ── */
+  #sa-footer-{{ section.id }} .sf__brand-logo {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0;
+    margin-bottom: 1.25rem;
+    text-decoration: none;
+    line-height: 1;
+  }
+
+  #sa-footer-{{ section.id }} .sf__logo-s {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.6rem;
+    color: #C9A84C;
+    letter-spacing: 0;
+    line-height: 1;
+  }
+
+  #sa-footer-{{ section.id }} .sf__logo-ock {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.6rem;
+    color: #F0EDE6;
+    letter-spacing: 0;
+    line-height: 1;
+  }
+
+  #sa-footer-{{ section.id }} .sf__logo-divider {
+    display: inline-block;
+    width: 2px;
+    height: 2rem;
+    background-color: #3A3A3A;
+    margin: 0 0.55rem 0.15rem;
+    vertical-align: middle;
+  }
+
+  #sa-footer-{{ section.id }} .sf__logo-academy {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: #C9A84C;
+    letter-spacing: 0.06em;
+    line-height: 1;
+  }
+
+  #sa-footer-{{ section.id }} .sf__tagline {
+    font-size: 0.875rem;
+    color: #888888;
+    line-height: 1.6;
+    max-width: 230px;
+    margin: 0;
+  }
+
+  /* ── Nav columns ── */
+  #sa-footer-{{ section.id }} .sf__col-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.12em;
+    color: #F0EDE6;
+    margin: 0 0 1.1rem;
+    text-transform: uppercase;
+  }
+
+  #sa-footer-{{ section.id }} .sf__nav {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  #sa-footer-{{ section.id }} .sf__nav a {
+    font-size: 0.875rem;
+    color: #888888;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  #sa-footer-{{ section.id }} .sf__nav a:hover {
+    color: #C9A84C;
+  }
+
+  /* ── Newsletter column ── */
+  #sa-footer-{{ section.id }} .sf__newsletter-text {
+    font-size: 0.8rem;
+    color: #888888;
+    margin: 0 0 1rem;
+    line-height: 1.55;
+  }
+
+  #sa-footer-{{ section.id }} .sf__newsletter-form {
+    display: flex;
+    gap: 0;
+  }
+
+  #sa-footer-{{ section.id }} .sf__email-input {
+    flex: 1;
+    background: #1A1A1A;
+    border: 1px solid #2A2A2A;
+    border-right: none;
+    color: #F0EDE6;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    padding: 0.7rem 1rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+    min-width: 0;
+  }
+
+  #sa-footer-{{ section.id }} .sf__email-input::placeholder {
+    color: #555555;
+  }
+
+  #sa-footer-{{ section.id }} .sf__email-input:focus {
+    border-color: #C9A84C;
+  }
+
+  #sa-footer-{{ section.id }} .sf__email-btn {
+    background: #C9A84C;
+    color: #FFFFFF;
+    border: none;
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    padding: 0.7rem 1.25rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    white-space: nowrap;
+  }
+
+  #sa-footer-{{ section.id }} .sf__email-btn:hover {
+    background: #A8843C;
+  }
+
+  #sa-footer-{{ section.id }} .sf__newsletter-fine {
+    font-size: 0.72rem;
+    color: #555555;
+    margin: 0.6rem 0 0;
+  }
+
+  /* ── Legal bar ── */
+  #sa-footer-{{ section.id }} .sf__legal-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.5rem;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid #1E1E1E;
+  }
+
+  #sa-footer-{{ section.id }} .sf__legal-bar a {
+    font-size: 0.72rem;
+    color: #555;
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    transition: color 0.2s;
+  }
+
+  #sa-footer-{{ section.id }} .sf__legal-bar a:hover {
+    color: #C9A84C;
+  }
+
+  #sa-footer-{{ section.id }} .sf__legal-bar span {
+    color: #333;
+    font-size: 0.6rem;
+  }
+
+  /* ── Bottom bar ── */
+  #sa-footer-{{ section.id }} .sf__bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 0;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  #sa-footer-{{ section.id }} .sf__copyright {
+    font-size: 0.8rem;
+    color: #555555;
+    margin: 0;
+  }
+
+  #sa-footer-{{ section.id }} .sf__copyright span {
+    color: #C9A84C;
+  }
+
+  #sa-footer-{{ section.id }} .sf__socials {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  #sa-footer-{{ section.id }} .sf__social-link {
+    color: #555555;
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  #sa-footer-{{ section.id }} .sf__social-link:hover {
+    color: #C9A84C;
+  }
+
+  #sa-footer-{{ section.id }} .sf__social-link svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+
+  /* ── Mobile: 2-col grid ── */
+  @media screen and (max-width: 899px) {
+    #sa-footer-{{ section.id }} .sf__cols {
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem 2rem;
+    }
+
+    #sa-footer-{{ section.id }} .sf__col--brand {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    #sa-footer-{{ section.id }} {
+      padding: 2.5rem 1.25rem 0;
+    }
+
+    #sa-footer-{{ section.id }} .sf__cols {
+      gap: 2rem 1.5rem;
+      padding-bottom: 2.5rem;
+    }
+
+    #sa-footer-{{ section.id }} .sf__newsletter-form {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    #sa-footer-{{ section.id }} .sf__email-input {
+      border-right: 1px solid #2A2A2A;
+    }
+
+    #sa-footer-{{ section.id }} .sf__email-btn {
+      width: 100%;
+      padding: 0.7rem 1rem;
+    }
+  }
+
+  @media screen and (max-width: 479px) {
+    #sa-footer-{{ section.id }} .sf__cols {
+      grid-template-columns: 1fr;
+    }
+
+    #sa-footer-{{ section.id }} .sf__bottom {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+{%- endstyle -%}
+
+<footer id="sa-footer-{{ section.id }}">
+  <div class="sf__inner">
+
+    <div class="sf__cols">
+
+      {%- comment -%} ── Col 1: Brand ── {%- endcomment -%}
+      <div class="sf__col sf__col--brand">
+        <a href="{{ routes.root_url }}" class="sf__brand-logo" aria-label="{{ shop.name }}">
+          <span class="sf__logo-s">S</span>
+          <span class="sf__logo-ock">OCK</span>
+          <span class="sf__logo-divider" aria-hidden="true"></span>
+          <span class="sf__logo-academy">ACADEMY</span>
+        </a>
+        <p class="sf__tagline">{{ section.settings.tagline }}</p>
+      </div>
+
+      {%- comment -%} ── Col 2: Shop ── {%- endcomment -%}
+      <div class="sf__col">
+        <p class="sf__col-heading">{{ section.settings.shop_heading }}</p>
+        <ul class="sf__nav" role="list">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'shop_link' -%}
+              <li>
+                <a href="{{ block.settings.link }}" {{ block.shopify_attributes }}>
+                  {{ block.settings.label }}
+                </a>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      </div>
+
+      {%- comment -%} ── Col 3: Help ── {%- endcomment -%}
+      <div class="sf__col">
+        <p class="sf__col-heading">{{ section.settings.help_heading }}</p>
+        <ul class="sf__nav" role="list">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'help_link' -%}
+              <li>
+                <a href="{{ block.settings.link }}" {{ block.shopify_attributes }}>
+                  {{ block.settings.label }}
+                </a>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      </div>
+
+      {%- comment -%} ── Col 4: Newsletter ── {%- endcomment -%}
+      <div class="sf__col">
+        <p class="sf__col-heading">{{ section.settings.newsletter_heading }}</p>
+        <p class="sf__newsletter-text">{{ section.settings.newsletter_text }}</p>
+        {%- form 'customer', id: 'footer-newsletter-{{ section.id }}', class: 'sf__newsletter-form' -%}
+          <input type="hidden" name="contact[tags]" value="newsletter">
+          <input
+            type="email"
+            name="contact[email]"
+            class="sf__email-input"
+            placeholder="{{ section.settings.email_placeholder }}"
+            aria-label="{{ section.settings.email_placeholder }}"
+            autocomplete="email"
+            required
+          >
+          <button type="submit" class="sf__email-btn" aria-label="Subscribe">GO</button>
+        {%- endform -%}
+        <p class="sf__newsletter-fine">{{ section.settings.newsletter_fine }}</p>
+      </div>
+
+    </div>{%- comment -%} /.sf__cols {%- endcomment -%}
+
+    {%- comment -%} ── Legal bar ── {%- endcomment -%}
+    <div class="sf__legal-bar">
+      <a href="/pages/privacy-policy">Privacy Policy</a>
+      <span>·</span>
+      <a href="/pages/terms-of-service">Terms of Service</a>
+      <span>·</span>
+      <a href="/pages/shipping-policy">Shipping Policy</a>
+      <span>·</span>
+      <a href="/pages/refund-policy">Refund Policy</a>
+    </div>
+
+    {%- comment -%} ── Bottom bar ── {%- endcomment -%}
+    <div class="sf__bottom">
+      <p class="sf__copyright">
+        &copy; {{ 'now' | date: '%Y' }} <span>{{ shop.name | upcase }}</span>. {{ section.settings.copyright_suffix }}
+      </p>
+
+      <div class="sf__socials">
+        {%- if section.settings.instagram_url != blank -%}
+          <a href="{{ section.settings.instagram_url }}" class="sf__social-link" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            IG
+          </a>
+        {%- endif -%}
+
+        {%- if section.settings.tiktok_url != blank -%}
+          <a href="{{ section.settings.tiktok_url }}" class="sf__social-link" target="_blank" rel="noopener" aria-label="TikTok">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z"/></svg>
+            TK
+          </a>
+        {%- endif -%}
+
+        {%- if section.settings.twitter_url != blank -%}
+          <a href="{{ section.settings.twitter_url }}" class="sf__social-link" target="_blank" rel="noopener" aria-label="X / Twitter">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            X
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "tag": "section",
+  "class": "section",
+  "enabled_on": {
+    "groups": ["footer"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "tagline",
+      "label": "Brand tagline",
+      "default": "The World's Most Interesting Socks."
+    },
+    {
+      "type": "header",
+      "content": "Shop column"
+    },
+    {
+      "type": "text",
+      "id": "shop_heading",
+      "label": "Shop heading",
+      "default": "Shop"
+    },
+    {
+      "type": "header",
+      "content": "Help column"
+    },
+    {
+      "type": "text",
+      "id": "help_heading",
+      "label": "Help heading",
+      "default": "Help"
+    },
+    {
+      "type": "header",
+      "content": "Newsletter column"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_heading",
+      "label": "Newsletter heading",
+      "default": "Stay in the loop"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_text",
+      "label": "Newsletter subtext",
+      "default": "New drops, exclusive deals, and sock culture — straight to your inbox."
+    },
+    {
+      "type": "text",
+      "id": "email_placeholder",
+      "label": "Email placeholder",
+      "default": "your@email.com"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_fine",
+      "label": "Fine print",
+      "default": "No spam. Unsubscribe anytime."
+    },
+    {
+      "type": "header",
+      "content": "Bottom bar"
+    },
+    {
+      "type": "text",
+      "id": "copyright_suffix",
+      "label": "Copyright suffix",
+      "default": "All rights reserved."
+    },
+    {
+      "type": "header",
+      "content": "Social links"
+    },
+    {
+      "type": "url",
+      "id": "instagram_url",
+      "label": "Instagram URL"
+    },
+    {
+      "type": "url",
+      "id": "tiktok_url",
+      "label": "TikTok URL"
+    },
+    {
+      "type": "url",
+      "id": "twitter_url",
+      "label": "X / Twitter URL"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "shop_link",
+      "name": "Shop link",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "All Socks"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    },
+    {
+      "type": "help_link",
+      "name": "Help link",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "FAQ"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Footer",
+      "blocks": [
+        { "type": "shop_link", "settings": { "label": "All Socks",    "link": "/collections/all" } },
+        { "type": "shop_link", "settings": { "label": "New Arrivals", "link": "/collections/new-arrivals" } },
+        { "type": "shop_link", "settings": { "label": "Sale",         "link": "/collections/sale" } },
+        { "type": "help_link", "settings": { "label": "FAQ",          "link": "/pages/faq" } },
+        { "type": "help_link", "settings": { "label": "Shipping",     "link": "/pages/shipping" } },
+        { "type": "help_link", "settings": { "label": "Returns",      "link": "/pages/returns" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

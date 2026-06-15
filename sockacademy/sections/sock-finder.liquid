@@ -1,0 +1,566 @@
+{%- style -%}
+  #SockFinder-{{ section.id }} {
+    background-color: #1A1A1A;
+    background-image:
+      radial-gradient(ellipse 100% 65% at 50% 115%, rgba(201, 168, 76, 0.12) 0%, transparent 65%),
+      radial-gradient(ellipse 55% 45% at 12% 25%, rgba(201, 168, 76, 0.06) 0%, transparent 55%),
+      radial-gradient(ellipse 45% 40% at 90% 15%, rgba(201, 168, 76, 0.04) 0%, transparent 50%);
+    padding: 6.25rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__inner {
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+    background: rgba(10, 10, 10, 0.52);
+    backdrop-filter: blur(28px) saturate(1.6);
+    -webkit-backdrop-filter: blur(28px) saturate(1.6);
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    box-shadow: 0 8px 48px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(201, 168, 76, 0.08);
+    padding: 3rem 2.5rem;
+  }
+
+  /* ── Eyebrow ── */
+  #SockFinder-{{ section.id }} .sfq__eyebrow {
+    text-align: center;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #C9A84C;
+    margin: 0 0 1rem;
+  }
+
+  /* ── Title ── */
+  #SockFinder-{{ section.id }} .sfq__title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    line-height: 1;
+    letter-spacing: 0.04em;
+    color: #F0EDE6;
+    text-align: center;
+    text-transform: uppercase;
+    margin: 0 0 0.6rem;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__title span {
+    color: #C9A84C;
+  }
+
+  /* ── Subtitle ── */
+  #SockFinder-{{ section.id }} .sfq__subtitle {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: #888888;
+    text-align: center;
+    margin: 0 0 3rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  /* ── Stage (fades between steps) ── */
+  #SockFinder-{{ section.id }} .sfq__stage {
+    transition: opacity 0.22s ease, transform 0.22s ease;
+    min-height: 200px;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__stage.sfq--fading {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  /* ── Step header ── */
+  #SockFinder-{{ section.id }} .sfq__step-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__step-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #666666;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__step-dots {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #222222;
+    transition: background 0.3s ease, transform 0.3s ease;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__dot--active {
+    background: #C9A84C;
+    transform: scale(1.4);
+  }
+
+  #SockFinder-{{ section.id }} .sfq__dot--done {
+    background: #C9A84C;
+  }
+
+  /* ── Question ── */
+  #SockFinder-{{ section.id }} .sfq__question {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    color: #888888;
+    text-transform: uppercase;
+    text-align: center;
+    margin: 0 0 1.5rem;
+    line-height: 1.4;
+  }
+
+  /* ── Options row ── */
+  #SockFinder-{{ section.id }} .sfq__options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__options--nowrap {
+    flex-wrap: nowrap;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__opt {
+    background: transparent;
+    border: 1px solid #222222;
+    border-radius: 2px;
+    padding: 0.5rem 1.2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__opt:hover {
+    border-color: #C9A84C;
+    color: #C9A84C;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__opt--selected {
+    border-color: #C9A84C;
+    background: rgba(201, 168, 76, 0.06);
+  }
+
+  #SockFinder-{{ section.id }} .sfq__opt-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #F0EDE6;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__opt:hover .sfq__opt-label,
+  #SockFinder-{{ section.id }} .sfq__opt--selected .sfq__opt-label {
+    color: #C9A84C;
+  }
+
+  /* ── Result card ── */
+  #SockFinder-{{ section.id }} .sfq__result {
+    background: #222222;
+    border: 1px solid #1E1E1E;
+    border-top: 1px solid #C9A84C;
+    padding: 2.5rem 2rem;
+    text-align: center;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__result-match {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #C9A84C;
+    margin: 0 0 0.5rem;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__result-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    letter-spacing: 0.06em;
+    color: #F0EDE6;
+    text-transform: uppercase;
+    margin: 0 0 0.75rem;
+    line-height: 1;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__result-desc {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    color: #666666;
+    line-height: 1.7;
+    margin: 0 0 1rem auto;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__result-tag {
+    display: inline-block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #C9A84C;
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    padding: 0.25rem 0.8rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 1.5rem;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__result-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__shop-btn {
+    display: inline-block;
+    background: #C9A84C;
+    color: #1A1A1A;
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 0.7rem 2.5rem;
+    border: 1px solid #C9A84C;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__shop-btn:hover {
+    background: transparent;
+    color: #C9A84C;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__restart-btn {
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #555555;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    transition: color 0.2s ease;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__restart-btn:hover {
+    color: #888888;
+  }
+
+  /* ── Progress bar ── */
+  #SockFinder-{{ section.id }} .sfq__progress-track {
+    margin-top: 2.5rem;
+    height: 1px;
+    background: #1A1A1A;
+    overflow: hidden;
+  }
+
+  #SockFinder-{{ section.id }} .sfq__progress-fill {
+    height: 100%;
+    background: #C9A84C;
+    width: 0%;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* ── Mobile ── */
+  @media screen and (max-width: 768px) {
+    #SockFinder-{{ section.id }} {
+      padding: 2.5rem 1.25rem;
+    }
+
+    #SockFinder-{{ section.id }} .sfq__inner {
+      padding: 2rem 1.25rem;
+    }
+
+    /* Force button wrapping on all option rows at mobile */
+    #SockFinder-{{ section.id }} .sfq__options,
+    #SockFinder-{{ section.id }} .sfq__options--nowrap {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    #SockFinder-{{ section.id }} .sfq__opt {
+      flex: 1 1 auto;
+      min-width: 6rem;
+      text-align: center;
+    }
+
+    /* Bump tiny label sizes for 375px readability */
+    #SockFinder-{{ section.id }} .sfq__eyebrow {
+      font-size: 0.75rem;
+    }
+
+    #SockFinder-{{ section.id }} .sfq__step-label {
+      font-size: 0.7rem;
+    }
+
+    #SockFinder-{{ section.id }} .sfq__result-match {
+      font-size: 0.7rem;
+    }
+  }
+
+  @media screen and (max-width: 375px) {
+    #SockFinder-{{ section.id }} .sfq__inner {
+      padding: 1.5rem 1rem;
+    }
+
+    #SockFinder-{{ section.id }} .sfq__result {
+      padding: 1.5rem 1rem;
+    }
+  }
+{%- endstyle -%}
+
+<section id="SockFinder-{{ section.id }}">
+  <div class="sfq__inner">
+    <p class="sfq__eyebrow">{{ section.settings.eyebrow }}</p>
+    <h2 class="sfq__title">
+      {{ section.settings.title | split: ' ' | first }}&nbsp;<span>{{ section.settings.title | split: ' ' | slice: 1, 10 | join: ' ' }}</span>
+    </h2>
+    <p class="sfq__subtitle">{{ section.settings.subtitle }}</p>
+
+    <div class="sfq__stage" id="sfq-stage-{{ section.id }}"></div>
+
+    <div class="sfq__progress-track">
+      <div class="sfq__progress-fill" id="sfq-bar-{{ section.id }}"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  'use strict';
+
+  var SECTION_ID = '{{ section.id }}';
+  var root  = document.getElementById('SockFinder-' + SECTION_ID);
+  var stage = document.getElementById('sfq-stage-' + SECTION_ID);
+  var bar   = document.getElementById('sfq-bar-' + SECTION_ID);
+  if (!root || !stage || !bar) return;
+
+  var state = { step: 1, occasion: null, vibe: null, budget: null };
+
+  var STEPS = [
+    {
+      key: 'occasion',
+      question: "What's the occasion?",
+      options: [
+        { value: 'everyday', label: 'Everyday'    },
+        { value: 'sport',    label: 'Sport'       },
+        { value: 'formal',   label: 'Formal'      },
+        { value: 'gift',     label: 'Gift'        },
+      ]
+    },
+    {
+      key: 'vibe',
+      question: "What's your vibe?",
+      options: [
+        { value: 'minimal', label: 'Minimal'     },
+        { value: 'bold',    label: 'Bold & Loud' },
+        { value: 'funny',   label: 'Funny'       },
+        { value: 'artsy',   label: 'Artsy'       },
+      ]
+    },
+    {
+      key: 'budget',
+      question: "What's your budget?",
+      options: [
+        { value: 'b1', label: 'Under $15' },
+        { value: 'b2', label: '$15 – $30' },
+        { value: 'b3', label: '$30+'      },
+      ]
+    }
+  ];
+
+  var RESULTS = {
+    'everyday:minimal': { title: 'The Daily Essential',     desc: 'Clean no-show ankle socks you\'ll forget you\'re wearing. Form meets function, every single day.',       tags: { b1: 'No-Show 3-Pack Essentials', b2: 'Premium Cotton Ankle Crew', b3: 'Merino Wool Everyday' }, link: '/collections/all' },
+    'everyday:bold':    { title: 'The Statement Maker',     desc: 'Bold patterns, loud colors, zero apologies. Your socks are doing the talking before you say a word.',    tags: { b1: 'Color Pop Crew Pack', b2: 'Patterned Fashion Crew', b3: 'Designer Statement Set' },         link: '/collections/all' },
+    'everyday:funny':   { title: 'The Conversation Starter',desc: 'Novelty socks with serious personality. Warning: expect compliments — and questions — from strangers.',  tags: { b1: 'Novelty Crew 2-Pack', b2: 'Premium Novelty Set', b3: 'Collector\'s Funny Edition' },       link: '/collections/all' },
+    'everyday:artsy':   { title: 'The Wearable Canvas',     desc: 'Artistic patterns that double as foot art. Crew socks you\'ll actually want to show off.',              tags: { b1: 'Artsy Crew Single', b2: 'Designer Pattern Pack', b3: 'Limited Artist Collab' },             link: '/collections/all' },
+    'sport:minimal':    { title: 'The Performance Purist',  desc: 'No-frills sport socks engineered for speed. Moisture-wicking, arch support, zero drag. Just performance.', tags: { b1: 'Sport Crew Pack', b2: 'Coolmax Performance Crew', b3: 'Elite Compression Pro' },          link: '/collections/all' },
+    'sport:bold':       { title: 'The Athletic Powerhouse', desc: 'Train hard, look harder. Bold compression socks that mean business on every lap and every rep.',         tags: { b1: 'Bold Sport Crew', b2: 'Compression Training Set', b3: 'Pro Athlete Series' },             link: '/collections/all' },
+    'sport:funny':      { title: 'The Fun Runner',          desc: 'Keep it light — quirky sport socks that make your gym crew smile between sets and sprints.',            tags: { b1: 'Fun Gym Crew', b2: 'Novelty Sport 3-Pack', b3: 'Premium Fun Sport Set' },                  link: '/collections/all' },
+    'sport:artsy':      { title: 'The Style Athlete',       desc: 'Because performance and art aren\'t mutually exclusive. Graphic sport socks for the bold mover.',       tags: { b1: 'Graphic Sport Crew', b2: 'Artist Sport Pack', b3: 'Designer Athletic Series' },           link: '/collections/all' },
+    'formal:minimal':   { title: 'The Classic Gentleman',   desc: 'Slim-knit dress socks in timeless solids. The kind that never upstage your suit — but always elevate it.', tags: { b1: 'Classic Dress 3-Pack', b2: 'Fine Knit Dress Set', b3: 'Merino Dress Collection' },       link: '/collections/all' },
+    'formal:bold':      { title: 'The Power Move',          desc: 'Make a statement in every boardroom. Bold dress socks for people who own the room before they speak.',   tags: { b1: 'Patterned Dress Pair', b2: 'Statement Dress Set', b3: 'Premium Bold Dress' },             link: '/collections/all' },
+    'formal:funny':     { title: 'The Secret Rebel',        desc: 'Business on the outside, personality at the ankles. Your colleagues will never suspect a thing.',       tags: { b1: 'Subtle Novelty Dress', b2: 'Fun Formal 2-Pack', b3: 'Premium Funny Formal Set' },         link: '/collections/all' },
+    'formal:artsy':     { title: 'The Sophisticated Patron',desc: 'Artistic patterns elevated for formal wear. The most interesting ankles in every room you enter.',       tags: { b1: 'Art Deco Dress Pair', b2: 'Gallery Formal Set', b3: 'Artisan Formal Collection' },       link: '/collections/all' },
+    'gift:minimal':     { title: 'The Timeless Gift',       desc: 'A clean, classic sock set they\'ll reach for every single day. Simple, useful, and genuinely thoughtful.', tags: { b1: 'Essential Gift 4-Pack', b2: 'Premium Everyday Gift Box', b3: 'Curated Merino Gift Set' }, link: '/collections/all' },
+    'gift:bold':        { title: 'The Showstopper Gift',    desc: 'Bold, vibrant socks that make the wrapping paper jealous. A gift worth photographing.',                 tags: { b1: 'Bold Color 4-Pack', b2: 'Statement Gift Box', b3: 'Premium Bold Gift Collection' },       link: '/collections/all' },
+    'gift:funny':       { title: 'The Guaranteed Laugh',    desc: 'Novelty sock gift sets that break the ice at any occasion. There has never been a bad reaction.',       tags: { b1: 'Funny 3-Pack Gift Bag', b2: 'Premium Novelty Gift Box', b3: 'Collector\'s Funny Gift Set' }, link: '/collections/all' },
+    'gift:artsy':       { title: 'The Thoughtful Gift',     desc: 'Artistic sock sets for the person who appreciates beauty in everything — including footwear.',          tags: { b1: 'Artsy 2-Pack Gift', b2: 'Designer Gift Box', b3: 'Limited Edition Art Gift' },           link: '/collections/all' },
+  };
+
+  /* ─── helpers ─── */
+  function setProgress(pct) {
+    bar.style.width = pct + '%';
+  }
+
+  function fade(fn) {
+    stage.classList.add('sfq--fading');
+    setTimeout(function () {
+      fn();
+      stage.classList.remove('sfq--fading');
+    }, 220);
+  }
+
+  function buildDots(activeStep) {
+    var html = '';
+    for (var i = 1; i <= 3; i++) {
+      var cls = 'sfq__dot';
+      if (i < activeStep)  cls += ' sfq__dot--done';
+      if (i === activeStep) cls += ' sfq__dot--active';
+      html += '<span class="' + cls + '"></span>';
+    }
+    return html;
+  }
+
+  /* ─── renderers ─── */
+  function renderStep(index) {
+    var step = STEPS[index - 1];
+    var opts = step.options.map(function (o) {
+      return '<button class="sfq__opt" data-key="' + step.key + '" data-value="' + o.value + '" type="button">'
+        + '<span class="sfq__opt-label">' + o.label + '</span>'
+        + '</button>';
+    }).join('');
+
+    var nowrap = step.options.length <= 3 ? ' sfq__options--nowrap' : '';
+
+    stage.innerHTML =
+      '<div class="sfq__step-meta">'
+      + '<span class="sfq__step-label">Step ' + index + ' of 3</span>'
+      + '<span class="sfq__step-dots">' + buildDots(index) + '</span>'
+      + '</div>'
+      + '<p class="sfq__question">' + step.question + '</p>'
+      + '<div class="sfq__options' + nowrap + '">' + opts + '</div>';
+
+    stage.querySelectorAll('.sfq__opt').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var key = btn.dataset.key;
+        var val = btn.dataset.value;
+
+        // Highlight selection briefly
+        stage.querySelectorAll('.sfq__opt').forEach(function (b) {
+          b.classList.remove('sfq__opt--selected');
+        });
+        btn.classList.add('sfq__opt--selected');
+
+        state[key] = val;
+
+        setTimeout(function () {
+          if (index < 3) {
+            fade(function () { renderStep(index + 1); });
+            setProgress(Math.round((index / 3) * 100));
+          } else {
+            fade(renderResult);
+            setProgress(100);
+          }
+        }, 320);
+      });
+    });
+  }
+
+  function renderResult() {
+    var key = state.occasion + ':' + state.vibe;
+    var r   = RESULTS[key] || RESULTS['everyday:minimal'];
+    var tag = r.tags[state.budget] || r.tags.b1;
+
+    stage.innerHTML =
+      '<div class="sfq__result">'
+      
+      + '<p class="sfq__result-match">Your perfect match</p>'
+      + '<h3 class="sfq__result-title">' + r.title + '</h3>'
+      + '<p class="sfq__result-desc">' + r.desc + '</p>'
+      + '<span class="sfq__result-tag">✦ ' + tag + '</span>'
+      + '<div class="sfq__result-actions">'
+      + '<a href="' + r.link + '" class="sfq__shop-btn">Shop Now →</a>'
+      + '<button class="sfq__restart-btn" type="button">↺ Start Over</button>'
+      + '</div>'
+      + '</div>'
+      + '<div class="sfq__step-meta" style="margin-top:1.5rem;">'
+      + '<span class="sfq__step-label">All done!</span>'
+      + '<span class="sfq__step-dots">' + buildDots(4) + '</span>'
+      + '</div>';
+
+    stage.querySelector('.sfq__restart-btn').addEventListener('click', function () {
+      state = { step: 1, occasion: null, vibe: null, budget: null };
+      fade(function () { renderStep(1); });
+      setProgress(0);
+      setTimeout(function () { setProgress(33); }, 50);
+    });
+  }
+
+  /* ─── boot ─── */
+  setProgress(33);
+  renderStep(1);
+
+  // Theme editor re-init
+  document.addEventListener('shopify:section:load', function (e) {
+    if (e.target.contains(root)) {
+      state = { step: 1, occasion: null, vibe: null, budget: null };
+      setProgress(33);
+      renderStep(1);
+    }
+  });
+
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Sock Finder Quiz",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow text",
+      "default": "Sock Finder"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Find Your Perfect Sock"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "3 questions. 10 seconds. Your ideal pair."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sock Finder Quiz"
+    }
+  ]
+}
+{% endschema %}

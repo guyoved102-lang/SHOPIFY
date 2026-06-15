@@ -1,0 +1,63 @@
+/* SOCKACADEMY — Custom Theme Styles */
+
+/* ── Header ─────────────────────────────────────────────── */
+
+.header__heading-link .h2 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #0077FF;
+  line-height: 1;
+}
+
+@media screen and (min-width: 750px) {
+  .header__heading-link .h2 {
+    font-size: 2.8rem;
+  }
+}
+
+.header {
+  border-bottom: 2px solid rgba(0, 119, 255, 0.2);
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+
+.button--primary,
+.shopify-payment-button__button {
+  border-radius: 4px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.button--primary:hover {
+  background-color: #0055CC;
+  transform: translateY(-1px);
+}
+
+/* ── Cards ───────────────────────────────────────────────── */
+
+.card-wrapper:hover .card {
+  border-color: rgba(0, 119, 255, 0.4);
+}
+
+/* ── Price ───────────────────────────────────────────────── */
+
+.price--sale .price-item--sale {
+  color: #FF5500;
+}
+
+/* ── Links ───────────────────────────────────────────────── */
+
+.link:hover,
+.full-unstyled-link:hover {
+  color: #0077FF;
+}
+
+/* ── Footer border ───────────────────────────────────────── */
+
+.footer {
+  border-top: 2px solid rgba(0, 119, 255, 0.2);
+}

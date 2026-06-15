@@ -1,0 +1,309 @@
+{%- style -%}
+  #CollectionsPreview-{{ section.id }} {
+    background-color: #1A1A1A;
+    padding: 6.25rem 2rem;
+  }
+
+  #CollectionsPreview-{{ section.id }} .cp__eyebrow {
+    text-align: center;
+    color: #C9A84C;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin: 0 0 0.75rem;
+  }
+
+  #CollectionsPreview-{{ section.id }} .cp__heading {
+    text-align: center;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 900;
+    color: #F0EDE6;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin: 0 0 0.75rem;
+  }
+
+  #CollectionsPreview-{{ section.id }} .cp__subheading {
+    text-align: center;
+    color: #888888;
+    font-size: 1rem;
+    margin: 0 0 4rem;
+  }
+
+  #CollectionsPreview-{{ section.id }} .cp__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  #CollectionsPreview-{{ section.id }} .cp__card {
+    background-color: #222222;
+    border: 1px solid #1A1A1A;
+    border-top: 3px solid #C9A84C;
+    padding: 2rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #CollectionsPreview-{{ section.id }} .cp__card:hover {
+    transform: translateY(-8px);
+    background-color: #2A2A2A;
+    border-top-color: #E2C47A;
+    box-shadow: 0 12px 48px rgba(201, 168, 76, 0.15);
+  }
+
+  #CollectionsPreview-{{ section.id }} .cp__card-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    flex: 1;
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  #CollectionsPreview-{{ section.id }} .cp__card:hover .cp__card-inner {
+    transform: translateY(-4px);
+  }
+
+  /* Alternate accent cards (even positions) */
+  #CollectionsPreview-{{ section.id }} .cp__card--accent {
+    border-top-color: #C9A84C;
+  }
+
+  #CollectionsPreview-{{ section.id }} .cp__card--accent:hover {
+    border-top-color: #E2C47A;
+    box-shadow: 0 8px 32px rgba(201, 168, 76, 0.12);
+  }
+
+  #CollectionsPreview-{{ section.id }} .cp__card--accent .cp__card-btn {
+    color: #C9A84C;
+  }
+
+  #CollectionsPreview-{{ section.id }} .cp__card-icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  #CollectionsPreview-{{ section.id }} .cp__card-icon svg {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+
+  #CollectionsPreview-{{ section.id }} .cp__card-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #F0EDE6;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  #CollectionsPreview-{{ section.id }} .cp__card-text {
+    font-size: 0.875rem;
+    color: #888888;
+    line-height: 1.55;
+    margin: 0;
+    flex-grow: 1;
+  }
+
+  #CollectionsPreview-{{ section.id }} .cp__card-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #C9A84C;
+    text-decoration: none;
+    transition: gap 0.2s ease;
+  }
+
+  #CollectionsPreview-{{ section.id }} .cp__card:hover .cp__card-btn {
+    gap: 0.7rem;
+  }
+
+  #CollectionsPreview-{{ section.id }} .cp__card-btn-arrow {
+    font-style: normal;
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  @media screen and (max-width: 768px) {
+    #CollectionsPreview-{{ section.id }} {
+      padding: 2.5rem 1.25rem;
+    }
+
+    #CollectionsPreview-{{ section.id }} .cp__subheading {
+      margin-bottom: 2rem;
+    }
+
+    #CollectionsPreview-{{ section.id }} .cp__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+{%- endstyle -%}
+
+<div id="CollectionsPreview-{{ section.id }}">
+  {%- if section.settings.eyebrow != blank -%}
+    <p class="cp__eyebrow">{{ section.settings.eyebrow }}</p>
+  {%- endif -%}
+  <h2 class="cp__heading">{{ section.settings.heading }}</h2>
+  {%- if section.settings.subheading != blank -%}
+    <p class="cp__subheading">{{ section.settings.subheading }}</p>
+  {%- endif -%}
+
+  <div class="cp__grid">
+    {%- for block in section.blocks -%}
+      <a
+        class="cp__card{% if forloop.index0 == 1 or forloop.index0 == 3 or forloop.index0 == 5 %} cp__card--accent{% endif %}"
+        {% if block.settings.link != blank %}
+          href="{{ block.settings.link }}"
+        {% else %}
+          role="link" aria-disabled="true"
+        {% endif %}
+        {{ block.shopify_attributes }}
+      >
+        <div class="cp__card-inner">
+        {%- if block.settings.icon != blank -%}
+          <div class="cp__card-icon" aria-hidden="true">
+            {%- case block.settings.icon -%}
+              {%- when 'no-show' -%}
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 8 L18 8 L18 16 L26 16 Q28 16 28 20 Q28 26 24 26 L8 26 Q5 26 5 23 Q5 16 8 16 L12 16 Z" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              {%- when 'crew' -%}
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 4 L18 4 L18 16 L26 16 Q28 16 28 20 Q28 26 24 26 L8 26 Q5 26 5 23 Q5 16 8 16 L12 16 Z" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <line x1="12" y1="8" x2="18" y2="8" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              {%- when 'sport' -%}
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 4 L11 17 H17 L12 28 L22 15 H16 Z" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              {%- when 'hiking' -%}
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <polyline points="2,28 12,10 16,16 22,8 30,28" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <line x1="2" y1="28" x2="30" y2="28" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              {%- when 'formal' -%}
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13 6 L16 5 L19 6 L18 10 L14 10 Z" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M14 10 L11 24 L16 28 L21 24 L18 10" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              {%- when 'gift' -%}
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="5" y="14" width="22" height="13" rx="1" stroke="#C9A84C" stroke-width="1.5"/>
+                  <rect x="3" y="10" width="26" height="4" rx="1" stroke="#C9A84C" stroke-width="1.5"/>
+                  <line x1="16" y1="10" x2="16" y2="27" stroke="#C9A84C" stroke-width="1.5"/>
+                  <path d="M16 10 C12 8 9 5 12 4 C14 3 16 6 16 10" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/>
+                  <path d="M16 10 C20 8 23 5 20 4 C18 3 16 6 16 10" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            {%- endcase -%}
+          </div>
+        {%- endif -%}
+        <h3 class="cp__card-title">{{ block.settings.title }}</h3>
+        <p class="cp__card-text">{{ block.settings.text }}</p>
+        <span class="cp__card-btn">
+          {{ block.settings.button_label }}
+          <i class="cp__card-btn-arrow">&#8594;</i>
+        </span>
+        </div>
+      </a>
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Collections Preview",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow text",
+      "default": "Shop by category"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Our Collections"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Find the perfect sock for every occasion."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection_card",
+      "name": "Collection card",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "no-show", "label": "No-Show / Ankle" },
+            { "value": "crew", "label": "Crew / Half" },
+            { "value": "sport", "label": "Sport / Running" },
+            { "value": "hiking", "label": "Hiking / Tactical" },
+            { "value": "formal", "label": "Formal / Dress" },
+            { "value": "gift", "label": "Gift / Sets" }
+          ],
+          "default": "crew"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Description",
+          "default": "Short collection description."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "Shop"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collections Preview"
+    }
+  ]
+}
+{% endschema %}

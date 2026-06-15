@@ -1,0 +1,441 @@
+{%- style -%}
+  #About-{{ section.id }} {
+    background-color: #1A1A1A;
+    color: #F0EDE6;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* ── Hero ── */
+  #About-{{ section.id }} .about__hero {
+    padding: 6.25rem 2rem 4rem;
+    text-align: center;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  #About-{{ section.id }} .about__hero-eyebrow {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #C9A84C;
+    margin: 0 0 2rem;
+  }
+
+  #About-{{ section.id }} .about__hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 6vw, 4.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: #F0EDE6;
+    margin: 0 0 2rem;
+    letter-spacing: 0.02em;
+  }
+
+  #About-{{ section.id }} .about__hero-rule {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin: 0 auto 2.5rem;
+  }
+
+  #About-{{ section.id }} .about__hero-rule::before,
+  #About-{{ section.id }} .about__hero-rule::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 1px;
+    background: #C9A84C;
+  }
+
+  #About-{{ section.id }} .about__hero-rule-diamond {
+    width: 6px;
+    height: 6px;
+    background: #C9A84C;
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  #About-{{ section.id }} .about__hero-lead {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #888888;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* ── Three Columns ── */
+  #About-{{ section.id }} .about__pillars {
+    padding: 3rem 2rem 6.25rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  #About-{{ section.id }} .about__pillars-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem;
+  }
+
+  #About-{{ section.id }} .about__pillar {
+    border-top: 1px solid #2A2A2A;
+    padding-top: 2rem;
+  }
+
+  #About-{{ section.id }} .about__pillar-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 700;
+    color: #C9A84C;
+    line-height: 1;
+    margin: 0 0 1.25rem;
+    opacity: 0.7;
+  }
+
+  #About-{{ section.id }} .about__pillar-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #F0EDE6;
+    margin: 0 0 1rem;
+    letter-spacing: 0.02em;
+  }
+
+  #About-{{ section.id }} .about__pillar-text {
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: #888888;
+    margin: 0;
+  }
+
+  /* ── Quote ── */
+  #About-{{ section.id }} .about__quote {
+    background-color: #141414;
+    border-top: 1px solid #2A2A2A;
+    border-bottom: 1px solid #2A2A2A;
+    padding: 6.25rem 2rem;
+    text-align: center;
+  }
+
+  #About-{{ section.id }} .about__quote-mark {
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem;
+    line-height: 0.5;
+    color: #C9A84C;
+    opacity: 0.4;
+    display: block;
+    margin-bottom: 1.5rem;
+    user-select: none;
+  }
+
+  #About-{{ section.id }} .about__quote-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-style: italic;
+    font-weight: 400;
+    color: #F0EDE6;
+    line-height: 1.45;
+    max-width: 820px;
+    margin: 0 auto 2rem;
+    letter-spacing: 0.01em;
+  }
+
+  #About-{{ section.id }} .about__quote-attribution {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #C9A84C;
+  }
+
+  /* ── Stats Bar ── */
+  #About-{{ section.id }} .about__stats {
+    padding: 3rem 2rem 6.25rem;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  #About-{{ section.id }} .about__stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  #About-{{ section.id }} .about__stat {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    border: 1px solid #2A2A2A;
+    position: relative;
+  }
+
+  #About-{{ section.id }} .about__stat::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 2px;
+    background: #C9A84C;
+  }
+
+  #About-{{ section.id }} .about__stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    color: #C9A84C;
+    line-height: 1;
+    margin: 0 0 0.75rem;
+    display: block;
+  }
+
+  #About-{{ section.id }} .about__stat-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #888888;
+    margin: 0;
+  }
+
+  /* ── Responsive ── */
+  @media screen and (max-width: 899px) {
+    #About-{{ section.id }} .about__pillars-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    #About-{{ section.id }} .about__stats-grid {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    #About-{{ section.id }} .about__hero {
+      padding: 2.5rem 1.25rem;
+    }
+
+    #About-{{ section.id }} .about__pillars,
+    #About-{{ section.id }} .about__stats {
+      padding: 2.5rem 1.25rem;
+    }
+
+    #About-{{ section.id }} .about__quote {
+      padding: 2.5rem 1.25rem;
+    }
+
+    #About-{{ section.id }} .about__quote-mark {
+      font-size: 3.5rem;
+    }
+
+    #About-{{ section.id }} .about__pillar-number {
+      font-size: clamp(2rem, 6vw, 3rem);
+    }
+
+    #About-{{ section.id }} .about__stat {
+      padding: 1.5rem 1rem;
+    }
+  }
+{%- endstyle -%}
+
+<div id="About-{{ section.id }}">
+
+  {%- comment -%} ── Hero ── {%- endcomment -%}
+  <div class="about__hero">
+    <p class="about__hero-eyebrow">{{ section.settings.eyebrow }}</p>
+    <h2 class="about__hero-title">{{ section.settings.hero_title }}</h2>
+    <div class="about__hero-rule" aria-hidden="true">
+      <span class="about__hero-rule-diamond"></span>
+    </div>
+    {%- if section.settings.hero_lead != blank -%}
+      <p class="about__hero-lead">{{ section.settings.hero_lead }}</p>
+    {%- endif -%}
+  </div>
+
+  {%- comment -%} ── Three Pillars ── {%- endcomment -%}
+  <div class="about__pillars">
+    <div class="about__pillars-grid">
+      <div class="about__pillar">
+        <p class="about__pillar-number">01</p>
+        <h2 class="about__pillar-title">{{ section.settings.pillar_1_title }}</h2>
+        <p class="about__pillar-text">{{ section.settings.pillar_1_text }}</p>
+      </div>
+      <div class="about__pillar">
+        <p class="about__pillar-number">02</p>
+        <h2 class="about__pillar-title">{{ section.settings.pillar_2_title }}</h2>
+        <p class="about__pillar-text">{{ section.settings.pillar_2_text }}</p>
+      </div>
+      <div class="about__pillar">
+        <p class="about__pillar-number">03</p>
+        <h2 class="about__pillar-title">{{ section.settings.pillar_3_title }}</h2>
+        <p class="about__pillar-text">{{ section.settings.pillar_3_text }}</p>
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} ── Quote ── {%- endcomment -%}
+  <div class="about__quote">
+    <span class="about__quote-mark" aria-hidden="true">&ldquo;</span>
+    <blockquote class="about__quote-text">{{ section.settings.quote }}</blockquote>
+    {%- if section.settings.quote_attribution != blank -%}
+      <p class="about__quote-attribution">— {{ section.settings.quote_attribution }}</p>
+    {%- endif -%}
+  </div>
+
+  {%- comment -%} ── Stats Bar ── {%- endcomment -%}
+  <div class="about__stats">
+    <div class="about__stats-grid">
+      <div class="about__stat">
+        <span class="about__stat-value">{{ section.settings.stat_1_value }}</span>
+        <p class="about__stat-label">{{ section.settings.stat_1_label }}</p>
+      </div>
+      <div class="about__stat">
+        <span class="about__stat-value">{{ section.settings.stat_2_value }}</span>
+        <p class="about__stat-label">{{ section.settings.stat_2_label }}</p>
+      </div>
+      <div class="about__stat">
+        <span class="about__stat-value">{{ section.settings.stat_3_value }}</span>
+        <p class="about__stat-label">{{ section.settings.stat_3_label }}</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% schema %}
+{
+  "name": "About",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Hero"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Brand Story"
+    },
+    {
+      "type": "text",
+      "id": "hero_title",
+      "label": "Hero title",
+      "default": "The World's First Sock Authority"
+    },
+    {
+      "type": "textarea",
+      "id": "hero_lead",
+      "label": "Lead paragraph",
+      "default": "Born from a simple obsession — that the sock you wear changes how you move, feel, and present yourself to the world. SOCKACADEMY exists to prove it."
+    },
+    {
+      "type": "header",
+      "content": "Pillars"
+    },
+    {
+      "type": "text",
+      "id": "pillar_1_title",
+      "label": "Pillar 1 title",
+      "default": "Our Mission"
+    },
+    {
+      "type": "textarea",
+      "id": "pillar_1_text",
+      "label": "Pillar 1 description",
+      "default": "To make premium socks accessible to everyone — curating only the styles and materials that meet our exacting standards of comfort, craft, and lasting quality."
+    },
+    {
+      "type": "text",
+      "id": "pillar_2_title",
+      "label": "Pillar 2 title",
+      "default": "Our Standard"
+    },
+    {
+      "type": "textarea",
+      "id": "pillar_2_text",
+      "label": "Pillar 2 description",
+      "default": "Every sock in our catalog is selected by hand. We test for durability, fit, and feel before anything earns the SOCKACADEMY name. No shortcuts. No compromise."
+    },
+    {
+      "type": "text",
+      "id": "pillar_3_title",
+      "label": "Pillar 3 title",
+      "default": "Our Promise"
+    },
+    {
+      "type": "textarea",
+      "id": "pillar_3_text",
+      "label": "Pillar 3 description",
+      "default": "If it's not right, we make it right. Every order ships with the confidence that your satisfaction is the only outcome we accept."
+    },
+    {
+      "type": "header",
+      "content": "Quote"
+    },
+    {
+      "type": "textarea",
+      "id": "quote",
+      "label": "Quote text",
+      "default": "We believe the smallest details define the greatest brands."
+    },
+    {
+      "type": "text",
+      "id": "quote_attribution",
+      "label": "Attribution (optional)",
+      "default": "SOCKACADEMY"
+    },
+    {
+      "type": "header",
+      "content": "Stats"
+    },
+    {
+      "type": "text",
+      "id": "stat_1_value",
+      "label": "Stat 1 value",
+      "default": "50+"
+    },
+    {
+      "type": "text",
+      "id": "stat_1_label",
+      "label": "Stat 1 label",
+      "default": "Sock Categories"
+    },
+    {
+      "type": "text",
+      "id": "stat_2_value",
+      "label": "Stat 2 value",
+      "default": "100%"
+    },
+    {
+      "type": "text",
+      "id": "stat_2_label",
+      "label": "Stat 2 label",
+      "default": "Premium Materials Only"
+    },
+    {
+      "type": "text",
+      "id": "stat_3_value",
+      "label": "Stat 3 value",
+      "default": "Global"
+    },
+    {
+      "type": "text",
+      "id": "stat_3_label",
+      "label": "Stat 3 label",
+      "default": "Ships Worldwide"
+    }
+  ],
+  "presets": [
+    {
+      "name": "About"
+    }
+  ]
+}
+{% endschema %}

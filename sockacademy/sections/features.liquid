@@ -1,0 +1,359 @@
+{%- style -%}
+  #Features-{{ section.id }} {
+    background-color: #1A1A1A;
+    padding: 6.25rem 2rem;
+  }
+
+  #Features-{{ section.id }} .features__heading {
+    text-align: center;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 900;
+    color: #F0EDE6;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin: 0 0 0.5rem;
+  }
+
+  #Features-{{ section.id }} .features__heading span {
+    color: #C9A84C;
+  }
+
+  #Features-{{ section.id }} .features__subheading {
+    text-align: center;
+    color: #888888;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 0 0 4rem;
+  }
+
+  #Features-{{ section.id }} .features__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  #Features-{{ section.id }} .features__card {
+    background-color: #222222;
+    border: 1px solid #1F1F1F;
+    border-top: 3px solid #222222;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.5s ease, box-shadow 0.5s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #Features-{{ section.id }} .features__card:hover {
+    transform: translateY(-8px);
+    border-top-color: #C9A84C;
+    box-shadow: 0 12px 48px rgba(201, 168, 76, 0.18);
+  }
+
+  #Features-{{ section.id }} .features__card-inner {
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  #Features-{{ section.id }} .features__card:hover .features__card-inner {
+    transform: translateY(-4px);
+  }
+
+  #Features-{{ section.id }} .features__icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 1.5rem;
+    color: #C9A84C;
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  #Features-{{ section.id }} .features__icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  #Features-{{ section.id }} .features__card:hover .features__icon {
+    transform: scale(1.1);
+  }
+
+  #Features-{{ section.id }} .features__card-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #F0EDE6;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0 0 0.75rem;
+  }
+
+  #Features-{{ section.id }} .features__card-text {
+    font-size: 0.95rem;
+    color: #888888;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .features__trust {
+    max-width: 1100px;
+    margin: 5rem auto 0;
+    padding-top: 3rem;
+    border-top: 1px solid rgba(201, 168, 76, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .features__trust-badge {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0 1.5rem;
+    text-align: center;
+    position: relative;
+  }
+
+  .features__trust-badge + .features__trust-badge::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 2.5rem;
+    width: 1px;
+    background: rgba(201, 168, 76, 0.2);
+  }
+
+  .features__trust-icon {
+    width: 28px;
+    height: 28px;
+    color: #C9A84C;
+    flex-shrink: 0;
+  }
+
+  .features__trust-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .features__trust-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #F0EDE6;
+    margin: 0;
+  }
+
+  .features__trust-sub {
+    font-size: 0.72rem;
+    color: #666;
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  @media screen and (max-width: 768px) {
+    #Features-{{ section.id }} {
+      padding: 2.5rem 1.25rem;
+    }
+
+    #Features-{{ section.id }} .features__grid {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    #Features-{{ section.id }} .features__subheading {
+      margin-bottom: 2rem;
+    }
+
+    .features__trust {
+      margin-top: 3rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+
+    .features__trust-badge {
+      padding: 1.25rem 1rem;
+    }
+
+    .features__trust-badge + .features__trust-badge::before {
+      display: none;
+    }
+
+    .features__trust-badge:nth-child(1),
+    .features__trust-badge:nth-child(2) {
+      border-bottom: 1px solid rgba(201, 168, 76, 0.12);
+    }
+
+    .features__trust-badge:nth-child(1),
+    .features__trust-badge:nth-child(3) {
+      border-right: 1px solid rgba(201, 168, 76, 0.12);
+    }
+  }
+{%- endstyle -%}
+
+<div id="Features-{{ section.id }}">
+  <p class="features__subheading">{{ section.settings.eyebrow }}</p>
+  {%- assign heading_words = section.settings.heading | split: ' ' -%}
+  {%- assign heading_last = heading_words | last -%}
+  {%- assign heading_rest = section.settings.heading | remove_last: heading_last | strip -%}
+  <h2 class="features__heading">
+    {{ heading_rest }}
+    <span>{{ heading_last }}</span>
+  </h2>
+
+  <div class="features__grid">
+    {%- for block in section.blocks -%}
+      <div class="features__card" {{ block.shopify_attributes }}>
+        <div class="features__card-inner">
+        <div class="features__icon">
+          {%- case block.settings.icon -%}
+            {%- when 'sock' -%}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M8 3v8L4.5 16A3.5 3.5 0 0 0 8 21h4a3.5 3.5 0 0 0 3.5-3.5V14h1a2 2 0 0 0 0-4h-1V3H8z"/>
+              </svg>
+            {%- when 'globe' -%}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M3.6 9h16.8M3.6 15h16.8"/>
+                <path d="M12 3c-2.5 3-4 5.5-4 9s1.5 6 4 9"/>
+                <path d="M12 3c2.5 3 4 5.5 4 9s-1.5 6-4 9"/>
+              </svg>
+            {%- when 'star' -%}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+          {%- endcase -%}
+        </div>
+        <h3 class="features__card-title">{{ block.settings.title }}</h3>
+        <p class="features__card-text">{{ block.settings.text }}</p>
+        </div>
+      </div>
+    {%- endfor -%}
+  </div>
+
+  <div class="features__trust">
+    <div class="features__trust-badge">
+      <div class="features__trust-icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <p class="features__trust-title">SSL Secure Checkout</p>
+      <p class="features__trust-sub">256-bit encryption</p>
+    </div>
+    <div class="features__trust-badge">
+      <div class="features__trust-icon">
+        <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+      </div>
+      <p class="features__trust-title">Free Returns</p>
+      <p class="features__trust-sub">14-day return right</p>
+    </div>
+    <div class="features__trust-badge">
+      <div class="features__trust-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </div>
+      <p class="features__trust-title">Worldwide Shipping</p>
+      <p class="features__trust-sub">Delivered to your door</p>
+    </div>
+    <div class="features__trust-badge">
+      <div class="features__trust-icon">
+        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </div>
+      <p class="features__trust-title">Premium Quality</p>
+      <p class="features__trust-sub">Curated by specialists</p>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Features",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow text",
+      "default": "Why choose us"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Why SOCKACADEMY?"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Feature card",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "sock",  "label": "Sock"  },
+            { "value": "globe", "label": "Globe" },
+            { "value": "star",  "label": "Star"  }
+          ],
+          "default": "star"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Feature title"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "default": "Feature description goes here."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Features",
+      "blocks": [
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "sock",
+            "title": "Premium Quality",
+            "text": "Only the finest materials for your feet."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "globe",
+            "title": "Global Selection",
+            "text": "Socks from around the world."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "star",
+            "title": "Expert Curation",
+            "text": "Hand-picked by sock specialists."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,71 @@
+<style>
+  .sa-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    text-decoration: none;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .sa-logo__s {
+    font-family: 'Playfair Display', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 400;
+    color: #C9A84C;
+    letter-spacing: 0;
+    line-height: 1;
+  }
+
+  .sa-logo__ock {
+    font-family: 'Playfair Display', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 400;
+    color: #F0EDE6;
+    letter-spacing: 0;
+    line-height: 1;
+  }
+
+  .sa-logo__divider {
+    display: inline-block;
+    width: 1.5px;
+    height: 1.5rem;
+    background-color: #222222;
+    margin: 0 0.5rem 0.1rem;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+
+  .sa-logo__academy {
+    font-family: 'Playfair Display', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: #C9A84C;
+    letter-spacing: 0.1em;
+    line-height: 1;
+  }
+
+  /* Shrink on scroll — Dawn adds .scrolled-past-header to <body> */
+  .scrolled-past-header .sa-logo__s,
+  .scrolled-past-header .sa-logo__ock {
+    font-size: 1.75rem;
+    transition: font-size 0.25s ease;
+  }
+
+  .scrolled-past-header .sa-logo__academy {
+    font-size: 1.05rem;
+    transition: font-size 0.25s ease;
+  }
+
+  .scrolled-past-header .sa-logo__divider {
+    height: 1.2rem;
+    transition: height 0.25s ease;
+  }
+</style>
+
+<a href="{{ routes.root_url }}" class="sa-logo" aria-label="{{ shop.name }}">
+  <span class="sa-logo__s">S</span>
+  <span class="sa-logo__ock">OCK</span>
+  <span class="sa-logo__divider" aria-hidden="true"></span>
+  <span class="sa-logo__academy">ACADEMY</span>
+</a>

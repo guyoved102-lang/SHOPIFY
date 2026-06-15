@@ -1,0 +1,176 @@
+{%- style -%}
+  #LegalPage-{{ section.id }} {
+    background-color: #1A1A1A;
+    color: #F0EDE6;
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  .lp-hero {
+    background: linear-gradient(135deg, #1A1A1A 0%, #1e1e1e 100%);
+    border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+    padding: 6rem 2rem 3.5rem;
+    text-align: center;
+  }
+
+  .lp-hero__badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #C9A84C;
+    border: 1px solid rgba(201, 168, 76, 0.4);
+    padding: 0.4rem 1.2rem;
+    border-radius: 100px;
+    margin-bottom: 1.5rem;
+  }
+
+  .lp-hero__title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    color: #F0EDE6;
+    margin: 0 0 1rem;
+    line-height: 1.2;
+  }
+
+  .lp-hero__meta {
+    font-size: 0.85rem;
+    color: #666;
+    letter-spacing: 0.05em;
+  }
+
+  .lp-body {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 4rem 2rem 6rem;
+  }
+
+  .lp-content h1,
+  .lp-content h2,
+  .lp-content h3 {
+    font-family: 'Playfair Display', serif;
+    color: #F0EDE6;
+    margin: 2.5rem 0 1rem;
+    line-height: 1.3;
+  }
+
+  .lp-content h2 {
+    font-size: 1.4rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(201, 168, 76, 0.15);
+  }
+
+  .lp-content h3 {
+    font-size: 1.1rem;
+    color: #C9A84C;
+  }
+
+  .lp-content p {
+    color: #aaa;
+    font-size: 0.95rem;
+    line-height: 1.9;
+    margin-bottom: 1rem;
+  }
+
+  .lp-content ul,
+  .lp-content ol {
+    color: #aaa;
+    font-size: 0.95rem;
+    line-height: 1.9;
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .lp-content li {
+    margin-bottom: 0.4rem;
+  }
+
+  .lp-content strong {
+    color: #F0EDE6;
+    font-weight: 600;
+  }
+
+  .lp-content a {
+    color: #C9A84C;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .lp-content a:hover {
+    opacity: 0.8;
+  }
+
+  .lp-content blockquote {
+    background: rgba(201, 168, 76, 0.07);
+    border-left: 3px solid #C9A84C;
+    border-radius: 0 8px 8px 0;
+    padding: 1rem 1.5rem;
+    margin: 1.5rem 0;
+    color: #C9A84C;
+    font-size: 0.9rem;
+  }
+
+  .lp-content hr {
+    border: none;
+    border-top: 1px solid rgba(201, 168, 76, 0.1);
+    margin: 2.5rem 0;
+  }
+
+  .lp-contact-box {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 3rem;
+    text-align: center;
+  }
+
+  .lp-contact-box p {
+    color: #888 !important;
+    font-size: 0.9rem !important;
+    margin: 0 0 0.75rem !important;
+  }
+
+  .lp-contact-box a {
+    color: #C9A84C !important;
+    font-weight: 600;
+  }
+
+  @media (max-width: 768px) {
+    .lp-hero { padding: 4rem 1.5rem 2.5rem; }
+    .lp-body { padding: 2.5rem 1.25rem 4rem; }
+  }
+{%- endstyle -%}
+
+<div id="LegalPage-{{ section.id }}">
+  <div class="lp-hero">
+    <div class="lp-hero__badge">Legal</div>
+    <h1 class="lp-hero__title">{{ page.title }}</h1>
+    <p class="lp-hero__meta">Last updated: {{ 'now' | date: '%B %Y' }} &nbsp;·&nbsp; SOCKACADEMY</p>
+  </div>
+
+  <div class="lp-body">
+    <div class="lp-content">
+      {{ page.content }}
+    </div>
+
+    <div class="lp-contact-box">
+      <p>Questions about this policy?</p>
+      <a href="mailto:hello@sockacademy.com">hello@sockacademy.com</a>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Legal Page",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Legal Page"
+    }
+  ]
+}
+{% endschema %}

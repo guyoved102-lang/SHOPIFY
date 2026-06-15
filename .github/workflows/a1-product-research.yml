@@ -1,0 +1,43 @@
+name: A1 — Product Research (Weekly)
+
+on:
+  schedule:
+    - cron: '0 7 * * 1'  # כל יום שני בשעה 7:00 UTC (10:00 ישראל)
+  workflow_dispatch:       # הרצה ידנית מ-GitHub
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          cd sockacademy/agents/A1_product_research
+          npm install dotenv 2>/dev/null || true
+
+      - name: Run A1 Product Research Agent
+        env:
+          CJ_EMAIL: ${{ secrets.CJ_EMAIL }}
+          CJ_PASSWORD: ${{ secrets.CJ_PASSWORD }}
+          CJ_API_KEY: ${{ secrets.CJ_API_KEY }}
+          SHOPIFY_MASTER_TOKEN: ${{ secrets.SHOPIFY_MASTER_TOKEN }}
+          KLAVIYO_PRIVATE_API_KEY: ${{ secrets.KLAVIYO_PRIVATE_API_KEY }}
+          MAKE_A1_WEBHOOK: ${{ secrets.MAKE_A1_WEBHOOK }}
+        run: |
+          cd sockacademy/agents/A1_product_research
+          node agent.js
+
+      - name: Upload results as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: a1-results-${{ github.run_number }}
+          path: sockacademy/agents/A1_product_research/last_run.json
+          retention-days: 30

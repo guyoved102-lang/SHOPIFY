@@ -1,0 +1,19 @@
+# Shopify CLI
+.shopify/
+node_modules/
+.env
+*.log
+
+# Atomic write temp files (Shopify dev server)
+*.tmp
+*.tmp.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo

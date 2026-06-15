@@ -1,0 +1,194 @@
+{
+  "sections": {
+    "image_banner": {
+      "type": "image-banner",
+      "blocks": {
+        "heading": {
+          "type": "heading",
+          "settings": {
+            "heading": "SOCKACADEMY",
+            "heading_size": "hxxl"
+          }
+        },
+        "text": {
+          "type": "text",
+          "settings": {
+            "text": "The World's Sock Specialists",
+            "text_style": "subtitle"
+          }
+        },
+        "button": {
+          "type": "buttons",
+          "settings": {
+            "button_label_1": "Shop Now",
+            "button_link_1": "shopify://collections/all",
+            "button_style_secondary_1": false,
+            "button_label_2": "",
+            "button_link_2": "",
+            "button_style_secondary_2": false
+          }
+        }
+      },
+      "block_order": [
+        "heading",
+        "text",
+        "button"
+      ],
+      "settings": {
+        "image_overlay_opacity": 40,
+        "image_height": "large",
+        "desktop_content_position": "bottom-center",
+        "show_text_box": false,
+        "desktop_content_alignment": "center",
+        "color_scheme": "scheme-1",
+        "mobile_content_alignment": "center",
+        "stack_images_on_mobile": false,
+        "show_text_below": false
+      }
+    },
+    "ticker": {
+      "type": "ticker",
+      "settings": {
+        "text": "PREMIUM QUALITY · FREE SHIPPING OVER $50 · THE WORLD'S FIRST SOCK AUTHORITY · MERINO WOOL · COOLMAX TECHNOLOGY · GIFT SETS AVAILABLE",
+        "speed": 30
+      }
+    },
+    "features": {
+      "type": "features",
+      "blocks": {
+        "card-1": {
+          "type": "feature",
+          "settings": {
+            "icon": "sock",
+            "title": "Premium Quality",
+            "text": "Only the finest materials for your feet."
+          }
+        },
+        "card-2": {
+          "type": "feature",
+          "settings": {
+            "icon": "globe",
+            "title": "Global Selection",
+            "text": "Socks from around the world."
+          }
+        },
+        "card-3": {
+          "type": "feature",
+          "settings": {
+            "icon": "star",
+            "title": "Expert Curation",
+            "text": "Hand-picked by sock specialists."
+          }
+        }
+      },
+      "block_order": ["card-1", "card-2", "card-3"],
+      "settings": {
+        "eyebrow": "Why choose us",
+        "heading": "Why SOCKACADEMY?"
+      }
+    },
+    "collections_preview": {
+      "type": "collections-preview",
+      "blocks": {
+        "card-noshow": {
+          "type": "collection_card",
+          "settings": {
+            "icon": "no-show",
+            "title": "No-Show & Ankle",
+            "text": "Invisible comfort for low-cut shoes.",
+            "link": "shopify://collections/no-show-ankle",
+            "button_label": "Shop"
+          }
+        },
+        "card-crew": {
+          "type": "collection_card",
+          "settings": {
+            "icon": "crew",
+            "title": "Crew & Half",
+            "text": "The everyday classic.",
+            "link": "shopify://collections/crew-half",
+            "button_label": "Shop"
+          }
+        },
+        "card-sport": {
+          "type": "collection_card",
+          "settings": {
+            "icon": "sport",
+            "title": "Sport & Running",
+            "text": "Coolmax ultra-light performance.",
+            "link": "shopify://collections/sport-running",
+            "button_label": "Shop"
+          }
+        },
+        "card-hiking": {
+          "type": "collection_card",
+          "settings": {
+            "icon": "hiking",
+            "title": "Hiking & Tactical",
+            "text": "Merino wool & Thermolite for any terrain.",
+            "link": "shopify://collections/hiking-tactical",
+            "button_label": "Shop"
+          }
+        },
+        "card-formal": {
+          "type": "collection_card",
+          "settings": {
+            "icon": "formal",
+            "title": "Formal & Dress",
+            "text": "Polished styles for the office and beyond.",
+            "link": "shopify://collections/formal-dress",
+            "button_label": "Shop"
+          }
+        },
+        "card-gift": {
+          "type": "collection_card",
+          "settings": {
+            "icon": "gift",
+            "title": "Gift & Sets",
+            "text": "The perfect sock set for every occasion.",
+            "link": "shopify://collections/gift-sets",
+            "button_label": "Shop"
+          }
+        }
+      },
+      "block_order": [
+        "card-noshow",
+        "card-crew",
+        "card-sport",
+        "card-hiking",
+        "card-formal",
+        "card-gift"
+      ],
+      "settings": {
+        "eyebrow": "Shop by category",
+        "heading": "Our Collections",
+        "subheading": "Find the perfect sock for every occasion."
+      }
+    },
+    "about": {
+      "type": "about",
+      "settings": {}
+    },
+    "blog_preview": {
+      "type": "blog-preview",
+      "settings": {}
+    },
+    "sock_finder": {
+      "type": "sock-finder",
+      "settings": {
+        "eyebrow": "Sock Finder",
+        "title": "Find Your Perfect Sock",
+        "subtitle": "3 questions. 10 seconds. Your ideal pair."
+      }
+    }
+  },
+  "order": [
+    "image_banner",
+    "ticker",
+    "features",
+    "collections_preview",
+    "about",
+    "blog_preview",
+    "sock_finder"
+  ]
+}
