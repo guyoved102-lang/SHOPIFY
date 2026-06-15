@@ -1,13 +1,25 @@
-/* SOCKACADEMY — Custom Theme Styles */
+/* SOCKACADEMY — Brand Identity: Black + Gold Premium */
 
-/* ── Header ─────────────────────────────────────────────── */
+/* ── CSS Variables ───────────────────────────────────── */
+:root {
+  --sa-black:      #0A0A0A;
+  --sa-dark:       #111111;
+  --sa-gold:       #C9A84C;
+  --sa-gold-light: #E2C97E;
+  --sa-gold-dark:  #8B6914;
+  --sa-white:      #FFFFFF;
+  --sa-gray:       #9CA3AF;
+  --sa-surface:    #1A1A1A;
+}
+
+/* ── Logo / Brand Name ───────────────────────────────── */
 
 .header__heading-link .h2 {
   font-size: 2.2rem;
   font-weight: 800;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #0077FF;
+  color: var(--sa-black);
   line-height: 1;
 }
 
@@ -17,47 +29,91 @@
   }
 }
 
+/* ── Header ──────────────────────────────────────────── */
+
 .header {
-  border-bottom: 2px solid rgba(0, 119, 255, 0.2);
+  border-bottom: 1px solid rgba(201, 168, 76, 0.25);
 }
 
-/* ── Buttons ─────────────────────────────────────────────── */
+/* ── Primary Buttons ─────────────────────────────────── */
 
 .button--primary,
 .shopify-payment-button__button {
-  border-radius: 4px;
+  background-color: var(--sa-black) !important;
+  color: var(--sa-gold) !important;
+  border: 1px solid var(--sa-gold) !important;
+  border-radius: 2px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  transition: background-color 0.2s ease, transform 0.1s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
 }
 
-.button--primary:hover {
-  background-color: #0055CC;
+.button--primary:hover,
+.shopify-payment-button__button:hover {
+  background-color: var(--sa-gold) !important;
+  color: var(--sa-black) !important;
   transform: translateY(-1px);
 }
 
-/* ── Cards ───────────────────────────────────────────────── */
+/* ── Secondary Buttons ───────────────────────────────── */
+
+.button--secondary {
+  border-color: rgba(201, 168, 76, 0.4) !important;
+  color: var(--sa-black) !important;
+}
+
+.button--secondary:hover {
+  border-color: var(--sa-gold) !important;
+  color: var(--sa-gold) !important;
+}
+
+/* ── Product Cards ───────────────────────────────────── */
 
 .card-wrapper:hover .card {
-  border-color: rgba(0, 119, 255, 0.4);
+  border-color: rgba(201, 168, 76, 0.5) !important;
+  box-shadow: 0 4px 20px rgba(201, 168, 76, 0.08);
 }
 
-/* ── Price ───────────────────────────────────────────────── */
+/* ── Price ───────────────────────────────────────────── */
 
 .price--sale .price-item--sale {
-  color: #FF5500;
+  color: var(--sa-gold);
 }
 
-/* ── Links ───────────────────────────────────────────────── */
+/* ── Links ───────────────────────────────────────────── */
 
 .link:hover,
 .full-unstyled-link:hover {
-  color: #0077FF;
+  color: var(--sa-gold);
 }
 
-/* ── Footer border ───────────────────────────────────────── */
+a:focus-visible {
+  outline-color: var(--sa-gold);
+}
+
+/* ── Footer ──────────────────────────────────────────── */
 
 .footer {
-  border-top: 2px solid rgba(0, 119, 255, 0.2);
+  border-top: 1px solid rgba(201, 168, 76, 0.2);
+}
+
+/* ── Badges ──────────────────────────────────────────── */
+
+.badge {
+  background-color: var(--sa-gold);
+  color: var(--sa-black);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+/* ── Section Headings Accent ─────────────────────────── */
+
+.section-heading::after {
+  content: '';
+  display: block;
+  width: 36px;
+  height: 2px;
+  background: var(--sa-gold);
+  margin-top: 8px;
 }

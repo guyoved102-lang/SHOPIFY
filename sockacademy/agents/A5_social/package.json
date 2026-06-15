@@ -1,7 +1,7 @@
 {
   "name": "a5-social",
-  "version": "1.0.0",
-  "description": "A5 — SockAcademy Social Content Agent (Instagram)",
+  "version": "2.0.0",
+  "description": "A5 — SockAcademy Social Content Agent (Claude + DALL-E + Shopify CDN + Instagram)",
   "main": "agent.js",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.24.0",

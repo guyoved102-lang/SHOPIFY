@@ -2,7 +2,7 @@ name: A5 — Social Content Agent (Weekly)
 
 on:
   schedule:
-    - cron: '0 6 * * 0'  # כל ראשון 06:00 UTC (09:00 ישראל) — לוח תוכן לשבוע
+    - cron: '0 6 * * 0'  # כל ראשון 06:00 UTC (09:00 ישראל)
   workflow_dispatch:
 
 jobs:
@@ -24,11 +24,11 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-          # להפעלה מלאה — הוסף ב-GitHub Secrets:
+          SHOPIFY_MASTER_TOKEN: ${{ secrets.SHOPIFY_MASTER_TOKEN }}
+          SHOPIFY_SHOP_DOMAIN: 11eqwi-ji.myshopify.com
+          # Image generation (DALL-E):
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          # Instagram publishing:
           META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
           META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
-          # תמונות לפרסום (URL ציבורי לכל סוג פוסט):
-          # IG_IMAGE_EDUCATION: ${{ secrets.IG_IMAGE_EDUCATION }}
-          # IG_IMAGE_PRODUCT: ${{ secrets.IG_IMAGE_PRODUCT }}
-          # IG_IMAGE_LIFESTYLE: ${{ secrets.IG_IMAGE_LIFESTYLE }}
         run: node agent.js

@@ -1,45 +1,62 @@
 /**
- * A5 — Social Content Agent v1.0
- * כותב 3 קפיות שבועיות לאינסטגרם עם Claude
- * שולח לוח תוכן שבועי למייל + מוכן לפוסטינג אוטומטי דרך Meta API
- * DRY-RUN: ללא META_ACCESS_TOKEN — רק קפיות + מייל
+ * A5 — Social Content Agent v2.0
+ * Claude (caption) → DALL-E (image) → Shopify CDN (host) → Meta API (publish)
+ * DRY-RUN: ללא META_ACCESS_TOKEN — קפיות + תמונות + מייל בלבד
  */
 
 require('dotenv').config({ path: '../../.env' });
 const Anthropic = require('@anthropic-ai/sdk');
 const nodemailer = require('nodemailer');
+const https = require('https');
+const http = require('http');
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-const IG_USER_ID = process.env.META_IG_USER_ID;       // Instagram Business Account ID
+const IG_USER_ID  = process.env.META_IG_USER_ID;
 const ACCESS_TOKEN = process.env.META_ACCESS_TOKEN;
+const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN || '11eqwi-ji.myshopify.com';
+const SHOPIFY_TOKEN  = process.env.SHOPIFY_MASTER_TOKEN;
 const DRY_RUN = !ACCESS_TOKEN || !IG_USER_ID;
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// לוח תוכן שבועי — 3 פוסטים קבועים
+// BRAND VISUAL IDENTITY
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const BRAND_VISUAL = {
+  palette: 'deep black (#0A0A0A), warm gold (#C9A84C), off-white cream (#F0EDE6)',
+  surface: 'black marble, dark slate, ebony wood grain, matte charcoal',
+  lighting: 'soft directional studio light, subtle rim light in warm gold, deep shadows',
+  style: 'editorial luxury flat lay, Monocle magazine aesthetic, Tom Ford minimalism',
+  avoid: 'bright backgrounds, colorful props, playful or cartoonish elements, cluttered compositions',
+};
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// WEEKLY CONTENT PLAN — 3 posts/week
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const WEEKLY_CONTENT_PLAN = [
   {
     day: 'Sunday',
     type: 'EDUCATION',
-    description: 'Know Your Materials — פוסט חינוכי על חומרים, כינולוגיה, טיפים מקצועיים',
+    description: 'Know Your Materials — educational post on materials, craft, expert tips',
     angle: 'educate about premium sock materials, construction, or care',
+    imageStyle: 'macro close-up of premium sock fabric texture on black marble — yarn detail visible, gold accent needle or thread nearby, extreme editorial quality',
   },
   {
     day: 'Wednesday',
     type: 'PRODUCT',
-    description: 'Product Spotlight — הדגשת מוצר ספציפי עם ערך ותועלת',
+    description: 'Product Spotlight — one specific product category with clear value',
     angle: 'spotlight one specific product category with clear value proposition',
+    imageStyle: 'folded premium dress socks arranged in precise geometric layout on dark slate, side-lit with warm studio light, one pair slightly offset for visual tension',
   },
   {
     day: 'Friday',
     type: 'LIFESTYLE',
-    description: 'Weekend Standard — פוסט לייפסטייל, אסתטי, שיוצר תשוקה למותג',
+    description: 'Weekend Standard — lifestyle, aesthetic, desire for the brand',
     angle: 'elevate the lifestyle — what wearing premium socks says about you',
+    imageStyle: 'man\'s ankle in tailored trousers and premium socks, partial frame, dark flooring, morning light from window, cinematic mood — understated luxury',
   },
 ];
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// TOPICS ROTATION — 52 שבועות
+// WEEKLY THEMES ROTATION — 24 weeks
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const WEEKLY_THEMES = [
   'Merino Wool — the fiber that breathes, regulates, and lasts',
@@ -69,9 +86,9 @@ const WEEKLY_THEMES = [
 ];
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// CLAUDE — יצירת קפי אינסטגרם
+// CLAUDE — Instagram caption
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function generateCaption(post, theme, weekNum) {
+async function generateCaption(post, theme) {
   const msg = await anthropic.messages.create({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 600,
@@ -90,63 +107,126 @@ Brand voice rules:
 - Authoritative but not arrogant — like a trusted expert, not a salesman
 - No generic phrases: "amazing", "perfect", "best ever", "game-changer"
 - CTA always: "Link in bio → sockacademy.store" (never pushy)
+- Think globally — this reaches audiences in US, UK, EU, Australia
 
 Write the caption in this exact JSON format:
 {
   "hook": "The first line — must stop the scroll. Max 10 words. Bold claim or unexpected insight.",
-  "body": "2-3 short paragraphs separated by blank lines. 80-120 words total. The meat of the post.",
+  "body": "2-3 short paragraphs separated by blank lines. 80-120 words total.",
   "cta": "Subtle close. 1 line. Always ends with: → sockacademy.store",
-  "hashtags": "8-12 relevant hashtags, mix of niche (#merinowoolsocks) and broader (#premiumsocks #mensStyle). One line, space-separated.",
-  "visual_direction": "One sentence describing the ideal image/visual for this post — for the photographer/designer."
+  "hashtags": "8-12 hashtags, mix of niche (#merinowoolsocks) and broader (#premiumsocks #mensstyle). One line.",
+  "visual_direction": "One precise sentence describing the ideal image for this post."
 }`,
     }],
   });
 
   try {
-    const text = msg.content[0].text.trim();
-    const json = text.match(/\{[\s\S]*\}/)?.[0];
+    const json = msg.content[0].text.trim().match(/\{[\s\S]*\}/)?.[0];
     return JSON.parse(json);
   } catch {
     return {
       hook: theme,
       body: msg.content[0].text,
       cta: '→ sockacademy.store',
-      hashtags: '#sockacademy #premiumsocks #mensStyle',
-      visual_direction: 'Premium flat lay of socks on clean surface.',
+      hashtags: '#sockacademy #premiumsocks #mensstyle',
+      visual_direction: post.imageStyle,
     };
   }
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// META API — פרסום לאינסטגרם (LIVE בלבד)
-// דורש: image_url ציבורי + ACCESS_TOKEN + IG_USER_ID
+// DALL-E — generate image
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function generateImage(post, caption, theme) {
+  const visualPrompt = caption.visual_direction || post.imageStyle;
+
+  const dallePrompt = `${visualPrompt}. ${BRAND_VISUAL.style}. Color palette: ${BRAND_VISUAL.palette}. Surface: ${BRAND_VISUAL.surface}. Lighting: ${BRAND_VISUAL.lighting}. Do not include: ${BRAND_VISUAL.avoid}. Aspect ratio 1:1, Instagram square format. Ultra high quality, sharp detail.`;
+
+  const response = await fetch('https://api.openai.com/v1/images/generations', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: 'dall-e-3',
+      prompt: dallePrompt,
+      n: 1,
+      size: '1024x1024',
+      quality: 'hd',
+      style: 'natural',
+    }),
+  });
+
+  const data = await response.json();
+  if (data.error) throw new Error(`DALL-E: ${data.error.message}`);
+  return data.data[0].url; // temporary URL (1 hour valid)
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SHOPIFY CDN — upload image for permanent public URL
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function uploadToShopifyCDN(imageUrl, filename) {
+  if (!SHOPIFY_TOKEN) return imageUrl; // fallback to temp URL if no token
+
+  // Download image buffer from DALL-E temp URL
+  const buffer = await downloadBuffer(imageUrl);
+  const base64 = buffer.toString('base64');
+
+  const body = JSON.stringify({
+    file: {
+      attachment: base64,
+      filename: filename,
+      content_type: 'image/png',
+    },
+  });
+
+  const res = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/files.json`, {
+    method: 'POST',
+    headers: {
+      'X-Shopify-Access-Token': SHOPIFY_TOKEN,
+      'Content-Type': 'application/json',
+    },
+    body,
+  });
+
+  const data = await res.json();
+  if (data.errors) throw new Error(`Shopify CDN: ${JSON.stringify(data.errors)}`);
+  return data.file?.url || imageUrl;
+}
+
+function downloadBuffer(url) {
+  return new Promise((resolve, reject) => {
+    const client = url.startsWith('https') ? https : http;
+    client.get(url, (res) => {
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
+      res.on('end', () => resolve(Buffer.concat(chunks)));
+      res.on('error', reject);
+    }).on('error', reject);
+  });
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// META API — publish to Instagram
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function publishToInstagram(caption, imageUrl) {
   if (DRY_RUN || !imageUrl) return null;
 
   const META_API = 'https://graph.facebook.com/v20.0';
 
-  // שלב 1 — יצור media container
   const mediaRes = await fetch(`${META_API}/${IG_USER_ID}/media`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      image_url: imageUrl,
-      caption,
-      access_token: ACCESS_TOKEN,
-    }),
+    body: JSON.stringify({ image_url: imageUrl, caption, access_token: ACCESS_TOKEN }),
   });
   const media = await mediaRes.json();
   if (media.error) throw new Error(`Meta media: ${media.error.message}`);
 
-  // שלב 2 — פרסם
   const publishRes = await fetch(`${META_API}/${IG_USER_ID}/media_publish`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      creation_id: media.id,
-      access_token: ACCESS_TOKEN,
-    }),
+    body: JSON.stringify({ creation_id: media.id, access_token: ACCESS_TOKEN }),
   });
   const published = await publishRes.json();
   if (published.error) throw new Error(`Meta publish: ${published.error.message}`);
@@ -154,7 +234,7 @@ async function publishToInstagram(caption, imageUrl) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// EMAIL — לוח תוכן שבועי
+// EMAIL — weekly calendar with previews
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function sendWeeklyCalendar(posts, weekNum, theme) {
   if (!process.env.GMAIL_APP_PASSWORD) return;
@@ -164,120 +244,133 @@ async function sendWeeklyCalendar(posts, weekNum, theme) {
     auth: { user: 'sockacademy.store@gmail.com', pass: process.env.GMAIL_APP_PASSWORD },
   });
 
-  const postsHtml = posts.map((p, i) => `
-    <div style="background:#f9fafb;border-radius:10px;padding:20px;margin:16px 0;border-left:4px solid #d4a017">
+  const postsHtml = posts.map(p => `
+    <div style="background:#111;border-radius:10px;padding:20px;margin:16px 0;border-left:3px solid #C9A84C">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <span style="background:#111827;color:#d4a017;font-size:11px;font-weight:700;letter-spacing:1px;padding:4px 10px;border-radius:12px;text-transform:uppercase">${p.plan.type}</span>
-        <span style="color:#6b7280;font-size:13px">${p.plan.day}</span>
+        <span style="background:#C9A84C;color:#0A0A0A;font-size:10px;font-weight:800;letter-spacing:1.5px;padding:4px 10px;border-radius:2px;text-transform:uppercase">${p.plan.type}</span>
+        <span style="color:#888;font-size:12px;letter-spacing:0.5px">${p.plan.day}</span>
+        ${p.imageUrl ? `<span style="background:#1a3a1a;color:#4ade80;font-size:10px;font-weight:700;padding:3px 8px;border-radius:2px">IMAGE ✓</span>` : `<span style="background:#3a1a1a;color:#f87171;font-size:10px;font-weight:700;padding:3px 8px;border-radius:2px">NO IMAGE</span>`}
       </div>
-      <div style="font-size:17px;font-weight:700;color:#111;margin-bottom:8px">"${p.caption.hook}"</div>
-      <div style="font-size:13px;color:#374151;line-height:1.7;white-space:pre-line;margin-bottom:12px">${p.caption.body}</div>
-      <div style="font-size:13px;color:#6b7280;margin-bottom:8px">${p.caption.cta}</div>
-      <div style="font-size:12px;color:#9ca3af;margin-bottom:12px">${p.caption.hashtags}</div>
-      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:10px">
-        <span style="font-size:11px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:1px">Visual Direction: </span>
-        <span style="font-size:12px;color:#374151">${p.caption.visual_direction}</span>
+
+      ${p.imageUrl ? `<img src="${p.imageUrl}" style="width:100%;border-radius:6px;margin-bottom:14px;max-height:400px;object-fit:cover" alt="${p.plan.type}">` : ''}
+
+      <div style="font-size:16px;font-weight:700;color:#F0EDE6;margin-bottom:8px;font-family:Georgia,serif">"${p.caption.hook}"</div>
+      <div style="font-size:13px;color:#9ca3af;line-height:1.7;white-space:pre-line;margin-bottom:10px">${p.caption.body}</div>
+      <div style="font-size:12px;color:#C9A84C;margin-bottom:6px">${p.caption.cta}</div>
+      <div style="font-size:11px;color:#6b7280;margin-bottom:12px">${p.caption.hashtags}</div>
+      <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:4px;padding:10px">
+        <span style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:1px">Visual Direction: </span>
+        <span style="font-size:11px;color:#9ca3af">${p.caption.visual_direction}</span>
       </div>
     </div>
   `).join('');
 
-  const html = `
-<div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto">
-  <div style="background:#111827;padding:28px;text-align:center;border-radius:12px 12px 0 0">
-    <div style="color:#fff;font-size:22px;font-weight:800">🧦 SockAcademy</div>
-    <div style="color:#9ca3af;font-size:13px;margin-top:4px">A5 Social Agent — שבוע ${weekNum}</div>
-    <div style="background:#374151;color:#fbbf24;padding:4px 12px;border-radius:12px;font-size:11px;display:inline-block;margin-top:8px">
-      ${DRY_RUN ? '🔧 DRY-RUN — קפיות מוכנות, פרסום ידני' : '🚀 LIVE MODE'}
-    </div>
-  </div>
-  <div style="padding:20px;border:1px solid #e5e7eb;border-top:0;border-radius:0 0 12px 12px">
-    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px;margin-bottom:20px">
-      <strong>נושא השבוע:</strong> ${theme}
-    </div>
+  const hasImages = posts.some(p => p.imageUrl);
 
-    <h3 style="color:#111;margin:0 0 4px">📅 לוח תוכן שבועי — 3 פוסטים</h3>
-    <p style="color:#6b7280;font-size:13px;margin:0 0 16px">העתק-הדבק לאינסטגרם. הוסף תמונה לפי ה-Visual Direction.</p>
+  const html = `
+<div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:640px;margin:0 auto;background:#0A0A0A;color:#F0EDE6">
+  <div style="padding:32px;text-align:center;border-bottom:1px solid #2a2a2a">
+    <div style="font-size:11px;letter-spacing:4px;color:#C9A84C;text-transform:uppercase;margin-bottom:8px">SOCKACADEMY</div>
+    <div style="font-size:22px;font-weight:700;font-family:Georgia,serif;color:#F0EDE6">A5 Social Agent</div>
+    <div style="color:#6b7280;font-size:12px;margin-top:4px">Week ${weekNum} · ${hasImages ? '🖼 AI Images Generated' : 'DRY-RUN — No Images'}</div>
+  </div>
+
+  <div style="padding:24px">
+    <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:6px;padding:16px;margin-bottom:20px">
+      <span style="font-size:10px;color:#C9A84C;font-weight:700;text-transform:uppercase;letter-spacing:1.5px">Weekly Theme</span>
+      <div style="font-size:15px;color:#F0EDE6;margin-top:6px;font-family:Georgia,serif;font-style:italic">${theme}</div>
+    </div>
 
     ${postsHtml}
 
     ${DRY_RUN ? `
-    <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:16px;margin-top:16px">
-      <strong style="color:#0369a1">להפעלה אוטומטית (פרסום ישיר לאינסטגרם):</strong>
-      <ul style="font-size:13px;color:#0c4a6e;margin:8px 0">
-        <li>META_ACCESS_TOKEN — ב-.env</li>
-        <li>META_IG_USER_ID — Instagram Business Account ID</li>
-        <li>image_url — URL ציבורי לתמונה (Shopify CDN / Cloudinary)</li>
-      </ul>
+    <div style="background:#1a1a1a;border:1px solid #C9A84C33;border-radius:6px;padding:16px;margin-top:16px">
+      <div style="font-size:11px;color:#C9A84C;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">להפעלה מלאה</div>
+      <div style="font-size:12px;color:#9ca3af;line-height:1.8">
+        META_ACCESS_TOKEN + META_IG_USER_ID → GitHub Secrets<br>
+        OPENAI_API_KEY → .env (לDall-E)<br>
+        SHOPIFY_MASTER_TOKEN → .env (כבר קיים ✓)
+      </div>
     </div>` : ''}
 
-    <p style="color:#9ca3af;font-size:11px;margin-top:20px;text-align:center">A5 Social Agent v1.0 · @sockacademy.store</p>
+    <p style="color:#4b5563;font-size:11px;margin-top:24px;text-align:center;letter-spacing:1px">A5 Social Agent v2.0 · @sockacademy.store</p>
   </div>
 </div>`;
 
   await transporter.sendMail({
     from: 'SockAcademy A5 Agent <sockacademy.store@gmail.com>',
     to: 'guyoved102@gmail.com',
-    subject: `📱 A5 — לוח תוכן שבוע ${weekNum}: "${theme.substring(0, 45)}..."`,
+    subject: `A5 — Week ${weekNum}: "${theme.substring(0, 45)}${theme.length > 45 ? '...' : ''}"`,
     html,
   });
 
-  console.log('📧 לוח תוכן נשלח למייל');
+  console.log('📧 Weekly calendar sent');
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // MAIN
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function main() {
-  console.log('🚀 A5 — Social Content Agent v1.0');
-  console.log(`🔧 מצב: ${DRY_RUN ? 'DRY-RUN (קפיות בלבד)' : 'LIVE (פרסום אוטומטי)'}`);
-  console.log('━'.repeat(40));
+  console.log('🚀 A5 — Social Content Agent v2.0');
+  console.log(`🔧 Mode: ${DRY_RUN ? 'DRY-RUN' : 'LIVE'} | Images: ${process.env.OPENAI_API_KEY ? 'DALL-E ✓' : 'SKIP (no OPENAI_API_KEY)'}`);
+  console.log('─'.repeat(44));
 
   if (!process.env.ANTHROPIC_API_KEY) {
-    console.error('❌ חסר ANTHROPIC_API_KEY');
+    console.error('❌ Missing ANTHROPIC_API_KEY');
     process.exit(1);
   }
 
-  // נושא השבוע
   const weekNum = Math.ceil((new Date() - new Date(new Date().getFullYear(), 0, 1)) / (7 * 24 * 60 * 60 * 1000));
   const theme = WEEKLY_THEMES[weekNum % WEEKLY_THEMES.length];
 
-  console.log(`\n📌 נושא שבוע ${weekNum}: "${theme}"`);
+  console.log(`\n📌 Week ${weekNum}: "${theme}"`);
+  console.log('\n✍️  Writing captions with Claude...');
 
-  // יצור 3 קפיות
-  console.log('\n✍️  כותב קפיות עם Claude...');
   const posts = [];
 
   for (const plan of WEEKLY_CONTENT_PLAN) {
-    console.log(`  ⏳ ${plan.day} (${plan.type})...`);
-    const caption = await generateCaption(plan, theme, weekNum);
-    posts.push({ plan, caption });
-    console.log(`  ✅ "${caption.hook}"`);
-    await new Promise(r => setTimeout(r, 500));
+    process.stdout.write(`  ${plan.day} (${plan.type})... `);
+
+    const caption = await generateCaption(plan, theme);
+    let imageUrl = null;
+
+    // Generate image with DALL-E if API key present
+    if (process.env.OPENAI_API_KEY) {
+      try {
+        const tempUrl = await generateImage(plan, caption, theme);
+        const filename = `a5-${plan.type.toLowerCase()}-week${weekNum}.png`;
+        imageUrl = await uploadToShopifyCDN(tempUrl, filename);
+        console.log(`✓ image`);
+      } catch (e) {
+        console.log(`⚠ image failed: ${e.message}`);
+      }
+    } else {
+      console.log(`✓ caption only`);
+    }
+
+    posts.push({ plan, caption, imageUrl });
+    await new Promise(r => setTimeout(r, 800));
   }
 
-  // DRY-RUN — רק מייל
-  // LIVE — נסה לפרסם (דורש image_url מ-ENV)
+  // Publish to Instagram (LIVE mode)
   if (!DRY_RUN) {
-    console.log('\n📤 מפרסם לאינסטגרם...');
+    console.log('\n📤 Publishing to Instagram...');
     for (const p of posts) {
-      const imageUrl = process.env[`IG_IMAGE_${p.plan.type}`]; // IG_IMAGE_EDUCATION, IG_IMAGE_PRODUCT, IG_IMAGE_LIFESTYLE
-      if (imageUrl) {
+      if (p.imageUrl) {
         const fullCaption = `${p.caption.hook}\n\n${p.caption.body}\n\n${p.caption.cta}\n\n${p.caption.hashtags}`;
         try {
-          const id = await publishToInstagram(fullCaption, imageUrl);
-          console.log(`  ✅ ${p.plan.day} פורסם — ID: ${id}`);
+          const id = await publishToInstagram(fullCaption, p.imageUrl);
+          console.log(`  ✅ ${p.plan.day} published — ID: ${id}`);
         } catch (e) {
           console.error(`  ❌ ${p.plan.day}: ${e.message}`);
         }
       } else {
-        console.log(`  ⚠️  ${p.plan.day}: חסרה תמונה (ENV: IG_IMAGE_${p.plan.type})`);
+        console.log(`  ⚠  ${p.plan.day}: no image, skipped`);
       }
     }
   }
 
-  console.log('\n━'.repeat(40));
-  console.log(`✅ A5 הושלם — ${posts.length} קפיות נוצרו`);
-
+  console.log(`\n✅ A5 done — ${posts.length} posts generated`);
   await sendWeeklyCalendar(posts, weekNum, theme);
 }
 
