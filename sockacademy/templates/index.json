@@ -1,49 +1,16 @@
 {
   "sections": {
-    "image_banner": {
-      "type": "image-banner",
-      "blocks": {
-        "heading": {
-          "type": "heading",
-          "settings": {
-            "heading": "SOCKACADEMY",
-            "heading_size": "hxxl"
-          }
-        },
-        "text": {
-          "type": "text",
-          "settings": {
-            "text": "The World's Sock Specialists",
-            "text_style": "subtitle"
-          }
-        },
-        "button": {
-          "type": "buttons",
-          "settings": {
-            "button_label_1": "Shop Now",
-            "button_link_1": "shopify://collections/all",
-            "button_style_secondary_1": false,
-            "button_label_2": "",
-            "button_link_2": "",
-            "button_style_secondary_2": false
-          }
-        }
-      },
-      "block_order": [
-        "heading",
-        "text",
-        "button"
-      ],
+    "sa_hero": {
+      "type": "hero",
       "settings": {
-        "image_overlay_opacity": 40,
-        "image_height": "large",
-        "desktop_content_position": "bottom-center",
-        "show_text_box": false,
-        "desktop_content_alignment": "center",
-        "color_scheme": "scheme-1",
-        "mobile_content_alignment": "center",
-        "stack_images_on_mobile": false,
-        "show_text_below": false
+        "eyebrow": "The World's Sock Specialists",
+        "heading": "Wear Something\nWorth Noticing",
+        "subtext": "Premium socks, expertly curated from the world's finest makers. Every pair earns its place.",
+        "cta_label": "Shop Now",
+        "cta_link": "shopify://collections/all",
+        "cta2_label": "Our Story",
+        "cta2_link": "shopify://pages/about-sockacademy",
+        "badge_text": "Est. 2024 · Premium Quality"
       }
     },
     "ticker": {
@@ -183,7 +150,7 @@
     }
   },
   "order": [
-    "image_banner",
+    "sa_hero",
     "ticker",
     "features",
     "collections_preview",

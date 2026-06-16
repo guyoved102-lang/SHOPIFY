@@ -1,0 +1,368 @@
+{%- style -%}
+  /* ── SockAcademy Hero ── */
+  .sa-hero {
+    position: relative;
+    min-height: 92vh;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+    background-color: #0D0D0D;
+  }
+
+  /* Background image layer */
+  .sa-hero__bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .sa-hero__bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: 0.45;
+  }
+
+  /* Gradient overlay — dark bottom */
+  .sa-hero__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(
+      to bottom,
+      rgba(13, 13, 13, 0.25) 0%,
+      rgba(13, 13, 13, 0.55) 50%,
+      rgba(13, 13, 13, 0.92) 100%
+    );
+  }
+
+  /* Abstract gold graphic (no image fallback) */
+  .sa-hero__abstract {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .sa-hero__abstract::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 70vw;
+    height: 70vw;
+    max-width: 800px;
+    max-height: 800px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center,
+      rgba(201, 168, 76, 0.06) 0%,
+      rgba(201, 168, 76, 0.02) 50%,
+      transparent 70%
+    );
+  }
+
+  .sa-hero__abstract::after {
+    content: '';
+    position: absolute;
+    bottom: 10%;
+    left: -5%;
+    width: 50vw;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201, 168, 76, 0.3) 40%, rgba(201, 168, 76, 0.3) 60%, transparent);
+  }
+
+  /* Content */
+  .sa-hero__inner {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 2.5rem 6rem;
+  }
+
+  .sa-hero__eyebrow {
+    display: block;
+    font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: #C9A84C;
+    margin-bottom: 1.25rem;
+  }
+
+  .sa-hero__heading {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(2.8rem, 7vw, 6.5rem);
+    font-weight: 700;
+    font-style: italic;
+    color: #F0EDE6;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin: 0 0 0.5rem;
+    max-width: 14ch;
+  }
+
+  .sa-hero__heading em {
+    font-style: normal;
+    color: #C9A84C;
+  }
+
+  .sa-hero__rule {
+    display: block;
+    width: 64px;
+    height: 1px;
+    background: #C9A84C;
+    margin: 1.75rem 0;
+    opacity: 0.7;
+  }
+
+  .sa-hero__subtext {
+    font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    color: rgba(240, 237, 230, 0.7);
+    line-height: 1.6;
+    max-width: 42ch;
+    margin: 0 0 2.5rem;
+  }
+
+  .sa-hero__actions {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  .sa-hero__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    padding: 0 2.25rem;
+    background-color: #C9A84C;
+    color: #0D0D0D;
+    font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1px solid #C9A84C;
+    border-radius: 2px;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .sa-hero__cta:hover {
+    background-color: transparent;
+    color: #C9A84C;
+    transform: translateY(-2px);
+  }
+
+  .sa-hero__cta--ghost {
+    background-color: transparent;
+    color: #F0EDE6;
+    border-color: rgba(240, 237, 230, 0.3);
+  }
+
+  .sa-hero__cta--ghost:hover {
+    border-color: #C9A84C;
+    color: #C9A84C;
+  }
+
+  /* Corner badge */
+  .sa-hero__badge {
+    position: absolute;
+    top: 2.5rem;
+    right: 2.5rem;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.6;
+  }
+
+  .sa-hero__badge-line {
+    width: 1px;
+    height: 48px;
+    background: #C9A84C;
+  }
+
+  .sa-hero__badge-text {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #C9A84C;
+  }
+
+  /* ── Mobile ── */
+  @media screen and (max-width: 749px) {
+    .sa-hero {
+      min-height: 88vh;
+      align-items: flex-end;
+    }
+
+    .sa-hero__inner {
+      padding: 0 1.25rem 4rem;
+    }
+
+    .sa-hero__heading {
+      font-size: clamp(2.4rem, 11vw, 3.5rem);
+      max-width: 100%;
+    }
+
+    .sa-hero__subtext {
+      font-size: 0.9rem;
+      max-width: 100%;
+    }
+
+    .sa-hero__actions {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .sa-hero__cta {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .sa-hero__badge {
+      display: none;
+    }
+  }
+
+  /* ── Tablet ── */
+  @media screen and (min-width: 750px) and (max-width: 989px) {
+    .sa-hero__heading {
+      font-size: clamp(3rem, 8vw, 5rem);
+    }
+  }
+{%- endstyle -%}
+
+<section class="sa-hero" aria-label="{{ section.settings.heading | escape }}">
+
+  {%- if section.settings.image != blank -%}
+    <div class="sa-hero__bg">
+      {{- section.settings.image | image_url: width: 2000 | image_tag:
+          loading: 'eager',
+          fetchpriority: 'high',
+          widths: '750, 1100, 1500, 2000',
+          sizes: '100vw',
+          alt: section.settings.image.alt | default: section.settings.heading -}}
+    </div>
+  {%- else -%}
+    <div class="sa-hero__abstract" aria-hidden="true"></div>
+  {%- endif -%}
+
+  <div class="sa-hero__overlay" aria-hidden="true"></div>
+
+  {%- if section.settings.badge_text != blank -%}
+    <div class="sa-hero__badge" aria-hidden="true">
+      <span class="sa-hero__badge-line"></span>
+      <span class="sa-hero__badge-text">{{ section.settings.badge_text }}</span>
+    </div>
+  {%- endif -%}
+
+  <div class="sa-hero__inner">
+    {%- if section.settings.eyebrow != blank -%}
+      <span class="sa-hero__eyebrow">{{ section.settings.eyebrow }}</span>
+    {%- endif -%}
+
+    {%- if section.settings.heading != blank -%}
+      <h1 class="sa-hero__heading">{{ section.settings.heading }}</h1>
+    {%- endif -%}
+
+    <span class="sa-hero__rule" aria-hidden="true"></span>
+
+    {%- if section.settings.subtext != blank -%}
+      <p class="sa-hero__subtext">{{ section.settings.subtext }}</p>
+    {%- endif -%}
+
+    <div class="sa-hero__actions">
+      {%- if section.settings.cta_label != blank and section.settings.cta_link != blank -%}
+        <a href="{{ section.settings.cta_link }}" class="sa-hero__cta">
+          {{- section.settings.cta_label -}}
+        </a>
+      {%- endif -%}
+
+      {%- if section.settings.cta2_label != blank and section.settings.cta2_link != blank -%}
+        <a href="{{ section.settings.cta2_link }}" class="sa-hero__cta sa-hero__cta--ghost">
+          {{- section.settings.cta2_label -}}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+
+</section>
+
+{% schema %}
+{
+  "name": "SA Hero",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Background Image"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow text",
+      "default": "The World's Sock Specialists"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Wear Something Worth Noticing"
+    },
+    {
+      "type": "textarea",
+      "id": "subtext",
+      "label": "Subtext",
+      "default": "Premium socks, expertly curated from the world's finest makers. Every pair earns its place."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Button 1 label",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Button 1 link"
+    },
+    {
+      "type": "text",
+      "id": "cta2_label",
+      "label": "Button 2 label (ghost)"
+    },
+    {
+      "type": "url",
+      "id": "cta2_link",
+      "label": "Button 2 link"
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Side badge text",
+      "default": "Est. 2024 · Premium Quality"
+    }
+  ],
+  "presets": [
+    {
+      "name": "SA Hero"
+    }
+  ]
+}
+{% endschema %}
