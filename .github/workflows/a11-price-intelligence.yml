@@ -1,0 +1,29 @@
+name: A11 — Price Intelligence (Weekly)
+
+on:
+  schedule:
+    - cron: '0 6 * * 3'  # Every Wednesday 06:00 UTC = 08:00 Israel (UTC+2)
+  workflow_dispatch:      # Manual trigger available
+
+jobs:
+  price-intelligence:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: sockacademy/agents/A11_price_intelligence
+        run: npm install
+
+      - name: Run A11 Price Intelligence Agent
+        working-directory: sockacademy/agents/A11_price_intelligence
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: node agent.js
