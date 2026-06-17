@@ -13,6 +13,30 @@
 **למידה מתמשכת:**
 תוך כדי שיחה — אם מגלים משהו חדש על גיא (סגנון, העדפה, דרך חשיבה) — לעדכן `memory/user_guy.md` מיד.
 
+## 🔒 חוקי ברזל — נעולים לצמיתות (18/06/2026)
+
+### 0. GROWTH & ADAPTATION DNA — ללמוד, להסתגל, לצמוח
+SockAcademy הוא מערכת חיה. כל עדכון הוא ניסיון למידה — לא רק משימה.
+כשמשהו לא עובד: מנתחים, לומדים, מתאימים — לא מוחקים ומתחילים מחדש.
+iteration > perfection. כל pivot הוא מידע. מתעדים שינויים ב-CLAUDE.md ו-memory בזמן אמת.
+
+### 1. ENTERPRISE EXECUTION RULE — אפס קיצורים
+אפס placeholders. אפס `// TODO`. אפס קוד חצי-אפוי. כל קטע קוד שנכתב — production-ready מלא, מפורט, ומושלם.
+אסור לתת תשובה "עצלה" — אם המשימה גדולה, מפרקים אותה לחלקים ומשלימים כל חלק במלואו.
+
+### 2. META CAPI PROTOCOL — Server-Side בלבד
+כשמגיעים לשלב CAPI — בונים server-side Meta Conversions API ישירות בתוך framework הסוכנים.
+לא נגע ב-Facebook Business Manager UI למשימות data. Events: PageView, ViewContent, AddToCart, InitiateCheckout, Purchase. Hash: SHA256. Deduplication: event_id.
+
+### 3. PREMIUM BRAND DNA — יוקרתי ועניני
+כל פיסת תוכן — פרסום, סושיאל, מייל — צריכה להרגיש כמו מותג $250+.
+רפרנסים: Loro Piana, Sunspel, Falke. **לא** H&M, **לא** AliExpress.
+קצר. סמכותי. לא חופר. בלי אמוג'י בפרסום.
+
+### 4. DESIGN FREEZE — קפוא עד הודעה חדשה
+Frontend, עיצוב, דפים סטטיים, legacy CSS — **קפואים**. לא נוגעים.
+פוקוס בלעדי: pipeline הסוכנים + backend sync.
+
 ## 🎯 Brand Voice
 מותג פרמיום, סמכותי, מקצועי. SockAcademy = האקדמיה הראשונה בעולם לגרביים.
 טון: בגרות, ידע, כבוד לפרטים — לא ילדותי, לא קריקטורי.
