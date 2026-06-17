@@ -9,6 +9,7 @@ const Anthropic = require('@anthropic-ai/sdk');
 const nodemailer = require('nodemailer');
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const DRY_RUN = process.env.DRY_RUN === 'true';
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN || '11eqwi-ji.myshopify.com';
 const SHOPIFY_TOKEN = process.env.SHOPIFY_MASTER_TOKEN;
 const BLOG_ID = process.env.BLOG_ID || '97332199622';
@@ -243,16 +244,21 @@ async function main() {
   console.log(`  ✅ ${wordCount} מילים נכתבו`);
 
   // פרסם ל-Shopify
-  console.log('\n📤 מפרסם ל-Shopify...');
   let article = null;
   let published = false;
 
-  try {
-    article = await publishArticle(topic, bodyHtml);
-    published = true;
-    console.log(`  ✅ פורסם: https://sockacademy.store/blogs/news/${article.handle}`);
-  } catch (e) {
-    console.error(`  ❌ שגיאה בפרסום: ${e.message}`);
+  if (DRY_RUN) {
+    console.log('\n📤 [DRY_RUN] מדלג על פרסום Shopify');
+    article = { body_html: bodyHtml, handle: 'dry-run' };
+  } else {
+    console.log('\n📤 מפרסם ל-Shopify...');
+    try {
+      article = await publishArticle(topic, bodyHtml);
+      published = true;
+      console.log(`  ✅ פורסם: https://sockacademy.store/blogs/news/${article.handle}`);
+    } catch (e) {
+      console.error(`  ❌ שגיאה בפרסום: ${e.message}`);
+    }
   }
 
   console.log('\n━'.repeat(40));

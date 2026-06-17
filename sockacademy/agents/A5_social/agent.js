@@ -89,7 +89,7 @@ const WEEKLY_THEMES = [
 async function generateCaption(post, theme) {
   const msg = await anthropic.messages.create({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 600,
+    max_tokens: 300,
     messages: [{
       role: 'user',
       content: `You write Instagram captions for SockAcademy — the world's first dedicated sock authority. Premium socks for men. Think: authoritative, minimal, tasteful. The account is @sockacademy.store.

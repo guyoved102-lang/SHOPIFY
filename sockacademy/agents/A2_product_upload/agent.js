@@ -16,6 +16,7 @@ const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID;
 const SHEET_NAME = 'A1_Products';
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const DRY_RUN = process.env.DRY_RUN === 'true';
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // GOOGLE SHEETS
@@ -244,16 +245,20 @@ async function main() {
       process.stdout.write(`⏳ ${product.name}... `);
 
       product.description = await generateDescription(product);
-      const shopifyProduct = await createShopifyProduct(product);
 
-      row.set('Upload Status', 'Uploaded');
-      row.set('Shopify ID', String(shopifyProduct.id));
-      row.set('Shopify URL', `https://sockacademy.store/products/${shopifyProduct.handle}`);
-      row.set('Upload Date', new Date().toISOString().split('T')[0]);
-      await row.save();
-
-      console.log(`✅ #${shopifyProduct.id}`);
-      results.push({ name: product.name, id: shopifyProduct.id, success: true });
+      if (DRY_RUN) {
+        console.log(`✅ [DRY_RUN] description generated, skipping Shopify upload`);
+        results.push({ name: product.name, id: 'DRY_RUN', success: true });
+      } else {
+        const shopifyProduct = await createShopifyProduct(product);
+        row.set('Upload Status', 'Uploaded');
+        row.set('Shopify ID', String(shopifyProduct.id));
+        row.set('Shopify URL', `https://sockacademy.store/products/${shopifyProduct.handle}`);
+        row.set('Upload Date', new Date().toISOString().split('T')[0]);
+        await row.save();
+        console.log(`✅ #${shopifyProduct.id}`);
+        results.push({ name: product.name, id: shopifyProduct.id, success: true });
+      }
 
     } catch (e) {
       console.log(`❌ ${e.message}`);
