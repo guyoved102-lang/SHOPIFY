@@ -1,0 +1,29 @@
+name: A12 — Review Collector (Daily)
+
+on:
+  schedule:
+    - cron: '0 7 * * *'  # Every day 07:00 UTC = 09:00 Israel (UTC+2)
+  workflow_dispatch:      # Manual trigger available
+
+jobs:
+  review-collector:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: sockacademy/agents/A12_review_collector
+        run: npm install
+
+      - name: Run A12 Review Collector Agent
+        working-directory: sockacademy/agents/A12_review_collector
+        env:
+          SHOPIFY_MASTER_TOKEN: ${{ secrets.SHOPIFY_MASTER_TOKEN }}
+          SHOPIFY_SHOP_DOMAIN: ${{ secrets.SHOPIFY_SHOP_DOMAIN || '11eqwi-ji.myshopify.com' }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: node agent.js
