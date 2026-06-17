@@ -259,7 +259,16 @@
           alt: section.settings.image.alt | default: section.settings.heading -}}
     </div>
   {%- else -%}
-    <div class="sa-hero__abstract" aria-hidden="true"></div>
+    <div class="sa-hero__bg">
+      <img
+        src="{{ 'sa-hero-banner.png' | asset_url }}"
+        alt="{{ section.settings.heading | escape }}"
+        loading="eager"
+        fetchpriority="high"
+        width="1536"
+        height="1024"
+      >
+    </div>
   {%- endif -%}
 
   <div class="sa-hero__overlay" aria-hidden="true"></div>

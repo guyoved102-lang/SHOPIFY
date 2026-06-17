@@ -46,6 +46,14 @@
     vertical-align: middle;
     flex-shrink: 0;
   }
+
+  @media screen and (max-width: 749px) {
+    #Ticker-{{ section.id }} .tk__item {
+      font-size: 0.65rem;
+      padding: 0.7rem 1.25rem;
+      letter-spacing: 0.18em;
+    }
+  }
 {%- endstyle -%}
 
 {%- assign items = section.settings.text | split: ' · ' -%}

@@ -1,8 +1,10 @@
-name: A5 — Social Content Agent (Weekly)
+name: A5 — Social Content Agent
 
 on:
   schedule:
-    - cron: '0 6 * * 0'  # כל ראשון 06:00 UTC (09:00 ישראל)
+    - cron: '0 7 * * 0'  # ראשון 07:00 UTC (10:00 ישראל)
+    - cron: '0 7 * * 3'  # רביעי 07:00 UTC (10:00 ישראל)
+    - cron: '0 7 * * 5'  # שישי  07:00 UTC (10:00 ישראל)
   workflow_dispatch:
 
 jobs:
@@ -23,12 +25,10 @@ jobs:
         working-directory: sockacademy/agents/A5_social
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           SHOPIFY_MASTER_TOKEN: ${{ secrets.SHOPIFY_MASTER_TOKEN }}
           SHOPIFY_SHOP_DOMAIN: 11eqwi-ji.myshopify.com
-          # Image generation (DALL-E):
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          # Instagram publishing:
           META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
           META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
         run: node agent.js

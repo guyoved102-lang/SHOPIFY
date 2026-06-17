@@ -7,8 +7,6 @@
 require('dotenv').config({ path: '../../.env' });
 const Anthropic = require('@anthropic-ai/sdk');
 const nodemailer = require('nodemailer');
-const https = require('https');
-const http = require('http');
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const IG_USER_ID  = process.env.META_IG_USER_ID;
@@ -149,62 +147,52 @@ async function generateImage(post, caption, theme) {
       'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
     },
     body: JSON.stringify({
-      model: 'dall-e-3',
+      model: 'gpt-image-1',
       prompt: dallePrompt,
       n: 1,
       size: '1024x1024',
-      quality: 'hd',
-      style: 'natural',
+      quality: 'high',
     }),
   });
 
   const data = await response.json();
-  if (data.error) throw new Error(`DALL-E: ${data.error.message}`);
-  return data.data[0].url; // temporary URL (1 hour valid)
+  if (data.error) throw new Error(`gpt-image-1: ${data.error.message}`);
+  // gpt-image-1 returns base64, not a URL
+  return data.data[0].b64_json;
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// SHOPIFY CDN — upload image for permanent public URL
+// SHOPIFY CDN — upload via theme Assets API (base64 → CDN URL)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function uploadToShopifyCDN(imageUrl, filename) {
-  if (!SHOPIFY_TOKEN) return imageUrl; // fallback to temp URL if no token
+const THEME_ID = '151789863110';
 
-  // Download image buffer from DALL-E temp URL
-  const buffer = await downloadBuffer(imageUrl);
-  const base64 = buffer.toString('base64');
+async function uploadToShopifyCDN(base64Data, filename) {
+  if (!SHOPIFY_TOKEN) return null;
 
+  const assetKey = `assets/${filename}`;
   const body = JSON.stringify({
-    file: {
-      attachment: base64,
-      filename: filename,
-      content_type: 'image/png',
+    asset: {
+      key: assetKey,
+      attachment: base64Data,
     },
   });
 
-  const res = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/files.json`, {
-    method: 'POST',
-    headers: {
-      'X-Shopify-Access-Token': SHOPIFY_TOKEN,
-      'Content-Type': 'application/json',
-    },
-    body,
-  });
+  const res = await fetch(
+    `https://${SHOPIFY_DOMAIN}/admin/api/2024-01/themes/${THEME_ID}/assets.json`,
+    {
+      method: 'PUT',
+      headers: {
+        'X-Shopify-Access-Token': SHOPIFY_TOKEN,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body,
+    }
+  );
 
   const data = await res.json();
-  if (data.errors) throw new Error(`Shopify CDN: ${JSON.stringify(data.errors)}`);
-  return data.file?.url || imageUrl;
-}
-
-function downloadBuffer(url) {
-  return new Promise((resolve, reject) => {
-    const client = url.startsWith('https') ? https : http;
-    client.get(url, (res) => {
-      const chunks = [];
-      res.on('data', c => chunks.push(c));
-      res.on('end', () => resolve(Buffer.concat(chunks)));
-      res.on('error', reject);
-    }).on('error', reject);
-  });
+  if (data.errors) throw new Error(`Shopify Assets: ${JSON.stringify(data.errors)}`);
+  return data.asset?.public_url || null;
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -334,12 +322,12 @@ async function main() {
     const caption = await generateCaption(plan, theme);
     let imageUrl = null;
 
-    // Generate image with DALL-E if API key present
+    // Generate image with gpt-image-1 if API key present
     if (process.env.OPENAI_API_KEY) {
       try {
-        const tempUrl = await generateImage(plan, caption, theme);
+        const base64Data = await generateImage(plan, caption, theme);
         const filename = `a5-${plan.type.toLowerCase()}-week${weekNum}.png`;
-        imageUrl = await uploadToShopifyCDN(tempUrl, filename);
+        imageUrl = await uploadToShopifyCDN(base64Data, filename);
         console.log(`✓ image`);
       } catch (e) {
         console.log(`⚠ image failed: ${e.message}`);
