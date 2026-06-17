@@ -1,0 +1,17 @@
+{
+  "name": "a10-trend-scout",
+  "version": "1.0.0",
+  "description": "SockAcademy A10 — Weekly trend scout: Google Trends + Reddit → Claude analysis → Sheets",
+  "main": "agent.js",
+  "scripts": {
+    "start": "node agent.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.24.0",
+    "dotenv": "^16.0.0",
+    "google-spreadsheet": "^4.1.4",
+    "google-auth-library": "^9.0.0",
+    "google-trends-api": "^4.9.2",
+    "nodemailer": "^6.9.0"
+  }
+}
