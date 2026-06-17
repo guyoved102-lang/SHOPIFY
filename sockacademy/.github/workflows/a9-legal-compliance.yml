@@ -1,0 +1,29 @@
+name: A9 — Legal Compliance
+
+on:
+  workflow_dispatch:
+
+jobs:
+  legal:
+    name: Publish Legal Pages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: agents/A9_legal_compliance/package.json
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: agents/A9_legal_compliance
+
+      - name: Run A9 Legal Compliance
+        env:
+          SHOPIFY_SHOP_DOMAIN: ${{ secrets.SHOPIFY_SHOP_DOMAIN }}
+          SHOPIFY_MASTER_TOKEN: ${{ secrets.SHOPIFY_MASTER_TOKEN }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: node agent.js
+        working-directory: agents/A9_legal_compliance

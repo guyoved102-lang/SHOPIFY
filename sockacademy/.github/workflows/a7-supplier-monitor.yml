@@ -1,0 +1,37 @@
+name: A7 — Supplier Monitor
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # 08:00 Israel (UTC+2) — daily
+  workflow_dispatch:
+
+jobs:
+  monitor:
+    name: Monitor Supplier Stock & Prices
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: agents/A7_supplier_monitor/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: agents/A7_supplier_monitor
+
+      - name: Run A7 Supplier Monitor
+        env:
+          SHOPIFY_SHOP_DOMAIN: ${{ secrets.SHOPIFY_SHOP_DOMAIN }}
+          SHOPIFY_MASTER_TOKEN: ${{ secrets.SHOPIFY_MASTER_TOKEN }}
+          CJ_API_KEY: ${{ secrets.CJ_API_KEY }}
+          CJ_EMAIL: ${{ secrets.CJ_EMAIL }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          STOCK_LOW_THRESHOLD: ${{ secrets.STOCK_LOW_THRESHOLD }}
+          PRICE_WARN_PCT: ${{ secrets.PRICE_WARN_PCT }}
+          PRICE_CRITICAL_PCT: ${{ secrets.PRICE_CRITICAL_PCT }}
+          MARKUP_MULTIPLIER: ${{ secrets.MARKUP_MULTIPLIER }}
+        run: node agent.js
+        working-directory: agents/A7_supplier_monitor

@@ -166,7 +166,6 @@ async function createTemplate(email) {
         type: 'template',
         attributes: {
           name: email.name,
-          editor_type: 'CODE',
           html: buildHTML(email),
           text: buildText(email),
         },
@@ -188,7 +187,6 @@ async function updateTemplate(id, email) {
         id,
         attributes: {
           name: email.name,
-          editor_type: 'CODE',
           html: buildHTML(email),
           text: buildText(email),
         },
