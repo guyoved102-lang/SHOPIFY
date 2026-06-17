@@ -73,11 +73,20 @@
 
   /* SockAcademy header overrides */
   .section-header .header-wrapper {
+    background-color: transparent;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+
+  .section-header .header-wrapper.sa-scrolled {
     background-color: #1A1A1A;
   }
 
   .section-header .header-wrapper--border-bottom {
-    border-bottom: 1px solid #2A2A2A;
+    border-bottom: 1px solid transparent;
+  }
+
+  .section-header .header-wrapper.sa-scrolled.header-wrapper--border-bottom {
+    border-bottom-color: #2A2A2A;
   }
 
   .section-header .list-menu__item--link,
@@ -634,3 +643,19 @@
   ]
 }
 {% endschema %}
+
+<script>
+(function() {
+  var wrapper = document.querySelector('.section-header .header-wrapper');
+  if (!wrapper) return;
+  function onScroll() {
+    if (window.scrollY > 20) {
+      wrapper.classList.add('sa-scrolled');
+    } else {
+      wrapper.classList.remove('sa-scrolled');
+    }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+</script>

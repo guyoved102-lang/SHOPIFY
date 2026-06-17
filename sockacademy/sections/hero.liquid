@@ -1,8 +1,13 @@
 {%- style -%}
   /* ── SockAcademy Hero ── */
+  .shopify-section:has(> .sa-hero) {
+    margin-top: -76px;
+    transform: none !important;
+  }
+
   .sa-hero {
     position: relative;
-    min-height: 92vh;
+    min-height: 100dvh;
     display: flex;
     align-items: flex-end;
     overflow: hidden;
@@ -33,7 +38,7 @@
       to bottom,
       rgba(13, 13, 13, 0.25) 0%,
       rgba(13, 13, 13, 0.55) 50%,
-      rgba(13, 13, 13, 0.92) 100%
+      rgba(13, 13, 13, 1.0) 100%
     );
   }
 
@@ -201,6 +206,11 @@
     letter-spacing: 0.3em;
     text-transform: uppercase;
     color: #C9A84C;
+  }
+
+  /* Header padding for content inside hero */
+  .sa-hero__inner {
+    padding-top: calc(76px + 2rem);
   }
 
   /* ── Mobile ── */
