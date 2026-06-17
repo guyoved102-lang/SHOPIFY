@@ -1,5 +1,16 @@
 # SOCKACADEMY - Current State (14/06/2026)
 
+## 🔴 טריגר סיום שיחה — חובה
+
+**כאשר גיא כותב "סיום שיחה" או "מסיימים שיחה" — מופעל אוטומטית:**
+Total Quality Control & System Audit Protocol:
+1. בדיקת syntax לכל agent files
+2. סריקת credentials — אפס hardcoded
+3. השוואת GitHub Secrets מול כל הworkflows
+4. בדיקת TODO/placeholders — תיעוד מה בכוונה ומה צריך תיקון
+5. git commit + push של כל שינויים פתוחים
+6. דוח QA בעברית — מה נשמר, מה הבא, מצב המערכת
+
 ## 🤖 הוראת פתיחת שיחה — חובה
 **בתחילת כל שיחה חדשה (פעם אחת בלבד):**
 הפעל את הסקיל `/run-sockacademy-agents` לבדיקת בריאות הסוכנים. דווח בשורה אחת.
