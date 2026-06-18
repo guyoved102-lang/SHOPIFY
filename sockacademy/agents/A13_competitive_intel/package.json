@@ -1,0 +1,17 @@
+{
+  "name": "a13-competitive-intel",
+  "version": "1.0.0",
+  "description": "SockAcademy A13 — Global Competitive Intelligence Agent",
+  "main": "agent.js",
+  "scripts": {
+    "start": "node agent.js",
+    "strike": "node agent.js --strike",
+    "dry-run": "node agent.js --dry-run"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "google-auth-library": "^9.14.2",
+    "googleapis": "^144.0.0",
+    "nodemailer": "^6.9.14"
+  }
+}
