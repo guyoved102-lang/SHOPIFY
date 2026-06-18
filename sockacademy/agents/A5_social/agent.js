@@ -1,11 +1,13 @@
 /**
- * A5 — Social Content Agent v2.0
- * Claude (caption) → DALL-E (image) → Shopify CDN (host) → Meta API (publish)
- * DRY-RUN: ללא META_ACCESS_TOKEN — קפיות + תמונות + מייל בלבד
+ * A5 — Social Content Agent v2.1
+ * Claude (caption) → DALL-E (image) → Google Drive (archive) → Shopify CDN (host) → Meta API (publish)
+ * DRY-RUN: ללא META_ACCESS_TOKEN — captions + images + Drive backup + email only
  */
 
 require('dotenv').config({ path: '../../.env' });
 const Anthropic = require('@anthropic-ai/sdk');
+const { google } = require('googleapis');
+const { Readable } = require('stream');
 const nodemailer = require('nodemailer');
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -177,6 +179,52 @@ async function generateImage(post, caption, theme) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// GOOGLE DRIVE — archive DALL-E images as permanent corporate asset
+// Requires: GDRIVE_BACKUP_FOLDER_ID + GOOGLE_SERVICE_ACCOUNT_JSON
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function backupToDrive(base64Data, filename, theme) {
+  const folderId = process.env.GDRIVE_BACKUP_FOLDER_ID;
+  const saJson   = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+
+  if (!folderId || !saJson) {
+    console.log('  ☁  Drive backup skipped (GDRIVE_BACKUP_FOLDER_ID or GOOGLE_SERVICE_ACCOUNT_JSON not set)');
+    return null;
+  }
+
+  let credentials;
+  try {
+    credentials = JSON.parse(saJson);
+  } catch {
+    console.log('  ☁  Drive backup skipped (GOOGLE_SERVICE_ACCOUNT_JSON is not valid JSON)');
+    return null;
+  }
+
+  const auth = new google.auth.GoogleAuth({
+    credentials,
+    scopes: ['https://www.googleapis.com/auth/drive.file'],
+  });
+
+  const drive = google.drive({ version: 'v3', auth });
+  const imageBuffer = Buffer.from(base64Data, 'base64');
+
+  const res = await drive.files.create({
+    requestBody: {
+      name: filename,
+      parents: [folderId],
+      description: `SockAcademy A5 | ${theme} | ${new Date().toISOString()}`,
+    },
+    media: {
+      mimeType: 'image/png',
+      body: Readable.from(imageBuffer),
+    },
+    fields: 'id,webViewLink',
+  });
+
+  console.log(`  ☁  Drive backup: ${res.data.webViewLink}`);
+  return { fileId: res.data.id, webViewLink: res.data.webViewLink };
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // SHOPIFY CDN — upload via theme Assets API (base64 → CDN URL)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const THEME_ID = '151789863110';
@@ -249,10 +297,11 @@ async function sendWeeklyCalendar(posts, weekNum, theme) {
 
   const postsHtml = posts.map(p => `
     <div style="background:#111;border-radius:10px;padding:20px;margin:16px 0;border-left:3px solid #C9A84C">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
         <span style="background:#C9A84C;color:#0A0A0A;font-size:10px;font-weight:800;letter-spacing:1.5px;padding:4px 10px;border-radius:2px;text-transform:uppercase">${p.plan.type}</span>
         <span style="color:#888;font-size:12px;letter-spacing:0.5px">${p.plan.day}</span>
         ${p.imageUrl ? `<span style="background:#1a3a1a;color:#4ade80;font-size:10px;font-weight:700;padding:3px 8px;border-radius:2px">IMAGE ✓</span>` : `<span style="background:#3a1a1a;color:#f87171;font-size:10px;font-weight:700;padding:3px 8px;border-radius:2px">NO IMAGE</span>`}
+        ${p.driveBackup ? `<a href="${p.driveBackup.webViewLink}" style="background:#1a2a3a;color:#60a5fa;font-size:10px;font-weight:700;padding:3px 8px;border-radius:2px;text-decoration:none">☁ DRIVE</a>` : ''}
       </div>
 
       ${p.imageUrl ? `<img src="${p.imageUrl}" style="width:100%;border-radius:6px;margin-bottom:14px;max-height:400px;object-fit:cover" alt="${p.plan.type}">` : ''}
@@ -338,12 +387,22 @@ async function main() {
     let imageUrl = null;
 
     // Generate image with gpt-image-1 if API key present
+    let driveBackup = null;
     if (process.env.OPENAI_API_KEY) {
       try {
         const base64Data = await generateImage(plan, caption, theme);
         const filename = `a5-${plan.type.toLowerCase()}-week${weekNum}.png`;
+
+        // Step 1: Archive to Google Drive (fail-safe — does not block CDN upload)
+        try {
+          driveBackup = await backupToDrive(base64Data, filename, theme);
+        } catch (driveErr) {
+          console.log(`  ☁  Drive backup failed (non-fatal): ${driveErr.message}`);
+        }
+
+        // Step 2: Upload to Shopify CDN for public Instagram URL
         imageUrl = await uploadToShopifyCDN(base64Data, filename);
-        console.log(`✓ image`);
+        console.log(`✓ image${driveBackup ? ' + Drive' : ''}`);
       } catch (e) {
         console.log(`⚠ image failed: ${e.message}`);
       }
@@ -351,7 +410,7 @@ async function main() {
       console.log(`✓ caption only`);
     }
 
-    posts.push({ plan, caption, imageUrl });
+    posts.push({ plan, caption, imageUrl, driveBackup });
     await new Promise(r => setTimeout(r, 800));
   }
 
