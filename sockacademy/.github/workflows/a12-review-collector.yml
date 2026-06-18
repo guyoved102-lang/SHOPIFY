@@ -20,10 +20,10 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: agents/A12_review_collector/package.json
+          cache-dependency-path: agents/A12_review_collector/package-lock.json
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
         working-directory: agents/A12_review_collector
 
       - name: Run A12 Review Collector
