@@ -64,6 +64,41 @@ Total Quality Control & System Audit Protocol:
 | `/hubspot-automation` | ON-HOLD |
 | `/render-automation` | ON-HOLD |
 
+## 🎯 Strategic Decisions — Locked (18/06/2026)
+
+### Financial Infrastructure
+- **רו"ח:** אין כרגע — גיא מנהל לבד
+- **חשבונאות Phase 1:** Google Sheets בלבד (מחובר כבר דרך Make.com)
+- **חשבונאות Phase 2:** Wave (חינמי) ב-$5K MRR
+- **חשבונאות Phase 3:** QuickBooks ב-$20K MRR
+- **ישות משפטית:** אין עדיין — גיא ישראל. CFO Agent בונה templates עם variables גמישות: `VAT_RATE`, `TAX_JURISDICTION`, `ENTITY_TYPE`
+- **מטבע בסיס:** USD הכנסות / ILS הוצאות — CFO Agent מנטר USD/ILS daily
+
+### Phase Triggers — Revenue Milestones
+| פאזה | טריגר | מה נפתח |
+|---|---|---|
+| Phase 1 → 2 | 25 הזמנות OR $1,000 MRR | A14 COO, A15 CFO, A8 Analytics, A16 CX |
+| Phase 2 → 3 | $5,000 MRR × 2 חודשים רצופים | A17 IP, A18 Fraud, A19 Returns, A20 Inventory, A21 Affiliate |
+| Scale Phase | $15,000 MRR | A23 Factory/Private Label, A28 Subscription Club, A27 PR |
+
+### Build Mandate — System-First
+**אפס מכירות עד שכל המערכת בנויה, בדוקה, ומסונכרנת מלאה.**
+Build order: Phase 1 Core → C-Suite Layer → Intelligence Expansion → Supply Chain → Revenue Expansion
+
+### A28 — SockAcademy Club (Subscription Model)
+**Value Proposition (Loro Piana Standard — חובה):**
+"Automated, cyclical wardrobe replenishment — ensuring a gentleman's collection remains meticulously curated, seamlessly complete, without individual friction."
+- **אסור:** humor זול, "גרביים נעלמות" כבדיחה
+- **מותר:** "wardrobe protocol", "replenishment programme", "curated cycle", "effortless continuity"
+- Brand frame: The club does not *sell* socks. It *maintains standards*.
+
+### Trademark & IP
+- **סימן מסחרי:** לא רשום עדיין — A17 בונה watchlist מניעתי לפני רישום
+
+### Notion / Corporate Memory
+- **Phase 1:** Google Sheets כ-Corporate Memory הזמנתי
+- **Phase 2+:** Notion API integration (blueprint מוכן, ממתין לפתיחת workspace)
+
 ## 🔒 חוקי ברזל — נעולים לצמיתות (18/06/2026)
 
 ### 0. GROWTH & ADAPTATION DNA — ללמוד, להסתגל, לצמוח
