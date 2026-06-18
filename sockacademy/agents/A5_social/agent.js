@@ -13,9 +13,10 @@ const nodemailer = require('nodemailer');
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const IG_USER_ID  = process.env.META_IG_USER_ID;
 const ACCESS_TOKEN = process.env.META_ACCESS_TOKEN;
-const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN || '11eqwi-ji.myshopify.com';
+const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
 const SHOPIFY_TOKEN  = process.env.SHOPIFY_MASTER_TOKEN;
 const DRY_RUN = !ACCESS_TOKEN || !IG_USER_ID;
+if (!SHOPIFY_DOMAIN) { console.error('❌ SHOPIFY_SHOP_DOMAIN not set'); process.exit(1); }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // BRAND VISUAL IDENTITY
@@ -227,7 +228,8 @@ async function backupToDrive(base64Data, filename, theme) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // SHOPIFY CDN — upload via theme Assets API (base64 → CDN URL)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const THEME_ID = '151789863110';
+const THEME_ID = process.env.SHOPIFY_THEME_ID;
+if (!THEME_ID) { console.error('❌ SHOPIFY_THEME_ID not set — add to GitHub Secrets'); process.exit(1); }
 
 async function uploadToShopifyCDN(base64Data, filename) {
   if (!SHOPIFY_TOKEN) return null;

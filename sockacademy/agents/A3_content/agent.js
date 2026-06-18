@@ -10,9 +10,11 @@ const nodemailer = require('nodemailer');
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const DRY_RUN = process.env.DRY_RUN === 'true';
-const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN || '11eqwi-ji.myshopify.com';
+const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
 const SHOPIFY_TOKEN = process.env.SHOPIFY_MASTER_TOKEN;
-const BLOG_ID = process.env.BLOG_ID || '97332199622';
+const BLOG_ID = process.env.BLOG_ID;
+if (!BLOG_ID) { console.error('❌ BLOG_ID not set — add to GitHub Secrets'); process.exit(1); }
+if (!SHOPIFY_DOMAIN) { console.error('❌ SHOPIFY_SHOP_DOMAIN not set'); process.exit(1); }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // SEO TOPICS — 24 נושאים לרוטציה שנתית

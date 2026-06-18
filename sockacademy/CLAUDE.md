@@ -503,3 +503,150 @@ Local preview: http://127.0.0.1:9292
 ## 👤 User
 - שם: גיא — לפנות תמיד בשם גיא
 
+---
+
+## 🏢 Corporate Directory Architecture (18/06/2026)
+
+### מפת המאגר — Canonical Repository Map
+
+```
+sockacademy/
+├── agents/                          ← Virtual Employee Fleet (A0–A28)
+│   ├── A0_orchestrator/             ← A0: Master scheduler (GitHub Actions trigger matrix)
+│   ├── A1_product_research/         ← A1: CJ Dropshipping intelligence
+│   ├── A2_product_upload/           ← A2: Shopify product sync
+│   ├── A3_content/                  ← A3: SEO blog (Anthropic + Shopify Blog API)
+│   ├── A4_meta_ads/                 ← A4: Meta Marketing API (DRY-RUN)
+│   ├── A5_social/                   ← A5: Instagram (Claude + DALL-E + Drive + CDN)
+│   ├── A6_email_sync/               ← A6: Klaviyo flows
+│   ├── A7_supplier_monitor/         ← A7: CJ supplier health
+│   ├── A9_legal_compliance/         ← A9: ToS, Privacy Policy generation
+│   ├── A10_trend_scout/             ← A10: Google Trends + social listening
+│   ├── A11_price_intelligence/      ← A11: Competitor pricing
+│   └── A12_review_collector/        ← A12: Review aggregation
+│
+├── corp/                            ← Corporate Knowledge & Document Layer
+│   ├── core/
+│   │   └── orchestration/           ← A0 trigger matrix, agent dependency graph (Phase 2)
+│   ├── finance/
+│   │   └── reports/
+│   │       └── rtl_sheet_template.js  ← ✅ LIVE: Google Sheets RTL Hebrew CFO engine
+│   ├── legal/
+│   │   └── compliance/              ← A9 outputs, attorney-ready materials (Phase 2)
+│   ├── marketing/
+│   │   └── assets/                  ← Brand voice manifest, visual identity (Phase 2)
+│   └── operations/
+│       └── logs/                    ← Runtime audit logs, agent health archives (Phase 2)
+│
+├── .github/
+│   └── workflows/                   ← GitHub Actions YAML (one file per agent)
+│
+└── .env.example                     ← Complete variable reference (see file for all vars)
+```
+
+### Corp Layer — כללי שימוש
+- `corp/finance/reports/rtl_sheet_template.js` — מודול Node.js מיובא ע"י A15 CFO Agent
+- `corp/` לא מכיל credentials. לא מכיל data. רק templates, specs, engine code.
+- הפעלה: A15 יעשה `require('../../corp/finance/reports/rtl_sheet_template.js')` — googleapis מ-node_modules של A15
+
+---
+
+## 🔤 RTL & Hebrew Formatting Standards (Mandatory)
+
+### Google Sheets RTL Protocol
+כל spreadsheet שנוצר ע"י A15 CFO Agent חייב לעמוד בסטנדרטים הבאים:
+
+| פרמטר | ערך | נימוק |
+|---|---|---|
+| `rightToLeft` | `true` | Native Sheets RTL mode — ה-UI מתהפך, עמודה A = ימין |
+| `locale` | `'iw'` | Hebrew locale — מספרים, תאריכים, מטבע בפורמט ישראלי |
+| `timeZone` | `'Asia/Jerusalem'` | כל timestamps בשעון ישראל |
+| `fontFamily` | `'Rubik'` | Google Font עם תמיכה מלאה בעברית, משקל 400/700 |
+| `horizontalAlignment` (טקסט עברי) | `'RIGHT'` | יישור ימין לטקסט |
+| `horizontalAlignment` (מספרים) | `'LEFT'` | מספרים תמיד שמאלה, גם ב-RTL sheets |
+| ILS format | `₪#,##0.00` | Google Sheets currency pattern לשקל |
+| USD format | `$#,##0.00` | דולר — הכנסות ב-USD תמיד |
+| Frozen rows | 3 | כותרת + תת-כותרת + headers — תמיד קפואות |
+
+### Hebrew Typography Hierarchy
+```
+Title (שורה 1):   Rubik 14pt Bold | #C9A84C (gold) | bg: #0A0A0A | CENTER
+Subtitle (שורה 2): Rubik 10pt      | #9CA3AF (muted) | bg: #1A1A1A | CENTER
+Headers (שורה 3):  Rubik 11pt Bold | #C9A84C (gold) | bg: #1A1A1A | border-bottom: 2px gold
+Data rows:         Rubik 10pt      | #F0EDE6 (cream) | alternating: #0A0A0A / #101010
+Profit (חיובי):   Rubik 10pt Bold | #4AAD80 (green)
+Loss (שלילי):     Rubik 10pt Bold | #F96E6E (red)
+```
+
+### Dual-Currency Architecture
+```
+USD (הכנסות):  כל הכנסה מ-Shopify נרשמת ב-USD
+ILS (הוצאות):  עלויות ישראליות ב-₪ — CFO מחשב מהשוואה
+USD/ILS Rate:   A15 מושך מ-exchangerate.host ב-runtime — לא hardcoded
+VAT_RATE:       env var — 0.17 (ישראל) | 0 (US ecommerce) | depends (EU)
+```
+
+---
+
+## 🔐 Security Protocol — Absolute Rules
+
+### Env Vars Required (GitHub Secrets + .env)
+כל הערכים האלה חייבים להיות ב-environment variables בלבד. אפס fallbacks בקוד.
+
+| Variable | Agent | סטטוס |
+|---|---|---|
+| `SHOPIFY_SHOP_DOMAIN` | A1–A7, A11 | ✅ Secret |
+| `SHOPIFY_MASTER_TOKEN` | A2, A3, A5, A7 | ✅ Secret |
+| `SHOPIFY_THEME_ID` | A5 | ⚠️ Add to GitHub Secrets (value: 151789863110) |
+| `BLOG_ID` | A3 | ⚠️ Add to GitHub Secrets (value: 97332199622) |
+| `ANTHROPIC_API_KEY` | כל agent | ✅ Secret |
+| `OPENAI_API_KEY` | A5 | ✅ Secret |
+| `META_ACCESS_TOKEN` | A4, A5 | ✅ Secret |
+| `META_AD_ACCOUNT_ID` | A4 | ✅ Secret |
+| `META_PAGE_ID` | A4 | ✅ Secret |
+| `META_IG_USER_ID` | A5 | ✅ Secret |
+| `KLAVIYO_PRIVATE_API_KEY` | A6, update_klaviyo_emails.js | ✅ .env (rotate immediately) |
+| `CJ_API_KEY` | A1, A7 | ✅ .env |
+| `GOOGLE_SERVICE_ACCOUNT_JSON` | A1, A2, A5, A15 | ✅ Secret |
+| `GOOGLE_SHEET_ID` | A1, A2 | ✅ Secret |
+| `GDRIVE_BACKUP_FOLDER_ID` | A5 | ⚠️ Add to GitHub Secrets |
+| `GMAIL_APP_PASSWORD` | כל agents עם email | ✅ Secret |
+| `VAT_RATE` | A15 | .env (0.17 for IL) |
+| `TAX_JURISDICTION` | A15 | .env (IL) |
+| `ENTITY_TYPE` | A15 | .env (SOLE_PROPRIETOR) |
+
+### Hardcoded Values — סטטוס ניקיון (18/06/2026)
+| קובץ | ממצא | סטטוס |
+|---|---|---|
+| `update_klaviyo_emails.js` | Klaviyo key — הוסר | ✅ נוקה |
+| `agents/A3_content/agent.js` | BLOG_ID fallback `97332199622` | ✅ הוסר |
+| `agents/A3_content/agent.js` | SHOPIFY_DOMAIN fallback | ✅ הוסר |
+| `agents/A5_social/agent.js` | THEME_ID `151789863110` | ✅ הוסר → env var |
+| `agents/A5_social/agent.js` | SHOPIFY_DOMAIN fallback | ✅ הוסר |
+| `agents/A10–A12` | `guyoved102@gmail.com` hardcoded | ℹ️ Not a credential — acceptable |
+
+### 🚨 Immediate Action Required (גיא בלבד)
+1. **GitHub Secrets — להוסיף:**
+   - `SHOPIFY_THEME_ID` = `151789863110`
+   - `BLOG_ID` = `97332199622`
+   - `GDRIVE_BACKUP_FOLDER_ID` = (ID של Google Drive folder ל-A5 images)
+2. **Klaviyo — לבטל ולחדש מפתח:**
+   - המפתח `pk_QSMqNV_10278b2159681589f1365ac70b04825dff` חשוף ב-git history
+   - כנס ל-Klaviyo → Settings → API Keys → Revoke → Create New
+   - עדכן `.env` ו-`KLAVIYO_PRIVATE_API_KEY` GitHub Secret
+
+---
+
+## 🔗 Sprint A — מה נשאר (סדר ביצוע)
+
+### ✅ הושלם
+- A5 Google Drive backup pipeline (v2.1) — `backupToDrive()` פעיל
+- Security sweep — 5 hardcoded values הוסרו
+- Corp/ directory + RTL CFO template engine
+- `.env.example` מקיף עם כל המשתנים
+
+### ⏳ בתור
+1. הוספת 3 GitHub Secrets (SHOPIFY_THEME_ID, BLOG_ID, GDRIVE_BACKUP_FOLDER_ID)
+2. Klaviyo key rotation (פעולת גיא)
+3. A13 Global Competitive Intelligence — הבנייה הגדולה הבאה
+

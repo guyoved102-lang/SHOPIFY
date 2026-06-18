@@ -1,4 +1,7 @@
-const API_KEY = "pk_QSMqNV_10278b2159681589f1365ac70b04825dff";
+require('dotenv').config({ path: './.env' });
+const API_KEY = process.env.KLAVIYO_PRIVATE_API_KEY;
+if (!API_KEY) { console.error('❌ KLAVIYO_PRIVATE_API_KEY not set in .env'); process.exit(1); }
+
 const BASE_URL = "https://a.klaviyo.com/api";
 const HEADERS = {
   Authorization: `Klaviyo-API-Key ${API_KEY}`,
