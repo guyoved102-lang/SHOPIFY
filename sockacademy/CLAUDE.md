@@ -24,6 +24,46 @@ Total Quality Control & System Audit Protocol:
 **למידה מתמשכת:**
 תוך כדי שיחה — אם מגלים משהו חדש על גיא (סגנון, העדפה, דרך חשיבה) — לעדכן `memory/user_guy.md` מיד.
 
+## 🗺️ Enterprise Stack — ורדיקטים v2 (CTO Review 18/06/2026)
+
+### Skills — Corporate Function Map
+| סקיל | ורדיקט CTO | מחלקה קורפורטיבית |
+|---|---|---|
+| `humanizer` | INTERNAL | מוזרק נטיבי ב-A4/A5. לא לקרוא כסקיל חיצוני. |
+| `claude-seo` | ACTIVE | Content Department — A3 Blog |
+| `frontend-design` | ON-HOLD | Design Freeze — לפתוח בעתיד ל-CRO Agent |
+| `hyperframes` | ACTIVE | C-Suite Presentations — Monthly Executive Deck |
+| `ai-second-brain` | ACTIVE | Institutional Memory — זיכרון קורפורטיבי חוצה שנים |
+| `notebooklm-skill` | ON-HOLD | Legal + CFO Document Processing — A9/A15 |
+| `doc-skills` | ACTIVE | CFO/COO Report Engine — PDF P&L, Tax docs, Audit reports |
+| `caveman` | BANNED | אפס שימוש מאומת — אסור לנצח |
+
+### MCP Servers — Corporate Function Map
+| MCP | ורדיקט CTO | מחלקה קורפורטיבית |
+|---|---|---|
+| `context7` | ACTIVE | Dev Sessions — docs לספריות |
+| `agent-browser` | ACTIVE | Intelligence Cluster — A10/A11/A13/A17/A18 |
+| `higgsfield` | ON-HOLD | Creative Studio — מחכה לתמונת רפרנס מגיא |
+| `perplexity` | ON-HOLD | Intelligence Cluster — להפעיל עם A10/A13 |
+| `supermetrics` | ACTIVE | CFO Data Aggregation — GA4+Meta+Shopify+Klaviyo unified |
+| `notion` | ACTIVE | Corporate Knowledge Base — decisions, audit trail, OKRs |
+| `granola` | ACTIVE | Strategy Session Documenter → Notion pipeline |
+| `zapier` | ON-HOLD | Accounting Integration — QuickBooks/Xero bridge (CFO Agent) |
+
+### Slash Commands
+| פקודה | סטטוס |
+|---|---|
+| `/run-skill-generator` | ACTIVE |
+| `/reload-skills` | ACTIVE |
+| `/skill-creator` | ON-HOLD |
+| `/postiz:postiz` | ON-HOLD |
+| `/skill-share` | ON-HOLD — להעריך מחדש |
+| `/skillify` | ON-HOLD — להעריך מחדש |
+| `/writing-skills` | BANNED — מתנגש עם Humanizer |
+| `/lobsterdomains` | ON-HOLD |
+| `/hubspot-automation` | ON-HOLD |
+| `/render-automation` | ON-HOLD |
+
 ## 🔒 חוקי ברזל — נעולים לצמיתות (18/06/2026)
 
 ### 0. GROWTH & ADAPTATION DNA — ללמוד, להסתגל, לצמוח
@@ -219,6 +259,88 @@ Use WELCOME10 at checkout — and use it on something worth wearing.
   - גרביים מיוחדים / Merino / Egyptian Cotton: $28–$45
   - סטים / מתנות: $45–$85
   - Tactical / ביצועים גבוהים: $25–$40
+
+---
+
+## 🏛️ SockAcademy Virtual Corporation — Full Org Chart v2
+
+### C-SUITE (3 Virtual Executives)
+| תפקיד | Agent | סטטוס |
+|---|---|---|
+| CEO | Guy Oved (אנושי) | תמיד |
+| COO — Chief Operating Officer | A14 (לבנות) | Phase 2 |
+| CFO — Chief Financial Officer | A15 (לבנות) | Phase 2 |
+| CMO — Chief Marketing Officer | A4+A5+A6 cluster | בנייה פעילה |
+
+### OPERATIONS DIVISION (COO Cluster)
+| Agent | תפקיד | כלים |
+|---|---|---|
+| A0 — Orchestrator | Chief of Staff — מתזמן כל הפייפליין | GitHub Actions |
+| A1 — Product Research | Procurement Manager | CJ API, Claude |
+| A2 — Product Upload | Supply Chain Manager | Shopify API |
+| A7 — IT/DevOps | IT Director | GitHub, Shopify CLI |
+| A14 — COO Agent | Operations Director — Monthly Reports + Audit | doc-skills, Notion, ai-second-brain |
+
+### FINANCE DIVISION (CFO Cluster)
+| Agent | תפקיד | כלים |
+|---|---|---|
+| A8 — Analytics | BI Analyst (On-Hold עד 10 מכירות) | GA4, supermetrics |
+| A11 — Price Intelligence | Competitive Pricing Analyst | agent-browser |
+| A15 — CFO Agent | P&L + Tax Readiness + Forecasting | supermetrics, doc-skills, Zapier→QuickBooks |
+| A19 — Returns Intelligence | Returns & Reverse Logistics Analyst | Shopify API, Google Sheets |
+| A20 — Inventory Intelligence | Demand Forecasting + Stock Alerts | Shopify API, CJ API |
+
+### MARKETING DIVISION (CMO Cluster)
+| Agent | תפקיד | כלים |
+|---|---|---|
+| A3 — Content Director | SEO Blog — 1,500+ word articles | Claude, Shopify API |
+| A4 — Performance Marketing | Meta Ads — copy + ROAS monitoring | Meta API, Claude |
+| A5 — Brand Marketing | Social/Instagram — 3 posts/week | IG API, Higgsfield, Claude |
+| A6 — CRM Director | Klaviyo — 4 flows + campaigns | Klaviyo API |
+| A10 — Trend Scout | Market Intelligence | agent-browser, perplexity |
+| A16 — Customer Experience | NPS + CLTV + Churn Detection | Klaviyo, Shopify API |
+| A21 — Affiliate & Influencer | ROI tracking + outreach pipeline | agent-browser, Shopify |
+| A24 — CRO Agent | A/B Testing + Funnel Optimization | GA4, Shopify, agent-browser |
+
+### INTELLIGENCE DIVISION
+| Agent | תפקיד | כלים |
+|---|---|---|
+| A10 — Market Intelligence | Trend + Opportunity Scout | agent-browser, perplexity |
+| A11 — Competitive Pricing | Real-time price benchmarking | agent-browser |
+| A12 — Customer Intelligence | Review Analysis + Sentiment | Shopify API, Claude |
+| A13 — Global Competitive | Full competitor landscape scan | agent-browser, perplexity |
+
+### LEGAL & COMPLIANCE DIVISION
+| Agent | תפקיד | כלים |
+|---|---|---|
+| A9 — Legal Compliance | Terms/Privacy/GDPR/FTC auto-update | Claude, Shopify API |
+| A26 — Regulatory Watch | מעקב חקיקה חדשה — EU/US/IL | agent-browser, perplexity |
+
+### RISK & SECURITY DIVISION (חדש — Phase 3)
+| Agent | תפקיד | כלים |
+|---|---|---|
+| A17 — IP & Brand Protection | סריקת גניבת עיצובים/קופי/תמונות + C&D drafts | agent-browser, Claude |
+| A18 — Fraud & Cybersecurity | Chargeback monitoring + bot traffic + payment health | Shopify API, Cloudflare |
+
+### SUPPLY CHAIN DIVERSIFICATION (חדש — Phase 3)
+| Agent | תפקיד | כלים |
+|---|---|---|
+| A22 — Supply Chain Intelligence | מעקב עיכובי משלוח עולמיים + ספקים חלופיים | agent-browser, CJ API |
+| A23 — Factory Relations | Private Label sourcing + quality scorecards | agent-browser, Claude |
+
+### CORPORATE MEMORY INFRASTRUCTURE
+| כלי | תפקיד |
+|---|---|
+| Notion Workspace | Corporate Knowledge Base — decisions, history, OKRs, audit trail |
+| ai-second-brain | Institutional Memory — זיכרון חוצה שנים וגרסאות |
+| doc-skills | Document Engine — PDF P&L, tax docs, corporate minutes |
+| granola | Strategy Session Recorder → מזין Notion + ai-second-brain |
+| Google Sheets | Operational Data Store — products, orders, inventory |
+
+### BUILD PHASES
+- **Phase 1 (עכשיו):** A1, A2, A3, A4, A5, A6 — Marketing + Operations core
+- **Phase 2 (אחרי 10 מכירות):** A14 COO, A15 CFO, A8 Analytics, A16 CX, A20 Inventory
+- **Phase 3 (Scale):** A17 IP, A18 Fraud, A19 Returns, A21 Affiliate, A22-A23 Supply Chain, A24 CRO, A26 Regulatory
 
 ---
 
