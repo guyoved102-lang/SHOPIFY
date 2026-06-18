@@ -2,7 +2,9 @@ name: A2 — Product Upload
 
 on:
   schedule:
-    - cron: '0 10 * * 1'  # 12:00 Israel (UTC+2) — every Monday (after A1)
+    # 13:00 Israel — runs after Orchestrator completes A1 (09:00) and Guy approves in Sheets.
+    # Human approval gate: change Status → "Approved" in Google Sheets A1_Products tab.
+    - cron: '0 10 * * 1'  # Monday 13:00 Israel (UTC+3)
   workflow_dispatch:
 
 jobs:

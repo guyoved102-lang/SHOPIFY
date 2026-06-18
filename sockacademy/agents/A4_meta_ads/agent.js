@@ -63,20 +63,32 @@ async function generateAdCopy(campaign, product) {
     max_tokens: 500,
     messages: [{
       role: 'user',
-      content: `You are writing Meta ad copy for SockAcademy — the world's first sock authority. Premium socks for men, $18–$85.
+      content: `You are writing Meta ad copy for SockAcademy — the world's first dedicated sock authority. Premium socks for men, $18–$85. Think: Tom Ford's restraint meets Patagonia's conviction.
 
 Campaign goal: ${campaign.goal}
 Format: ${campaign.format} ad
 Product: ${product.name} ($${product.price})
 Audience: ${campaign.audience}
 
-Brand voice: authoritative, understated luxury. No hype. No exclamation marks.
+BRAND VOICE — non-negotiable:
+- No exclamation marks. Ever.
+- No superlatives: no "best", "ultimate", "perfect", "amazing", "incredible"
+- No parallel list structures ("X for Y, Z for A") — they read as AI
+- Authoritative but not arrogant — the expert who has worn everything and chose this
+
+HUMANIZER RULES — apply to every line:
+- Vary sentence length dramatically. Short impact. Then a longer, deliberate observation that earns its length. Then short again.
+- Use em dashes (—) for natural pauses, not commas: "The difference — and it's measurable — starts at fiber density"
+- Include ONE specific tactile or sensory detail per ad: weight, texture, temperature, compression feel
+- Write to ONE specific man. Not a demographic. Not a persona. One actual human.
+- Occasional sentence fragments are human: "Worth noting." / "Two years, no pilling."
+- Strategic asymmetry: if line 1 is short, make line 2 longer. Never two long lines in a row.
 
 Write:
-1. PRIMARY TEXT (125 chars max) — the main feed text
-2. HEADLINE (40 chars max) — bold text on the ad
-3. DESCRIPTION (30 chars max) — below headline
-4. HOOK (first 3 seconds if video) — one punchy sentence
+1. PRIMARY TEXT (125 chars max) — conversational, one specific claim, one sensory detail
+2. HEADLINE (40 chars max) — declarative statement, no question marks
+3. DESCRIPTION (30 chars max) — functional benefit, stated plainly
+4. HOOK (first 3 seconds if video) — a statement that earns attention without begging for it
 
 Return as JSON: { "primary": "...", "headline": "...", "description": "...", "hook": "..." }`
     }],

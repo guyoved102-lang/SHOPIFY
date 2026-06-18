@@ -92,28 +92,43 @@ async function generateCaption(post, theme) {
     max_tokens: 300,
     messages: [{
       role: 'user',
-      content: `You write Instagram captions for SockAcademy — the world's first dedicated sock authority. Premium socks for men. Think: authoritative, minimal, tasteful. The account is @sockacademy.store.
+      content: `You write Instagram captions for SockAcademy — the world's first dedicated sock authority. Premium socks for men. Think: Monocle's precision meets a trusted friend's directness. The account is @sockacademy.store.
 
 Weekly theme: ${theme}
 Post type: ${post.type} — ${post.description}
 Angle: ${post.angle}
 
-Brand voice rules:
+BRAND VOICE — non-negotiable:
 - No exclamation marks. Ever.
-- No emojis in body text (only allowed: 1 subtle emoji max in the whole caption, only if it genuinely adds something)
-- Short sentences. White space between paragraphs.
-- Authoritative but not arrogant — like a trusted expert, not a salesman
-- No generic phrases: "amazing", "perfect", "best ever", "game-changer"
-- CTA always: "Link in bio → sockacademy.store" (never pushy)
-- Think globally — this reaches audiences in US, UK, EU, Australia
+- No emojis in body text. Zero.
+- No generic phrases: "amazing", "game-changer", "level up", "elevate", "perfect"
+- No rhetorical questions — they feel lazy and AI-written
+- Authoritative without arrogance. Expert without gatekeeping.
+- Global audience: US, UK, EU, Australia — no slang, no local references
+
+HUMANIZER RULES — every caption must feel written, not generated:
+- Sentence rhythm: one short line (4-6 words), then one longer deliberate line, then short again
+- White space IS punctuation — a one-sentence paragraph has more weight than three sentences
+- Never start two consecutive sentences with the same word
+- Use em dashes (—) once per caption for a natural pause
+- The hook must be a complete, standalone thought — not a teaser, not a cliffhanger
+- One paragraph max 20 words. One word or two-word closing line before the CTA.
+- Occasionally begin a sentence with "And" or "But" — it sounds human, not robotic
+
+SOCIAL-MEDIA-SKILLS — Instagram-specific craft:
+- Hook line (first line): must earn the "more" tap on its own merit — specific claim or unexpected fact
+- Body: max 3 paragraphs. Each paragraph breathes. Never more than 3 sentences in one block.
+- The second-to-last line before CTA: one word, or two. Creates visual tension.
+- Hashtag strategy: 4 ultra-niche (#merinowoolcrewsocks), 4 mid-reach (#premiumsocks #menssocks), 3 broad (#mensstyle #mensware #qualitymatters) — exactly 11 total, one line
+- Never hashtag the brand name — let it earn organic mentions
 
 Write the caption in this exact JSON format:
 {
-  "hook": "The first line — must stop the scroll. Max 10 words. Bold claim or unexpected insight.",
-  "body": "2-3 short paragraphs separated by blank lines. 80-120 words total.",
-  "cta": "Subtle close. 1 line. Always ends with: → sockacademy.store",
-  "hashtags": "8-12 hashtags, mix of niche (#merinowoolsocks) and broader (#premiumsocks #mensstyle). One line.",
-  "visual_direction": "One precise sentence describing the ideal image for this post."
+  "hook": "First line only. Complete thought. Max 9 words. Specific claim or quiet authority — stops the scroll without begging.",
+  "body": "2-3 short paragraphs. Varied rhythm. 80-110 words total. Separated by blank lines.",
+  "cta": "One line. Quiet close. Always ends: → sockacademy.store",
+  "hashtags": "Exactly 11 hashtags: 4 niche + 4 mid + 3 broad. One line, no commas.",
+  "visual_direction": "One precise sentence: surface, lighting, composition, mood. No vague adjectives."
 }`,
     }],
   });

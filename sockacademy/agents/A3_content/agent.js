@@ -212,10 +212,48 @@ async function sendReport(topic, article, published) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// A1 CONTEXT — topic selection aligned with weekly product research
+// When running via A0 Orchestrator, these env vars are injected automatically.
+// Standalone runs fall back to week-rotation.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function selectTopic(weekOfYear) {
+  const a1Category = process.env.A1_TOP_CATEGORY;
+  const a1Keywords = process.env.A1_TREND_KEYWORDS;
+
+  // When A1 context is available: find a blog topic matching this week's top category
+  if (a1Category) {
+    const categoryMap = {
+      'Premium Materials': ['Premium Materials'],
+      'Dress & Formal': ['Dress & Formal'],
+      'Athletic': ['Performance'],
+      'Tactical & Outdoor': ['Tactical & Outdoor'],
+      'Gift Sets': ['Gift Sets'],
+      'Casual & No-Show': ['Performance'],
+    };
+    const targetCategories = categoryMap[a1Category] || [a1Category];
+    const matching = BLOG_TOPICS.filter(t => targetCategories.includes(t.category));
+
+    if (matching.length > 0) {
+      // Rotate within the matching category to avoid repeats
+      const idx = weekOfYear % matching.length;
+      const topic = matching[idx];
+      console.log(`🔗 A1 Context: top category = "${a1Category}" → topic aligned`);
+      if (a1Keywords) console.log(`   A1 trend keywords: ${a1Keywords}`);
+      return { ...topic, a1Context: { category: a1Category, keywords: a1Keywords } };
+    }
+  }
+
+  // Fallback: standard week-rotation
+  const topicIndex = weekOfYear % BLOG_TOPICS.length;
+  console.log('📌 No A1 context — using standard week rotation');
+  return BLOG_TOPICS[topicIndex];
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // MAIN
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function main() {
-  console.log('🚀 A3 — Content Agent v1.0');
+  console.log('🚀 A3 — Content Agent v1.1');
   console.log('━'.repeat(40));
 
   if (!process.env.ANTHROPIC_API_KEY) {
@@ -228,13 +266,11 @@ async function main() {
     process.exit(1);
   }
 
-  // בחר נושא לפי שבוע בשנה (רוטציה)
   const weekOfYear = Math.ceil((new Date() - new Date(new Date().getFullYear(), 0, 1)) / (7 * 24 * 60 * 60 * 1000));
-  const topicIndex = weekOfYear % BLOG_TOPICS.length;
-  const topic = BLOG_TOPICS[topicIndex];
+  const topic = selectTopic(weekOfYear);
 
   console.log(`\n📌 נושא השבוע (שבוע ${weekOfYear}): "${topic.title}"`);
-  console.log(`   קטגוריה: ${topic.category}`);
+  console.log(`   קטגוריה: ${topic.category}${topic.a1Context ? ' [A1-aligned]' : ' [rotation]'}`);
 
   // כתוב מאמר עם Claude
   console.log('\n✍️  כותב מאמר עם Claude...');
