@@ -24,6 +24,55 @@ Total Quality Control & System Audit Protocol:
 **למידה מתמשכת:**
 תוך כדי שיחה — אם מגלים משהו חדש על גיא (סגנון, העדפה, דרך חשיבה) — לעדכן `memory/user_guy.md` מיד.
 
+## 🧭 SYSTEM RULES & CONTEXT ANCHOR — `/boot-sockacademy`
+
+**כאשר גיא כותב `/boot-sockacademy` — מופעל פרוטוקול יישור מלא:**
+
+### שלב 1 — טעינת זיכרון מוסדי
+קרא את הקבצים הבאים לפי הסדר, ודווח על כל אחד "✅ נטען":
+1. `sockacademy/CLAUDE.md` — State, rules, agent matrix
+2. `memory/project_sockacademy_state.md` — מצב נוכחי ומה הושלם
+3. `memory/feedback_enterprise_rules.md` — חוקי ברזל
+4. `memory/user_guy.md` — פרופיל גיא
+
+### שלב 2 — הצהרת Brand DNA (Loro Piana Standard)
+לאחר הטעינה, אמץ והצהר בריש גלי:
+- **טון:** סמכותי, קצר, בוגר. אפס אמוג'י בכל תוכן פרסומי.
+- **רמה:** מותג $250+. רפרנסים: Loro Piana, Sunspel, Falke.
+- **אסור:** humor זול, childish copy, שפה של H&M / AliExpress.
+- **מפתח Brand Voice:** SockAcademy = "The world's first sock authority" — לא חנות. Academic authority.
+
+### שלב 3 — הצהרת Infrastructure-First Mandate
+אמץ ואשר את הכלל הבלתי-מתפשר:
+> **"אנחנו בונים את כל 28 הסוכנים ואת מלוא התשתית לפני שמעלים מוצר אחד או מריצים קמפיין חי אחד. אפס השקה עד שהבסיס 100% בנוי, בדוק, ומסונכרן."**
+
+Phase order: Phase 1 Core → C-Suite Layer → Intelligence Expansion → Supply Chain → Revenue Expansion.
+שום agent phase לא מדולג. שום קיצור דרך.
+
+### שלב 4 — הצהרת Zero-Waste Coding Standard
+אמץ ואשר:
+- **אפס placeholders** — אפס `// TODO`, אפס `// coming soon`, אפס mock data בproduction code.
+- **אפס hardcoded credentials** — הכל דרך `process.env` + GitHub Secrets.
+- **אפס DRY-RUN בזבזני** — agent שרץ יומי ללא output → משנים ל-weekly.
+- **כל קוד: production-ready מהרגע הראשון.**
+- **API versions: Shopify 2025-01, Klaviyo 2024-10-15 — לא לרדת.**
+
+### שלב 5 — סיכום מצב + מה הבא
+לאחר הטעינה, הצג:
+- רשימה קצרה של agents שהושלמו (Phase 1 current status)
+- הסוכן הבא בתור לבנייה
+- רשימת "Guy-only pending" (ללא בקשה לביצוע — תזכורת בלבד)
+
+---
+
+**פקודות מהירות נוספות:**
+| פקודה | מה קורה |
+|---|---|
+| `/boot-sockacademy` | טעינה מלאה + יישור אסטרטגי (ראה למעלה) |
+| `סיום שיחה` | QA Protocol: syntax + secrets scan + git commit + push + דוח |
+
+---
+
 ## 🗺️ Enterprise Stack — ורדיקטים v2 (CTO Review 18/06/2026)
 
 ### Skills — Corporate Function Map
@@ -53,6 +102,7 @@ Total Quality Control & System Audit Protocol:
 ### Slash Commands
 | פקודה | סטטוס |
 |---|---|
+| `/boot-sockacademy` | ACTIVE — Context Anchor: טעינת brand DNA + mandate + agent status |
 | `/run-skill-generator` | ACTIVE |
 | `/reload-skills` | ACTIVE |
 | `/skill-creator` | ON-HOLD |
