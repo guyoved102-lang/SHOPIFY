@@ -28,4 +28,6 @@ jobs:
           META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
           META_AD_ACCOUNT_ID: ${{ secrets.META_AD_ACCOUNT_ID }}
           META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
-        run: node agent.js
+        run: |
+          node -e "console.log('TOKEN_LEN:', process.env.META_ACCESS_TOKEN?.length, 'STARTS:', process.env.META_ACCESS_TOKEN?.substring(0,6))"
+          node agent.js
