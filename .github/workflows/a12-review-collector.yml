@@ -1,8 +1,8 @@
-name: A12 — Review Collector (Daily)
+name: A12 — Review Collector (Weekly)
 
 on:
   schedule:
-    - cron: '0 7 * * *'  # Every day 07:00 UTC = 09:00 Israel (UTC+2)
+    - cron: '0 7 * * 4'  # Every Thursday 07:00 UTC = 09:00 Israel (UTC+2)
   workflow_dispatch:      # Manual trigger available
 
 jobs:
@@ -24,6 +24,6 @@ jobs:
         working-directory: sockacademy/agents/A12_review_collector
         env:
           SHOPIFY_MASTER_TOKEN: ${{ secrets.SHOPIFY_MASTER_TOKEN }}
-          SHOPIFY_SHOP_DOMAIN: ${{ secrets.SHOPIFY_SHOP_DOMAIN || '11eqwi-ji.myshopify.com' }}
+          SHOPIFY_SHOP_DOMAIN: ${{ secrets.SHOPIFY_SHOP_DOMAIN }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
         run: node agent.js

@@ -10,7 +10,7 @@ const nodemailer = require('nodemailer');
 
 const KLAVIYO_KEY = process.env.KLAVIYO_PRIVATE_API_KEY;
 const KLAVIYO_BASE = 'https://a.klaviyo.com/api';
-const REVISION = '2024-02-15';
+const REVISION = '2024-10-15';
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // EMAIL CONTENT — source of truth

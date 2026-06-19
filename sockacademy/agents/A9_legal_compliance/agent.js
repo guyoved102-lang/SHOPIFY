@@ -13,9 +13,9 @@ const nodemailer = require('nodemailer');
 
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
 const SHOPIFY_TOKEN  = process.env.SHOPIFY_MASTER_TOKEN;
-const SHOPIFY_API    = `https://${SHOPIFY_DOMAIN}/admin/api/2024-01`;
+const SHOPIFY_API    = `https://${SHOPIFY_DOMAIN}/admin/api/2025-01`;
 
-const EFFECTIVE_DATE = 'June 17, 2026';
+const EFFECTIVE_DATE = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 const BRAND          = 'SockAcademy';
 const STORE_URL      = 'sockacademy.store';
 const CONTACT_EMAIL  = 'hello@sockacademy.store';

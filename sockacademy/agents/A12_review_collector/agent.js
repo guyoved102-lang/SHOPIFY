@@ -22,12 +22,12 @@ const axios = require('axios');
 const nodemailer = require('nodemailer');
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
-const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN || '11eqwi-ji.myshopify.com';
+const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
 const SHOPIFY_TOKEN = process.env.SHOPIFY_MASTER_TOKEN;
-const GMAIL_USER = 'guyoved102@gmail.com';
+const GMAIL_USER = 'sockacademy.store@gmail.com';
 const ADMIN_EMAIL = 'guyoved102@gmail.com';
 const STORE_URL = 'https://sockacademy.store';
-const SHOPIFY_API = `https://${SHOPIFY_DOMAIN}/admin/api/2024-01`;
+const SHOPIFY_API = `https://${SHOPIFY_DOMAIN}/admin/api/2025-01`;
 
 const REVIEW_DAYS = 7;
 const REVIEW_TAG = 'review-requested';

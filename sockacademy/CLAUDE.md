@@ -595,8 +595,8 @@ VAT_RATE:       env var — 0.17 (ישראל) | 0 (US ecommerce) | depends (EU)
 
 | Variable | Agent | סטטוס |
 |---|---|---|
-| `SHOPIFY_SHOP_DOMAIN` | A1–A7, A11 | ✅ Secret |
-| `SHOPIFY_MASTER_TOKEN` | A2, A3, A5, A7 | ✅ Secret |
+| `SHOPIFY_SHOP_DOMAIN` | A1–A7, A11, A12 | ✅ Secret |
+| `SHOPIFY_MASTER_TOKEN` | A2, A3, A5, A7, A12 | ✅ Secret |
 | `SHOPIFY_THEME_ID` | A5 | ⚠️ Add to GitHub Secrets (value: 151789863110) |
 | `BLOG_ID` | A3 | ⚠️ Add to GitHub Secrets (value: 97332199622) |
 | `ANTHROPIC_API_KEY` | כל agent | ✅ Secret |
@@ -611,11 +611,12 @@ VAT_RATE:       env var — 0.17 (ישראל) | 0 (US ecommerce) | depends (EU)
 | `GOOGLE_SHEET_ID` | A1, A2 | ✅ Secret |
 | `GDRIVE_BACKUP_FOLDER_ID` | A5 | ⚠️ Add to GitHub Secrets |
 | `GMAIL_APP_PASSWORD` | כל agents עם email | ✅ Secret |
+| `PERPLEXITY_API_KEY` | A13 | ⚠️ Add to GitHub Secrets |
 | `VAT_RATE` | A15 | .env (0.17 for IL) |
 | `TAX_JURISDICTION` | A15 | .env (IL) |
 | `ENTITY_TYPE` | A15 | .env (SOLE_PROPRIETOR) |
 
-### Hardcoded Values — סטטוס ניקיון (18/06/2026)
+### Hardcoded Values — סטטוס ניקיון (19/06/2026)
 | קובץ | ממצא | סטטוס |
 |---|---|---|
 | `update_klaviyo_emails.js` | Klaviyo key — הוסר | ✅ נוקה |
@@ -623,7 +624,12 @@ VAT_RATE:       env var — 0.17 (ישראל) | 0 (US ecommerce) | depends (EU)
 | `agents/A3_content/agent.js` | SHOPIFY_DOMAIN fallback | ✅ הוסר |
 | `agents/A5_social/agent.js` | THEME_ID `151789863110` | ✅ הוסר → env var |
 | `agents/A5_social/agent.js` | SHOPIFY_DOMAIN fallback | ✅ הוסר |
-| `agents/A10–A12` | `guyoved102@gmail.com` hardcoded | ℹ️ Not a credential — acceptable |
+| `.github/workflows/a3-content.yml` | SHOPIFY_DOMAIN + BLOG_ID hardcoded | ✅ הוסר → secrets |
+| `.github/workflows/a5-social.yml` | SHOPIFY_DOMAIN hardcoded | ✅ הוסר → secrets |
+| `agents/A2_product_upload/agent.js` | SHOPIFY_DOMAIN fallback `11eqwi-ji` | ✅ הוסר |
+| `agents/A12_review_collector/agent.js` | SHOPIFY_DOMAIN fallback `11eqwi-ji` | ✅ הוסר |
+| `agents/A12_review_collector/agent.js` | GMAIL_USER `guyoved102@gmail.com` | ✅ שונה → sockacademy.store@gmail.com |
+| `agents/A10–A11` | `guyoved102@gmail.com` כ-ADMIN_EMAIL | ℹ️ Not a credential — acceptable |
 
 ### 🚨 Immediate Action Required (גיא בלבד)
 1. **GitHub Secrets — להוסיף:**
@@ -644,9 +650,22 @@ VAT_RATE:       env var — 0.17 (ישראל) | 0 (US ecommerce) | depends (EU)
 - Security sweep — 5 hardcoded values הוסרו
 - Corp/ directory + RTL CFO template engine
 - `.env.example` מקיף עם כל המשתנים
+- **Master Audit + Code Sweep (19/06/2026):**
+  - Shopify API versions → `2025-01` (A2, A5, A9, A12)
+  - Klaviyo API revision → `2024-10-15` (A6)
+  - A9 EFFECTIVE_DATE → dynamic (`new Date()`)
+  - A3 cron → `0 9 * * 1` (אחרי A1, ללא collision)
+  - A4 cron → שבועי (`0 7 * * 2`, שלישי) — לא DRY-RUN יומי
+  - A12 cron → שבועי (`0 7 * * 4`, חמישי) — לא daily כשאין הזמנות
+  - a3-content.yml / a5-social.yml → SHOPIFY_SHOP_DOMAIN → secrets
+  - a12-review-collector.yml → הסר invalid `||` fallback expression
+  - a11-price-intelligence.yml → הוסף ANTHROPIC_API_KEY
+  - a13-competitive-intel.yml → נוצר (workflow חסר תוקן)
+  - PERPLEXITY_API_KEY → נוסף לטבלת Security Protocol
 
-### ⏳ בתור
-1. הוספת 3 GitHub Secrets (SHOPIFY_THEME_ID, BLOG_ID, GDRIVE_BACKUP_FOLDER_ID)
-2. Klaviyo key rotation (פעולת גיא)
-3. A13 Global Competitive Intelligence — הבנייה הגדולה הבאה
+### ⏳ בתור — פעולות גיא בלבד (נדרש לאחר שלב הבנייה)
+1. הוספת GitHub Secrets: `SHOPIFY_THEME_ID`, `BLOG_ID`, `GDRIVE_BACKUP_FOLDER_ID`, `PERPLEXITY_API_KEY`
+2. Klaviyo key rotation (חשוף ב-git history)
+3. הסרת Secrets מיותרים: `CJ_EMAIL`, `CJ_PASSWORD`
+4. סימון מוצר "Approved" ב-Google Sheet לבדיקת pipeline A1→A2
 

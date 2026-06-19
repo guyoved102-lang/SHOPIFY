@@ -10,8 +10,8 @@ const { JWT } = require('google-auth-library');
 const Anthropic = require('@anthropic-ai/sdk');
 const nodemailer = require('nodemailer');
 
-const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN || '11eqwi-ji.myshopify.com';
-const SHOPIFY_API_VERSION = '2024-01';
+const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
+const SHOPIFY_API_VERSION = '2025-01';
 const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID;
 const SHEET_NAME = 'A1_Products';
 

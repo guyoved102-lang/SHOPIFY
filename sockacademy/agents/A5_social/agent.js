@@ -243,7 +243,7 @@ async function uploadToShopifyCDN(base64Data, filename) {
   });
 
   const res = await fetch(
-    `https://${SHOPIFY_DOMAIN}/admin/api/2024-01/themes/${THEME_ID}/assets.json`,
+    `https://${SHOPIFY_DOMAIN}/admin/api/2025-01/themes/${THEME_ID}/assets.json`,
     {
       method: 'PUT',
       headers: {
