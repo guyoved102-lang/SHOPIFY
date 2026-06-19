@@ -47,13 +47,13 @@
           "data_input": {
             "via": "google_sheets",
             "tab": "A1_Products",
-            "filter": "Status=Approved AND UploadStatus=''",
+            "filter": "Status=Approved AND 'Upload Status'=''",
             "schema": "schemas/A2_input.schema.json"
           },
           "data_output": {
             "via": "google_sheets",
             "tab": "A1_Products",
-            "writes_back": "UploadStatus",
+            "writes_back": "Upload Status",
             "schema": "schemas/A2_output.schema.json"
           },
           "retry": { "max_attempts": 2, "backoff_minutes": 5 },
@@ -217,5 +217,22 @@
     "columns": ["Agent", "Status", "LastRun", "OutputKey", "ErrorMessage", "RetryCount", "LockedBy"],
     "status_values": ["PENDING", "RUNNING", "COMPLETE", "FAILED", "DEAD", "SKIPPED", "INVALID"],
     "setup_note": "Tab must be created manually in the SockAcademy Google Sheet before A0 first run"
+  },
+
+  "stuck_detection": {
+    "description": "A0 detects rows in A1_Products where 'Upload Status' = 'uploading' past the agent timeout. Marks them stuck:TIMESTAMP and alerts Guy.",
+    "trigger": "Runs after every A2 completion OR after A2 timeout event",
+    "algorithm": [
+      "1. Query A1_Products for all rows where 'Upload Status' = 'uploading'",
+      "2. For each such row: compare current_time against A0_STATE_LEDGER.LastRun for A2",
+      "3. If (current_time - LastRun) > stuck_threshold_minutes → mark row 'Upload Status' = 'stuck:UNIX_TIMESTAMP'",
+      "4. Send alert email to admin listing all newly-stuck rows (name, PID, time stuck)"
+    ],
+    "stuck_threshold_minutes": 30,
+    "stuck_status_pattern": "^stuck:[0-9]+$",
+    "alert_via": "email_to_admin",
+    "recovery": "Guy manually clears 'Upload Status' to '' to allow retry, or to 'error:manual-skip' to permanently skip",
+    "implementation_phase": "Phase B — A0 MVP",
+    "design_status": "FINAL — ready to code when Phase B begins"
   }
 }

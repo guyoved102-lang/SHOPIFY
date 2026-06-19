@@ -1,13 +1,13 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "sockacademy/schemas/A1_output.schema.json",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "title": "A1 Product Research — Output Schema",
-  "description": "מבנה הנתונים שA1 כותב לGoogle Sheets (טאב: A1_Products). A2 קורא ממנו.",
+  "description": "מבנה הנתונים שA1 כותב לGoogle Sheets (טאב: A1_Products). שמות השדות = שמות העמודות המדויקים ב-Google Sheets כפי שA2 קורא אותם.",
   "type": "object",
-  "required": ["Name", "Source", "PID", "Rating", "Orders", "Reviews", "SupplierPrice", "RetailPrice", "Margin", "MarginPct", "ImageUrl", "URL", "Materials", "Category", "Score"],
+  "required": ["Product Name", "Source", "PID", "Rating", "Orders", "Reviews", "Supplier Price", "Retail Price", "Margin", "Margin Pct", "Image URL", "URL", "Materials", "Category", "Score"],
   "properties": {
-    "Name": {
+    "Product Name": {
       "type": "string",
       "minLength": 5,
       "description": "שם המוצר המלא כפי שחזר מה-API"
@@ -38,28 +38,28 @@
       "minimum": 0,
       "description": "מספר ביקורות"
     },
-    "SupplierPrice": {
+    "Supplier Price": {
       "type": "number",
       "minimum": 0,
       "description": "מחיר ספק בדולרים (0 = לא זמין)"
     },
-    "RetailPrice": {
+    "Retail Price": {
       "type": "number",
       "minimum": 0,
-      "description": "מחיר קמעונאי מוצע (חישוב: SupplierPrice × multiplier)"
+      "description": "מחיר קמעונאי מוצע (חישוב: Supplier Price × multiplier)"
     },
     "Margin": {
       "type": "number",
       "minimum": 0,
-      "description": "רווח גולמי בדולרים (RetailPrice - SupplierPrice)"
+      "description": "רווח גולמי בדולרים (Retail Price - Supplier Price)"
     },
-    "MarginPct": {
+    "Margin Pct": {
       "type": "integer",
       "minimum": 0,
       "maximum": 100,
       "description": "אחוז מרג'ין"
     },
-    "ImageUrl": {
+    "Image URL": {
       "type": "string",
       "description": "URL לתמונה ראשית (ריק אם לא זמין)"
     },
@@ -91,7 +91,7 @@
       "maximum": 100,
       "description": "ציון A1 (אלגוריתם ניקוד 120 נק' → normalized לـ100)"
     },
-    "ScoreReasons": {
+    "Score Reasons": {
       "type": "string",
       "description": "סיבות הניקוד — מופרדות בפסיקים (אופציונלי, לתצוגה בלבד)"
     },
@@ -100,12 +100,12 @@
       "enum": ["", "Approved", "Rejected"],
       "description": "מוגדר ידנית על ידי גיא. A2 מעבד רק 'Approved'."
     },
-    "UploadStatus": {
+    "Upload Status": {
       "type": "string",
-      "pattern": "^($|uploading$|uploaded:[0-9]+$|error:.{1,200}$)",
-      "description": "מוגדר על ידי A2. ריק = טרם עובד. 'uploading' = בתהליך. 'uploaded:SHOPIFY_ID' = הושלם. 'error:...' = נכשל."
+      "pattern": "^($|uploading$|uploaded:[0-9]+$|error:.{1,200}$|stuck:[0-9]+$)",
+      "description": "מוגדר על ידי A2/A0. ריק = טרם עובד. 'uploading' = בתהליך. 'uploaded:SHOPIFY_ID' = הושלם. 'error:...' = נכשל. 'stuck:TIMESTAMP' = נתקע — A0 מסמן ומתריע."
     },
-    "RunDate": {
+    "Run Date": {
       "type": "string",
       "format": "date-time",
       "description": "ISO timestamp של ריצת A1 שייצרה שורה זו"

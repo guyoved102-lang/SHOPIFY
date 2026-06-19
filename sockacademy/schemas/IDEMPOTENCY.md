@@ -10,14 +10,13 @@
 
 ---
 
-## A2 — Product Upload ⚠️ תיקון נדרש
+## A2 — Product Upload
+**סטטוס:** ✅ תוקן — optimistic lock  
 
-**בעיה:** אם A2 נכשל לאחר יצירת מוצר ב-Shopify אך לפני כתיבת `UploadStatus` ל-Sheets — retry ייצור מוצר כפול.
-
-**תיקון נדרש ב-`agent.js`:**
+**הגנה מובנית ב-`agent.js` (ריצה מה-19/06/2026):**
 
 ```javascript
-// ב-getApprovedRows — מסנן גם 'uploading' (שמגן מ-concurrent runs):
+// getApprovedRows — מסנן גם 'uploading':
 async function getApprovedRows(sheet) {
   const rows = await sheet.getRows();
   return rows.filter(row => {
@@ -25,55 +24,61 @@ async function getApprovedRows(sheet) {
     const uploadStatus = (row.get('Upload Status') || '').trim();
     return (
       status === 'Approved' &&
-      uploadStatus === ''  // לא מעבד uploading (in-progress) ולא uploaded
+      uploadStatus === ''
+      // 'uploading' = בתהליך או נתקע → דלג (מונע duplicate Shopify product)
+      // 'uploaded:ID' = הושלם → דלג
+      // 'error:...' = נכשל → דלג, גיא מנקה ידנית
+      // 'stuck:TIMESTAMP' = A0 זיהה תקיעה → דלג, גיא מנקה
     );
   });
 }
 
 // לפני createShopifyProduct — כתיבה אופטימיסטית:
-async function processRow(row, product, transporter) {
-  // STEP 1: Lock the row BEFORE doing anything external
-  await row.set('Upload Status', 'uploading');
-  await row.save();
+row.set('Upload Status', 'uploading');
+await row.save();
 
-  try {
-    // STEP 2: Generate description
-    const description = await generateDescription(product);
-    product.description = description;
+// לאחר הצלחה:
+row.set('Upload Status', `uploaded:${shopifyProduct.id}`);
+row.set('Shopify ID', String(shopifyProduct.id));
+row.set('Shopify URL', `https://sockacademy.store/products/${shopifyProduct.handle}`);
+row.set('Upload Date', new Date().toISOString().split('T')[0]);
+await row.save();
 
-    // STEP 3: Create Shopify product
-    const shopifyProduct = await createShopifyProduct(product);
-
-    // STEP 4: Mark complete with Shopify ID
-    await row.set('Upload Status', `uploaded:${shopifyProduct.id}`);
-    await row.save();
-
-    return { success: true, id: shopifyProduct.id, name: product.name };
-
-  } catch (err) {
-    // STEP 5: On failure — mark as error (NOT empty, to prevent infinite retry)
-    await row.set('Upload Status', `error:${err.message.slice(0, 150)}`);
-    await row.save();
-    throw err;
-  }
-}
+// לאחר כישלון:
+row.set('Upload Status', `Error: ${e.message.slice(0, 150)}`);
+await row.save();
 ```
 
-**תוצאה לאחר תיקון:**
-| UploadStatus | פירוש | A2 בריצה הבאה |
+**טבלת מצבים — עמודת `Upload Status` ב-Sheets:**
+| Upload Status | פירוש | A2 בריצה הבאה |
 |---|---|---|
 | `""` (ריק) | טרם עובד | יעבד |
 | `"uploading"` | בתהליך (או נתקע) | ידלג — לא ידוע אם Shopify קיבל |
 | `"uploaded:8923847162"` | הושלם | ידלג |
 | `"error:Shopify 422: ..."` | נכשל | ידלג — גיא מנקה ידנית |
+| `"stuck:1750316400"` | A0 זיהה תקיעה (Unix timestamp) | ידלג — גיא מנקה ידנית |
 
-**איך לאפשר retry על שגיאה:** גיא מוחק את תוכן עמודת Upload Status ידנית בSheet.
+**איך לאפשר retry על שגיאה:** גיא מוחק את תוכן עמודת `Upload Status` ידנית ב-Sheet.
 
 ---
 
 ## A3 — Content / Blog
-**סטטוס:** ⚠️ בדיקה נדרשת  
-**נדרש:** לפני יצירת מאמר, לבדוק אם קיים כבר מאמר עם אותו title ב-Shopify Blog. אם קיים — לדלג, לא לשכפל.
+**סטטוס:** ✅ תוקן — check_existing by handle  
+
+**הגנה מובנית ב-`agent.js` (ריצה מה-19/06/2026):**
+
+```javascript
+// לפני publishArticle — בודק אם מאמר קיים לפי handle:
+const exists = await articleExists(handle);
+if (exists) {
+  console.log(`⏭️  מאמר קיים (${handle}) — מדלג`);
+  return; // idempotent — skip without error
+}
+// רק אם לא קיים → פרסם
+article = await publishArticle(topic, bodyHtml);
+```
+
+**נימוק:** handle = נגזר דטרמיניסטית מ-topic.title. אותה ריצה שבועית תייצר אותו handle → בדיקה בלבד מונעת כפל.
 
 ---
 
@@ -133,17 +138,17 @@ async function processRow(row, product, transporter) {
 
 ## סיכום — סטטוס idempotency
 
-| Agent | Safe? | סוג guard | תיקון נדרש? |
-|-------|-------|-----------|-------------|
-| A1 | ✅ | stateless | לא |
-| A2 | ⚠️ | optimistic_lock | **כן — ראה תיקון למעלה** |
-| A3 | ⚠️ | check_existing | כן — לפני build |
-| A4 | ✅ | stateless | לא |
-| A5 | ✅ | stateless | לא |
-| A6 | ✅ | upsert_by_name | לא |
-| A7 | ✅ | shopify_update | לא |
-| A9 | ✅ | stateless | לא |
-| A10 | ✅ | stateless | לא |
-| A11 | ✅ | stateless | לא |
-| A12 | ✅ | shopify_tag | לא |
-| A13 | ✅ | append | לא |
+| Agent | Safe? | סוג guard | תוקן? |
+|-------|-------|-----------|--------|
+| A1 | ✅ | stateless | — |
+| A2 | ✅ | optimistic_lock | ✅ 19/06/2026 |
+| A3 | ✅ | check_existing (handle) | ✅ 19/06/2026 |
+| A4 | ✅ | stateless | — |
+| A5 | ✅ | stateless | — |
+| A6 | ✅ | upsert_by_name | — |
+| A7 | ✅ | shopify_update | — |
+| A9 | ✅ | stateless | — |
+| A10 | ✅ | stateless | — |
+| A11 | ✅ | stateless | — |
+| A12 | ✅ | shopify_tag | — |
+| A13 | ✅ | append | — |

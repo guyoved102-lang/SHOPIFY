@@ -1,19 +1,33 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "sockacademy/schemas/A2_output.schema.json",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "title": "A2 Product Upload — Output Schema",
-  "description": "מה שA2 כותב חזרה ל-Google Sheets ומה שנוצר ב-Shopify",
+  "description": "מה שA2 כותב חזרה ל-Google Sheets ומה שנוצר ב-Shopify. שמות השדות = שמות עמודות Google Sheets.",
   "type": "object",
   "sheets_writeback": {
     "description": "שדות שA2 מעדכן ב-A1_Products לאחר העלאה מוצלחת",
-    "required": ["UploadStatus"],
+    "required": ["Upload Status"],
     "properties": {
-      "UploadStatus": {
+      "Upload Status": {
         "type": "string",
         "pattern": "^uploaded:[0-9]+$",
         "example": "uploaded:8923847162",
         "description": "מוגדר לאחר העלאה מוצלחת. ה-ID הוא Shopify Product ID."
+      },
+      "Shopify ID": {
+        "type": "string",
+        "pattern": "^[0-9]+$",
+        "description": "Shopify Product ID — כפי שחזר מה-API"
+      },
+      "Shopify URL": {
+        "type": "string",
+        "description": "https://sockacademy.store/products/{handle}"
+      },
+      "Upload Date": {
+        "type": "string",
+        "format": "date",
+        "description": "תאריך העלאה בפורמט YYYY-MM-DD"
       }
     }
   },
@@ -23,7 +37,7 @@
     "properties": {
       "title": {
         "type": "string",
-        "description": "= Name מ-A1"
+        "description": "= Product Name מ-A1"
       },
       "body_html": {
         "type": "string",
@@ -55,8 +69,8 @@
           "type": "object",
           "required": ["price"],
           "properties": {
-            "price": { "type": "string", "description": "= RetailPrice.toFixed(2)" },
-            "compare_at_price": { "type": "string", "description": "= RetailPrice × 1.25" },
+            "price": { "type": "string", "description": "= Retail Price.toFixed(2)" },
+            "compare_at_price": { "type": "string", "description": "= Retail Price × 1.25" },
             "inventory_management": { "type": "null" },
             "fulfillment_service": { "const": "manual" }
           }

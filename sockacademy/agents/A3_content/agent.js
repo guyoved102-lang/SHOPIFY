@@ -59,18 +59,27 @@ const BLOG_TOPICS = [
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // SHOPIFY API
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function shopifyPost(path, body) {
-  const res = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/${path}`, {
-    method: 'POST',
+async function shopifyRequest(method, path, body = null) {
+  const res = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2025-01/${path}`, {
+    method,
     headers: {
       'X-Shopify-Access-Token': SHOPIFY_TOKEN,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(body),
+    body: body ? JSON.stringify(body) : null,
   });
   const data = await res.json();
   if (!res.ok) throw new Error(`Shopify ${path}: ${JSON.stringify(data.errors || data)}`);
   return data;
+}
+
+async function shopifyPost(path, body) {
+  return shopifyRequest('POST', path, body);
+}
+
+async function articleExists(handle) {
+  const data = await shopifyRequest('GET', `blogs/${BLOG_ID}/articles.json?handle=${encodeURIComponent(handle)}&limit=1`);
+  return data.articles && data.articles.length > 0;
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -291,9 +300,25 @@ async function main() {
   } else {
     console.log('\n📤 מפרסם ל-Shopify...');
     try {
-      article = await publishArticle(topic, bodyHtml);
-      published = true;
-      console.log(`  ✅ פורסם: https://sockacademy.store/blogs/news/${article.handle}`);
+      const handle = topic.title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .substring(0, 80);
+
+      console.log('  🔍 בודק אם מאמר קיים...');
+      const exists = await articleExists(handle);
+
+      if (exists) {
+        console.log(`  ⏭️  מאמר קיים (${handle}) — מדלג (idempotency guard)`);
+        article = { body_html: bodyHtml, handle };
+        published = true;
+      } else {
+        article = await publishArticle(topic, bodyHtml);
+        published = true;
+        console.log(`  ✅ פורסם: https://sockacademy.store/blogs/news/${article.handle}`);
+      }
     } catch (e) {
       console.error(`  ❌ שגיאה בפרסום: ${e.message}`);
     }
