@@ -1,0 +1,12 @@
+{
+  "name": "a0-orchestrator",
+  "version": "1.0.0",
+  "description": "A0 — SockAcademy Orchestrator Agent (Phase B MVP)",
+  "main": "agent.js",
+  "dependencies": {
+    "dotenv": "^17.0.0",
+    "google-auth-library": "^9.0.0",
+    "google-spreadsheet": "^4.1.4",
+    "nodemailer": "^9.0.0"
+  }
+}

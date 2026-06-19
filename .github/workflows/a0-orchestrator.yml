@@ -1,0 +1,47 @@
+name: A0 — Orchestrator (Daily Health Check)
+
+on:
+  schedule:
+    - cron: '0 9 * * *'   # כל יום 09:00 UTC (12:00 ישראל) — אחרי A2 + timeout buffer
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no Sheets writes, no emails)'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['true', 'false']
+      force_weekly_report:
+        description: 'Force send Weekly Health Report now'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['true', 'false']
+
+jobs:
+  orchestrator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: sockacademy/agents/A0_orchestrator/package-lock.json
+
+      - name: Install dependencies
+        working-directory: sockacademy/agents/A0_orchestrator
+        run: npm install
+
+      - name: Run A0 Orchestrator
+        working-directory: sockacademy/agents/A0_orchestrator
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          FORCE_WEEKLY_REPORT: ${{ github.event.inputs.force_weekly_report || 'false' }}
+        run: node agent.js
