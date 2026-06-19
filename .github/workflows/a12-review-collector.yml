@@ -1,4 +1,4 @@
-name: A12 — Review Collector (Weekly)
+﻿name: A12 ג€” Review Collector (Weekly)
 
 on:
   schedule:
@@ -14,7 +14,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install dependencies
         working-directory: sockacademy/agents/A12_review_collector

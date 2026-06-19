@@ -1,10 +1,10 @@
-name: A5 — Social Content Agent
+﻿name: A5 ג€” Social Content Agent
 
 on:
   schedule:
-    - cron: '0 7 * * 0'  # ראשון 07:00 UTC (10:00 ישראל)
-    - cron: '0 7 * * 3'  # רביעי 07:00 UTC (10:00 ישראל)
-    - cron: '0 7 * * 5'  # שישי  07:00 UTC (10:00 ישראל)
+    - cron: '0 7 * * 0'  # ׳¨׳׳©׳•׳ 07:00 UTC (10:00 ׳™׳©׳¨׳׳)
+    - cron: '0 7 * * 3'  # ׳¨׳‘׳™׳¢׳™ 07:00 UTC (10:00 ׳™׳©׳¨׳׳)
+    - cron: '0 7 * * 5'  # ׳©׳™׳©׳™  07:00 UTC (10:00 ׳™׳©׳¨׳׳)
   workflow_dispatch:
 
 jobs:
@@ -15,7 +15,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install dependencies
         working-directory: sockacademy/agents/A5_social

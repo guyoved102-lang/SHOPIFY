@@ -1,4 +1,4 @@
-name: A10 — Trend Scout (Weekly)
+﻿name: A10 ג€” Trend Scout (Weekly)
 
 on:
   schedule:
@@ -14,7 +14,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install dependencies
         working-directory: sockacademy/agents/A10_trend_scout

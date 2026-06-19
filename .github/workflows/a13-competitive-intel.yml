@@ -1,9 +1,9 @@
-name: A13 — Global Competitive Intelligence (Weekly)
+﻿name: A13 ג€” Global Competitive Intelligence (Weekly)
 
 on:
   schedule:
-    - cron: '0 6 * * 0'  # ראשון 06:00 UTC (09:00 ישראל) — לפני A10 Trend Scout
-  workflow_dispatch:      # הפעלה ידנית + --strike flag
+    - cron: '0 6 * * 0'  # ׳¨׳׳©׳•׳ 06:00 UTC (09:00 ׳™׳©׳¨׳׳) ג€” ׳׳₪׳ ׳™ A10 Trend Scout
+  workflow_dispatch:      # ׳”׳₪׳¢׳׳” ׳™׳“׳ ׳™׳× + --strike flag
 
 jobs:
   competitive-intel:
@@ -13,7 +13,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
           cache-dependency-path: sockacademy/agents/A13_competitive_intel/package-lock.json
 

@@ -1,8 +1,8 @@
-name: A0 — Orchestrator (Daily Health Check)
+﻿name: A0 ג€” Orchestrator (Daily Health Check)
 
 on:
   schedule:
-    - cron: '0 9 * * *'   # כל יום 09:00 UTC (12:00 ישראל) — אחרי A2 + timeout buffer
+    - cron: '0 9 * * *'   # ׳›׳ ׳™׳•׳ 09:00 UTC (12:00 ׳™׳©׳¨׳׳) ג€” ׳׳—׳¨׳™ A2 + timeout buffer
   workflow_dispatch:
     inputs:
       dry_run:
@@ -28,7 +28,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
           cache-dependency-path: sockacademy/agents/A0_orchestrator/package-lock.json
 

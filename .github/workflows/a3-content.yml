@@ -1,9 +1,9 @@
-name: A3 — Content Agent (Weekly Blog)
+﻿name: A3 ג€” Content Agent (Weekly Blog)
 
 on:
   schedule:
-    - cron: '0 9 * * 1'  # כל שני 09:00 UTC (12:00 ישראל) — אחרי A1 שרץ 07:00
-  workflow_dispatch:      # הפעלה ידנית מ-GitHub
+    - cron: '0 9 * * 1'  # ׳›׳ ׳©׳ ׳™ 09:00 UTC (12:00 ׳™׳©׳¨׳׳) ג€” ׳׳—׳¨׳™ A1 ׳©׳¨׳¥ 07:00
+  workflow_dispatch:      # ׳”׳₪׳¢׳׳” ׳™׳“׳ ׳™׳× ׳-GitHub
 
 jobs:
   write-blog:
@@ -13,7 +13,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install dependencies
         working-directory: sockacademy/agents/A3_content
