@@ -3,11 +3,19 @@ name: A2 — Product Upload (Daily)
 on:
   schedule:
     - cron: '0 8 * * *'   # כל יום 11:00 ישראל (UTC+3)
-  workflow_dispatch:        # הרצה ידנית
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (generates description, skips Shopify upload + Sheet write)'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['true', 'false']
 
 jobs:
   upload:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -30,4 +38,5 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
         run: node agent.js
