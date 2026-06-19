@@ -31,4 +31,5 @@ jobs:
           SHOPIFY_SHOP_DOMAIN: 11eqwi-ji.myshopify.com
           META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
           META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
+          SHOPIFY_THEME_ID: ${{ secrets.SHOPIFY_THEME_ID }}
         run: node agent.js
