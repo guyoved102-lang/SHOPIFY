@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "sockacademy/schemas/A2_output.schema.json",
+  "version": "1.0.0",
+  "title": "A2 Product Upload — Output Schema",
+  "description": "מה שA2 כותב חזרה ל-Google Sheets ומה שנוצר ב-Shopify",
+  "type": "object",
+  "sheets_writeback": {
+    "description": "שדות שA2 מעדכן ב-A1_Products לאחר העלאה מוצלחת",
+    "required": ["UploadStatus"],
+    "properties": {
+      "UploadStatus": {
+        "type": "string",
+        "pattern": "^uploaded:[0-9]+$",
+        "example": "uploaded:8923847162",
+        "description": "מוגדר לאחר העלאה מוצלחת. ה-ID הוא Shopify Product ID."
+      }
+    }
+  },
+  "shopify_product": {
+    "description": "מבנה ה-Shopify product שנוצר",
+    "required": ["title", "status", "vendor", "product_type"],
+    "properties": {
+      "title": {
+        "type": "string",
+        "description": "= Name מ-A1"
+      },
+      "body_html": {
+        "type": "string",
+        "description": "תיאור SEO שנוצר על ידי Claude Haiku"
+      },
+      "vendor": {
+        "type": "string",
+        "const": "SockAcademy"
+      },
+      "product_type": {
+        "type": "string",
+        "description": "= Category מ-A1, או 'Socks' כ-fallback"
+      },
+      "status": {
+        "type": "string",
+        "const": "draft",
+        "description": "תמיד draft — גיא מפרסם ידנית"
+      },
+      "tags": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "תמיד כולל: 'sockacademy', 'a2-agent' + תגי קטגוריה וחומר"
+      },
+      "variants": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 1,
+        "items": {
+          "type": "object",
+          "required": ["price"],
+          "properties": {
+            "price": { "type": "string", "description": "= RetailPrice.toFixed(2)" },
+            "compare_at_price": { "type": "string", "description": "= RetailPrice × 1.25" },
+            "inventory_management": { "type": "null" },
+            "fulfillment_service": { "const": "manual" }
+          }
+        }
+      }
+    }
+  }
+}

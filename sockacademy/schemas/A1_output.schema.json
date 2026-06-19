@@ -1,0 +1,115 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "sockacademy/schemas/A1_output.schema.json",
+  "version": "1.0.0",
+  "title": "A1 Product Research — Output Schema",
+  "description": "מבנה הנתונים שA1 כותב לGoogle Sheets (טאב: A1_Products). A2 קורא ממנו.",
+  "type": "object",
+  "required": ["Name", "Source", "PID", "Rating", "Orders", "Reviews", "SupplierPrice", "RetailPrice", "Margin", "MarginPct", "ImageUrl", "URL", "Materials", "Category", "Score"],
+  "properties": {
+    "Name": {
+      "type": "string",
+      "minLength": 5,
+      "description": "שם המוצר המלא כפי שחזר מה-API"
+    },
+    "Source": {
+      "type": "string",
+      "enum": ["CJ", "AliExpress", "Alibaba"],
+      "description": "פלטפורמה שממנה נמצא המוצר"
+    },
+    "PID": {
+      "type": "string",
+      "minLength": 1,
+      "description": "מזהה מוצר ייחודי בפלטפורמת המקור"
+    },
+    "Rating": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 5,
+      "description": "דירוג ממוצע (0 = לא זמין)"
+    },
+    "Orders": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "מספר הזמנות שנמכרו"
+    },
+    "Reviews": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "מספר ביקורות"
+    },
+    "SupplierPrice": {
+      "type": "number",
+      "minimum": 0,
+      "description": "מחיר ספק בדולרים (0 = לא זמין)"
+    },
+    "RetailPrice": {
+      "type": "number",
+      "minimum": 0,
+      "description": "מחיר קמעונאי מוצע (חישוב: SupplierPrice × multiplier)"
+    },
+    "Margin": {
+      "type": "number",
+      "minimum": 0,
+      "description": "רווח גולמי בדולרים (RetailPrice - SupplierPrice)"
+    },
+    "MarginPct": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "אחוז מרג'ין"
+    },
+    "ImageUrl": {
+      "type": "string",
+      "description": "URL לתמונה ראשית (ריק אם לא זמין)"
+    },
+    "URL": {
+      "type": "string",
+      "minLength": 1,
+      "description": "URL לדף המוצר בפלטפורמת המקור"
+    },
+    "Materials": {
+      "type": "string",
+      "description": "חומרים מופרדים בפסיקים (דוגמה: 'Merino Wool, Cashmere')"
+    },
+    "Category": {
+      "type": "string",
+      "enum": [
+        "Premium Materials",
+        "Athletic",
+        "Dress & Formal",
+        "Tactical & Outdoor",
+        "Gift Sets",
+        "Casual & No-Show",
+        "General"
+      ],
+      "description": "קטגוריית סגנון — enum נוקשה, אסור ערכים חדשים ללא עדכון schema"
+    },
+    "Score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "ציון A1 (אלגוריתם ניקוד 120 נק' → normalized לـ100)"
+    },
+    "ScoreReasons": {
+      "type": "string",
+      "description": "סיבות הניקוד — מופרדות בפסיקים (אופציונלי, לתצוגה בלבד)"
+    },
+    "Status": {
+      "type": "string",
+      "enum": ["", "Approved", "Rejected"],
+      "description": "מוגדר ידנית על ידי גיא. A2 מעבד רק 'Approved'."
+    },
+    "UploadStatus": {
+      "type": "string",
+      "pattern": "^($|uploading$|uploaded:[0-9]+$|error:.{1,200}$)",
+      "description": "מוגדר על ידי A2. ריק = טרם עובד. 'uploading' = בתהליך. 'uploaded:SHOPIFY_ID' = הושלם. 'error:...' = נכשל."
+    },
+    "RunDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO timestamp של ריצת A1 שייצרה שורה זו"
+    }
+  },
+  "additionalProperties": false
+}

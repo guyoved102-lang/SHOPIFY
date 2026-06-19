@@ -1,0 +1,221 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "last_updated": "2026-06-19",
+    "owner": "A0 Orchestrator",
+    "description": "Declarative dependency graph + trigger matrix for all 28 SockAcademy agents. A0 reads this file — no hardcoded logic in A0 agent.js.",
+    "schema_note": "Chain agents pass data via Google Sheets tabs. Parallel agents are independent — no data handoff."
+  },
+
+  "concurrency_limit": 6,
+  "_concurrency_note": "GitHub Free plan: 20 concurrent jobs. Each agent = ~2 jobs (checkout + run). 6 agents × 2 = 12 jobs — leaves 8 buffer for manual triggers.",
+
+  "pipelines": [
+
+    {
+      "id": "product-pipeline",
+      "name": "Product Discovery → Upload",
+      "trigger": {
+        "type": "cron",
+        "schedule": "0 7 * * 1",
+        "description": "כל יום שני 07:00 UTC (10:00 ישראל)"
+      },
+      "chain": [
+        {
+          "agent": "A1",
+          "workflow": "a1-product-research.yml",
+          "timeout_minutes": 30,
+          "data_output": {
+            "via": "google_sheets",
+            "tab": "A1_Products",
+            "schema": "schemas/A1_output.schema.json"
+          },
+          "retry": { "max_attempts": 2, "backoff_minutes": 5 },
+          "idempotency": "stateless — always safe to retry"
+        },
+        {
+          "agent": "A2",
+          "workflow": "a2-product-upload.yml",
+          "timeout_minutes": 20,
+          "depends_on": "A1",
+          "wait_for_human": {
+            "description": "גיא חייב לסמן לפחות מוצר אחד כ-'Approved' ב-Google Sheet לפני שA2 רץ",
+            "field": "Status",
+            "value": "Approved",
+            "tab": "A1_Products"
+          },
+          "data_input": {
+            "via": "google_sheets",
+            "tab": "A1_Products",
+            "filter": "Status=Approved AND UploadStatus=''",
+            "schema": "schemas/A2_input.schema.json"
+          },
+          "data_output": {
+            "via": "google_sheets",
+            "tab": "A1_Products",
+            "writes_back": "UploadStatus",
+            "schema": "schemas/A2_output.schema.json"
+          },
+          "retry": { "max_attempts": 2, "backoff_minutes": 5 },
+          "idempotency": "optimistic_lock — writes 'uploading' to Sheets before Shopify call. See schemas/IDEMPOTENCY.md"
+        }
+      ]
+    },
+
+    {
+      "id": "intelligence-cluster",
+      "name": "Weekly Market Intelligence",
+      "trigger": {
+        "type": "cron",
+        "schedule": "0 5 * * 0",
+        "description": "כל יום ראשון 05:00 UTC (08:00 ישראל)"
+      },
+      "parallel": [
+        {
+          "agent": "A10",
+          "workflow": "a10-trend-scout.yml",
+          "timeout_minutes": 20,
+          "data_output": { "via": "email_to_admin", "schema": null },
+          "retry": { "max_attempts": 2, "backoff_minutes": 5 },
+          "idempotency": "stateless — safe to retry"
+        },
+        {
+          "agent": "A11",
+          "workflow": "a11-price-intelligence.yml",
+          "timeout_minutes": 20,
+          "note": "Replace cheerio with Perplexity API — pending PERPLEXITY_API_KEY secret",
+          "data_output": { "via": "email_to_admin", "schema": null },
+          "retry": { "max_attempts": 2, "backoff_minutes": 5 },
+          "idempotency": "stateless — safe to retry"
+        },
+        {
+          "agent": "A13",
+          "workflow": "a13-competitive-intel.yml",
+          "timeout_minutes": 30,
+          "data_output": {
+            "via": "google_sheets",
+            "tab": "A13_CompetitorIntel",
+            "schema": null
+          },
+          "retry": { "max_attempts": 2, "backoff_minutes": 10 },
+          "idempotency": "stateless — appends rows, safe to retry"
+        }
+      ]
+    },
+
+    {
+      "id": "post-purchase-cluster",
+      "name": "Daily Post-Purchase",
+      "trigger": {
+        "type": "cron",
+        "schedule": "0 7 * * *",
+        "description": "כל יום 07:00 UTC (10:00 ישראל)"
+      },
+      "parallel": [
+        {
+          "agent": "A12",
+          "workflow": "a12-review-collector.yml",
+          "timeout_minutes": 15,
+          "data_output": { "via": "email_to_admin", "schema": null },
+          "retry": { "max_attempts": 2, "backoff_minutes": 5 },
+          "idempotency": "shopify_tag — tag 'review-requested' prevents duplicate sends. Safe to retry."
+        }
+      ]
+    },
+
+    {
+      "id": "content-cluster",
+      "name": "Weekly Content",
+      "trigger": {
+        "type": "cron",
+        "schedule": "0 8 * * 2",
+        "description": "כל יום שלישי 08:00 UTC (11:00 ישראל)"
+      },
+      "parallel": [
+        {
+          "agent": "A3",
+          "workflow": "a3-content.yml",
+          "timeout_minutes": 20,
+          "data_output": { "via": "shopify_blog_post", "schema": null },
+          "retry": { "max_attempts": 1, "backoff_minutes": 10 },
+          "idempotency": "check_existing — A3 should check if article with same title exists before creating"
+        },
+        {
+          "agent": "A4",
+          "workflow": "a4-meta-ads.yml",
+          "timeout_minutes": 15,
+          "data_output": { "via": "google_sheets_or_email", "schema": null },
+          "retry": { "max_attempts": 2, "backoff_minutes": 5 },
+          "idempotency": "stateless — generates copy, does not publish"
+        },
+        {
+          "agent": "A5",
+          "workflow": "a5-social.yml",
+          "timeout_minutes": 20,
+          "data_output": { "via": "google_drive", "schema": null },
+          "retry": { "max_attempts": 2, "backoff_minutes": 5 },
+          "idempotency": "stateless — generates assets, does not post"
+        }
+      ]
+    },
+
+    {
+      "id": "ops-cluster",
+      "name": "Operational Monitoring",
+      "trigger": {
+        "type": "cron",
+        "schedule": "0 6 * * 3",
+        "description": "כל יום רביעי 06:00 UTC (09:00 ישראל)"
+      },
+      "parallel": [
+        {
+          "agent": "A7",
+          "workflow": "a7-supplier-monitor.yml",
+          "timeout_minutes": 20,
+          "note": "Blocked on real product data — currently uses MOCK_PRODUCTS. See schemas/A7_input.schema.json migration_note.",
+          "data_input": {
+            "via": "google_sheets",
+            "tab": "A1_Products",
+            "filter": "UploadStatus starts with 'uploaded:'",
+            "schema": "schemas/A7_input.schema.json"
+          },
+          "retry": { "max_attempts": 2, "backoff_minutes": 5 },
+          "idempotency": "shopify_price_update — idempotent by design (same price = no-op)"
+        },
+        {
+          "agent": "A9",
+          "workflow": "a9-legal-compliance.yml",
+          "timeout_minutes": 15,
+          "data_output": { "via": "email_to_admin", "schema": null },
+          "retry": { "max_attempts": 1, "backoff_minutes": 10 },
+          "idempotency": "stateless — generates report only"
+        }
+      ]
+    }
+  ],
+
+  "one_time_agents": [
+    {
+      "agent": "A6",
+      "workflow": "a6-email-sync.yml",
+      "description": "הגדרת Klaviyo templates — מריץ פעם אחת לפני השקה, ואחרי כל שינוי בתוכן המייל",
+      "trigger": "manual_only",
+      "idempotency": "upsert_by_name — בודק אם template קיים לפי שם לפני יצירה. Safe to re-run."
+    }
+  ],
+
+  "future_agents": {
+    "phase_2_c_suite": ["A14_COO", "A15_CFO", "A8_Analytics", "A16_CX", "A20_Inventory"],
+    "phase_3_risk": ["A17_IP", "A18_Fraud", "A19_Returns", "A21_Affiliate"],
+    "phase_3_growth": ["A22_SupplyChain", "A23_Logistics", "A24_CRO", "A25_Influencer", "A26_Regulatory", "A27_PR", "A28_SubscriptionClub"],
+    "status": "PENDING — will be added to pipelines above when built"
+  },
+
+  "state_ledger": {
+    "location": "Google Sheets",
+    "tab": "A0_STATE_LEDGER",
+    "columns": ["Agent", "Status", "LastRun", "OutputKey", "ErrorMessage", "RetryCount", "LockedBy"],
+    "status_values": ["PENDING", "RUNNING", "COMPLETE", "FAILED", "DEAD", "SKIPPED", "INVALID"],
+    "setup_note": "Tab must be created manually in the SockAcademy Google Sheet before A0 first run"
+  }
+}

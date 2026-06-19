@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "sockacademy/schemas/A2_input.schema.json",
+  "version": "1.0.0",
+  "title": "A2 Product Upload — Input Schema",
+  "description": "השדות שA2 קורא מ-A1_Products. חייב להיות subset מדויק של A1_output.schema.json. אם A1 שינה שם שדה — יש לעדכן גם כאן.",
+  "type": "object",
+  "required": ["Name", "Category", "SupplierPrice", "RetailPrice", "ImageUrl", "URL", "PID", "Source"],
+  "properties": {
+    "Name": {
+      "$ref": "A1_output.schema.json#/properties/Name"
+    },
+    "Source": {
+      "$ref": "A1_output.schema.json#/properties/Source"
+    },
+    "PID": {
+      "$ref": "A1_output.schema.json#/properties/PID"
+    },
+    "Category": {
+      "$ref": "A1_output.schema.json#/properties/Category"
+    },
+    "Materials": {
+      "$ref": "A1_output.schema.json#/properties/Materials"
+    },
+    "RetailPrice": {
+      "$ref": "A1_output.schema.json#/properties/RetailPrice"
+    },
+    "SupplierPrice": {
+      "$ref": "A1_output.schema.json#/properties/SupplierPrice"
+    },
+    "ImageUrl": {
+      "$ref": "A1_output.schema.json#/properties/ImageUrl"
+    },
+    "URL": {
+      "$ref": "A1_output.schema.json#/properties/URL"
+    },
+    "Status": {
+      "$ref": "A1_output.schema.json#/properties/Status"
+    },
+    "UploadStatus": {
+      "$ref": "A1_output.schema.json#/properties/UploadStatus"
+    }
+  },
+  "notes": {
+    "filter_condition": "Status === 'Approved' AND UploadStatus is empty string",
+    "idempotency_guard": "A2 writes 'uploading' to UploadStatus BEFORE creating Shopify product. See A2 idempotency fix in IDEMPOTENCY.md"
+  }
+}

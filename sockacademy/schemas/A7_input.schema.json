@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "sockacademy/schemas/A7_input.schema.json",
+  "version": "1.0.0",
+  "title": "A7 Supplier Monitor — Input Schema",
+  "description": "רשימת המוצרים שA7 מנטר. מקור: Google Sheets A1_Products (שורות עם UploadStatus=uploaded:*). כרגע A7 משתמש ב-MOCK_PRODUCTS — זהו המבנה הנדרש לאחר הגירה לנתונים אמיתיים.",
+  "type": "object",
+  "required": ["name", "cj_product_id", "shopify_id", "supplier_price", "retail_price", "category"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "שם המוצר — חייב להתאים ל-Name ב-A1_Products"
+    },
+    "cj_product_id": {
+      "type": "string",
+      "description": "PID מ-A1 — חייב להיות CJ PID אמיתי (לא MOCK_CJ_*)"
+    },
+    "shopify_id": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9]+$",
+      "description": "Shopify Product ID — נלקח מ-UploadStatus ('uploaded:SHOPIFY_ID')"
+    },
+    "variant_id": {
+      "type": ["string", "null"],
+      "description": "Shopify Variant ID — נדרש לעדכון מחיר. null עד לאחר product creation."
+    },
+    "supplier_price": {
+      "type": "number",
+      "minimum": 0.01,
+      "description": "מחיר ספק נוכחי בCJ — SupplierPrice מ-A1"
+    },
+    "retail_price": {
+      "type": "number",
+      "minimum": 0.01,
+      "description": "מחיר קמעונאי ב-Shopify — RetailPrice מ-A1"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Premium Materials",
+        "Athletic",
+        "Dress & Formal",
+        "Tactical & Outdoor",
+        "Gift Sets",
+        "Casual & No-Show",
+        "General"
+      ]
+    }
+  },
+  "migration_note": "A7 יעבור מ-MOCK_PRODUCTS לקריאה מ-A1_Products כאשר: (א) מוצרים אמיתיים הועלו ל-Shopify, (ב) UploadStatus כולל Shopify ID, (ג) variant_id נוסף לשורות ב-Sheets."
+}

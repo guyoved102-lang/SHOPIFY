@@ -39,10 +39,17 @@ async function loadSheet() {
 
 async function getApprovedRows(sheet) {
   const rows = await sheet.getRows();
-  return rows.filter(row =>
-    (row.get('Status') || '').trim() === 'Approved' &&
-    !row.get('Upload Status')
-  );
+  return rows.filter(row => {
+    const status = (row.get('Status') || '').trim();
+    const uploadStatus = (row.get('Upload Status') || '').trim();
+    return (
+      status === 'Approved' &&
+      uploadStatus === ''
+      // 'uploading' = A2 in-progress or crashed mid-run → skip to avoid Shopify duplicate
+      // 'Uploaded' / 'uploaded:ID' = done → skip
+      // 'Error: ...' = failed → skip, Guy clears manually to allow retry
+    );
+  });
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -244,14 +251,21 @@ async function main() {
     try {
       process.stdout.write(`⏳ ${product.name}... `);
 
-      product.description = await generateDescription(product);
-
       if (DRY_RUN) {
+        product.description = await generateDescription(product);
         console.log(`✅ [DRY_RUN] description generated, skipping Shopify upload`);
         results.push({ name: product.name, id: 'DRY_RUN', success: true });
       } else {
+        // Optimistic lock: write 'uploading' BEFORE calling Shopify.
+        // If A2 crashes after this and before 'Uploaded', the row stays 'uploading'
+        // and will be skipped on retry — preventing duplicate Shopify products.
+        row.set('Upload Status', 'uploading');
+        await row.save();
+
+        product.description = await generateDescription(product);
         const shopifyProduct = await createShopifyProduct(product);
-        row.set('Upload Status', 'Uploaded');
+
+        row.set('Upload Status', `uploaded:${shopifyProduct.id}`);
         row.set('Shopify ID', String(shopifyProduct.id));
         row.set('Shopify URL', `https://sockacademy.store/products/${shopifyProduct.handle}`);
         row.set('Upload Date', new Date().toISOString().split('T')[0]);
