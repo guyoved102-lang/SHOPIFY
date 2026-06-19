@@ -29,5 +29,5 @@ jobs:
           META_AD_ACCOUNT_ID: ${{ secrets.META_AD_ACCOUNT_ID }}
           META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
         run: |
-          node -e "console.log('TOKEN_LEN:', process.env.META_ACCESS_TOKEN?.length, 'STARTS:', process.env.META_ACCESS_TOKEN?.substring(0,6))"
+          node -e "console.log('TOKEN_LEN:', process.env.META_ACCESS_TOKEN?.length, 'STARTS:', process.env.META_ACCESS_TOKEN?.substring(0,6)); console.log('AD_ACCOUNT starts:', process.env.META_AD_ACCOUNT_ID?.substring(0,4))"
           node agent.js
