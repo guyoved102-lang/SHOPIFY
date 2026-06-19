@@ -13,9 +13,10 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const META_API_VERSION = 'v20.0';
 const META_BASE = `https://graph.facebook.com/${META_API_VERSION}`;
-const AD_ACCOUNT_ID = process.env.META_AD_ACCOUNT_ID; // act_XXXXXXXXXXXXXXX
-const ACCESS_TOKEN = process.env.META_ACCESS_TOKEN;
-const PAGE_ID = process.env.META_PAGE_ID;
+const strip = s => (s || '').replace(/^﻿/, '').trim();
+const AD_ACCOUNT_ID = strip(process.env.META_AD_ACCOUNT_ID); // act_XXXXXXXXXXXXXXX
+const ACCESS_TOKEN = strip(process.env.META_ACCESS_TOKEN);
+const PAGE_ID = strip(process.env.META_PAGE_ID);
 
 const DRY_RUN = !ACCESS_TOKEN || !AD_ACCOUNT_ID;
 
