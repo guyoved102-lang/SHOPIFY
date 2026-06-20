@@ -191,6 +191,59 @@ Total Quality Control & System Audit Protocol:
 
 ---
 
+## 🎛️ CONTROL CENTER ROADMAP — Business Intelligence & Operations Hub
+
+**החלטה נעולה (20/06/2026). מחולקת ל-3 Phases.**
+
+### Phase A — Vision Documentation ✅ (20/06/2026)
+**מטרה:** שמירת כל דרישות ה-Control Center לעתיד. אין קוד עדיין.
+
+| מודול | תיאור |
+|---|---|
+| תפעול אנושי-מלאכותי | ניהול משימות שוטפות — Human-AI collaboration, delegation log |
+| לקוחות וסטטוס | תמונת מצב עדכנית של בריאות העסק והלקוחות |
+| ניהול פיננסי | מעקב כספים, תשלומים עתידיים, הצעות מחיר ספקים, ריכוז קבלות לרו"ח |
+| שיווק ופרסום | ניהול קמפיינים + content pipeline לתוכן ויראלי |
+| Agent Fleet Status | בקרה על מצב, פעילות ותקינות כל 6 Super-Agents |
+| שרשרת אספקה ומלאי | מלאי בזמן אמת, Low Stock Alerts, זמני שילוח, הזמנות רכש מול ספקים |
+| Market & Trend Intelligence | מגמות צרכניות, מחירי מתחרים, מאקרו-כלכלי — data-driven decisions |
+| Human-in-the-Loop | אישור/דחייה של פעולות קריטיות לפני ביצוע (ראה Phase B) |
+| Returns & VIP CS | RMA, זיכויים, זיהוי לקוחות חוזרים → Klaviyo VIP segment |
+| Security & Audit Logs | בריאות APIs, שגיאות חיבור, ניטור, התראות על חשיפות |
+| Future-Proofing | תשתית פתוחה — כל מודול שיוסיף ערך בעתיד |
+
+**רציונל:** כל המודולים מזינים נתונים שכבר מיוצרים ע"י הסוכנים הקיימים. הדאשבורד הוא Visualization Layer בלבד — לא לוגיקה חדשה.
+
+---
+
+### Phase B — Human-in-the-Loop (Pre-Launch Blocker) 🔴
+**סטטוס:** חייב לקרות לפני Product Upload ראשון חי.
+**גודל:** ~1-2 ימי עבודה.
+
+**מה בונים:**
+1. טבלת `pending_approvals` ב-Supabase עם RLS ON:
+   - `id`, `agent_id`, `action_type`, `payload_json`, `status` (pending/approved/rejected), `created_at`, `resolved_at`
+2. לפני כל פעולה קריטית — Agent כותב שורה לטבלה ומחכה לאישור
+3. התראת email לגיא עם תיאור הפעולה + קישור לאישור/דחייה
+4. Agent בודק status לפני ביצוע — אם לא `approved` תוך 24h → abort + log
+
+**פעולות קריטיות שדורשות אישור ידני:**
+- אישור תקציב קמפיין Meta מעל $50
+- שינוי מחיר מוצר ב-Shopify
+- מחיקת מוצר מהחנות
+- שליחת blast campaign לכל רשימת הלקוחות
+- שינוי בתנאי שימוש / Privacy Policy
+
+---
+
+### Phase C — Full Dashboard UI (~30 ימים לאחר השקה)
+**סטטוס:** לא לבנות עד שיש data אמיתי.
+**טריגר:** 30 ימים לאחר Product Upload ראשון חי.
+**סיבה:** Dashboard ריק = חסר ערך. נתונים ראשונים = בסיס לעיצוב נכון.
+**טכנולוגיה:** Supabase כ-backend (כבר קיים) + UI (Retool / Next.js — להחליט בהגעה לפאזה).
+
+---
+
 ## 🗺️ Enterprise Stack — ורדיקטים v2 (CTO Review 18/06/2026)
 
 ### Skills — Corporate Function Map
