@@ -1,0 +1,15 @@
+{
+  "name": "a17-token-refresher",
+  "version": "1.0.0",
+  "description": "SockAcademy A17 — Refresh META_ACCESS_TOKEN every 50 days via GitHub Actions",
+  "main": "agent.js",
+  "scripts": {
+    "start": "node agent.js",
+    "dry-run": "DRY_RUN=true node agent.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "libsodium-wrappers": "^0.7.13",
+    "nodemailer": "^6.9.0"
+  }
+}
