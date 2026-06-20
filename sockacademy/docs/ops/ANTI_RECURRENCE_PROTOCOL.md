@@ -183,18 +183,60 @@
 
 ---
 
+## 16. Lint/CI שנכשל על קבצים לגיטימיים (False Positives)
+
+**מה קרה (20/06/2026):** Structure Lint נכשל ב-CI עם 24 violations — כולם false positives:
+- Shopify theme files (assets, sections, config...) נדחו כ-"SA_ROOT_CONTAMINATION"
+- Claude infrastructure (.claude, .agents) נדחו כ-"ROOT_CONTAMINATION"
+- `.env` נדחה למרות שהוא gitignored — הlint סרק filesystem במקום `git ls-files`
+
+**סיבה:** הlint נכתב רק עם הכלל אבל בלי לדעת את כל הקבצים הלגיטימיים שכבר קיימים.
+
+**פרוטוקול:**
+- Rules 4+5 (`.env`, `node_modules`): תמיד `git ls-files` — לא filesystem walk
+- ALLOWED lists: חייבות לכלול את כל הקבצים הלגיטימיים שכבר קיימים בrepo
+- לפני כל שינוי בlint: להריץ מקומית ולוודא 0 violations על main
+
+**בדיקה בסגירת שיחה:** `node sockacademy/scripts/ci/structure-lint.js` חייב לצאת exit 0 לפני push.
+
+---
+
+## 17. CI אדום = חסימה — לא סוגרים שיחה לפני CI ירוק
+
+**מה קרה (20/06/2026):** push הצליח → שיחה "נסגרה" → CI נכשל → הבעיה התגלתה רק בשיחה הבאה.
+**פרוטוקול:**
+- `gh run list --limit 3` חובה אחרי כל push — לחכות לסיום הrun
+- CI אדום = תיקון מיידי לפני סגירה. ללא יוצא מן הכלל.
+- Boot Dashboard v3 מציג CI status בפתיחה — safety net אם משהו נסגר בטעות עם CI אדום
+
+---
+
+## 18. שגיאות לא מתועדות = שגיאות שחוזרות
+
+**עיקרון:** כל bug שנמצא ומתוקן בשיחה → פרוטוקול חדש ב-ANTI_RECURRENCE מיד.
+**טריגר mid-session:** ראה CLAUDE.md → "טריגר 6 — שגיאה תוקנה"
+**מטרה:** כל שגיאה הופכת לחיסון נגד עצמה. המערכת לומדת בזמן אמת.
+
+---
+
 ## SESSION CONTINUITY CHECKLIST — בכל שיחה
 
 **פתיחה:**
-- [ ] `/boot-sockacademy` → Boot Dashboard מציג PENDING
-- [ ] CI ירוק על main לפני התחלה
+- [ ] `/boot-sockacademy` → Boot Dashboard v3 (CI status + git status + PENDING)
+- [ ] CI ירוק על main לפני התחלה — אם אדום: לתקן קודם
 
 **בתוך שיחה:**
 - [ ] כל milestone → PARANOIA MODE
 - [ ] כל קובץ חדש → 3 שאלות FILE CREATION PROTOCOL
-- [ ] כל commit → security sweep
+- [ ] כל commit → security sweep (git diff --cached)
+- [ ] גיא אומר "עבד/הוספתי/בוצע" → ✅ ב-memory מיד
+- [ ] שגיאה תוקנה → פרוטוקול חדש ב-ANTI_RECURRENCE מיד
 
-**סגירה:**
-- [ ] `memory/project_sockacademy_state.md` עדכני
-- [ ] git commit + push
-- [ ] דוח סיום: מה הושלם / מה ממתין / מה הבא
+**סגירה (לפי הסדר):**
+- [ ] 1. QA Sweep — syntax + credentials + SMTP + placeholders
+- [ ] 2. Lesson Capture — שגיאות שתוקנו → פרוטוקולים חדשים
+- [ ] 3. Memory update — PENDING מעודכן + "next session primer"
+- [ ] 4. git commit + push
+- [ ] 5. CI Verification — `gh run list --limit 3` — לחכות לירוק. אסור לסגור עם CI אדום.
+- [ ] 6. Self-Critique — מה יכולתי לתפוס מוקדם יותר?
+- [ ] 7. דוח סיום — commits + שגיאות שנלמדו + מה ממתין לגיא + מה הבא
