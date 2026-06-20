@@ -1,0 +1,116 @@
+name: Shopify Webhook Handler
+
+# Triggered by Make.com scenario when Shopify fires a webhook.
+# Make.com sends: POST https://api.github.com/repos/OWNER/REPO/dispatches
+# Body: { "event_type": "shopify-webhook", "client_payload": { "topic": "...", "data": {...} } }
+
+on:
+  repository_dispatch:
+    types: [shopify-webhook]
+
+jobs:
+
+  # ── Order Created / Paid ────────────────────────────────────────────────
+  handle-order:
+    name: Handle Order Event
+    if: |
+      github.event.client_payload.topic == 'orders/create' ||
+      github.event.client_payload.topic == 'orders/paid'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: sockacademy/corp/core/package-lock.json
+
+      - name: Install core deps
+        run: npm ci
+        working-directory: sockacademy/corp/core
+
+      - name: Push order event to queue
+        env:
+          UPSTASH_REDIS_REST_URL:   ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+          EVENT_TOPIC:  ${{ github.event.client_payload.topic }}
+          EVENT_DATA:   ${{ toJson(github.event.client_payload.data) }}
+        run: |
+          node -e "
+            require('dotenv').config({ path: '../../.env' });
+            const q = require('./queue');
+            const data = JSON.parse(process.env.EVENT_DATA || '{}');
+            q.orderCreated({ topic: process.env.EVENT_TOPIC, ...data })
+              .then(() => console.log('Order event queued'))
+              .catch(e => { console.error(e); process.exit(1); });
+          "
+        working-directory: sockacademy/corp/core
+
+  # ── Inventory Low ────────────────────────────────────────────────────────
+  handle-inventory:
+    name: Handle Low Inventory
+    if: github.event.client_payload.topic == 'inventory_levels/update'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: sockacademy/corp/core/package-lock.json
+
+      - name: Install core deps
+        run: npm ci
+        working-directory: sockacademy/corp/core
+
+      - name: Check threshold and push stock event
+        env:
+          UPSTASH_REDIS_REST_URL:   ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+          STOCK_LOW_THRESHOLD:      ${{ secrets.STOCK_LOW_THRESHOLD }}
+          EVENT_DATA:               ${{ toJson(github.event.client_payload.data) }}
+        run: |
+          node -e "
+            require('dotenv').config({ path: '../../.env' });
+            const q = require('./queue');
+            const data = JSON.parse(process.env.EVENT_DATA || '{}');
+            const threshold = parseInt(process.env.STOCK_LOW_THRESHOLD || '10', 10);
+            const available = data.available ?? data.inventory_quantity ?? 999;
+            if (available <= threshold) {
+              q.stockLow(data)
+                .then(() => console.log('Stock low event queued — available:', available))
+                .catch(e => { console.error(e); process.exit(1); });
+            } else {
+              console.log('Stock OK — available:', available, '— no event queued');
+            }
+          "
+        working-directory: sockacademy/corp/core
+
+      - name: Trigger A7 supplier monitor
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_PAT_SECRETS_WRITE }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              workflow_id: 'a7-supplier-monitor.yml',
+              ref: 'main',
+            });
+
+  # ── Product Updated ──────────────────────────────────────────────────────
+  handle-product:
+    name: Handle Product Update
+    if: |
+      github.event.client_payload.topic == 'products/update' ||
+      github.event.client_payload.topic == 'products/create'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log product event
+        run: |
+          echo "Product event: ${{ github.event.client_payload.topic }}"
+          echo "Product ID: ${{ github.event.client_payload.data.id }}"
+          echo "Product: ${{ github.event.client_payload.data.title }}"
