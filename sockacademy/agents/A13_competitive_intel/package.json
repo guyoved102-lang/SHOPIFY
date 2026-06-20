@@ -9,9 +9,8 @@
     "dry-run": "node agent.js --dry-run"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
     "dotenv": "^16.4.5",
-    "google-auth-library": "^9.14.2",
-    "googleapis": "^144.0.0",
     "nodemailer": "^6.9.14"
   }
 }

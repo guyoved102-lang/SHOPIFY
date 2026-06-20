@@ -8,9 +8,8 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.24.0",
+    "@supabase/supabase-js": "^2.45.0",
     "dotenv": "^16.0.0",
-    "google-spreadsheet": "^4.1.4",
-    "google-auth-library": "^9.0.0",
     "google-trends-api": "^4.9.2",
     "nodemailer": "^6.9.0"
   }

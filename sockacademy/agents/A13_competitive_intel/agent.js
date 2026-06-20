@@ -9,12 +9,11 @@ require('dotenv').config({ path: '../../.env' });
 
 const https   = require('https');
 const nodemailer = require('nodemailer');
-const { google } = require('googleapis');
-const { JWT }    = require('google-auth-library');
+const { createClient } = require('@supabase/supabase-js');
 
 // ─── Startup Guards ──────────────────────────────────────────────────────────
 const REQUIRED = ['PERPLEXITY_API_KEY', 'ANTHROPIC_API_KEY', 'GMAIL_APP_PASSWORD',
-                  'GOOGLE_SERVICE_ACCOUNT_JSON', 'GOOGLE_SHEET_ID'];
+                  'SUPABASE_URL', 'SUPABASE_SERVICE_KEY'];
 const missing = REQUIRED.filter(k => !process.env[k]);
 if (missing.length) {
   console.error('❌ Missing env vars:', missing.join(', '));
@@ -25,7 +24,6 @@ if (missing.length) {
 const STRIKE_MODE  = process.argv.includes('--strike');
 const DRY_RUN      = process.argv.includes('--dry-run');
 const ADMIN_EMAIL  = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
-const SHEET_TAB    = 'A13 Intel';
 
 const MARKETS = [
   { code: 'US', lang: 'en', currency: 'USD', symbol: '$',  active: true  },
@@ -225,43 +223,31 @@ Required JSON format:
   });
 }
 
-// ─── Google Sheets Logging ────────────────────────────────────────────────────
-async function logToSheets(rows) {
+// ─── Supabase Logging ─────────────────────────────────────────────────────────
+async function logToSupabase(rows) {
   if (!rows.length) return;
-  const sa = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
-  const auth = new JWT({
-    email: sa.client_email, key: sa.private_key,
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-  });
-  const sheets = google.sheets({ version: 'v4', auth });
-  const sheetId = process.env.GOOGLE_SHEET_ID;
-
-  // Ensure tab exists
-  try {
-    await sheets.spreadsheets.batchUpdate({
-      spreadsheetId: sheetId,
-      requestBody: { requests: [{ addSheet: { properties: { title: SHEET_TAB } } }] },
-    });
-    // Add header row
-    await sheets.spreadsheets.values.update({
-      spreadsheetId: sheetId, range: `${SHEET_TAB}!A1`,
-      valueInputOption: 'RAW',
-      requestBody: { values: [[
-        'Date', 'Mode', 'Market', 'Tier', 'Competitor', 'Category',
-        'Price Min', 'Price Max', 'New Products', 'Out of Stock',
-        'Active Promo', 'Promo Detail', 'Opportunity', 'Action', 'Urgency', 'Summary',
-      ]] },
-    });
-  } catch { /* tab already exists */ }
-
-  await sheets.spreadsheets.values.append({
-    spreadsheetId: sheetId,
-    range: `${SHEET_TAB}!A1`,
-    valueInputOption: 'RAW',
-    insertDataOption: 'INSERT_ROWS',
-    requestBody: { values: rows },
-  });
-  console.log(`  📊 Logged ${rows.length} rows → Sheets`);
+  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+  const records = rows.map(r => ({
+    run_date:    r[0],
+    mode:        r[1],
+    market:      r[2],
+    tier:        r[3],
+    competitor:  r[4],
+    category:    r[5],
+    price_min:   r[6] !== '' ? parseFloat(r[6]) : null,
+    price_max:   r[7] !== '' ? parseFloat(r[7]) : null,
+    new_products: r[8],
+    out_of_stock: r[9] === 'Yes',
+    active_promo: r[10] === 'Yes',
+    promo_detail: r[11],
+    opportunity:  r[12],
+    action:       r[13],
+    urgency:      r[14],
+    summary:      r[15],
+  }));
+  const { error } = await supabase.from('competitor_intel').insert(records);
+  if (error) throw new Error(`Supabase insert failed: ${error.message}`);
+  console.log(`  📊 Logged ${records.length} rows → Supabase competitor_intel`);
 }
 
 // ─── Email Report ─────────────────────────────────────────────────────────────
@@ -411,14 +397,14 @@ async function run() {
   // Skip email in strike mode if no HIGH opportunities
   if (STRIKE_MODE && strikes.length === 0) {
     console.log('  ✅ No strikes detected — no email sent.');
-    if (!DRY_RUN) await logToSheets(sheetRows);
+    if (!DRY_RUN) await logToSupabase(sheetRows);
     return;
   }
 
   const html = buildEmailHtml(results, mode, runDate);
 
   if (!DRY_RUN) {
-    await logToSheets(sheetRows);
+    await logToSupabase(sheetRows);
     await sendEmail(html, mode, strikes.length);
   } else {
     console.log('  [DRY RUN] Would have logged', sheetRows.length, 'rows and sent email');

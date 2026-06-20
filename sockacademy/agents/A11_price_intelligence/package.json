@@ -8,11 +8,10 @@
     "dry-run": "DRY_RUN=true node agent.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
     "axios": "^1.6.0",
     "cheerio": "^1.0.0",
     "dotenv": "^16.0.0",
-    "google-auth-library": "^9.0.0",
-    "google-spreadsheet": "^4.1.4",
     "nodemailer": "^6.9.0"
   }
 }

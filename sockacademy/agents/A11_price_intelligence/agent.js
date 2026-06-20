@@ -20,13 +20,11 @@ require('dotenv').config({ path: '../../.env' });
 const axios = require('axios');
 const cheerio = require('cheerio');
 const nodemailer = require('nodemailer');
-const { GoogleSpreadsheet } = require('google-spreadsheet');
-const { JWT } = require('google-auth-library');
+const { createClient } = require('@supabase/supabase-js');
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const GMAIL_USER = 'guyoved102@gmail.com';
 const ALERT_EMAIL = 'guyoved102@gmail.com';
-const SHEET_ID = process.env.GOOGLE_SHEET_ID;
 
 // SockAcademy price floors — for positioning comparison
 const SA_PRICE_FLOORS = {
@@ -302,55 +300,30 @@ function buildMarketSummary(results) {
   });
 }
 
-async function writeToSheets(results) {
-  if (!SHEET_ID || !process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
-    console.log('⚠️  Sheets env not set — skipping write');
+async function writeToSupabase(results) {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
+    console.log('⚠️  Supabase credentials missing — skipping write');
     return;
   }
 
-  const svc = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
-  const auth = new JWT({
-    email: svc.client_email,
-    key: svc.private_key,
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-  });
-
-  const doc = new GoogleSpreadsheet(SHEET_ID, auth);
-  await doc.loadInfo();
-
-  let sheet = doc.sheetsByTitle['A11_Prices'];
-  if (!sheet) {
-    sheet = await doc.addSheet({ title: 'A11_Prices' });
-  }
-
-  const HEADERS = [
-    'Timestamp',
-    'Brand',
-    'Product Name',
-    'Category',
-    'Price (USD)',
-    'SA Floor (USD)',
-    'Δ vs SA',
-    'URL',
-    'Status',
-  ];
-
-  await sheet.setHeaderRow(HEADERS);
-
+  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
   const rows = results.map((r) => ({
-    'Timestamp': r.timestamp,
-    'Brand': r.brand,
-    'Product Name': r.product_name,
-    'Category': r.category,
-    'Price (USD)': r.price_usd ?? '',
-    'SA Floor (USD)': r.sa_floor ?? '',
-    'Δ vs SA': r.price_usd && r.sa_floor ? (r.price_usd - r.sa_floor).toFixed(2) : '',
-    'URL': r.url,
-    'Status': r.status,
+    timestamp:    r.timestamp,
+    brand:        r.brand,
+    product_name: r.product_name,
+    category:     r.category,
+    price_usd:    r.price_usd ?? null,
+    sa_floor:     r.sa_floor ?? null,
+    delta_vs_sa:  r.price_usd && r.sa_floor
+      ? parseFloat((r.price_usd - r.sa_floor).toFixed(2))
+      : null,
+    url:    r.url,
+    status: r.status,
   }));
 
-  await sheet.addRows(rows);
-  console.log(`\n✅ Sheets: ${results.length} rows → A11_Prices tab`);
+  const { error } = await supabase.from('competitor_prices').insert(rows);
+  if (error) throw new Error(`Supabase insert failed: ${error.message}`);
+  console.log(`\n✅ Supabase: ${results.length} rows → competitor_prices`);
 }
 
 function buildEmailHtml(results, summary, dateStr) {
@@ -510,7 +483,7 @@ async function main() {
     }
 
     if (!DRY_RUN) {
-      await writeToSheets(results);
+      await writeToSupabase(results);
       await sendEmailDigest(results, summary);
     } else {
       console.log('\n🔬 DRY_RUN: skipping Sheets + email');

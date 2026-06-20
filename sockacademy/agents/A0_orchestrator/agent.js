@@ -7,165 +7,123 @@
  */
 
 require('dotenv').config({ path: '../../.env' });
-const { GoogleSpreadsheet } = require('google-spreadsheet');
-const { JWT } = require('google-auth-library');
+const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 
-const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID;
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const FORCE_WEEKLY = process.env.FORCE_WEEKLY_REPORT === 'true';
 const ADMIN_EMAIL = 'sockacademy.store@gmail.com';
 
-const PRODUCTS_TAB = 'A1_Products';
-const STATE_TAB = 'A0_STATE_LEDGER';
+// ─── SUPABASE ────────────────────────────────────────────────────────────────
 
-// ─── GOOGLE SHEETS ───────────────────────────────────────────────────────────
-
-async function loadDoc() {
-  if (!process.env.GOOGLE_SERVICE_ACCOUNT_JSON) throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON not set');
-  if (!SPREADSHEET_ID) throw new Error('GOOGLE_SHEET_ID not set');
-
-  const sa = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
-  const auth = new JWT({
-    email: sa.client_email,
-    key: sa.private_key,
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-  });
-
-  const doc = new GoogleSpreadsheet(SPREADSHEET_ID, auth);
-  await doc.loadInfo();
-  return doc;
+function getSupabase() {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY)
+    throw new Error('SUPABASE_URL / SUPABASE_SERVICE_KEY not set');
+  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 }
 
 // ─── STUCK DETECTION ─────────────────────────────────────────────────────────
 // A0 runs at 09:00 UTC — 1 hour after A2 starts (07:00) and 40 min past A2's
 // 20-min timeout. Any row still in 'uploading' at this point is definitively stuck.
 
-async function runStuckDetection(doc) {
-  const sheet = doc.sheetsByTitle[PRODUCTS_TAB];
-  if (!sheet) {
-    console.log(`⚠️  Tab "${PRODUCTS_TAB}" not found — skipping stuck detection`);
-    return { stuckRows: [], markedCount: 0 };
-  }
+async function runStuckDetection(supabase) {
+  const { data: rows, error } = await supabase
+    .from('products')
+    .select('id, product_name, cj_pid, upload_status')
+    .eq('upload_status', 'uploading');
 
-  const rows = await sheet.getRows();
-  const stuckRows = [];
-  const now = Math.floor(Date.now() / 1000);
+  if (error) throw new Error(`Supabase stuck query failed: ${error.message}`);
 
-  for (const row of rows) {
-    const uploadStatus = (row.get('Upload Status') || '').trim();
-    if (uploadStatus === 'uploading') {
-      stuckRows.push({
-        name: row.get('Product Name') || 'Unknown',
-        pid: row.get('PID') || '?',
-        row,
-      });
-    }
-  }
-
+  const stuckRows = rows || [];
   if (stuckRows.length === 0) {
     console.log('✅ Stuck detection: no stuck rows');
     return { stuckRows: [], markedCount: 0 };
   }
 
   console.log(`🚨 Found ${stuckRows.length} stuck row(s)`);
+  const now = Math.floor(Date.now() / 1000);
   let markedCount = 0;
 
-  for (const { name, pid, row } of stuckRows) {
-    console.log(`   → Stuck: "${name}" (PID: ${pid})`);
+  for (const row of stuckRows) {
+    console.log(`   → Stuck: "${row.product_name}" (PID: ${row.cj_pid || '?'})`);
     if (DRY_RUN) {
       console.log(`     [DRY_RUN] Would write stuck:${now}`);
     } else {
-      row.set('Upload Status', `stuck:${now}`);
-      await row.save();
-      markedCount++;
+      const { error: updateErr } = await supabase
+        .from('products')
+        .update({ upload_status: `stuck:${now}` })
+        .eq('id', row.id);
+      if (updateErr) console.error(`     ⚠️ Failed to mark stuck: ${updateErr.message}`);
+      else markedCount++;
     }
   }
 
   return { stuckRows, markedCount };
 }
 
-// ─── STATE LEDGER ─────────────────────────────────────────────────────────────
+// ─── HEALTH LOG ───────────────────────────────────────────────────────────────
 
-async function readStateLedger(doc) {
-  const sheet = doc.sheetsByTitle[STATE_TAB];
-  if (!sheet) {
-    console.log(`⚠️  Tab "${STATE_TAB}" not found`);
-    console.log('   → Create manually in Google Sheets with columns:');
-    console.log('     Agent | Status | LastRun | OutputKey | ErrorMessage | RetryCount | LockedBy');
+async function readHealthLog(supabase) {
+  const { data: rows, error } = await supabase
+    .from('agent_health_log')
+    .select('*');
+
+  if (error) {
+    console.log(`⚠️  Could not read agent_health_log: ${error.message}`);
     return null;
   }
 
-  const rows = await sheet.getRows();
   const ledger = {};
-  for (const row of rows) {
-    const agent = row.get('Agent');
-    if (agent) {
-      ledger[agent] = {
-        status: row.get('Status') || '',
-        lastRun: row.get('LastRun') || '',
-        outputKey: row.get('OutputKey') || '',
-        errorMessage: row.get('ErrorMessage') || '',
-        retryCount: row.get('RetryCount') || '0',
+  for (const row of rows || []) {
+    if (row.agent) {
+      ledger[row.agent] = {
+        status:       row.status || '',
+        lastRun:      row.last_run || '',
+        outputKey:    row.output_key || '',
+        errorMessage: row.error_message || '',
+        retryCount:   String(row.retry_count || '0'),
       };
     }
   }
-  return { sheet, rows, ledger };
+  return ledger;
 }
 
-async function updateA0State(doc, status, errorMessage = '') {
-  const result = await readStateLedger(doc);
-  if (!result) return;
-
-  const { sheet, rows, ledger } = result;
+async function updateA0State(supabase, status, errorMessage = '') {
   const now = new Date().toISOString();
-
-  if (ledger['A0']) {
-    const a0Row = rows.find(r => r.get('Agent') === 'A0');
-    if (a0Row) {
-      a0Row.set('Status', status);
-      a0Row.set('LastRun', now);
-      a0Row.set('ErrorMessage', errorMessage);
-      if (!DRY_RUN) await a0Row.save();
-      else console.log(`[DRY_RUN] Would update A0 row: ${status}`);
-    }
-  } else {
-    if (!DRY_RUN) {
-      await sheet.addRow({
-        Agent: 'A0',
-        Status: status,
-        LastRun: now,
-        OutputKey: '',
-        ErrorMessage: errorMessage,
-        RetryCount: '0',
-        LockedBy: '',
-      });
-    } else {
-      console.log(`[DRY_RUN] Would add A0 row: ${status}`);
-    }
+  if (DRY_RUN) {
+    console.log(`[DRY_RUN] Would log A0 state: ${status}`);
+    return;
   }
+  const { error } = await supabase
+    .from('agent_health_log')
+    .upsert(
+      { agent: 'A0', status, last_run: now, error_message: errorMessage, updated_at: now },
+      { onConflict: 'agent' }
+    );
+  if (error) console.error(`⚠️  State log failed: ${error.message}`);
+  else console.log(`📋 A0 state → ${status}`);
 }
 
 // ─── PRODUCTS SUMMARY ─────────────────────────────────────────────────────────
 
-async function buildProductsSummary(doc) {
-  const sheet = doc.sheetsByTitle[PRODUCTS_TAB];
-  if (!sheet) return null;
+async function buildProductsSummary(supabase) {
+  const { data: rows, error } = await supabase
+    .from('products')
+    .select('status, upload_status');
 
-  const rows = await sheet.getRows();
+  if (error) throw new Error(`Products summary failed: ${error.message}`);
+
   const s = { total: 0, approved: 0, uploaded: 0, errors: 0, stuck: 0, pending: 0 };
-
-  for (const row of rows) {
-    const status = (row.get('Status') || '').trim();
-    const uploadStatus = (row.get('Upload Status') || '').trim();
+  for (const row of rows || []) {
+    const status = (row.status || '').trim();
+    const uploadStatus = (row.upload_status || '').trim();
     s.total++;
     if (status === 'Approved') s.approved++;
     if (uploadStatus.startsWith('uploaded:')) s.uploaded++;
-    else if (uploadStatus.startsWith('error:')) s.errors++;
+    else if (uploadStatus.startsWith('error:') || uploadStatus.startsWith('Error:')) s.errors++;
     else if (uploadStatus.startsWith('stuck:')) s.stuck++;
     else if (uploadStatus === '') s.pending++;
   }
-
   return s;
 }
 
@@ -215,7 +173,7 @@ function stuckAlertHtml(stuckRows) {
       </tr>
       ${rowsHtml}
     </table>
-    <p><strong>Recovery:</strong> Open Google Sheets → A1_Products → clear <code>Upload Status</code> to <code>""</code> for retry,
+    <p><strong>Recovery:</strong> Open Supabase Dashboard → products table → clear <code>upload_status</code> to <code>""</code> for retry,
     or set to <code>error:manual-skip</code> to permanently skip.</p>
     <hr>
     <p style="color:#888;font-size:11px">SockAcademy A0 Orchestrator — Phase B MVP</p>
@@ -232,14 +190,14 @@ function weeklyReportHtml(summary, ledger, stuckCount) {
           <th style="padding:4px 8px;text-align:left">Metric</th>
           <th style="padding:4px 8px;text-align:left">Count</th>
         </tr>
-        <tr><td style="padding:4px 8px">Total rows in A1_Products</td><td style="padding:4px 8px">${summary.total}</td></tr>
+        <tr><td style="padding:4px 8px">Total products in Supabase</td><td style="padding:4px 8px">${summary.total}</td></tr>
         <tr><td style="padding:4px 8px">Approved (by Guy)</td><td style="padding:4px 8px">${summary.approved}</td></tr>
         <tr><td style="padding:4px 8px">✅ Uploaded to Shopify</td><td style="padding:4px 8px">${summary.uploaded}</td></tr>
         <tr><td style="padding:4px 8px">❌ Upload errors</td><td style="padding:4px 8px">${summary.errors}</td></tr>
         <tr><td style="padding:4px 8px">🚨 Stuck (needs action)</td><td style="padding:4px 8px">${summary.stuck}</td></tr>
         <tr><td style="padding:4px 8px">⏳ Pending (awaiting approval)</td><td style="padding:4px 8px">${summary.pending}</td></tr>
       </table>`
-    : '<p><em>A1_Products tab not accessible.</em></p>';
+    : '<p><em>Products table not accessible.</em></p>';
 
   const ledgerSection = ledger && Object.keys(ledger).length > 0
     ? `<table border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;margin:8px 0">
@@ -258,15 +216,15 @@ function weeklyReportHtml(summary, ledger, stuckCount) {
           </tr>`
         ).join('')}
       </table>`
-    : '<p><em>State ledger is empty — agents will write here in Phase C.</em></p>';
+    : '<p><em>agent_health_log is empty — agents will write here as they run.</em></p>';
 
   return `<div style="font-family:monospace;max-width:700px">
     <h2>📊 SockAcademy Weekly Health Report</h2>
     <p><strong>${dateStr}</strong><br>Generated: ${ts}</p>
     <hr>
-    <h3>🏭 Product Pipeline (A1_Products)</h3>
+    <h3>🏭 Product Pipeline (Supabase: products)</h3>
     ${pipelineSection}
-    <h3>📋 A0_STATE_LEDGER</h3>
+    <h3>📋 agent_health_log</h3>
     ${ledgerSection}
     <h3>${stuckCount > 0 ? `🚨 Stuck Rows This Run: ${stuckCount}` : '✅ Stuck Detection: Clean'}</h3>
     ${stuckCount > 0
@@ -275,7 +233,7 @@ function weeklyReportHtml(summary, ledger, stuckCount) {
     <hr>
     <p style="color:#888;font-size:11px">
       SockAcademy A0 Orchestrator — Phase B MVP |
-      <a href="https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}">Open Google Sheets</a>
+      <a href="https://supabase.com/dashboard/project/hpxjlzkdezyvoicqflhl">Open Supabase Dashboard</a>
     </p>
   </div>`;
 }
@@ -287,12 +245,12 @@ async function main() {
   console.log(`   ${new Date().toISOString()} | DRY_RUN=${DRY_RUN} | FORCE_WEEKLY=${FORCE_WEEKLY}`);
   console.log('─'.repeat(52));
 
-  const doc = await loadDoc();
-  console.log(`✅ Sheets connected: "${doc.title}"`);
+  const supabase = getSupabase();
+  console.log('✅ Supabase connected');
 
   // Step 1 — Stuck detection (every run)
   console.log('\n[1/3] Stuck Detection');
-  const { stuckRows, markedCount } = await runStuckDetection(doc);
+  const { stuckRows, markedCount } = await runStuckDetection(supabase);
 
   if (stuckRows.length > 0) {
     await sendEmail(
@@ -305,20 +263,20 @@ async function main() {
   const isSunday = new Date().getDay() === 0;
   if (isSunday || FORCE_WEEKLY) {
     console.log('\n[2/3] Weekly Health Report');
-    const summary = await buildProductsSummary(doc);
-    const ledgerResult = await readStateLedger(doc);
+    const summary = await buildProductsSummary(supabase);
+    const ledger  = await readHealthLog(supabase);
 
     await sendEmail(
       `📊 SockAcademy Weekly Health — ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'Asia/Jerusalem' })}`,
-      weeklyReportHtml(summary, ledgerResult?.ledger || null, stuckRows.length)
+      weeklyReportHtml(summary, ledger, stuckRows.length)
     );
   } else {
     console.log('\n[2/3] Weekly Report — skipped (not Sunday)');
   }
 
-  // Step 3 — Update A0's own state in ledger
-  console.log('\n[3/3] Updating A0_STATE_LEDGER');
-  await updateA0State(doc, 'COMPLETE');
+  // Step 3 — Update A0's own state in health log
+  console.log('\n[3/3] Updating agent_health_log');
+  await updateA0State(supabase, 'COMPLETE');
   console.log('✅ A0 state written');
 
   console.log('\n' + '─'.repeat(52));

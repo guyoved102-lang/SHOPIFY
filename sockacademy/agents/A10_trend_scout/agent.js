@@ -13,16 +13,8 @@
 require('dotenv').config({ path: '../../.env' });
 const Anthropic      = require('@anthropic-ai/sdk');
 const googleTrends   = require('google-trends-api');
-const { GoogleSpreadsheet } = require('google-spreadsheet');
-const { JWT }        = require('google-auth-library');
+const { createClient } = require('@supabase/supabase-js');
 const nodemailer     = require('nodemailer');
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// CONFIG
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-const SHEET_ID  = process.env.GOOGLE_SHEET_ID;
-const SHEET_TAB = 'A10_Trends';
 
 // Seed keywords per category — structural placeholders, expand after market research
 const CATEGORIES = {
@@ -245,54 +237,34 @@ Return ONLY valid JSON. No markdown, no explanation outside the array.`;
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// LAYER 3 — OUTPUT: Google Sheets
+// LAYER 3 — OUTPUT: Supabase
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-async function writeToSheets(trends) {
-  if (!SHEET_ID || !process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
-    console.log('⚠️  Sheets credentials missing — skipping Sheets write');
+async function writeToSupabase(trends) {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
+    console.log('⚠️  Supabase credentials missing — skipping write');
     return;
   }
 
-  const serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
-  const auth = new JWT({
-    email:  serviceAccount.client_email,
-    key:    serviceAccount.private_key,
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-  });
-
-  const doc = new GoogleSpreadsheet(SHEET_ID, auth);
-  await doc.loadInfo();
-
-  // Find or create A10_Trends tab
-  let sheet = doc.sheetsByTitle[SHEET_TAB];
-  if (!sheet) {
-    sheet = await doc.addSheet({ title: SHEET_TAB });
-    await sheet.setHeaderRow([
-      'Scouted At', 'Rank', 'Trend Name', 'Category',
-      'Trend Score', 'Direction', 'Google Signal', 'Reddit Signal',
-      'CJ Search Term', 'Est. Retail (USD)', 'Rationale',
-    ]);
-    console.log(`   Created new sheet tab: ${SHEET_TAB}`);
-  }
-
+  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
   const scoutedAt = new Date().toISOString();
   const rows = trends.map(t => ({
-    'Scouted At':       scoutedAt,
-    'Rank':             t.rank,
-    'Trend Name':       t.trend_name,
-    'Category':         t.category,
-    'Trend Score':      t.trend_score,
-    'Direction':        t.trend_direction,
-    'Google Signal':    t.google_signal,
-    'Reddit Signal':    t.reddit_signal,
-    'CJ Search Term':   t.cj_search_term,
-    'Est. Retail (USD)': t.estimated_retail_usd,
-    'Rationale':        t.rationale,
+    scouted_at:           scoutedAt,
+    rank:                 t.rank,
+    trend_name:           t.trend_name,
+    category:             t.category,
+    trend_score:          t.trend_score,
+    trend_direction:      t.trend_direction,
+    google_signal:        t.google_signal,
+    reddit_signal:        t.reddit_signal,
+    cj_search_term:       t.cj_search_term,
+    estimated_retail_usd: t.estimated_retail_usd,
+    rationale:            t.rationale,
   }));
 
-  await sheet.addRows(rows);
-  console.log(`   ✅ ${rows.length} trends written to Sheets → ${SHEET_TAB}`);
+  const { error } = await supabase.from('trends').insert(rows);
+  if (error) throw new Error(`Supabase insert failed: ${error.message}`);
+  console.log(`   ✅ ${rows.length} trends written to Supabase → trends`);
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -422,7 +394,7 @@ async function main() {
 
   // Layer 3 — Output
   console.log('\n💾 Writing outputs...');
-  await writeToSheets(trends);
+  await writeToSupabase(trends);
   await sendEmailDigest(trends);
 
   console.log('\n' + '━'.repeat(44));

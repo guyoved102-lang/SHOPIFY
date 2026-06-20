@@ -4,9 +4,8 @@
   "description": "A0 — SockAcademy Orchestrator Agent (Phase B MVP)",
   "main": "agent.js",
   "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
     "dotenv": "^17.0.0",
-    "google-auth-library": "^9.0.0",
-    "google-spreadsheet": "^4.1.4",
     "nodemailer": "^9.0.0"
   }
 }
