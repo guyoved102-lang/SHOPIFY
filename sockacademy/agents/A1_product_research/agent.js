@@ -694,6 +694,53 @@ async function run() {
     }
   }
 
+  // Supabase — כתיבת top10 לטבלת products
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) {
+    try {
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+      const runDate  = new Date().toISOString().split('T')[0];
+
+      const upsertRows = top10.map(p => {
+        const pr = suggestRetailPrice(p);
+        return {
+          cj_pid:          p.pid || null,
+          name:            p.name,
+          category:        p.category,
+          materials:       p.materials || [],
+          platform:        p.source,
+          rating:          p.rating   || null,
+          orders_count:    p.orders   || null,
+          supplier_price:  p.supplierPrice || null,
+          retail_price:    pr.retail  || null,
+          score:           p.score,
+          image_url:       p.imageUrl || null,
+          product_url:     p.url      || null,
+          status:          'Pending',
+          upload_status:   '',
+          run_date:        runDate,
+        };
+      });
+
+      const { error: sbErr } = await supabase
+        .from('products')
+        .upsert(upsertRows, { onConflict: 'cj_pid', ignoreDuplicates: false });
+
+      if (sbErr) throw new Error(sbErr.message);
+      console.log(`✅ ${upsertRows.length} מוצרים נכתבו ל-Supabase (products)`);
+
+      // Push event to queue so A2 knows new candidates are available
+      const queue = require('../../corp/core/queue');
+      await queue.push(queue.QUEUES.UPLOAD, {
+        type:    'products.researched',
+        source:  'A1',
+        payload: { count: upsertRows.length, runDate },
+      });
+    } catch (e) {
+      console.log(`⚠️  Supabase write: ${e.message}`);
+    }
+  }
+
   // Make.com webhook (legacy — אופציונלי)
   const webhookUrl = process.env.MAKE_A1_WEBHOOK;
   if (webhookUrl) {
