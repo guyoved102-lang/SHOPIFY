@@ -10,6 +10,7 @@
 
 require('dotenv').config({ path: '../../.env' });
 const nodemailer = require('nodemailer');
+const { requestApproval } = require('../../corp/core/hitl');
 
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
 const SHOPIFY_TOKEN  = process.env.SHOPIFY_MASTER_TOKEN;
@@ -472,44 +473,31 @@ async function sendConfirmation(results) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 async function main() {
-  console.log('🚀 A9 — Legal Compliance Agent v1.0');
-  console.log('━'.repeat(42));
-  console.log(`⚖️  Governing law: Delaware, USA`);
-  console.log(`⚖️  Arbitration: AAA | Class action waiver: ON`);
-  console.log(`⚖️  GDPR + CCPA compliant`);
-  console.log(`📄 Syncing ${LEGAL_PAGES.length} legal pages to Shopify...\n`);
+  console.log('A9 — Legal Compliance Agent v2.0 (HitL enabled)');
+  console.log('━'.repeat(48));
+  console.log('Governing law: Delaware, USA | GDPR + CCPA compliant');
+  console.log(`Pages to publish: ${LEGAL_PAGES.length}\n`);
 
   if (!SHOPIFY_DOMAIN || !SHOPIFY_TOKEN) {
-    console.error('❌ Missing SHOPIFY_SHOP_DOMAIN or SHOPIFY_MASTER_TOKEN');
+    console.error('ERROR: Missing SHOPIFY_SHOP_DOMAIN or SHOPIFY_MASTER_TOKEN');
     process.exit(1);
   }
 
-  const results = [];
+  const pagesSummary = LEGAL_PAGES.map(p => `• ${p.title} (/pages/${p.handle})`).join('\n');
+  console.log('Submitting for approval:\n' + pagesSummary + '\n');
 
-  for (const page of LEGAL_PAGES) {
-    process.stdout.write(`  ${page.title}... `);
-    try {
-      const result = await syncPage(page);
-      console.log(`✅ ${result.action} → ${result.url}`);
-      results.push(result);
-    } catch (e) {
-      console.log(`❌ ${e.message}`);
-      results.push({ title: page.title, action: 'error', url: '', shopify_admin: '', error: e.message });
-    }
-    await new Promise(r => setTimeout(r, 400));
-  }
+  const approvalId = await requestApproval({
+    agentId:     'A9',
+    actionType:  'legal_page_update',
+    description: `Publish/update ${LEGAL_PAGES.length} legal pages to Shopify:\n${pagesSummary}\n\nREMINDER: Review with a certified attorney before approving.`,
+    payload:     {
+      pages: LEGAL_PAGES.map(p => ({ title: p.title, handle: p.handle, body_html: p.body_html })),
+    },
+  });
 
-  console.log('\n' + '━'.repeat(42));
-  const ok = results.filter(r => r.action !== 'error').length;
-  console.log(`✅ Done — ${ok}/${results.length} pages synced`);
-
-  if (ok < results.length) {
-    console.log('⚠️  Some pages failed — check errors above');
-  }
-
-  console.log('\n⚠️  REMINDER: Review all templates with a certified attorney before launch.\n');
-
-  await sendConfirmation(results);
+  console.log(`\nApproval submitted. ID: ${approvalId}`);
+  console.log('Check guyoved102@gmail.com for approval instructions.');
+  console.log('Pages will NOT be published until you approve via GitHub Actions → hitl-approve.yml');
 }
 
 main().catch(e => {

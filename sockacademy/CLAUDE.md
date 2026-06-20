@@ -759,8 +759,14 @@ sockacademy/
 │   └── operations/
 │       └── logs/                    ← Runtime audit logs, agent health archives (Phase 2)
 │
-├── .github/
-│   └── workflows/                   ← GitHub Actions YAML (one file per agent)
+├── docs/                            ← Strategy & Ops documentation
+│   ├── strategy/                    ← VISION.md, SOCKACADEMY_VISION.md, BRAND_STRATEGY.md, MASTER_STRATEGY.html
+│   └── ops/                         ← KLAVIYO_ABANDONED_CART_FLOW.md, SKILLS_GUIDE.md/pdf, release-notes.md
+│
+├── scripts/
+│   └── setup/                       ← One-time setup scripts (exchange_token.js, create_products.js, upload_hero.js, etc.)
+│
+├── schemas/                         ← JSON schemas + IDEMPOTENCY.md
 │
 └── .env.example                     ← Complete variable reference (see file for all vars)
 ```

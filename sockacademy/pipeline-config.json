@@ -1,10 +1,21 @@
 {
   "_meta": {
-    "version": "1.0.0",
-    "last_updated": "2026-06-19",
+    "version": "2.0.0",
+    "last_updated": "2026-06-20",
     "owner": "A0 Orchestrator",
     "description": "Declarative dependency graph + trigger matrix for all 28 SockAcademy agents. A0 reads this file — no hardcoded logic in A0 agent.js.",
-    "schema_note": "Chain agents pass data via Google Sheets tabs. Parallel agents are independent — no data handoff."
+    "schema_note": "Migrated agents (A0, A2, A10, A11, A13) use Supabase as data layer. A1/A7 still use Google Sheets — pending Supabase migration.",
+    "data_layer": {
+      "supabase_migrated": ["A0", "A2", "A10", "A11", "A13"],
+      "google_sheets_legacy": ["A1", "A7"],
+      "supabase_tables": {
+        "products": "A2 output — Shopify product sync",
+        "trends": "A10 output — trend intelligence",
+        "competitor_prices": "A11 output — pricing data",
+        "competitor_intel": "A13 output — competitive landscape",
+        "agent_health_log": "A0 state ledger"
+      }
+    }
   },
 
   "concurrency_limit": 6,
@@ -75,7 +86,11 @@
           "agent": "A10",
           "workflow": "a10-trend-scout.yml",
           "timeout_minutes": 20,
-          "data_output": { "via": "email_to_admin", "schema": null },
+          "data_output": {
+            "via": "supabase",
+            "table": "trends",
+            "also": "email_to_admin"
+          },
           "retry": { "max_attempts": 2, "backoff_minutes": 5 },
           "idempotency": "stateless — safe to retry"
         },
@@ -84,7 +99,11 @@
           "workflow": "a11-price-intelligence.yml",
           "timeout_minutes": 20,
           "note": "Replace cheerio with Perplexity API — pending PERPLEXITY_API_KEY secret",
-          "data_output": { "via": "email_to_admin", "schema": null },
+          "data_output": {
+            "via": "supabase",
+            "table": "competitor_prices",
+            "also": "email_to_admin"
+          },
           "retry": { "max_attempts": 2, "backoff_minutes": 5 },
           "idempotency": "stateless — safe to retry"
         },
@@ -93,9 +112,8 @@
           "workflow": "a13-competitive-intel.yml",
           "timeout_minutes": 30,
           "data_output": {
-            "via": "google_sheets",
-            "tab": "A13_CompetitorIntel",
-            "schema": null
+            "via": "supabase",
+            "table": "competitor_intel"
           },
           "retry": { "max_attempts": 2, "backoff_minutes": 10 },
           "idempotency": "stateless — appends rows, safe to retry"
@@ -212,11 +230,11 @@
   },
 
   "state_ledger": {
-    "location": "Google Sheets",
-    "tab": "A0_STATE_LEDGER",
-    "columns": ["Agent", "Status", "LastRun", "OutputKey", "ErrorMessage", "RetryCount", "LockedBy"],
+    "location": "supabase",
+    "table": "agent_health_log",
+    "columns": ["agent_id", "status", "last_run", "output_key", "error_message", "retry_count", "locked_by"],
     "status_values": ["PENDING", "RUNNING", "COMPLETE", "FAILED", "DEAD", "SKIPPED", "INVALID"],
-    "setup_note": "Tab must be created manually in the SockAcademy Google Sheet before A0 first run"
+    "setup_note": "Table exists in Supabase with RLS ON. Migrated from Google Sheets 20/06/2026."
   },
 
   "stuck_detection": {

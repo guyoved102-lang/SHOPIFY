@@ -1,0 +1,45 @@
+name: HitL — Approve or Reject Action
+
+on:
+  workflow_dispatch:
+    inputs:
+      approval_id:
+        description: 'Approval ID (UUID from email)'
+        required: true
+        type: string
+      decision:
+        description: 'Decision'
+        required: true
+        type: choice
+        options:
+          - approve
+          - reject
+
+jobs:
+  resolve:
+    name: Resolve Approval
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: sockacademy/corp/core/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: sockacademy/corp/core
+
+      - name: Execute approval decision
+        env:
+          APPROVAL_ID: ${{ inputs.approval_id }}
+          DECISION: ${{ inputs.decision }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SHOPIFY_SHOP_DOMAIN: ${{ secrets.SHOPIFY_SHOP_DOMAIN }}
+          SHOPIFY_MASTER_TOKEN: ${{ secrets.SHOPIFY_MASTER_TOKEN }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: node hitl-execute.js
+        working-directory: sockacademy/corp/core
