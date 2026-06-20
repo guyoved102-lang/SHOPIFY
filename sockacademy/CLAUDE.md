@@ -28,36 +28,12 @@ GitHub workflow    → .github/workflows/
 
 ---
 
-## 🔴 טריגר סיום שיחה — חובה
+## 🟢 פרוטוקול פתיחת שיחה — חובה (v3)
 
-**כאשר גיא כותב "סיום שיחה" או "מסיימים שיחה" — מופעל אוטומטית:**
-
-### שלב 1 — QA Sweep
-1. בדיקת syntax לכל agent files שנגענו בשיחה
-2. סריקת credentials — אפס hardcoded בשום קובץ
-3. השוואת GitHub Secrets שמוזכרים ב-YAMLs מול `gh secret list`
-4. בדיקת TODO/placeholders — מה בכוונה ומה צריך תיקון
-
-### שלב 2 — שמירת מצב (CRITICAL — רציפות בין שיחות)
-5. עדכון `memory/project_sockacademy_state.md`:
-   - סמן ✅ על כל מה שהושלם בשיחה זו
-   - עדכן סעיף `🔴 PENDING` עם כל המשימות הפתוחות לגיא ולשיחה הבאה
-6. git commit + push של כל שינויים פתוחים
-
-### שלב 3 — דוח סיום
-7. דוח QA בעברית:
-   - מה הושלם בשיחה הזו (commits ספציפיים)
-   - מה ממתין לגיא (רשימה מדויקת)
-   - מה ממתין לשיחה הבאה (agent / task הבא)
-   - מצב CI (ירוק/אדום)
-
-**מטרה:** שיחה חדשה מתחילה בדיוק מהמקום שעצרנו — ללא שום אובדן הקשר.
-
-## 🤖 הוראת פתיחת שיחה — חובה
-**בתחילת כל שיחה חדשה (פעם אחת בלבד):**
-1. קרא `memory/project_sockacademy_state.md` → הצג PENDING section לגיא
-2. קרא `docs/ops/ANTI_RECURRENCE_PROTOCOL.md` → הפנם את כל 12 הפרוטוקולים
-3. הפעל `/run-sockacademy-agents` לבדיקת בריאות הסוכנים. דווח בשורה אחת.
+**בתחילת כל שיחה חדשה — הפעל `/boot-sockacademy`. הוא עושה:**
+1. טוען 5 קבצי זיכרון (CLAUDE.md + memory + ANTI_RECURRENCE_PROTOCOL)
+2. מריץ System Health Snapshot: CI status + git status + last commit
+3. מציג Boot Dashboard v3 עם PENDING ברורה לגיא
 
 **חיסכון בטוקנים — תמיד:**
 תגובות קצרות. לא לחזור על מה שנאמר. לא לסכם. לא להסביר לפני שעושים — פשוט לעשות.
@@ -67,6 +43,74 @@ GitHub workflow    → .github/workflows/
 
 **למידה מתמשכת:**
 תוך כדי שיחה — אם מגלים משהו חדש על גיא (סגנון, העדפה, דרך חשיבה) — לעדכן `memory/user_guy.md` מיד.
+
+---
+
+## ⚡ פרוטוקול Mid-Session — טריגרים אוטומטיים (חדש)
+
+**אלו הם triggers שמפעילים פעולה אוטומטית — ללא צורך שגיא יבקש:**
+
+### טריגר 1 — גיא מאשר שמשהו עבד
+**מילות מפתח:** "הרצתי ועבד", "PROVEN", "עבד", "אישרתי", "הוספתי", "בוצע", "הרצתי SQL", "Secret נוסף"
+**פעולה:** עדכן `memory/project_sockacademy_state.md` מיד — סמן ✅ על הפריט הספציפי. לא לחכות ל-`סיום שיחה`.
+
+### טריגר 2 — לפני כל קובץ חדש (Write/Edit)
+**פעולה אוטומטית — לפני כל `Write` לקובץ שלא קיים:**
+1. הכרז: "קובץ זה שייך ל-`<canonical path>` לפי CLAUDE.md"
+2. בדוק: "האם אני מזהם root?"
+3. אשר: "structure-lint יתפוס אם טעיתי"
+אם לא ברור לאיזה dir → לשאול לפני יצירה.
+
+### טריגר 3 — לפני כל `git commit`
+**פעולה אוטומטית:**
+- `git diff --cached` — לוודא אפס credentials, אפס .env, אפס TODO
+- אם נמצא משהו → לעצור ולדווח לגיא לפני commit
+
+### טריגר 4 — agent הושלם
+**פעולה אוטומטית — מיד אחרי git push של agent:**
+- הרץ PARANOIA MODE (6 בדיקות)
+- עדכן סטטוס agent ל-✅ ב-memory
+- הצג: מה הבא לפי pipeline-config.json
+
+### טריגר 5 — החלטה ארכיטקטורית חדשה
+**מילות מפתח:** "נחליט ש...", "מעכשיו...", "שינינו את...", "ארכיטקטורה חדשה"
+**פעולה:** שמור להחלטה ל-memory מיד — לא בסוף השיחה.
+
+### טריגר 6 — context מתקרב לגבול
+**סימנים:** שיחה ארוכה מאוד, הודעת מערכת על compression, גיא מציין
+**פעולה:** הרץ שמירת מצב מקוצרת — עדכן PENDING ב-memory + commit כל שינוי פתוח.
+
+---
+
+## 🔴 פרוטוקול סיום שיחה — חובה (v3)
+
+**כאשר גיא כותב "סיום שיחה" — מופעל אוטומטית:**
+
+### שלב 1 — QA Sweep
+1. Syntax check: כל agent files שנגענו בשיחה
+2. Credentials scan: `git diff HEAD` — אפס secrets, אפס .env
+3. SMTP check: כל nodemailer config = `sockacademy.store@gmail.com`
+4. Placeholders scan: אפס `TODO|FIXME|coming soon` בקוד חדש
+5. Secrets validation: כל `process.env.X` שנוסף → קיים ב-GitHub Secrets?
+
+### שלב 2 — שמירת מצב (CRITICAL)
+6. עדכן `memory/project_sockacademy_state.md`:
+   - ✅ על כל מה שהושלם בשיחה זו
+   - עדכן `🔴 PENDING` עם כל המשימות הפתוחות
+   - הוסף שורת "Next session primer": משפט אחד — מה בדיוק יעשה Claude בפתיחת השיחה הבאה
+
+### שלב 3 — Git
+7. `git add` + `git commit` + `git push`
+8. וודא push הצליח (`git log --oneline -1` מציג את ה-commit)
+
+### שלב 4 — דוח סיום
+9. דוח בעברית:
+   - **הושלם:** [commits ספציפיים עם hash]
+   - **גיא — ממתין לך:** [רשימה מדויקת]
+   - **שיחה הבאה מתחילה ב:** [agent / task ספציפי]
+   - **CI:** ירוק / [שם workflow שנכשל]
+
+**מטרה:** שיחה חדשה מתחילה בדיוק מהמקום שעצרנו — ללא שום אובדן הקשר.
 
 ## 🧭 SYSTEM RULES, IRON LAWS & CONTEXT ANCHOR — `/boot-sockacademy`
 
