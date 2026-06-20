@@ -1,0 +1,40 @@
+name: A8 — Analytics Reporter (Weekly)
+
+on:
+  schedule:
+    - cron: '0 7 * * 0'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'DRY_RUN (true = no email sent)'
+        required: false
+        default: 'false'
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sockacademy/agents/A8_analytics_reporter
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: sockacademy/agents/A8_analytics_reporter/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run A8 Analytics Reporter
+        env:
+          GA4_PROPERTY_ID:              ${{ secrets.GA4_PROPERTY_ID }}
+          GOOGLE_SERVICE_ACCOUNT_JSON:  ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GMAIL_APP_PASSWORD:           ${{ secrets.GMAIL_APP_PASSWORD }}
+          SUPABASE_URL:                 ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY:         ${{ secrets.SUPABASE_SERVICE_KEY }}
+          DRY_RUN:                      ${{ github.event.inputs.dry_run || 'false' }}
+        run: node agent.js
