@@ -1,55 +1,59 @@
 /**
- * A2 — Product Upload Agent v1.0
- * קורא Google Sheets → מייצר תיאור SEO עם Claude → מעלה ל-Shopify כ-Draft
+ * A2 — Product Upload Agent v2.0
+ * קורא Supabase → מייצר תיאור SEO עם Claude Sonnet → מעלה ל-Shopify כ-Draft
  * טריגר: GitHub Actions יומי / ידני
  */
 
 require('dotenv').config({ path: '../../.env' });
-const { GoogleSpreadsheet } = require('google-spreadsheet');
-const { JWT } = require('google-auth-library');
+const { createClient } = require('@supabase/supabase-js');
 const Anthropic = require('@anthropic-ai/sdk');
 const nodemailer = require('nodemailer');
 
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
 const SHOPIFY_API_VERSION = '2025-01';
-const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID;
-const SHEET_NAME = 'A1_Products';
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const DRY_RUN = process.env.DRY_RUN === 'true';
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// GOOGLE SHEETS
+// SUPABASE
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function loadSheet() {
-  if (!process.env.GOOGLE_SERVICE_ACCOUNT_JSON) throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON not set');
-  if (!SPREADSHEET_ID) throw new Error('GOOGLE_SHEET_ID not set');
-
-  const sa = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
-  const auth = new JWT({
-    email: sa.client_email,
-    key: sa.private_key,
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-  });
-
-  const doc = new GoogleSpreadsheet(SPREADSHEET_ID, auth);
-  await doc.loadInfo();
-  return doc.sheetsByTitle[SHEET_NAME] || doc.sheetsByIndex[0];
+function getSupabase() {
+  if (!process.env.SUPABASE_URL) throw new Error('SUPABASE_URL not set');
+  if (!process.env.SUPABASE_SERVICE_KEY) throw new Error('SUPABASE_SERVICE_KEY not set');
+  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 }
 
-async function getApprovedRows(sheet) {
-  const rows = await sheet.getRows();
-  return rows.filter(row => {
-    const status = (row.get('Status') || '').trim();
-    const uploadStatus = (row.get('Upload Status') || '').trim();
-    return (
-      status === 'Approved' &&
-      uploadStatus === ''
-      // 'uploading' = A2 in-progress or crashed mid-run → skip to avoid Shopify duplicate
-      // 'Uploaded' / 'uploaded:ID' = done → skip
-      // 'Error: ...' = failed → skip, Guy clears manually to allow retry
-    );
-  });
+async function getApprovedProducts(supabase) {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('status', 'Approved')
+    .eq('upload_status', '');
+
+  if (error) throw new Error(`Supabase query failed: ${error.message}`);
+  return data || [];
+}
+
+async function setUploadStatus(supabase, id, status) {
+  const { error } = await supabase
+    .from('products')
+    .update({ upload_status: status })
+    .eq('id', id);
+  if (error) throw new Error(`Supabase update failed: ${error.message}`);
+}
+
+async function markUploaded(supabase, id, shopifyProduct) {
+  const { error } = await supabase
+    .from('products')
+    .update({
+      upload_status: `uploaded:${shopifyProduct.id}`,
+      shopify_id: String(shopifyProduct.id),
+      shopify_url: `https://sockacademy.store/products/${shopifyProduct.handle}`,
+      upload_date: new Date().toISOString().split('T')[0],
+    })
+    .eq('id', id);
+  if (error) throw new Error(`Supabase markUploaded failed: ${error.message}`);
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -57,7 +61,7 @@ async function getApprovedRows(sheet) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function generateDescription(product) {
   const msg = await anthropic.messages.create({
-    model: 'claude-haiku-4-5-20251001',
+    model: 'claude-sonnet-4-6',
     max_tokens: 600,
     messages: [{
       role: 'user',
@@ -65,10 +69,10 @@ async function generateDescription(product) {
 
 Brand voice: authoritative, precise, understated luxury. No hype. No adjective stacking. The tone is that of an expert who has tested every sock in existence and this is the one worth buying.
 
-Product: ${product.name}
-Category: ${product.category}
+Product: ${product.product_name}
+Category: ${product.category || 'Premium Socks'}
 Materials: ${product.materials || 'premium materials'}
-Price: $${product.retailPrice}
+Price: $${product.retail_price}
 
 Rules:
 - 150-200 words, HTML format (<p> and <ul><li> tags)
@@ -91,21 +95,21 @@ async function createShopifyProduct(product) {
 
   const payload = {
     product: {
-      title: product.name,
+      title: product.product_name,
       body_html: product.description,
       vendor: 'SockAcademy',
       product_type: product.category || 'Socks',
       status: 'draft',
       tags: tags.join(', '),
       variants: [{
-        price: product.retailPrice.toFixed(2),
-        compare_at_price: (product.retailPrice * 1.25).toFixed(2),
+        price: Number(product.retail_price).toFixed(2),
+        compare_at_price: (Number(product.retail_price) * 1.25).toFixed(2),
         inventory_management: null,
         fulfillment_service: 'manual',
         requires_shipping: true,
         taxable: true,
       }],
-      images: product.imageUrl ? [{ src: product.imageUrl, alt: product.name }] : [],
+      images: product.image_url ? [{ src: product.image_url, alt: product.product_name }] : [],
     }
   };
 
@@ -164,16 +168,16 @@ async function sendSummaryEmail(results) {
 
   const html = `
 <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
-  <h2 style="color:#1a1a2e">🧦 A2 — דוח העלאת מוצרים</h2>
+  <h2 style="color:#1a1a2e">A2 — דוח העלאת מוצרים</h2>
   <p style="color:#666">תאריך: ${new Date().toLocaleDateString('he-IL')}</p>
 
   <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:16px;margin:16px 0">
-    <h3 style="color:#16a34a;margin:0 0 12px">✅ הועלו בהצלחה: ${success.length}</h3>
+    <h3 style="color:#16a34a;margin:0 0 12px">הועלו בהצלחה: ${success.length}</h3>
     ${success.map(r => `
       <div style="margin:8px 0;padding:8px;background:#fff;border-radius:4px">
         <strong>${r.name}</strong><br>
-        <a href="https://${SHOPIFY_DOMAIN.replace('.myshopify.com', '')}.myshopify.com/admin/products/${r.id}" style="color:#2563eb;font-size:13px">
-          פתח ב-Shopify Admin →
+        <a href="https://${SHOPIFY_DOMAIN}/admin/products/${r.id}" style="color:#2563eb;font-size:13px">
+          פתח ב-Shopify Admin
         </a>
       </div>
     `).join('')}
@@ -181,17 +185,17 @@ async function sendSummaryEmail(results) {
 
   ${failed.length ? `
   <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:16px;margin:16px 0">
-    <h3 style="color:#dc2626;margin:0 0 12px">❌ שגיאות: ${failed.length}</h3>
+    <h3 style="color:#dc2626;margin:0 0 12px">שגיאות: ${failed.length}</h3>
     ${failed.map(r => `<p style="margin:4px 0">• <strong>${r.name}</strong>: ${r.error}</p>`).join('')}
   </div>` : ''}
 
-  <p style="color:#999;font-size:12px;margin-top:24px">SockAcademy A2 Agent — Upload completed</p>
+  <p style="color:#999;font-size:12px;margin-top:24px">SockAcademy A2 Agent v2.0 — Supabase + Claude Sonnet</p>
 </div>`;
 
   await transporter.sendMail({
     from: 'SockAcademy Agent <sockacademy.store@gmail.com>',
     to: 'guyoved102@gmail.com',
-    subject: `🧦 A2 — ${success.length} מוצרים הועלו ל-Shopify${failed.length ? ` (${failed.length} שגיאות)` : ''}`,
+    subject: `A2 — ${success.length} מוצרים הועלו ל-Shopify${failed.length ? ` (${failed.length} שגיאות)` : ''}`,
     html,
   });
 
@@ -202,91 +206,71 @@ async function sendSummaryEmail(results) {
 // MAIN
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function main() {
-  console.log('🚀 A2 — Product Upload Agent v1.0');
-  console.log('━'.repeat(40));
+  console.log('🚀 A2 — Product Upload Agent v2.0 (Supabase + Claude Sonnet)');
+  console.log('━'.repeat(50));
 
-  // Validate required env vars
-  const missing = ['SHOPIFY_MASTER_TOKEN', 'GOOGLE_SERVICE_ACCOUNT_JSON', 'GOOGLE_SHEET_ID', 'ANTHROPIC_API_KEY']
+  const missing = ['SHOPIFY_MASTER_TOKEN', 'SUPABASE_URL', 'SUPABASE_SERVICE_KEY', 'ANTHROPIC_API_KEY']
     .filter(k => !process.env[k]);
   if (missing.length) {
     console.error(`❌ חסרים: ${missing.join(', ')}`);
     process.exit(1);
   }
 
-  let sheet;
+  let supabase;
   try {
-    sheet = await loadSheet();
-    console.log(`📊 שגיון לגיליון: ${sheet.title}`);
+    supabase = getSupabase();
+    console.log('✅ Supabase מחובר');
   } catch (e) {
-    console.error(`❌ Google Sheets: ${e.message}`);
+    console.error(`❌ Supabase: ${e.message}`);
     process.exit(1);
   }
 
-  const approvedRows = await getApprovedRows(sheet);
-  console.log(`📋 מוצרים מאושרים להעלאה: ${approvedRows.length}`);
+  const approvedProducts = await getApprovedProducts(supabase);
+  console.log(`📋 מוצרים מאושרים להעלאה: ${approvedProducts.length}`);
 
-  if (approvedRows.length === 0) {
+  if (approvedProducts.length === 0) {
     console.log('✅ אין מוצרים חדשים — הכל עדכני');
     return;
   }
 
   const results = [];
 
-  for (const row of approvedRows) {
-    const product = {
-      name: row.get('Product Name'),
-      category: row.get('Category'),
-      materials: row.get('Materials'),
-      supplierPrice: parseFloat(row.get('Supplier Price') || 0),
-      retailPrice: parseFloat(row.get('Retail Price') || 0),
-      imageUrl: row.get('Image URL'),
-      score: row.get('Score'),
-      platform: row.get('Platform'),
-      rating: row.get('Rating'),
-      orders: row.get('Orders'),
-    };
-
-    if (!product.name) continue;
+  for (const product of approvedProducts) {
+    if (!product.product_name) continue;
 
     try {
-      process.stdout.write(`⏳ ${product.name}... `);
+      process.stdout.write(`⏳ ${product.product_name}... `);
 
       if (DRY_RUN) {
         product.description = await generateDescription(product);
         console.log(`✅ [DRY_RUN] description generated, skipping Shopify upload`);
-        results.push({ name: product.name, id: 'DRY_RUN', success: true });
+        results.push({ name: product.product_name, id: 'DRY_RUN', success: true });
       } else {
         // Optimistic lock: write 'uploading' BEFORE calling Shopify.
-        // If A2 crashes after this and before 'Uploaded', the row stays 'uploading'
+        // If A2 crashes after this and before markUploaded, the row stays 'uploading'
         // and will be skipped on retry — preventing duplicate Shopify products.
-        row.set('Upload Status', 'uploading');
-        await row.save();
+        await setUploadStatus(supabase, product.id, 'uploading');
 
         product.description = await generateDescription(product);
         const shopifyProduct = await createShopifyProduct(product);
 
-        row.set('Upload Status', `uploaded:${shopifyProduct.id}`);
-        row.set('Shopify ID', String(shopifyProduct.id));
-        row.set('Shopify URL', `https://sockacademy.store/products/${shopifyProduct.handle}`);
-        row.set('Upload Date', new Date().toISOString().split('T')[0]);
-        await row.save();
+        await markUploaded(supabase, product.id, shopifyProduct);
         console.log(`✅ #${shopifyProduct.id}`);
-        results.push({ name: product.name, id: shopifyProduct.id, success: true });
+        results.push({ name: product.product_name, id: shopifyProduct.id, success: true });
       }
 
     } catch (e) {
       console.log(`❌ ${e.message}`);
       try {
-        row.set('Upload Status', `Error: ${e.message.slice(0, 150)}`);
-        await row.save();
+        await setUploadStatus(supabase, product.id, `Error: ${e.message.slice(0, 150)}`);
       } catch (_) {}
-      results.push({ name: product.name, error: e.message, success: false });
+      results.push({ name: product.product_name, error: e.message, success: false });
     }
 
     await new Promise(r => setTimeout(r, 800));
   }
 
-  console.log('━'.repeat(40));
+  console.log('━'.repeat(50));
   console.log(`✅ הסתיים — ${results.filter(r => r.success).length}/${results.length} הועלו`);
 
   await sendSummaryEmail(results);
