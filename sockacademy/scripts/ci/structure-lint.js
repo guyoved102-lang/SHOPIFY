@@ -56,7 +56,12 @@ function walk(dir, callback) {
 // ── Rule 1: Repo root may only contain known top-level entries ───────────────
 
 const ALLOWED_ROOT_ENTRIES = new Set([
+  // Repo essentials
   '.github', 'sockacademy', '.gitignore', '.gitattributes', 'README.md', '.editorconfig',
+  // Claude Code / Agent SDK infrastructure (managed by tooling — not manual files)
+  '.claude', '.agents', 'skills-lock.json',
+  // CI artifact (written by this script on failure — uploaded to GitHub Actions)
+  'structure-violations.json',
 ]);
 
 for (const { name, full, isDir } of children(REPO_ROOT)) {
@@ -73,9 +78,19 @@ for (const { name, full, isDir } of children(REPO_ROOT)) {
 // ── Rule 2: sockacademy/ root may only contain known entries ─────────────────
 
 const ALLOWED_SA_ROOT = new Set([
+  // SockAcademy operational files
   'CLAUDE.md', '.env.example', 'pipeline-config.json',
+  // SockAcademy canonical directories
   'agents', 'corp', 'docs', 'schemas', 'scripts',
-  // allow package.json/lock only if it has a clear owner — flag if found
+  // Shopify theme directories (sockacademy/ IS the theme root)
+  'assets', 'config', 'layout', 'sections', 'snippets', 'templates', 'locales',
+  // Shopify theme config files
+  '.gitignore', '.shopifyignore', '.theme-check.yml', '.prettierrc.json',
+  'package.json', 'package-lock.json', 'translation.yml', 'README.md', 'LICENSE.md',
+  // Dev tooling
+  '.vscode', '.claude', 'node_modules',
+  // Local credentials (gitignored — OK on disk, not OK in git — Rule 4 handles git check)
+  '.env',
 ]);
 
 for (const { name, full } of children(SA_ROOT)) {
@@ -101,35 +116,39 @@ for (const { name, full } of children(scriptsDir)) {
   }
 }
 
-// ── Rule 4: No .env files committed anywhere ──────────────────────────────────
+// ── Rule 4: No .env files committed to git ────────────────────────────────────
+// Uses git ls-files so local untracked .env files (correctly gitignored) don't trigger false positives.
 
-walk(REPO_ROOT, (file) => {
-  const base = path.basename(file);
+const { execSync } = require('child_process');
+let gitTrackedFiles = [];
+try {
+  gitTrackedFiles = execSync('git ls-files', { cwd: REPO_ROOT }).toString().trim().split('\n');
+} catch (_) { /* git not available — skip rule */ }
+
+for (const f of gitTrackedFiles) {
+  const base = path.basename(f);
   if (base === '.env' || (base.startsWith('.env.') && base !== '.env.example')) {
     fail(
       'ENV_FILE_COMMITTED',
-      file,
-      `CRITICAL: .env file committed to git. Remove immediately: git rm --cached ${path.relative(REPO_ROOT, file)}`
+      path.join(REPO_ROOT, f),
+      `CRITICAL: .env file committed to git. Remove immediately: git rm --cached ${f}`
     );
   }
-});
+}
 
-// ── Rule 5: No node_modules committed ────────────────────────────────────────
+// ── Rule 5: No node_modules committed to git ─────────────────────────────────
+// Uses the already-computed gitTrackedFiles list (git-aware, not filesystem).
 
-walk(REPO_ROOT, (file) => {
-  if (file.includes(`${path.sep}node_modules${path.sep}`)) {
-    // Only flag if node_modules dir itself was git-added (would be rare but dangerous)
-    // We check one level deep to avoid excessive output
-    const parts = path.relative(REPO_ROOT, file).split(path.sep);
-    if (parts[0] === 'node_modules' || parts[1] === 'node_modules') {
-      fail(
-        'NODE_MODULES_COMMITTED',
-        file,
-        `node_modules must not be committed. Add to .gitignore and run: git rm -r --cached node_modules`
-      );
-    }
+for (const f of gitTrackedFiles) {
+  if (f.includes('node_modules/') || f.includes('node_modules\\')) {
+    fail(
+      'NODE_MODULES_COMMITTED',
+      path.join(REPO_ROOT, f),
+      `node_modules must not be committed. Add to .gitignore and run: git rm -r --cached node_modules`
+    );
+    break; // one violation per repo is enough to alert
   }
-});
+}
 
 // ── Rule 6: Agent folders must follow naming convention A<N>_snake_case ──────
 
