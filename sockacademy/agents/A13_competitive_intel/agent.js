@@ -348,14 +348,14 @@ function buildEmailHtml(results, mode, runDate) {
 async function sendEmail(html, mode, strikeCount) {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
-    auth: { user: 'guyoved102@gmail.com', pass: process.env.GMAIL_APP_PASSWORD },
+    auth: { user: 'sockacademy.store@gmail.com', pass: process.env.GMAIL_APP_PASSWORD },
   });
   const subject = mode === 'strike'
     ? `⚡ A13 Strike Alert — ${strikeCount} High Opportunity${strikeCount !== 1 ? 's' : ''} Detected`
     : `📡 A13 Weekly Intel — Competitor Report ${new Date().toLocaleDateString('en-IL')}`;
 
   await transporter.sendMail({
-    from: '"SockAcademy A13" <guyoved102@gmail.com>',
+    from: '"SockAcademy A13" <sockacademy.store@gmail.com>',
     to: ADMIN_EMAIL,
     subject,
     html,

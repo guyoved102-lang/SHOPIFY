@@ -23,7 +23,7 @@ const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
-const GMAIL_USER = 'guyoved102@gmail.com';
+const GMAIL_USER  = 'sockacademy.store@gmail.com';
 const ALERT_EMAIL = 'guyoved102@gmail.com';
 
 function getSupabase() {
