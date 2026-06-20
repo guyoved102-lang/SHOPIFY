@@ -1,7 +1,15 @@
+import os
+import sys
 import requests
 import json
+from dotenv import load_dotenv
 
-API_KEY = "pk_QSMqNV_10278b2159681589f1365ac70b04825dff"
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
+
+API_KEY = os.environ.get("KLAVIYO_PRIVATE_API_KEY")
+if not API_KEY:
+    sys.exit("ERROR: KLAVIYO_PRIVATE_API_KEY not set in environment or .env")
+
 HEADERS = {
     "Authorization": f"Klaviyo-API-Key {API_KEY}",
     "revision": "2024-02-15",
