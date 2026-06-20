@@ -1,8 +1,8 @@
-﻿name: A13 ג€” Global Competitive Intelligence (Weekly)
+name: A13  -  Global Competitive Intelligence (Weekly)
 
 on:
   schedule:
-    - cron: '0 6 * * 0'  # ׳¨׳׳©׳•׳ 06:00 UTC (09:00 ׳™׳©׳¨׳׳) ג€” ׳׳₪׳ ׳™ A10 Trend Scout
+    - cron: '0 6 * * 0'  # ׳¨׳׳©׳•׳ 06:00 UTC (09:00 ׳™׳©׳¨׳׳)  -  ׳׳₪׳ ׳™ A10 Trend Scout
   workflow_dispatch:      # ׳”׳₪׳¢׳׳” ׳™׳“׳ ׳™׳× + --strike flag
 
 jobs:

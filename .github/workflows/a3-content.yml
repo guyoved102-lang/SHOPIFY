@@ -1,8 +1,8 @@
-﻿name: A3 ג€” Content Agent (Weekly Blog)
+name: A3  -  Content Agent (Weekly Blog)
 
 on:
   schedule:
-    - cron: '0 9 * * 1'  # ׳›׳ ׳©׳ ׳™ 09:00 UTC (12:00 ׳™׳©׳¨׳׳) ג€” ׳׳—׳¨׳™ A1 ׳©׳¨׳¥ 07:00
+    - cron: '0 9 * * 1'  # ׳›׳ ׳©׳ ׳™ 09:00 UTC (12:00 ׳™׳©׳¨׳׳)  -  ׳׳—׳¨׳™ A1 ׳©׳¨׳¥ 07:00
   workflow_dispatch:      # ׳”׳₪׳¢׳׳” ׳™׳“׳ ׳™׳× ׳-GitHub
 
 jobs:

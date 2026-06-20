@@ -1,8 +1,8 @@
-﻿name: A0 ג€” Orchestrator (Daily Health Check)
+name: A0  -  Orchestrator (Daily Health Check)
 
 on:
   schedule:
-    - cron: '0 9 * * *'   # ׳›׳ ׳™׳•׳ 09:00 UTC (12:00 ׳™׳©׳¨׳׳) ג€” ׳׳—׳¨׳™ A2 + timeout buffer
+    - cron: '0 9 * * *'   # ׳›׳ ׳™׳•׳ 09:00 UTC (12:00 ׳™׳©׳¨׳׳)  -  ׳׳—׳¨׳™ A2 + timeout buffer
   workflow_dispatch:
     inputs:
       dry_run:
