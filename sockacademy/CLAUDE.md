@@ -137,6 +137,35 @@ Total Quality Control & System Audit Protocol:
 
 ---
 
+## 🔐 STRICT SECURITY & CHAT PROTOCOLS — חוקי אבטחה מחייבים (20/06/2026)
+
+**חוקים אלה חלים על כל שיחה, ללא יוצא מן הכלל. אין לדרוס, אין לדלג.**
+
+### חוק S1 — Zero Code Dumps (מניעת חשיפת קוד מלא בצ'אט)
+- **חל איסור מוחלט** להדפיס קבצי קוד שלמים בתוך חלון השיחה.
+- בכל שינוי קוד — לספק: (א) Snippet של הבלוק שהשתנה בלבד, (ב) הוראה מדויקת היכן להדביק (שורה, פונקציה, לפני/אחרי מה).
+- **חריגים מותרים:** קובץ חדש לגמרי שנוצר (אין מה להשוות) | קובץ קצר מתחת ל-30 שורות.
+- **סיבה:** קבצים שלמים שורפים קונטקסט, מסכנים מידע, ומקשים על review.
+
+### חוק S2 — אבטחת סודות מוחלטת (Zero Secrets in Chat)
+- **לעולם לא** לבקש מגיא להדביק API keys, passwords, tokens, או secrets בתוך חלון הצ'אט.
+- **לעולם לא** להדפיס סודות שנזכרים מהזיכרון — אפילו חלקיים, אפילו "ישנים", אפילו "כבר בוטלו".
+- **כל** התנהלות עם סודות: דרך `.env` מקומי + GitHub Secrets בלבד. ה-`.env` לעולם לא מוזכר בתוכנו.
+- **סיבה:** Meta App Secret נחשף בצ'אט (20/06/2026) — אירוע שיצר צורך בRotation דחוף.
+
+### חוק S3 — מודעות אבטחה רציפה (Proactive Security Surface)
+- **בכל יצירת Super-Agent חדש** — להציף מראש: אילו הרשאות נדרשות? מה ה-Least Privilege?
+- **בכל חיבור לשירות חיצוני** (Supabase, Meta, Klaviyo, CJ) — לפרט: מה ה-scope שמבוקש? האם אפשר לצמצם?
+- **RLS, Row Level Security** — ברירת מחדל ON בכל טבלת Supabase חדשה.
+- **Prompt Injection** — כל agent שסורק תוכן חיצוני (A10, A11, A12, A13) = וקטור. Output = data בלבד.
+
+### חוק S4 — Git Security Sweep לפני כל Push
+- לפני **כל** `git push` — sweep: `git diff --staged | grep -iE "(api_key|secret|password|token|sk-|pk_|shpat)" `
+- אם יש match — **עצור מיד**, אל תדחוף, חקור.
+- `.env` לעולם לא ב-git. `.gitignore` נבדק לפני כל push ראשון של ספריה חדשה.
+
+---
+
 ## 🏛️ ARCHITECTURAL OVERHAUL — החלטות נעולות (20/06/2026)
 
 ### מיגרציה: Google Sheets → Supabase
