@@ -55,7 +55,9 @@ GitHub workflow    → .github/workflows/
 
 ## 🤖 הוראת פתיחת שיחה — חובה
 **בתחילת כל שיחה חדשה (פעם אחת בלבד):**
-הפעל את הסקיל `/run-sockacademy-agents` לבדיקת בריאות הסוכנים. דווח בשורה אחת.
+1. קרא `memory/project_sockacademy_state.md` → הצג PENDING section לגיא
+2. קרא `docs/ops/ANTI_RECURRENCE_PROTOCOL.md` → הפנם את כל 12 הפרוטוקולים
+3. הפעל `/run-sockacademy-agents` לבדיקת בריאות הסוכנים. דווח בשורה אחת.
 
 **חיסכון בטוקנים — תמיד:**
 תגובות קצרות. לא לחזור על מה שנאמר. לא לסכם. לא להסביר לפני שעושים — פשוט לעשות.
