@@ -16,11 +16,11 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: agents/A7_supplier_monitor/package-lock.json
+          cache-dependency-path: sockacademy/agents/A7_supplier_monitor/package-lock.json
 
       - name: Install dependencies
         run: npm ci
-        working-directory: agents/A7_supplier_monitor
+        working-directory: sockacademy/agents/A7_supplier_monitor
 
       - name: Run A7 Supplier Monitor
         env:
@@ -34,4 +34,4 @@ jobs:
           PRICE_CRITICAL_PCT: ${{ secrets.PRICE_CRITICAL_PCT }}
           MARKUP_MULTIPLIER: ${{ secrets.MARKUP_MULTIPLIER }}
         run: node agent.js
-        working-directory: agents/A7_supplier_monitor
+        working-directory: sockacademy/agents/A7_supplier_monitor

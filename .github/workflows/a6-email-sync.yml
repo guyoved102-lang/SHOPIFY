@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'agents/A6_email_sync/agent.js'
+      - 'sockacademy/agents/A6_email_sync/agent.js'
 
 jobs:
   sync:
@@ -17,15 +17,15 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: agents/A6_email_sync/package-lock.json
+          cache-dependency-path: sockacademy/agents/A6_email_sync/package-lock.json
 
       - name: Install dependencies
         run: npm ci
-        working-directory: agents/A6_email_sync
+        working-directory: sockacademy/agents/A6_email_sync
 
       - name: Run A6 Email Sync
         env:
           KLAVIYO_PRIVATE_API_KEY: ${{ secrets.KLAVIYO_PRIVATE_API_KEY }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
         run: node agent.js
-        working-directory: agents/A6_email_sync
+        working-directory: sockacademy/agents/A6_email_sync
