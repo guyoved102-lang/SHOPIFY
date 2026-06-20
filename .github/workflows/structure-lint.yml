@@ -1,0 +1,29 @@
+name: Structure Lint — Architectural Guardrail
+
+# Runs on every push and PR.
+# Fails within ~60 seconds if any file violates the canonical directory map.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Enforce Directory Structure
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run structure linter
+        run: node sockacademy/scripts/ci/structure-lint.js
+
+      - name: Upload violation report (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: structure-violations
+          path: structure-violations.json
+          retention-days: 7

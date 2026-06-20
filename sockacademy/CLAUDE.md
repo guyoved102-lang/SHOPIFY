@@ -1,5 +1,33 @@
 # SOCKACADEMY - Current State (14/06/2026)
 
+## 🏗️ FILE CREATION PROTOCOL — Zero-Tolerance Enforcement (20/06/2026)
+
+**לפני יצירת כל קובץ חדש — חובה לעבור 3 שאלות. אין יוצא מן הכלל:**
+
+### שאלה 1 — Where does this file live?
+```
+קוד agent חדש      → sockacademy/agents/A<N>_snake_case/
+סקריפט one-time    → sockacademy/scripts/setup/
+סקריפט CI         → sockacademy/scripts/ci/
+מסמך אסטרטגי      → sockacademy/docs/strategy/
+מסמך ops/תהליכים  → sockacademy/docs/ops/
+shared utility     → sockacademy/corp/core/
+schema / SQL       → sockacademy/corp/core/ (SQL) או sockacademy/schemas/
+GitHub workflow    → .github/workflows/
+```
+**אם הקובץ לא מתאים לאף קטגוריה → לשאול לפני יצירה.**
+
+### שאלה 2 — Am I about to contaminate a root?
+- **אסור בכל מצב:** קבצים בשורש הרפו (`/`) מלבד `.github/`, `sockacademy/`, `.gitignore`, `.gitattributes`, `README.md`
+- **אסור בכל מצב:** קבצים בשורש `sockacademy/` מלבד `CLAUDE.md`, `.env.example`, `pipeline-config.json`, וספריות canonical
+
+### שאלה 3 — Will CI catch me if I'm wrong?
+- `structure-lint.yml` רץ על כל push ומכשיל CI תוך 60 שניות אם קובץ נמצא במקום הלא נכון
+- A0 בודק structure בכל ריצה יומית ושולח email אם יש violation
+- **עדיף לשאול לפני מאשר לקבל CI failure אחרי**
+
+---
+
 ## 🔴 טריגר סיום שיחה — חובה
 
 **כאשר גיא כותב "סיום שיחה" או "מסיימים שיחה" — מופעל אוטומטית:**

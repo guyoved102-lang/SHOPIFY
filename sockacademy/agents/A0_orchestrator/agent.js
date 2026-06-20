@@ -238,6 +238,88 @@ function weeklyReportHtml(summary, ledger, stuckCount) {
   </div>`;
 }
 
+// ─── WORKSPACE HEALTH CHECK ──────────────────────────────────────────────────
+// Runs the same rules as scripts/ci/structure-lint.js but from inside A0.
+// Reports violations by email so Guy is alerted even without a CI run.
+
+const path = require('path');
+const fsSync = require('fs');
+
+function runWorkspaceHealthCheck() {
+  const REPO_ROOT = path.resolve(__dirname, '../../..');
+  const SA_ROOT   = path.join(REPO_ROOT, 'sockacademy');
+
+  const violations = [];
+
+  function kids(dir) {
+    if (!fsSync.existsSync(dir)) return [];
+    return fsSync.readdirSync(dir).map((n) => ({
+      name: n,
+      full: path.join(dir, n),
+      isDir: fsSync.statSync(path.join(dir, n)).isDirectory(),
+    }));
+  }
+
+  // Root entries
+  const ALLOWED_ROOT = new Set(['.github', 'sockacademy', '.gitignore', '.gitattributes', 'README.md', '.editorconfig']);
+  for (const { name, full } of kids(REPO_ROOT)) {
+    if (name === '.git') continue;
+    if (!ALLOWED_ROOT.has(name))
+      violations.push({ rule: 'ROOT_CONTAMINATION', file: path.relative(REPO_ROOT, full) });
+  }
+
+  // sockacademy/ root entries
+  const ALLOWED_SA = new Set(['CLAUDE.md', '.env.example', 'pipeline-config.json', 'agents', 'corp', 'docs', 'schemas', 'scripts']);
+  for (const { name, full } of kids(SA_ROOT)) {
+    if (!ALLOWED_SA.has(name))
+      violations.push({ rule: 'SA_ROOT_CONTAMINATION', file: path.relative(REPO_ROOT, full) });
+  }
+
+  // docs/ subdirs
+  for (const { name, full } of kids(path.join(SA_ROOT, 'docs'))) {
+    if (!['strategy', 'ops'].includes(name))
+      violations.push({ rule: 'DOCS_CONTAMINATION', file: path.relative(REPO_ROOT, full) });
+  }
+
+  // scripts/ subdirs
+  for (const { name, full } of kids(path.join(SA_ROOT, 'scripts'))) {
+    if (!['ci', 'setup'].includes(name))
+      violations.push({ rule: 'SCRIPTS_CONTAMINATION', file: path.relative(REPO_ROOT, full) });
+  }
+
+  // Agent naming convention
+  for (const { name, full, isDir } of kids(path.join(SA_ROOT, 'agents'))) {
+    if (isDir && !/^A\d+_[a-z0-9_]+$/.test(name))
+      violations.push({ rule: 'AGENT_NAMING', file: path.relative(REPO_ROOT, full) });
+  }
+
+  return violations;
+}
+
+function workspaceAlertHtml(violations) {
+  const ts = new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' });
+  const rows = violations.map((v) =>
+    `<tr><td style="padding:4px 8px;color:#c0392b"><strong>${v.rule}</strong></td><td style="padding:4px 8px;font-family:monospace">${v.file}</td></tr>`
+  ).join('');
+
+  return `<div style="font-family:monospace;max-width:700px">
+    <h2 style="color:#c0392b">🏗️ A0 — Workspace Structure Violation</h2>
+    <p><strong>Time (IL):</strong> ${ts}</p>
+    <p>The following files/directories violate the canonical architecture defined in CLAUDE.md.</p>
+    <p><strong>Action required:</strong> move or delete the items below, then push a clean commit.</p>
+    <table border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;margin:12px 0">
+      <tr style="background:#f2f2f2">
+        <th style="padding:4px 8px;text-align:left">Rule</th>
+        <th style="padding:4px 8px;text-align:left">Violating Path</th>
+      </tr>
+      ${rows}
+    </table>
+    <p>The CI <strong>structure-lint.yml</strong> workflow also enforces these rules on every push.</p>
+    <hr>
+    <p style="color:#888;font-size:11px">SockAcademy A0 Orchestrator — Workspace Health Check</p>
+  </div>`;
+}
+
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -250,7 +332,7 @@ async function main() {
   await updateA0State(supabase, 'RUNNING');
 
   // Step 1 — Stuck detection (every run)
-  console.log('\n[1/3] Stuck Detection');
+  console.log('\n[1/4] Stuck Detection');
   const { stuckRows, markedCount } = await runStuckDetection(supabase);
 
   if (stuckRows.length > 0) {
@@ -263,7 +345,7 @@ async function main() {
   // Step 2 — Weekly health report (Sundays or forced)
   const isSunday = new Date().getDay() === 0;
   if (isSunday || FORCE_WEEKLY) {
-    console.log('\n[2/3] Weekly Health Report');
+    console.log('\n[2/4] Weekly Health Report');
     const summary = await buildProductsSummary(supabase);
     const ledger  = await readHealthLog(supabase);
 
@@ -272,16 +354,30 @@ async function main() {
       weeklyReportHtml(summary, ledger, stuckRows.length)
     );
   } else {
-    console.log('\n[2/3] Weekly Report — skipped (not Sunday)');
+    console.log('\n[2/4] Weekly Report — skipped (not Sunday)');
   }
 
-  // Step 3 — Update A0's own state in health log
-  console.log('\n[3/3] Updating agent_health_log');
+  // Step 3 — Workspace structure health check (every run)
+  console.log('\n[3/4] Workspace Health Check');
+  const structureViolations = runWorkspaceHealthCheck();
+  if (structureViolations.length === 0) {
+    console.log('✅ Workspace structure clean — no violations');
+  } else {
+    console.error(`🏗️  ${structureViolations.length} structure violation(s) found:`);
+    structureViolations.forEach((v) => console.error(`   [${v.rule}] ${v.file}`));
+    await sendEmail(
+      `🏗️ A0 Alert: ${structureViolations.length} workspace structure violation(s)`,
+      workspaceAlertHtml(structureViolations)
+    );
+  }
+
+  // Step 4 — Update A0's own state in health log
+  console.log('\n[4/4] Updating agent_health_log');
   await updateA0State(supabase, 'COMPLETE');
   console.log('✅ A0 state written');
 
   console.log('\n' + '─'.repeat(52));
-  console.log(`✅ Done | stuck marked: ${markedCount} | DRY_RUN=${DRY_RUN}`);
+  console.log(`✅ Done | stuck: ${markedCount} | structure: ${structureViolations.length} violations | DRY_RUN=${DRY_RUN}`);
 }
 
 main().catch(async err => {
