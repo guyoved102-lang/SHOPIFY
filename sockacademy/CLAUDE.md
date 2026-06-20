@@ -31,13 +31,27 @@ GitHub workflow    → .github/workflows/
 ## 🔴 טריגר סיום שיחה — חובה
 
 **כאשר גיא כותב "סיום שיחה" או "מסיימים שיחה" — מופעל אוטומטית:**
-Total Quality Control & System Audit Protocol:
-1. בדיקת syntax לכל agent files
-2. סריקת credentials — אפס hardcoded
-3. השוואת GitHub Secrets מול כל הworkflows
-4. בדיקת TODO/placeholders — תיעוד מה בכוונה ומה צריך תיקון
-5. git commit + push של כל שינויים פתוחים
-6. דוח QA בעברית — מה נשמר, מה הבא, מצב המערכת
+
+### שלב 1 — QA Sweep
+1. בדיקת syntax לכל agent files שנגענו בשיחה
+2. סריקת credentials — אפס hardcoded בשום קובץ
+3. השוואת GitHub Secrets שמוזכרים ב-YAMLs מול `gh secret list`
+4. בדיקת TODO/placeholders — מה בכוונה ומה צריך תיקון
+
+### שלב 2 — שמירת מצב (CRITICAL — רציפות בין שיחות)
+5. עדכון `memory/project_sockacademy_state.md`:
+   - סמן ✅ על כל מה שהושלם בשיחה זו
+   - עדכן סעיף `🔴 PENDING` עם כל המשימות הפתוחות לגיא ולשיחה הבאה
+6. git commit + push של כל שינויים פתוחים
+
+### שלב 3 — דוח סיום
+7. דוח QA בעברית:
+   - מה הושלם בשיחה הזו (commits ספציפיים)
+   - מה ממתין לגיא (רשימה מדויקת)
+   - מה ממתין לשיחה הבאה (agent / task הבא)
+   - מצב CI (ירוק/אדום)
+
+**מטרה:** שיחה חדשה מתחילה בדיוק מהמקום שעצרנו — ללא שום אובדן הקשר.
 
 ## 🤖 הוראת פתיחת שיחה — חובה
 **בתחילת כל שיחה חדשה (פעם אחת בלבד):**
