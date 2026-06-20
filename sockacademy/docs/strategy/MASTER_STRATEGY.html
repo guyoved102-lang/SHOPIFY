@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SockAcademy — מסמך אסטרטגיה ראשי</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Frank+Ruhl+Libre:wght@300;400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --black: #0A0A0A;
+    --dark: #1A1A1A;
+    --dark2: #111111;
+    --cream: #F0EDE6;
+    --cream-dim: #D4CFC6;
+    --gray: #888888;
+    --gray-light: #AAAAAA;
+    --green: #4AAD80;
+    --red: #F96E6E;
+  }
+
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  body {
+    font-family: 'Frank Ruhl Libre', serif;
+    background: var(--black);
+    color: var(--cream);
+    direction: rtl;
+    text-align: right;
+    line-height: 1.8;
+  }
+
+  /* ─── COVER PAGE ─── */
+  .cover {
+    width: 100%;
+    min-height: 100vh;
+    background: var(--dark2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 60px;
+    page-break-after: always;
+    border-bottom: 1px solid var(--gold);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .cover::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .cover-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    letter-spacing: 8px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 60px;
+    opacity: 0.8;
+  }
+
+  .cover-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 52px;
+    font-weight: 900;
+    color: var(--cream);
+    text-align: center;
+    line-height: 1.2;
+    margin-bottom: 20px;
+    letter-spacing: -1px;
+  }
+
+  .cover-title span {
+    color: var(--gold);
+  }
+
+  .cover-subtitle {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--gray-light);
+    text-align: center;
+    margin-bottom: 80px;
+    letter-spacing: 2px;
+  }
+
+  .cover-divider {
+    width: 80px;
+    height: 1px;
+    background: var(--gold);
+    margin: 40px auto;
+    opacity: 0.6;
+  }
+
+  .cover-meta {
+    display: flex;
+    gap: 60px;
+    justify-content: center;
+    margin-top: 60px;
+  }
+
+  .cover-meta-item {
+    text-align: center;
+  }
+
+  .cover-meta-item .label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .cover-meta-item .value {
+    font-size: 14px;
+    color: var(--cream-dim);
+    font-family: 'Frank Ruhl Libre', serif;
+  }
+
+  .cover-manifesto {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 20px;
+    color: var(--gold);
+    text-align: center;
+    max-width: 600px;
+    line-height: 1.6;
+    margin-top: 40px;
+  }
+
+  /* ─── MAIN CONTENT ─── */
+  .document {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 60px;
+  }
+
+  /* ─── SECTION ─── */
+  .section {
+    padding: 70px 0;
+    border-bottom: 1px solid #222;
+    page-break-inside: avoid;
+  }
+
+  .section:last-child {
+    border-bottom: none;
+  }
+
+  .section-number {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--cream);
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+
+  .section-lead {
+    font-size: 18px;
+    color: var(--gold);
+    font-weight: 300;
+    margin-bottom: 40px;
+    font-style: italic;
+    line-height: 1.6;
+  }
+
+  /* ─── TYPOGRAPHY ─── */
+  h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--gold);
+    margin: 40px 0 16px;
+    font-weight: 700;
+  }
+
+  h4 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gray-light);
+    margin: 30px 0 12px;
+  }
+
+  p {
+    font-size: 16px;
+    color: var(--cream-dim);
+    margin-bottom: 16px;
+    line-height: 1.9;
+  }
+
+  p strong {
+    color: var(--cream);
+    font-weight: 700;
+  }
+
+  /* ─── HIGHLIGHT BOX ─── */
+  .highlight {
+    background: #111;
+    border-right: 3px solid var(--gold);
+    padding: 24px 28px;
+    margin: 30px 0;
+    border-radius: 2px;
+  }
+
+  .highlight p {
+    margin: 0;
+    font-size: 17px;
+    color: var(--cream);
+    font-style: italic;
+  }
+
+  /* ─── PILLAR CARDS ─── */
+  .pillars {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin: 40px 0;
+  }
+
+  .pillar-card {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    padding: 30px 24px;
+    border-radius: 2px;
+    position: relative;
+  }
+
+  .pillar-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; left: 0;
+    height: 2px;
+    background: var(--gold);
+  }
+
+  .pillar-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    color: #2a2a2a;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+
+  .pillar-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--gold);
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+
+  .pillar-body {
+    font-size: 14px;
+    color: var(--gray-light);
+    line-height: 1.7;
+  }
+
+  /* ─── FRAMEWORK ─── */
+  .framework {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    margin: 40px 0;
+    border: 1px solid #2a2a2a;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .framework-phase {
+    padding: 32px 24px;
+    border-left: 1px solid #2a2a2a;
+  }
+
+  .framework-phase:last-child {
+    border-left: none;
+  }
+
+  .phase-letter {
+    font-family: 'Playfair Display', serif;
+    font-size: 56px;
+    color: var(--gold);
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 8px;
+    opacity: 0.3;
+  }
+
+  .phase-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  .phase-time {
+    font-size: 12px;
+    color: var(--gray);
+    margin-bottom: 16px;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .phase-body {
+    font-size: 14px;
+    color: var(--cream-dim);
+    line-height: 1.7;
+  }
+
+  .phase-example {
+    margin-top: 16px;
+    padding: 12px;
+    background: #0a0a0a;
+    border-radius: 2px;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--gold-light);
+    line-height: 1.6;
+  }
+
+  /* ─── RULES LIST ─── */
+  .rules-list {
+    list-style: none;
+    margin: 30px 0;
+  }
+
+  .rules-list li {
+    padding: 20px 0;
+    border-bottom: 1px solid #1e1e1e;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .rules-list li:last-child {
+    border-bottom: none;
+  }
+
+  .rule-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    color: var(--gold);
+    font-weight: 900;
+    opacity: 0.4;
+    min-width: 36px;
+    line-height: 1;
+    padding-top: 4px;
+  }
+
+  .rule-content strong {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 17px;
+    color: var(--cream);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .rule-content span {
+    font-size: 14px;
+    color: var(--gray-light);
+    line-height: 1.6;
+  }
+
+  /* ─── COMPARISON TABLE ─── */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 30px 0;
+    font-size: 14px;
+  }
+
+  .compare-table thead tr {
+    background: var(--dark);
+    border-bottom: 2px solid var(--gold);
+  }
+
+  .compare-table thead th {
+    padding: 14px 16px;
+    text-align: right;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+  }
+
+  .compare-table tbody tr {
+    border-bottom: 1px solid #1e1e1e;
+  }
+
+  .compare-table tbody tr:hover {
+    background: #111;
+  }
+
+  .compare-table td {
+    padding: 14px 16px;
+    color: var(--cream-dim);
+    vertical-align: top;
+  }
+
+  .compare-table td:first-child {
+    color: var(--cream);
+    font-weight: 700;
+    font-family: 'Frank Ruhl Libre', serif;
+  }
+
+  .compare-table td.our-win {
+    color: var(--green);
+    font-size: 13px;
+  }
+
+  /* ─── PHASE TIMELINE ─── */
+  .timeline {
+    margin: 40px 0;
+  }
+
+  .timeline-item {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 32px;
+    align-items: flex-start;
+  }
+
+  .timeline-badge {
+    background: var(--dark);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    white-space: nowrap;
+    border-radius: 2px;
+    min-width: 100px;
+    text-align: center;
+  }
+
+  .timeline-content h4 {
+    margin: 0 0 8px;
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--cream);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .timeline-content p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--gray-light);
+  }
+
+  /* ─── BANNED TABLE ─── */
+  .banned-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 30px 0;
+  }
+
+  .banned-item {
+    background: #0f0f0f;
+    border: 1px solid #1e1e1e;
+    padding: 20px;
+    border-radius: 2px;
+  }
+
+  .banned-word {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    text-decoration: line-through;
+    color: var(--red);
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+
+  .banned-reason {
+    font-size: 13px;
+    color: var(--gray);
+    line-height: 1.5;
+  }
+
+  /* ─── MANIFESTO ─── */
+  .manifesto {
+    background: #0a0a0a;
+    border: 1px solid #2a2a2a;
+    padding: 60px;
+    margin: 40px 0;
+    text-align: center;
+    position: relative;
+  }
+
+  .manifesto::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .manifesto::after {
+    content: '';
+    position: absolute;
+    bottom: 0; right: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .manifesto p {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--cream);
+    line-height: 1.8;
+    font-style: italic;
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto 20px;
+  }
+
+  .manifesto p:last-child {
+    margin-bottom: 0;
+    font-size: 18px;
+    color: var(--gold);
+  }
+
+  /* ─── STAT CARDS ─── */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin: 30px 0;
+  }
+
+  .stat-card {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    padding: 24px 16px;
+    text-align: center;
+    border-radius: 2px;
+  }
+
+  .stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: var(--gold);
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .stat-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gray);
+  }
+
+  /* ─── FOOTER ─── */
+  .doc-footer {
+    background: var(--dark2);
+    padding: 40px 60px;
+    margin-top: 80px;
+    border-top: 1px solid #222;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .doc-footer .brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--gold);
+    letter-spacing: 3px;
+  }
+
+  .doc-footer .meta {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--gray);
+    text-align: left;
+    direction: ltr;
+  }
+
+  /* ─── PRINT ─── */
+  @media print {
+    body { background: #0A0A0A !important; }
+    .section { page-break-inside: avoid; }
+    .cover { page-break-after: always; min-height: 100vh; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--                      COVER PAGE                          -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-logo">SOCKACADEMY.STORE</div>
+
+  <div class="cover-title">
+    מסמך חזון ואסטרטגיה<br>
+    <span>ראשי</span>
+  </div>
+
+  <div class="cover-subtitle">SockAcademy — Master Vision & Strategy Document</div>
+
+  <div class="cover-divider"></div>
+
+  <div class="cover-manifesto">
+    "הגרב היא הדבר האחרון שאתה שם לפני שאתה יוצא —<br>
+    וזה הופך אותה לפרט הסיום. לנקודה."
+  </div>
+
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <span class="label">גרסה</span>
+      <span class="value">1.0 — Foundation</span>
+    </div>
+    <div class="cover-meta-item">
+      <span class="label">תאריך</span>
+      <span class="value">יוני 2026</span>
+    </div>
+    <div class="cover-meta-item">
+      <span class="label">מחבר</span>
+      <span class="value">גיא עובד + SockAcademy CTO</span>
+    </div>
+    <div class="cover-meta-item">
+      <span class="label">סטטוס</span>
+      <span class="value">נעול — Foundation Release</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!--                    MAIN DOCUMENT                         -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="document">
+
+  <!-- ── SECTION 1: POSITIONING ── -->
+  <div class="section">
+    <span class="section-number">פרק א׳</span>
+    <h2 class="section-title">מיצוב — מי אנחנו</h2>
+    <p class="section-lead">
+      לא חנות. לא מותג. אקדמיה.
+    </p>
+
+    <p>
+      SockAcademy היא <strong>האוטוריטה הראשונה בעולם לגרביים פרמיום.</strong>
+      עשינו לגרביים מה ש-Wine Spectator עשה ליין, ומה שתרבות הסניקרס עשתה לנעליים —
+      הפכנו פריט יומיומי שנזנח לאובייקט של ידע, זהות ורצון אמיתי.
+    </p>
+
+    <div class="highlight">
+      <p>
+        "SockAcademy לא מוכרת גרביים. היא מוכרת את הסטנדרט שרוב האנשים
+        מעולם לא יישמו על הרגליים שלהם. הגרביים הן רק ההוכחה."
+      </p>
+    </div>
+
+    <p>
+      Nike לא מוכרת נעליים — היא מוכרת ביצועים ושייכות.
+      Loro Piana לא מוכרת בגדים — היא מוכרת שקט ושל-מינות.
+      SockAcademy לא מוכרת גרביים — היא מוכרת <strong>ידע, זהות ושדרוג יומיומי.</strong>
+    </p>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-value">1st</div>
+        <div class="stat-label">Sock Authority בעולם</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">12</div>
+        <div class="stat-label">SKUs מקסימום — Curation</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">$9.33</div>
+        <div class="stat-label">עלות שנתית לזוג Merino</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">3–5y</div>
+        <div class="stat-label">אורך חיים לזוג פרמיום</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 2: THE MISSION ── -->
+  <div class="section">
+    <span class="section-number">פרק ב׳</span>
+    <h2 class="section-title">המשימה — Center Stage</h2>
+    <p class="section-lead">
+      הגרב היא הפרט האחרון. הפרט שנשאר.
+    </p>
+
+    <p>
+      הגרב היא הדבר האחרון שאתה שם לפני שאתה יוצא מהבית.
+      זה הופך אותה לנקודת הסיום של כל לוק. לפרט שאם נבחר בחוסר תשומת לב —
+      מבגד את כל הכוונה שהושקעה בשאר.
+    </p>
+
+    <p>
+      המלבישים המדוקדקים ביותר ידעו זאת תמיד: גרביים הן המקום שבו
+      תשומת הלב לפרטים הופכת לגלויה — או לבלתי נראית.
+    </p>
+
+    <div class="highlight">
+      <p>
+        "הגרב הנכונה לא רק משלימה לוק. היא מאותתת על מי שאתה.
+        על איכות הבד. על דיוק הסריגה. על הדרך שבה היא שומרת על צורתה
+        אחרי מאה כביסות."
+      </p>
+    </div>
+
+    <p>
+      המשימה שלנו: <strong>להפוך את הרגע הזה לכוונתי.</strong>
+      לא מקרי. לא שאריות. לא "מה שנמצא במגירה."
+      בחירה מודעת, מתוך ידע, על מה מכסה את הרגליים שלך.
+    </p>
+  </div>
+
+  <!-- ── SECTION 3: UVP ── -->
+  <div class="section">
+    <span class="section-number">פרק ג׳</span>
+    <h2 class="section-title">הבידול — 3 עמודי UVP</h2>
+    <p class="section-lead">
+      מה שמפריד בינינו לבין כולם.
+    </p>
+
+    <div class="pillars">
+      <div class="pillar-card">
+        <div class="pillar-number">01</div>
+        <div class="pillar-title">חינוך כשיווק</div>
+        <div class="pillar-body">
+          אנחנו מלמדים לפני שאנחנו מוכרים. כל מבקר עוזב עם יותר ידע ממה שהגיע איתו.
+          ידע בונה אמון. אמון מייצר מכירה.
+          <br><br>
+          <em style="color: var(--gold); font-size: 13px;">
+            "סיב Merino בודד דקיק פי 6 משערה אנושית —
+            לכן הוא מווסת טמפרטורה במקום לספוג זיעה."
+          </em>
+        </div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-number">02</div>
+        <div class="pillar-title">נרטיב ה-Center Stage</div>
+        <div class="pillar-body">
+          הגרב אינה אביזר. היא סימן הפיסוק של לוק שלם.
+          כל פיסת קופי, כל מייל, כל פרסומת — מחזקת את המסגרת הזו.
+          הגרב לא תשחק תפקיד משני בחנות שלה.
+          <br><br>
+          <em style="color: var(--gold); font-size: 13px;">
+            "הדבר האחרון שאתה שם — הוא הראשון שהם מבחינים בו."
+          </em>
+        </div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-number">03</div>
+        <div class="pillar-title">קיוריישן מעל אגרגציה</div>
+        <div class="pillar-body">
+          לא 500 מוצרים. מקסימום 12 SKUs פעילים בכל עת.
+          לכל מוצר יש סיפור חומר, מקור, ומדריך לבישה.
+          נדירות + קיוריישן = תפיסת לוקסרי אמיתית.
+          <br><br>
+          <em style="color: var(--gold); font-size: 13px;">
+            כשמוצר חדש נכנס — מוצר ישן יוצא.
+            זו החלטה מותגית, לא מגבלה עסקית.
+          </em>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight">
+      <p>
+        שטח פנוי אסטרטגי: שום מותג לא בנה D2C luxury sock brand
+        המבוסס על חינוך-ראשון בסקייל דיגיטלי. זהו הטריטוריה שלנו.
+        מי שמגיע ראשון — הוא הקטגוריה.
+        SockAcademy מגיעה ראשונה.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── SECTION 4: AUDIENCE ── -->
+  <div class="section">
+    <span class="section-number">פרק ד׳</span>
+    <h2 class="section-title">קהל היעד — מיפוי מגדרי</h2>
+    <p class="section-lead">
+      פוקוס, שלב א׳. הרחבה, שלבים ב׳–ג׳.
+    </p>
+
+    <h3>שלב א׳ — גברים כ-Primary (עכשיו)</h3>
+    <p>
+      <strong>פרסונה ראשית:</strong> גברים, גיל 28–45, הכנסה $80K+, מתלבשים בכוונה.
+      אנשים שיבחרו שעון על פני תכשיט, אבל יעריכו גם איכות בד בחולצה.
+      אנשים שמבינים שפרטים קטנים הם מה שמבדיל בין מראה בינוני למראה שאי-אפשר להתעלם ממנו.
+    </p>
+
+    <p>
+      <strong>למה לא להתחיל עם נשים:</strong> שוק גרבי הגברים-לוקסרי
+      הוא underserved. שוק הנשים עמוס — Calzedonia, Wolford, Falke, Happy Socks.
+      הנשים כבר מפונקות. <strong>אותוריטה מותגית דורשת דיוק. דיוק דורש פוקוס.</strong>
+    </p>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-badge">שלב א׳ — עכשיו</div>
+        <div class="timeline-content">
+          <h4>גברים — Primary Persona</h4>
+          <p>כל הקופי, הויזואלים ותיאורי המוצרים מדברים לגברים. פרמיום, כוונתי, מדוייק.</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-badge">שלב ב׳ — אחרי Traction</div>
+        <div class="timeline-content">
+          <h4>נשים כ-Gift Buyers</h4>
+          <p>כניסה דרך פורטל ה-Gifting — "המתנה המושלמת לגבר שיש לו הכל."
+          אותם מוצרים. קופי שונה. נשים הן מנוע ה-gifting החזק ביותר בלוקסרי.</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-badge">שלב ג׳ — $5K MRR×3</div>
+        <div class="timeline-content">
+          <h4>קולקציית נשים עצמאית</h4>
+          <p>נרטיב נפרד: "הפרט שגורם ללוק השלם להיות הגיוני."
+          לא center stage של גבר — center stage של אישה. מסגרת זהה, טריגר שונה.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 5: FRAMEWORK ── -->
+  <div class="section">
+    <span class="section-number">פרק ה׳</span>
+    <h2 class="section-title">מסגרת המרה — FEEL → BELIEVE → BUY</h2>
+    <p class="section-lead">
+      לא משפך. תהליך חינוך.
+    </p>
+
+    <p>
+      הבעיה האמיתית של שיעור נטישה גבוה: אנשים עוזבים כי הם
+      לא מרגישים ש-<strong>ה-stakes גבוהים.</strong>
+      כשמוכרים גרביים ב-$28, המוח אומר "זה רק גרביים."
+      המשימה שלנו: <strong>להרים את ה-perceived stakes.</strong>
+    </p>
+
+    <div class="framework">
+      <div class="framework-phase">
+        <div class="phase-letter">F</div>
+        <div class="phase-name">Feel — הרגש</div>
+        <div class="phase-time">0–8 שניות</div>
+        <div class="phase-body">
+          ה-Hero section חייב להפעיל רגש לפני שהמוצר מובן.
+          לא תיאור. לא מחיר. לא feature. רגש.
+        </div>
+        <div class="phase-example">
+          ✓ "הדבר האחרון שאתה שם — הוא הראשון שהם מבחינים בו."<br><br>
+          ✗ "Premium Socks for Men"
+        </div>
+      </div>
+      <div class="framework-phase">
+        <div class="phase-letter">B</div>
+        <div class="phase-name">Believe — האמונה</div>
+        <div class="phase-time">8 שניות – 2 דקות</div>
+        <div class="phase-body">
+          העברת אמונות, לא מפרטים.
+          כשלקוח לומד משהו חדש — הוא מרגיש חכם.
+          כשמרגיש חכם — הוא סומך.
+          כשסומך — הוא קונה.
+        </div>
+        <div class="phase-example">
+          ✓ "סיב Merino בודד דקיק פי 6 משערה — לכן הוא מווסת ולא סופג."<br><br>
+          ✗ "עשוי 85% Merino Wool"
+        </div>
+      </div>
+      <div class="framework-phase">
+        <div class="phase-letter">B</div>
+        <div class="phase-name">Buy — הקנייה</div>
+        <div class="phase-time">2–4 דקות</div>
+        <div class="phase-body">
+          להפוך את ה-לא-קנייה לבלתי הגיונית.
+          עוגן עלות-לשנה. נדירות אמיתית. הוכחה חברתית מבוססת ידע.
+        </div>
+        <div class="phase-example">
+          "$28 × אורך חיים 3 שנים = $9.33 לשנה.<br>
+          $8 × החלפה כל 4 חודשים = $24 לשנה."<br><br>
+          המתמטיקה עושה את העבודה.
+        </div>
+      </div>
+    </div>
+
+    <h3>כלי ה-Buy Stage — 3 עקרונות</h3>
+
+    <p>
+      <strong>נדירות אמיתית בלבד:</strong>
+      "אנחנו מייצרים 200 זוגות בסטייל הזה בחודש" — לא שעון ספירה לאחור מזוייף.
+      שיווק על בסיס פחד זמן הורס אמון. נדירות אמיתית בונה אותו.
+    </p>
+
+    <p>
+      <strong>הוכחה חברתית מבוססת ידע:</strong>
+      "סוף סוף הבנתי למה גרביים זולות הורסות את הרגליים" —
+      לא "מוצר מצויין, 5 כוכבים." Review שמלמד — מוכר יותר מ-review שמשבח.
+    </p>
+
+    <p>
+      <strong>אפס הנחות בשלב הזה.</strong>
+      עיגון עלות-לשנה וחינוך החומרים עשו כבר את העבודה.
+      הנחה בשלב זה מאותתת שהמחיר המקורי היה מנופח.
+    </p>
+  </div>
+
+  <!-- ── SECTION 6: COPY LAWS ── -->
+  <div class="section">
+    <span class="section-number">פרק ו׳</span>
+    <h2 class="section-title">חוקי קופי — 7 חוקי ברזל</h2>
+    <p class="section-lead">
+      אלה לא המלצות. אלה חוקים.
+    </p>
+
+    <ul class="rules-list">
+      <li>
+        <div class="rule-number">1</div>
+        <div class="rule-content">
+          <strong>פסקאות קצרות — לא יותר מ-3 שורות</strong>
+          <span>גלילה הורגת קוראי long-form. אם פסקה נמשכת יותר מ-3 שורות — חותכים.</span>
+        </div>
+      </li>
+      <li>
+        <div class="rule-number">2</div>
+        <div class="rule-content">
+          <strong>כל משפט שני מפתיע</strong>
+          <span>אם הקורא יכול לנבא את המשפט הבא — מחיקה. קופי שניתן לנבא הוא קופי בלתי נראה.</span>
+        </div>
+      </li>
+      <li>
+        <div class="rule-number">3</div>
+        <div class="rule-content">
+          <strong>קול ישיר, לא קול שיווקי</strong>
+          <span>"אנחנו לא עורכים מבצעים. עדיפים לנו שלא תקנה, על פני שתקנה לא נכון."
+          זה מוכר יותר מ-"איכות פרמיום מובטחת." ביטחון מאותת אוטוריטה. אוטוריטה מאותת איכות.</span>
+        </div>
+      </li>
+      <li>
+        <div class="rule-number">4</div>
+        <div class="rule-content">
+          <strong>מבחן הטקסט של 10 שניות</strong>
+          <span>כסה את כל התמונות. האם הקופי לבדו יוצר רצון לקנות? אם לא — הקופי חלש.
+          תמונות הן תמיכה, לא אסטרטגיה.</span>
+        </div>
+      </li>
+      <li>
+        <div class="rule-number">5</div>
+        <div class="rule-content">
+          <strong>אפס pop-ups ב-30 השניות הראשונות</strong>
+          <span>אמון נהרס תוך 3 שניות. pop-up מיידי מאותת יאוש. איסוף מיילים מתרחש אחרי העברת ערך — לא לפניה.</span>
+        </div>
+      </li>
+      <li>
+        <div class="rule-number">6</div>
+        <div class="rule-content">
+          <strong>"משלוח חינם מ-$X" לעולם לא יהיה ה-Hero Message</strong>
+          <span>זה מאותת מיידית חנות commodity גנרית. שמרו לזה לנטישת עגלה, לא להכרות עם המותג.</span>
+        </div>
+      </li>
+      <li>
+        <div class="rule-number">7</div>
+        <div class="rule-content">
+          <strong>היררכיית CTA היא קדושה</strong>
+          <span>ראשון: בנה רצון (חינוך → סיפור → הוכחה חברתית). שני: בקש את הכסף. לעולם לא להפוך את הסדר הזה.</span>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ── SECTION 7: BANNED ── -->
+  <div class="section">
+    <span class="section-number">פרק ז׳</span>
+    <h2 class="section-title">מה שאסור — לנצח</h2>
+    <p class="section-lead">
+      מילים שהורגות את המותג בשורה אחת.
+    </p>
+
+    <div class="banned-grid">
+      <div class="banned-item">
+        <div class="banned-word">"Premium Quality"</div>
+        <div class="banned-reason">כל מותג אומר זאת. לא מוסיף כלום.
+        השתמש במפרט שמוכיח: "85% Merino, 200 needle count."</div>
+      </div>
+      <div class="banned-item">
+        <div class="banned-word">"Luxury Feel"</div>
+        <div class="banned-reason">טענה ללא הוכחה. הראה, אל תטען.
+        "סיב Merino דקיק פי 6 משערה" — זה לוקסרי בלי לומר המילה.</div>
+      </div>
+      <div class="banned-item">
+        <div class="banned-word">"Limited Time Offer"</div>
+        <div class="banned-reason">מניפולציית דחיפות. הורסת אמון לאורך זמן.
+        נדירות אמיתית בלבד: "200 זוגות/חודש" — ניתן לאמת.</div>
+      </div>
+      <div class="banned-item">
+        <div class="banned-word">"World's Best"</div>
+        <div class="banned-reason">סופרלטיב ללא בסיס. "האוטוריטה הראשונה בעולם לגרביים" — זה אנחנו יכולים לתמוך בו.</div>
+      </div>
+      <div class="banned-item">
+        <div class="banned-word">"Hassle-free"</div>
+        <div class="banned-reason">ביטוי generic. מחק. השתמש ב"ללא חיכוך" / "אוטומטי" / "ברמה שמנהלת את עצמה."</div>
+      </div>
+      <div class="banned-item">
+        <div class="banned-word">גרביים נעלמות</div>
+        <div class="banned-reason">הומור זול. קורס אוטוריטה בשניה אחת. השתמש: "חידוש מחזורי" / "wardrobe continuity."</div>
+      </div>
+      <div class="banned-item">
+        <div class="banned-word">אמוג'י בפרסומות</div>
+        <div class="banned-reason">שובר את ה-premium signal. Loro Piana לא שולחת מיילים עם אמוג'י. גם אנחנו לא.</div>
+      </div>
+      <div class="banned-item">
+        <div class="banned-word">גרביים לכלבים / ילדים / נובלטי</div>
+        <div class="banned-reason">BLOCKED לנצח. מדלל את האמינות, מבלבל את הקהל, מכחיד את הפוזיציה.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 8: COMPETITORS ── -->
+  <div class="section">
+    <span class="section-number">פרק ח׳</span>
+    <h2 class="section-title">נוף המתחרים — מפת יתרונות</h2>
+    <p class="section-lead">
+      מי מוביל, מה הם מחמיצים, ואיפה הרווח שלנו.
+    </p>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>מותג</th>
+          <th>מה הם טוענים</th>
+          <th>החולשה שלהם</th>
+          <th>היתרון שלנו עליהם</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Bombas</td>
+          <td>נוחות + צדקה (B1G1)</td>
+          <td>מסר הצדקה מדלל את הלוקסרי. מסה קריטית שהפכה generic.</td>
+          <td class="our-win">אנחנו מחזיקים באוטוריטה. הם מחזיקים בצדקה.</td>
+        </tr>
+        <tr>
+          <td>Darn Tough</td>
+          <td>אחריות לכל החיים</td>
+          <td>פוקוס על עמידות, לא אסתטיקה. קהל חוצניקים, לא style-conscious.</td>
+          <td class="our-win">אנחנו מחזיקים בלוקסרי. הם מחזיקים בעמידות.</td>
+        </tr>
+        <tr>
+          <td>Stance</td>
+          <td>אמנות + קולאבורציות celebrity</td>
+          <td>הפך מאסי. הype דועך. אוטוריטה לא נבנית על celebrity deals.</td>
+          <td class="our-win">אנחנו מחזיקים בחינוך. הם מחזיקים ב-hype.</td>
+        </tr>
+        <tr>
+          <td>Falke</td>
+          <td>מורשת גרמנית מ-1895</td>
+          <td>מסורתי. חסר נרטיב דיגיטלי. המורשת לא מתורגמת ל-D2C.</td>
+          <td class="our-win">אנחנו מחזיקים באוטוריטה דיגיטלית-ראשית. הם מחזיקים בלגאסי.</td>
+        </tr>
+        <tr>
+          <td>Pantherella</td>
+          <td>מלאכה בריטית, Royal Warrant</td>
+          <td>מסורתי מדי. חסר נוכחות דיגיטלית. מדבר לקהל שמת.</td>
+          <td class="our-win">אנחנו מחזיקים בנרטיב מודרני. הם מחזיקים במסורת ללא סיפור.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="highlight">
+      <p>
+        הפער שכולם מחמיצים: אף אחד לא בנה <strong>אוטוריטה אינטלקטואלית</strong> סביב גרביים.
+        Bombas מוכרת נוחות. Falke מוכרת מורשת. Stance מוכרת אמנות.
+        אף אחד לא מלמד אותך <em>למה</em> הגרביים שלך חשובות.
+        זהו הטריטוריה שלנו.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── SECTION 9: MANIFESTO ── -->
+  <div class="section">
+    <span class="section-number">פרק ט׳</span>
+    <h2 class="section-title">המניפסט — מה שאנחנו בונים</h2>
+
+    <div class="manifesto">
+      <p>
+        אנחנו לא בונים חנות Shopify.
+        אנחנו לא מפעילים פעולת dropshipping.
+        אנחנו לא עוד מותג גרביים.
+      </p>
+      <p>
+        אנחנו בונים את המוסד הראשון של אוטוריטת הגרב —
+        מותג כל-כך ברור במיצובו, כל-כך עקבי בקולו,
+        וכל-כך אמין במומחיותו, שהקטגוריה תסתדר מחדש סביבנו.
+      </p>
+      <p>
+        הגרב היא הדבר האחרון שאתה שם לפני שאתה יוצא.
+        היא הפרט הסיום. נקודת הסיום. הסימן.
+        אנחנו קיימים כדי להפוך את הרגע הזה לכוונתי.
+      </p>
+      <p>
+        הסטנדרט הוא המוצר.
+        הגרביים הן רק ההוכחה.
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── FOOTER ── -->
+<div class="doc-footer">
+  <div class="brand">SOCKACADEMY</div>
+  <div class="meta">
+    Master Vision & Strategy Document v1.0<br>
+    יוני 2026 — Confidential — Guy Oved
+  </div>
+</div>
+
+</body>
+</html>
