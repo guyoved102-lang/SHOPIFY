@@ -1,20 +1,50 @@
 {
   "_meta": {
-    "version": "2.0.0",
+    "version": "3.0.0",
     "last_updated": "2026-06-20",
     "owner": "A0 Orchestrator",
     "description": "Declarative dependency graph + trigger matrix for all 28 SockAcademy agents. A0 reads this file — no hardcoded logic in A0 agent.js.",
-    "schema_note": "Migrated agents (A0, A2, A10, A11, A13) use Supabase as data layer. A1/A7 still use Google Sheets — pending Supabase migration.",
     "data_layer": {
-      "supabase_migrated": ["A0", "A2", "A10", "A11", "A13"],
-      "google_sheets_legacy": ["A1", "A7"],
+      "supabase_migrated": ["A0", "A1", "A2", "A10", "A11", "A13"],
+      "google_sheets_legacy": ["A7"],
       "supabase_tables": {
-        "products": "A2 output — Shopify product sync",
-        "trends": "A10 output — trend intelligence",
-        "competitor_prices": "A11 output — pricing data",
-        "competitor_intel": "A13 output — competitive landscape",
-        "agent_health_log": "A0 state ledger"
+        "products":           "A1 write (research) + A2 write (upload) — primary product table",
+        "trends":             "A10 output — trend intelligence",
+        "competitor_prices":  "A11 output — pricing data",
+        "competitor_intel":   "A13 output — competitive landscape",
+        "agent_health_log":   "A0 state ledger",
+        "pending_approvals":  "HitL approval queue (Phase B)",
+        "queue_log":          "Upstash event audit trail"
       }
+    },
+    "observability": {
+      "provider": "LangFuse",
+      "module":   "sockacademy/corp/core/observability.js",
+      "secrets":  ["LANGFUSE_PUBLIC_KEY", "LANGFUSE_SECRET_KEY"],
+      "note":     "graceful no-op when secrets absent"
+    },
+    "event_queue": {
+      "provider": "Upstash Redis",
+      "module":   "sockacademy/corp/core/queue.js",
+      "secrets":  ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"],
+      "queues":   ["sa:queue:upload", "sa:queue:content", "sa:queue:orders", "sa:queue:stock", "sa:queue:intel"]
+    },
+    "webhook_bridge": {
+      "provider":  "Make.com → GitHub repository_dispatch",
+      "workflow":  ".github/workflows/shopify-webhook-handler.yml",
+      "topics":    ["orders/create", "orders/paid", "inventory_levels/update", "products/create", "products/update"],
+      "secret":    "MAKE_WEBHOOK_URL (in .env — for register_webhooks.js setup)"
+    },
+    "guardrails": {
+      "structure_lint":   ".github/workflows/structure-lint.yml — runs on every push, fails CI in ~15s on violations",
+      "a0_health_check":  "A0 agent step 3 — workspace structure check on every daily run, email alert on violation",
+      "creation_protocol": "CLAUDE.md FILE CREATION PROTOCOL — 3 mandatory questions before any new file"
+    },
+    "token_refresh": {
+      "agent":    "A17",
+      "schedule": "1st of every 2nd month, 08:00 UTC",
+      "workflow": ".github/workflows/a17-token-refresher.yml",
+      "secrets":  ["META_APP_ID", "META_APP_SECRET", "GH_PAT_SECRETS_WRITE"]
     }
   },
 

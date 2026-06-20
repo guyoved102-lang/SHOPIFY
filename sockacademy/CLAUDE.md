@@ -792,7 +792,8 @@ sockacademy/
 │   └── ops/                         ← KLAVIYO_ABANDONED_CART_FLOW.md, SKILLS_GUIDE.md/pdf, release-notes.md
 │
 ├── scripts/
-│   └── setup/                       ← One-time setup scripts (exchange_token.js, create_products.js, upload_hero.js, etc.)
+│   ├── ci/                          ← CI/guardrail scripts (structure-lint.js — runs in GitHub Actions on every push)
+│   └── setup/                       ← One-time setup scripts (exchange_token.js, create_products.js, register_webhooks.js, etc.)
 │
 ├── schemas/                         ← JSON schemas + IDEMPOTENCY.md
 │
