@@ -247,6 +247,7 @@ async function main() {
 
   const supabase = getSupabase();
   console.log('✅ Supabase connected');
+  await updateA0State(supabase, 'RUNNING');
 
   // Step 1 — Stuck detection (every run)
   console.log('\n[1/3] Stuck Detection');
@@ -283,7 +284,15 @@ async function main() {
   console.log(`✅ Done | stuck marked: ${markedCount} | DRY_RUN=${DRY_RUN}`);
 }
 
-main().catch(err => {
+main().catch(async err => {
   console.error('\n❌ A0 fatal:', err.message);
+  try {
+    const sb = getSupabase();
+    await updateA0State(sb, 'ERROR', err.message);
+    await sendEmail(
+      '🚨 A0 Orchestrator FAILED — action needed',
+      `<div style="font-family:monospace"><h2>🚨 A0 Fatal Error</h2><p><strong>Time:</strong> ${new Date().toISOString()}</p><pre style="background:#f5f5f5;padding:12px">${err.message}</pre></div>`
+    );
+  } catch (_) {}
   process.exit(1);
 });

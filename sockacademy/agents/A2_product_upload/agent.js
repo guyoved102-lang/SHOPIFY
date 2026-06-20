@@ -203,6 +203,33 @@ async function sendSummaryEmail(results) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// HEALTH MONITORING
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function logHealth(supabase, status, errorMessage = '') {
+  const now = new Date().toISOString();
+  try {
+    await supabase.from('agent_health_log').upsert(
+      { agent: 'A2', status, last_run: now, error_message: errorMessage, updated_at: now },
+      { onConflict: 'agent' }
+    );
+  } catch (e) { console.error('Health log failed:', e.message); }
+}
+
+async function sendErrorAlert(errorMessage) {
+  if (!process.env.GMAIL_APP_PASSWORD) return;
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user: 'sockacademy.store@gmail.com', pass: process.env.GMAIL_APP_PASSWORD },
+  });
+  await transporter.sendMail({
+    from: '"SockAcademy Agents" <sockacademy.store@gmail.com>',
+    to: 'sockacademy.store@gmail.com',
+    subject: '🚨 A2 Product Upload FAILED — action needed',
+    html: `<div style="font-family:monospace"><h2>🚨 A2 Failed</h2><p><strong>Time:</strong> ${new Date().toISOString()}</p><pre style="background:#f5f5f5;padding:12px;border-radius:4px">${errorMessage}</pre></div>`,
+  }).catch(e => console.error('Alert email failed:', e.message));
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // MAIN
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function main() {
@@ -224,6 +251,8 @@ async function main() {
     console.error(`❌ Supabase: ${e.message}`);
     process.exit(1);
   }
+
+  await logHealth(supabase, 'RUNNING');
 
   const approvedProducts = await getApprovedProducts(supabase);
   console.log(`📋 מוצרים מאושרים להעלאה: ${approvedProducts.length}`);
@@ -274,9 +303,15 @@ async function main() {
   console.log(`✅ הסתיים — ${results.filter(r => r.success).length}/${results.length} הועלו`);
 
   await sendSummaryEmail(results);
+  await logHealth(supabase, 'SUCCESS');
 }
 
-main().catch(e => {
+main().catch(async e => {
   console.error('💥 Fatal:', e.message);
+  try {
+    const sb = getSupabase();
+    await logHealth(sb, 'ERROR', e.message);
+    await sendErrorAlert(e.message);
+  } catch (_) {}
   process.exit(1);
 });

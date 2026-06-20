@@ -26,6 +26,36 @@ const DRY_RUN = process.env.DRY_RUN === 'true';
 const GMAIL_USER = 'guyoved102@gmail.com';
 const ALERT_EMAIL = 'guyoved102@gmail.com';
 
+function getSupabase() {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY)
+    throw new Error('SUPABASE_URL / SUPABASE_SERVICE_KEY not set');
+  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+}
+
+async function logHealth(supabase, status, errorMessage = '') {
+  const now = new Date().toISOString();
+  try {
+    await supabase.from('agent_health_log').upsert(
+      { agent: 'A11', status, last_run: now, error_message: errorMessage, updated_at: now },
+      { onConflict: 'agent' }
+    );
+  } catch (e) { console.error('Health log failed:', e.message); }
+}
+
+async function sendErrorAlert(errorMessage) {
+  if (!process.env.GMAIL_APP_PASSWORD) return;
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user: 'sockacademy.store@gmail.com', pass: process.env.GMAIL_APP_PASSWORD },
+  });
+  await transporter.sendMail({
+    from: '"SockAcademy Agents" <sockacademy.store@gmail.com>',
+    to: 'sockacademy.store@gmail.com',
+    subject: '🚨 A11 Price Intelligence FAILED — action needed',
+    html: `<div style="font-family:monospace"><h2>🚨 A11 Failed</h2><p><strong>Time:</strong> ${new Date().toISOString()}</p><pre style="background:#f5f5f5;padding:12px;border-radius:4px">${errorMessage}</pre></div>`,
+  }).catch(e => console.error('Alert email failed:', e.message));
+}
+
 // SockAcademy price floors — for positioning comparison
 const SA_PRICE_FLOORS = {
   'Merino Wool': 35,
@@ -470,6 +500,9 @@ async function main() {
   console.log(DRY_RUN ? '🔬 DRY_RUN mode — simulated prices' : '🌐 LIVE — fetching real prices');
   console.log(`📋 Competitors: ${Object.keys(COMPETITORS).join(', ')}`);
 
+  const supabase = getSupabase();
+  await logHealth(supabase, 'RUNNING');
+
   try {
     const results = await scoutAllCompetitors();
 
@@ -492,8 +525,11 @@ async function main() {
 
     const okCount = results.filter((r) => r.price_usd || r.status === 'DRY_RUN').length;
     console.log(`\n✅ A11 done — ${okCount}/${results.length} products processed`);
+    await logHealth(supabase, 'SUCCESS');
   } catch (err) {
     console.error('❌ A11 fatal error:', err.message);
+    await logHealth(supabase, 'ERROR', err.message);
+    await sendErrorAlert(err.message);
     process.exit(1);
   }
 }

@@ -11,6 +11,34 @@ const https   = require('https');
 const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 
+function getSupabase() {
+  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+}
+
+async function logHealth(supabase, status, errorMessage = '') {
+  const now = new Date().toISOString();
+  try {
+    await supabase.from('agent_health_log').upsert(
+      { agent: 'A13', status, last_run: now, error_message: errorMessage, updated_at: now },
+      { onConflict: 'agent' }
+    );
+  } catch (e) { console.error('Health log failed:', e.message); }
+}
+
+async function sendErrorAlert(errorMessage) {
+  if (!process.env.GMAIL_APP_PASSWORD) return;
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user: 'sockacademy.store@gmail.com', pass: process.env.GMAIL_APP_PASSWORD },
+  });
+  await transporter.sendMail({
+    from: '"SockAcademy Agents" <sockacademy.store@gmail.com>',
+    to: 'sockacademy.store@gmail.com',
+    subject: '🚨 A13 Competitive Intel FAILED — action needed',
+    html: `<div style="font-family:monospace"><h2>🚨 A13 Failed</h2><p><strong>Time:</strong> ${new Date().toISOString()}</p><pre style="background:#f5f5f5;padding:12px;border-radius:4px">${errorMessage}</pre></div>`,
+  }).catch(e => console.error('Alert email failed:', e.message));
+}
+
 // ─── Startup Guards ──────────────────────────────────────────────────────────
 const REQUIRED = ['PERPLEXITY_API_KEY', 'ANTHROPIC_API_KEY', 'GMAIL_APP_PASSWORD',
                   'SUPABASE_URL', 'SUPABASE_SERVICE_KEY'];
@@ -342,6 +370,9 @@ async function run() {
   console.log(`\n🕵️  A13 Competitive Intelligence — ${mode.toUpperCase()} mode | ${runDate}`);
   if (DRY_RUN) console.log('  [DRY RUN — no Sheets/email writes]');
 
+  const supabase = getSupabase();
+  await logHealth(supabase, 'RUNNING');
+
   const activeMarkets = MARKETS.filter(m => m.active);
   // Strike mode: Tier 1 only. Deep mode: all tiers.
   const targetCompetitors = STRIKE_MODE
@@ -410,7 +441,16 @@ async function run() {
     console.log('  [DRY RUN] Would have logged', sheetRows.length, 'rows and sent email');
   }
 
+  await logHealth(supabase, 'SUCCESS');
   console.log('\n✅ A13 complete.\n');
 }
 
-run().catch(err => { console.error('❌ A13 fatal:', err); process.exit(1); });
+run().catch(async err => {
+  console.error('❌ A13 fatal:', err);
+  try {
+    const sb = getSupabase();
+    await logHealth(sb, 'ERROR', err.message);
+    await sendErrorAlert(err.message);
+  } catch (_) {}
+  process.exit(1);
+});
