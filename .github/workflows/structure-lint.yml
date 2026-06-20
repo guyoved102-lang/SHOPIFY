@@ -16,6 +16,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Run structure linter
         run: node sockacademy/scripts/ci/structure-lint.js
