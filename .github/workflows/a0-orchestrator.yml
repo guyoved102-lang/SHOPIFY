@@ -2,7 +2,7 @@ name: A0  -  Orchestrator (Daily Health Check)
 
 on:
   schedule:
-    - cron: '0 9 * * *'   # ׳›׳ ׳™׳•׳ 09:00 UTC (12:00 ׳™׳©׳¨׳׳)  -  ׳׳—׳¨׳™ A2 + timeout buffer
+    - cron: '0 9 * * *'
   workflow_dispatch:
     inputs:
       dry_run:

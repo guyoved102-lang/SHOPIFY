@@ -2,7 +2,7 @@ name: A2 — Product Upload (Daily)
 
 on:
   schedule:
-    - cron: '0 8 * * *'   # כל יום 11:00 ישראל (UTC+3)
+    - cron: '0 8 * * *'
   workflow_dispatch:
     inputs:
       dry_run:

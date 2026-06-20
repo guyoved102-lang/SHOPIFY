@@ -2,7 +2,7 @@ name: A4  -  Meta Ads Agent (Weekly)
 
 on:
   schedule:
-    - cron: '0 7 * * 2'  # ׳›׳ ׳©׳׳™׳©׳™ 07:00 UTC (10:00 ׳™׳©׳¨׳׳)
+    - cron: '0 7 * * 2'
   workflow_dispatch:
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-          # ׳׳”׳₪׳¢׳׳” ׳׳׳׳”  -  ׳”׳•׳¡׳£ ׳‘-GitHub Secrets:
+
           META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
           META_AD_ACCOUNT_ID: ${{ secrets.META_AD_ACCOUNT_ID }}
           META_PAGE_ID: ${{ secrets.META_PAGE_ID }}

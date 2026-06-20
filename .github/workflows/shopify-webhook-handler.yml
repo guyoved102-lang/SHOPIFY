@@ -10,7 +10,7 @@ on:
 
 jobs:
 
-  # ── Order Created / Paid ────────────────────────────────────────────────
+
   handle-order:
     name: Handle Order Event
     if: |
@@ -47,7 +47,7 @@ jobs:
           "
         working-directory: sockacademy/corp/core
 
-  # ── Inventory Low ────────────────────────────────────────────────────────
+
   handle-inventory:
     name: Handle Low Inventory
     if: github.event.client_payload.topic == 'inventory_levels/update'
@@ -101,7 +101,7 @@ jobs:
               ref: 'main',
             });
 
-  # ── Product Updated ──────────────────────────────────────────────────────
+
   handle-product:
     name: Handle Product Update
     if: |
