@@ -219,6 +219,36 @@
 
 ---
 
+## 19. Node.js Version Mismatch — Supabase Realtime WebSocket נכשל
+
+**מה קרה (21/06/2026):** A8 נכשל עם `Fatal: Node.js 20 detected without native WebSocket support`. כל שאר ה-agents השתמשו ב-Node 24, אבל A8 נשאר על 20 מהיצירה.
+**סיבה:** Supabase `@supabase/supabase-js` Realtime client דורש WebSocket native (זמין מ-Node 22+). ב-Node 20 — fatal error מיד.
+**פרוטוקול:**
+- **כל** GitHub Actions YAML: `node-version: '24'` — ללא יוצא מן הכלל
+- לפני כל push של agent חדש: `grep -r "node-version" .github/workflows/` — לוודא שאין 20 או 18
+- אם agent ישן קיים עם Node < 22: תקן לפני שממשיכים
+
+**בדיקה:** `grep -r "node-version" .github/workflows/ | grep -v "24"` — חייב להחזיר ריק.
+
+---
+
+## 20. CREATE TABLE IF NOT EXISTS לא מספיק כשSchema השתנה
+
+**מה קרה (21/06/2026):** agent_health_log.sql כלל `CREATE TABLE IF NOT EXISTS`. A8 כבר ניסה ליצור טבלה בשם זה (עם columns שונים) — הSQL שרד בשקט, אבל index על `agent_id` נכשל כי הטבלה הישנה לא כללה את העמודה.
+**שגיאה:** `ERROR: 42703: column "agent_id" does not exist` בעת יצירת index — אחרי שה-CREATE TABLE "הצליח".
+**פרוטוקול:**
+- כשמריצים SQL שייתכן שהטבלה כבר קיימת: **תמיד** להריץ `DROP TABLE IF EXISTS <name>;` ראשון
+- לתעד בSQL file עצמו: "אם נכשל — הרץ DROP TABLE IF EXISTS קודם"
+- לעולם לא להניח ש-`IF NOT EXISTS` = idempotent כאשר schema השתנה
+
+**תבנית בטוחה לSQL files:**
+```sql
+-- אם הטבלה קיימת עם schema ישן — הרץ קודם: DROP TABLE IF EXISTS <name>;
+CREATE TABLE IF NOT EXISTS <name> ( ... );
+```
+
+---
+
 ## SESSION CONTINUITY CHECKLIST — בכל שיחה
 
 **פתיחה:**
