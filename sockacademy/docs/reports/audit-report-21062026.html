@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SockAcademy — Full System Audit Report | 21/06/2026</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #0a0a0a; color: #f0ede6; padding: 40px 60px; line-height: 1.6; }
+  .header { border-bottom: 2px solid #C9A84C; padding-bottom: 24px; margin-bottom: 36px; text-align: center; }
+  .brand { font-size: 11px; letter-spacing: 5px; color: #C9A84C; text-transform: uppercase; margin-bottom: 8px; }
+  h1 { font-size: 28px; font-weight: 700; color: #f0ede6; margin-bottom: 6px; }
+  .subtitle { color: #6b7280; font-size: 14px; }
+  .section { margin-bottom: 36px; }
+  h2 { font-size: 16px; font-weight: 700; color: #C9A84C; text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px solid #1a1a1a; padding-bottom: 10px; margin-bottom: 18px; }
+  h3 { font-size: 14px; font-weight: 600; color: #f0ede6; margin-bottom: 10px; margin-top: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px; }
+  th { background: #111; color: #9ca3af; text-align: right; padding: 10px 12px; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
+  td { padding: 10px 12px; border-bottom: 1px solid #1a1a1a; color: #d1d5db; vertical-align: top; }
+  tr:hover td { background: #111; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 700; }
+  .badge-red { background: #3a0a0a; color: #f87171; }
+  .badge-green { background: #0a2a0a; color: #4ade80; }
+  .badge-yellow { background: #2a1a0a; color: #fbbf24; }
+  .badge-blue { background: #0a1a2a; color: #60a5fa; }
+  .badge-gray { background: #1a1a1a; color: #9ca3af; }
+  .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .summary-card { background: #111; border: 1px solid #1a1a1a; border-radius: 6px; padding: 16px 20px; text-align: center; }
+  .summary-card .number { font-size: 32px; font-weight: 700; margin-bottom: 4px; }
+  .summary-card .label { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: #6b7280; }
+  .critical-list { background: #1a0a0a; border: 1px solid #3a0a0a; border-radius: 6px; padding: 20px 24px; margin-bottom: 16px; }
+  .critical-list li { color: #f0ede6; font-size: 14px; padding: 6px 0; border-bottom: 1px solid #2a0a0a; list-style: none; }
+  .critical-list li:last-child { border-bottom: none; }
+  .critical-list li::before { content: ""; }
+  .num { color: #C9A84C; font-weight: 700; margin-left: 8px; font-size: 13px; }
+  .value { color: #4ade80; font-family: monospace; background: #0a1a0a; padding: 1px 6px; border-radius: 3px; font-size: 12px; }
+  .agent-status { font-size: 16px; }
+  .commit-list { background: #111; border-radius: 6px; padding: 16px 20px; }
+  .commit-list code { display: block; font-family: monospace; font-size: 13px; color: #C9A84C; margin-bottom: 6px; }
+  .commit-list .desc { color: #9ca3af; font-size: 12px; margin-bottom: 12px; margin-right: 16px; }
+  .footer { border-top: 1px solid #1a1a1a; margin-top: 48px; padding-top: 20px; text-align: center; color: #4b5563; font-size: 11px; }
+  .timeline-item { display: flex; margin-bottom: 12px; }
+  .timeline-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; margin-left: 12px; flex-shrink: 0; }
+  .timeline-dot.red { background: #ef4444; }
+  .timeline-dot.green { background: #22c55e; }
+  .timeline-dot.yellow { background: #f59e0b; }
+  .timeline-content { flex: 1; }
+  .timeline-content .title { color: #f0ede6; font-size: 13px; font-weight: 600; }
+  .timeline-content .detail { color: #6b7280; font-size: 12px; margin-top: 2px; }
+  @media print { body { background: white; color: black; } .badge-red { background: #fee2e2; color: #dc2626; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">SockAcademy Operations</div>
+  <h1>Full System Audit Report</h1>
+  <div class="subtitle">21 June 2026 — Comprehensive infrastructure validation across all 15 agents and 18 workflows</div>
+</div>
+
+<!-- EXECUTIVE SUMMARY -->
+<div class="section">
+  <h2>Executive Summary</h2>
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="number" style="color:#22c55e">11</div>
+      <div class="label">Agents Healthy</div>
+    </div>
+    <div class="summary-card">
+      <div class="number" style="color:#ef4444">4</div>
+      <div class="label">Agents Failing</div>
+    </div>
+    <div class="summary-card">
+      <div class="number" style="color:#C9A84C">4</div>
+      <div class="label">YAMLs Fixed Today</div>
+    </div>
+    <div class="summary-card">
+      <div class="number" style="color:#f59e0b">6</div>
+      <div class="label">Secrets Missing</div>
+    </div>
+  </div>
+  <p style="color:#9ca3af; font-size:13px;">All YAML files are now clean and aligned with their actual package.json dependencies. The 4 agent failures are caused exclusively by missing GitHub Secrets — all of which require Guy's action. No code bugs were found.</p>
+</div>
+
+<!-- YAML FIXES PERFORMED -->
+<div class="section">
+  <h2>YAML Fixes Performed This Session</h2>
+  <div class="commit-list">
+    <code>6b32c14</code>
+    <div class="desc">fix: A0 + A11 YAML drift — replaced stale GOOGLE_ vars with SUPABASE_URL + SUPABASE_SERVICE_KEY</div>
+    <code>06da34d</code>
+    <div class="desc">fix: clean A10 + A13 YAMLs — removed GOOGLE_ dead weight vars (agents use Supabase, not Sheets)</div>
+  </div>
+  <p style="color:#9ca3af; font-size:12px; margin-top:12px;">Root cause: Supabase Phase 2 migration updated agent.js code but left YAML env: sections referencing stale Google Sheets credentials. This caused silent failure at cron time — agents had valid code but received no database connection.</p>
+</div>
+
+<!-- AGENT STATUS MATRIX -->
+<div class="section">
+  <h2>Agent Status Matrix — Post Audit</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Agent</th>
+        <th>Name</th>
+        <th>Status</th>
+        <th>YAML</th>
+        <th>Issue</th>
+        <th>Fix Required</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>A0</strong></td>
+        <td>Orchestrator</td>
+        <td><span class="badge badge-green">FIXED</span></td>
+        <td><span class="badge badge-green">CLEAN</span></td>
+        <td>Ran on old commit 21/06 (timing) — will pass tomorrow</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>A1</strong></td>
+        <td>Product Research</td>
+        <td><span class="badge badge-green">HEALTHY</span></td>
+        <td><span class="badge badge-blue">DUAL</span></td>
+        <td>google-spreadsheet + supabase (valid)</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>A2</strong></td>
+        <td>Product Upload</td>
+        <td><span class="badge badge-green">HEALTHY</span></td>
+        <td><span class="badge badge-green">CLEAN</span></td>
+        <td>DeprecationWarning (non-breaking)</td>
+        <td>—</td>
+      </tr>
+      <tr style="background:#1a0808">
+        <td><strong>A3</strong></td>
+        <td>Content Agent</td>
+        <td><span class="badge badge-red">FAILING</span></td>
+        <td><span class="badge badge-green">CLEAN</span></td>
+        <td>BLOG_ID missing → exit(1) every Monday. 5 failures.</td>
+        <td>Add BLOG_ID = 97332199622</td>
+      </tr>
+      <tr>
+        <td><strong>A4</strong></td>
+        <td>Meta Ads</td>
+        <td><span class="badge badge-green">HEALTHY</span></td>
+        <td><span class="badge badge-green">CLEAN</span></td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>A5</strong></td>
+        <td>Social Content</td>
+        <td><span class="badge badge-yellow">WARNING</span></td>
+        <td><span class="badge badge-green">CLEAN</span></td>
+        <td>OPENAI_API_KEY expired. Images fail, CI passes. Captions sent.</td>
+        <td>Renew OPENAI_API_KEY</td>
+      </tr>
+      <tr>
+        <td><strong>A6</strong></td>
+        <td>Email Sync</td>
+        <td><span class="badge badge-green">HEALTHY</span></td>
+        <td><span class="badge badge-green">CLEAN</span></td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>A7</strong></td>
+        <td>Supplier Monitor</td>
+        <td><span class="badge badge-green">HEALTHY</span></td>
+        <td><span class="badge badge-green">CLEAN</span></td>
+        <td>Threshold secrets null → graceful defaults (confirmed in code)</td>
+        <td>—</td>
+      </tr>
+      <tr style="background:#1a0808">
+        <td><strong>A8</strong></td>
+        <td>Analytics Reporter</td>
+        <td><span class="badge badge-red">FAILING</span></td>
+        <td><span class="badge badge-green">CLEAN</span></td>
+        <td>GA4_PROPERTY_ID missing → fails every Sunday 07:00 UTC</td>
+        <td>Add GA4_PROPERTY_ID = 541051756</td>
+      </tr>
+      <tr>
+        <td><strong>A9</strong></td>
+        <td>Legal Compliance</td>
+        <td><span class="badge badge-green">HEALTHY</span></td>
+        <td><span class="badge badge-green">CLEAN</span></td>
+        <td>Manual trigger only</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>A10</strong></td>
+        <td>Trend Scout</td>
+        <td><span class="badge badge-green">FIXED</span></td>
+        <td><span class="badge badge-green">CLEAN</span></td>
+        <td>GOOGLE_ dead weight removed 21/06</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>A11</strong></td>
+        <td>Price Intelligence</td>
+        <td><span class="badge badge-green">FIXED</span></td>
+        <td><span class="badge badge-green">CLEAN</span></td>
+        <td>SUPABASE_ vars added 21/06</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>A12</strong></td>
+        <td>Review Collector</td>
+        <td><span class="badge badge-green">HEALTHY</span></td>
+        <td><span class="badge badge-green">CLEAN</span></td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr style="background:#1a0808">
+        <td><strong>A13</strong></td>
+        <td>Competitive Intel</td>
+        <td><span class="badge badge-red">FAILING</span></td>
+        <td><span class="badge badge-green">CLEAN</span></td>
+        <td>PERPLEXITY_API_KEY missing → AI analysis fails every Sunday 06:00</td>
+        <td>Add PERPLEXITY_API_KEY</td>
+      </tr>
+      <tr style="background:#1a0808">
+        <td><strong>A17</strong></td>
+        <td>Token Refresher</td>
+        <td><span class="badge badge-red">PENDING FAIL</span></td>
+        <td><span class="badge badge-green">CLEAN</span></td>
+        <td>META_APP_ID + GH_PAT_SECRETS_WRITE missing — will fail next bimonthly run</td>
+        <td>Add both secrets</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- SECRETS REQUIRED -->
+<div class="section">
+  <h2>Action Required — Guy Only</h2>
+  <p style="color:#9ca3af; font-size:13px; margin-bottom:16px;">The following secrets must be added via GitHub → Settings → Secrets and variables → Actions.</p>
+  <div class="critical-list">
+    <ul>
+      <li><span class="num">1.</span> <code>BLOG_ID</code> = <span class="value">97332199622</span> — fixes A3 Content (failing every Monday) <span class="badge badge-red">NEW — found 21/06</span></li>
+      <li><span class="num">2.</span> <code>GA4_PROPERTY_ID</code> = <span class="value">541051756</span> — fixes A8 Analytics (failing every Sunday)</li>
+      <li><span class="num">3.</span> <code>PERPLEXITY_API_KEY</code> = [your key] — fixes A13 Competitive Intel</li>
+      <li><span class="num">4.</span> <code>META_APP_ID</code> = [from Meta Dashboard] — fixes A17 Token Refresher</li>
+      <li><span class="num">5.</span> <code>GH_PAT_SECRETS_WRITE</code> = [GitHub PAT, scope: repo+secrets] — fixes A17</li>
+      <li><span class="num">6.</span> <code>OPENAI_API_KEY</code> = [new key from OpenAI] — fixes A5 image generation</li>
+    </ul>
+  </div>
+</div>
+
+<!-- GITHUB SECRETS INVENTORY -->
+<div class="section">
+  <h2>GitHub Secrets Inventory — 21/06/2026</h2>
+  <table>
+    <thead>
+      <tr><th>Secret</th><th>Last Updated</th><th>Used By</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>ANTHROPIC_API_KEY</td><td>2026-06-20</td><td>A3, A4, A5, A10, A13</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+      <tr><td>CJ_API_KEY</td><td>2026-06-15</td><td>A1, A7</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+      <tr><td>CJ_EMAIL / CJ_PASSWORD</td><td>2026-06-15</td><td>A1</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+      <tr><td>GA4_MEASUREMENT_ID</td><td>2026-06-15</td><td>A8</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+      <tr><td>GMAIL_APP_PASSWORD</td><td>2026-06-20</td><td>All agents (alerts)</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+      <tr><td>GOOGLE_SERVICE_ACCOUNT_JSON</td><td>2026-06-15</td><td>A1, A8</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+      <tr><td>GOOGLE_SHEET_ID</td><td>2026-06-15</td><td>A1</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+      <tr><td>KLAVIYO_PRIVATE_API_KEY</td><td>2026-06-17</td><td>A6</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+      <tr><td>META_ACCESS_TOKEN</td><td>2026-06-19</td><td>A4, A5, A17</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+      <tr><td>META_AD_ACCOUNT_ID / META_PAGE_ID / META_IG_USER_ID</td><td>2026-06-17</td><td>A4, A5</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+      <tr><td>META_APP_SECRET</td><td>2026-06-20</td><td>A17</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+      <tr><td>OPENAI_API_KEY</td><td>2026-06-17</td><td>A5</td><td><span class="badge badge-yellow">EXPIRED</span></td></tr>
+      <tr><td>SHOPIFY_MASTER_TOKEN</td><td>2026-06-15</td><td>A2, A3, A7, A9, A12</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+      <tr><td>SHOPIFY_SHOP_DOMAIN</td><td>2026-06-20</td><td>A2, A3, A7, A9, A12</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+      <tr><td>SHOPIFY_THEME_ID</td><td>2026-06-19</td><td>A9</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+      <tr><td>SUPABASE_URL</td><td>2026-06-20</td><td>A0, A1, A2, A8, A10, A11, A13</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+      <tr><td>SUPABASE_SERVICE_KEY</td><td>2026-06-20</td><td>A0, A1, A2, A8, A10, A11, A13</td><td><span class="badge badge-green">ACTIVE</span></td></tr>
+      <tr style="background:#1a0808"><td>BLOG_ID</td><td>—</td><td>A3</td><td><span class="badge badge-red">MISSING</span></td></tr>
+      <tr style="background:#1a0808"><td>GA4_PROPERTY_ID</td><td>—</td><td>A8</td><td><span class="badge badge-red">MISSING</span></td></tr>
+      <tr style="background:#1a0808"><td>PERPLEXITY_API_KEY</td><td>—</td><td>A13</td><td><span class="badge badge-red">MISSING</span></td></tr>
+      <tr style="background:#1a0808"><td>META_APP_ID</td><td>—</td><td>A17</td><td><span class="badge badge-red">MISSING</span></td></tr>
+      <tr style="background:#1a0808"><td>GH_PAT_SECRETS_WRITE</td><td>—</td><td>A17</td><td><span class="badge badge-red">MISSING</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ARCHITECTURE -->
+<div class="section">
+  <h2>6 Super-Agent Architecture — Current State</h2>
+  <table>
+    <thead>
+      <tr><th>Super-Agent</th><th>Agents</th><th>Health</th><th>Blocking Issue</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>SA-1 Intelligence</strong></td>
+        <td>A1 + A10 + A11 + A13</td>
+        <td><span class="badge badge-yellow">PARTIAL</span></td>
+        <td>A13: PERPLEXITY_API_KEY missing</td>
+      </tr>
+      <tr>
+        <td><strong>SA-2 Content</strong></td>
+        <td>A2 + A3 + A5</td>
+        <td><span class="badge badge-yellow">PARTIAL</span></td>
+        <td>A3: BLOG_ID missing | A5: OPENAI expired</td>
+      </tr>
+      <tr>
+        <td><strong>SA-3 Revenue</strong></td>
+        <td>A4 + A6</td>
+        <td><span class="badge badge-green">HEALTHY</span></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>SA-4 Operations</strong></td>
+        <td>A7 + A12 + A9</td>
+        <td><span class="badge badge-green">HEALTHY</span></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>SA-5 Analytics</strong></td>
+        <td>A8 + reporting</td>
+        <td><span class="badge badge-red">FAILING</span></td>
+        <td>A8: GA4_PROPERTY_ID missing</td>
+      </tr>
+      <tr>
+        <td><strong>SA-6 Orchestrator</strong></td>
+        <td>A0 + health + decision engine</td>
+        <td><span class="badge badge-yellow">IN PROGRESS</span></td>
+        <td>A0 YAML fixed. Enhanced logic not yet built.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- NEXT STEPS -->
+<div class="section">
+  <h2>Next Steps</h2>
+  <h3 style="color:#f87171">Guy — Immediate Action Required</h3>
+  <ol style="color:#d1d5db; font-size:13px; padding-right:20px; line-height:2;">
+    <li>Add <strong>BLOG_ID = 97332199622</strong> to GitHub Secrets (A3 fails every Monday)</li>
+    <li>Add <strong>GA4_PROPERTY_ID = 541051756</strong> to GitHub Secrets (A8 fails every Sunday)</li>
+    <li>Add <strong>PERPLEXITY_API_KEY</strong> to GitHub Secrets (A13)</li>
+    <li>Add <strong>META_APP_ID</strong> to GitHub Secrets (A17)</li>
+    <li>Create PAT + add <strong>GH_PAT_SECRETS_WRITE</strong> to GitHub Secrets (A17)</li>
+    <li>Renew <strong>OPENAI_API_KEY</strong> in GitHub Secrets (A5 images)</li>
+    <li>Run 3 SQL files in Supabase SQL Editor</li>
+  </ol>
+  <h3 style="color:#C9A84C; margin-top:20px">Claude — Next Session</h3>
+  <ol style="color:#d1d5db; font-size:13px; padding-right:20px; line-height:2;">
+    <li>Verify CI green for A3/A8/A13 after Guy adds secrets</li>
+    <li>Create agent_health_log.sql</li>
+    <li>Build SA-6 Orchestrator enhanced logic (YAMLs now clean — blocker removed)</li>
+  </ol>
+</div>
+
+<div class="footer">
+  <div>SockAcademy — Full System Audit Report</div>
+  <div style="margin-top:4px">Generated: 21 June 2026 | Claude Sonnet 4.6 | Confidential</div>
+  <div style="margin-top:4px">To save as PDF: Ctrl+P → Save as PDF (disable headers/footers for clean output)</div>
+</div>
+
+</body>
+</html>
