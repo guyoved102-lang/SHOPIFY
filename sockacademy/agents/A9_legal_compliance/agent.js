@@ -10,7 +10,27 @@
 
 require('dotenv').config({ path: '../../.env' });
 const nodemailer = require('nodemailer');
+const { createClient } = require('@supabase/supabase-js');
 const { requestApproval } = require('../../corp/core/hitl');
+
+function getSupabase() {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
+  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+}
+
+async function logHealth(supabase, status, errorMsg = '') {
+  if (!supabase) return;
+  try {
+    const run_status = status === 'failed' ? 'failure' : status;
+    await supabase.from('agent_health_log').insert({
+      agent_id:      'A9',
+      agent_name:    'Legal Compliance',
+      run_status,
+      error_message: errorMsg || null,
+      metadata:      {},
+    });
+  } catch (e) { console.error('Health log failed:', e.message); }
+}
 
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
 const SHOPIFY_TOKEN  = process.env.SHOPIFY_MASTER_TOKEN;
@@ -473,6 +493,8 @@ async function sendConfirmation(results) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 async function main() {
+  const supabase = getSupabase();
+  await logHealth(supabase, 'running');
   console.log('A9 — Legal Compliance Agent v2.0 (HitL enabled)');
   console.log('━'.repeat(48));
   console.log('Governing law: Delaware, USA | GDPR + CCPA compliant');
@@ -498,9 +520,11 @@ async function main() {
   console.log(`\nApproval submitted. ID: ${approvalId}`);
   console.log('Check guyoved102@gmail.com for approval instructions.');
   console.log('Pages will NOT be published until you approve via GitHub Actions → hitl-approve.yml');
+  await logHealth(supabase, 'success');
 }
 
-main().catch(e => {
+main().catch(async e => {
   console.error('💥 Fatal:', e.message);
+  await logHealth(getSupabase(), 'failure', e.message).catch(() => {});
   process.exit(1);
 });

@@ -7,6 +7,26 @@
 require('dotenv').config({ path: '../../.env' });
 const Anthropic = require('@anthropic-ai/sdk');
 const nodemailer = require('nodemailer');
+const { createClient } = require('@supabase/supabase-js');
+
+function getSupabase() {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
+  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+}
+
+async function logHealth(supabase, status, errorMsg = '') {
+  if (!supabase) return;
+  try {
+    const run_status = status === 'failed' ? 'failure' : status;
+    await supabase.from('agent_health_log').insert({
+      agent_id:      'A3',
+      agent_name:    'Content',
+      run_status,
+      error_message: errorMsg || null,
+      metadata:      {},
+    });
+  } catch (e) { console.error('Health log failed:', e.message); }
+}
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const DRY_RUN = process.env.DRY_RUN === 'true';
@@ -264,6 +284,8 @@ function selectTopic(weekOfYear) {
 // MAIN
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function main() {
+  const supabase = getSupabase();
+  await logHealth(supabase, 'running');
   console.log('🚀 A3 — Content Agent v1.1');
   console.log('━'.repeat(40));
 
@@ -328,9 +350,11 @@ async function main() {
   console.log(`✅ A3 הושלם — ${published ? 'פורסם' : 'נכשל'}`);
 
   await sendReport(topic, article || { body_html: bodyHtml, handle: '' }, published);
+  await logHealth(supabase, 'success');
 }
 
-main().catch(e => {
+main().catch(async e => {
   console.error('💥 Fatal:', e.message);
+  await logHealth(getSupabase(), 'failure', e.message).catch(() => {});
   process.exit(1);
 });

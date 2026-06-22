@@ -8,6 +8,26 @@
 require('dotenv').config({ path: '../../.env' });
 const fs = require('fs');
 const nodemailer = require('nodemailer');
+const { createClient } = require('@supabase/supabase-js');
+
+function getSupabase() {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
+  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+}
+
+async function logHealth(supabase, status, errorMsg = '') {
+  if (!supabase) return;
+  try {
+    const run_status = status === 'failed' ? 'failure' : status;
+    await supabase.from('agent_health_log').insert({
+      agent_id:      'A1',
+      agent_name:    'Product Research',
+      run_status,
+      error_message: errorMsg || null,
+      metadata:      {},
+    });
+  } catch (e) { console.error('Health log failed:', e.message); }
+}
 
 const emailTransporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
@@ -537,6 +557,8 @@ function buildHTMLEmail(top10, stats, date) {
 // MAIN
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function run() {
+  const supabase = getSupabase();
+  await logHealth(supabase, 'running');
   console.log('🚀 A1 Product Research Agent v2.0\n');
   console.log('📡 פלטפורמות: CJ Dropshipping + AliExpress + Alibaba + TikTok Trends\n');
 
@@ -695,10 +717,8 @@ async function run() {
   }
 
   // Supabase — כתיבת top10 לטבלת products
-  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) {
+  if (supabase) {
     try {
-      const { createClient } = require('@supabase/supabase-js');
-      const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
       const runDate  = new Date().toISOString().split('T')[0];
 
       const upsertRows = top10.map(p => {
@@ -751,9 +771,11 @@ async function run() {
   }
 
   console.log('\n🎯 A1 v2.0 הושלם!');
+  await logHealth(supabase, 'success');
 }
 
-run().catch(err => {
+run().catch(async err => {
   console.error('❌ A1 Error:', err.message);
+  await logHealth(getSupabase(), 'failure', err.message).catch(() => {});
   process.exit(1);
 });

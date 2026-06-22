@@ -13,6 +13,26 @@
 require('dotenv').config({ path: '../../.env' });
 const fs = require('fs');
 const path = require('path');
+const { createClient } = require('@supabase/supabase-js');
+
+function getSupabase() {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
+  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+}
+
+async function logHealth(supabase, status, errorMsg = '') {
+  if (!supabase) return;
+  try {
+    const run_status = status === 'failed' ? 'failure' : status;
+    await supabase.from('agent_health_log').insert({
+      agent_id:      'A7',
+      agent_name:    'Supplier Monitor',
+      run_status,
+      error_message: errorMsg || null,
+      metadata:      {},
+    });
+  } catch (e) { console.error('Health log failed:', e.message); }
+}
 const nodemailer = require('nodemailer');
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -297,6 +317,8 @@ async function sendAlert(allChanges) {
 // MAIN
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function main() {
+  const supabase = getSupabase();
+  await logHealth(supabase, 'running');
   console.log('🚀 A7 — Supplier Monitor Agent v1.0');
   console.log('━'.repeat(40));
   console.log(`⚙️  stock_threshold=${CONFIG.STOCK_LOW_THRESHOLD ?? 'TBD'} | price_warn=${CONFIG.PRICE_CHANGE_WARN_PCT ?? 'TBD'}% | price_critical=${CONFIG.PRICE_CHANGE_CRITICAL_PCT ?? 'TBD'}%`);
@@ -348,9 +370,11 @@ async function main() {
   console.log('\n' + '━'.repeat(40));
   console.log(`✅ Done — ${allChanges.length} change(s) across ${MOCK_PRODUCTS.length} products`);
   if (allChanges.length) await sendAlert(allChanges);
+  await logHealth(supabase, 'success');
 }
 
-main().catch(e => {
+main().catch(async e => {
   console.error('💥 Fatal:', e.message);
+  await logHealth(getSupabase(), 'failure', e.message).catch(() => {});
   process.exit(1);
 });

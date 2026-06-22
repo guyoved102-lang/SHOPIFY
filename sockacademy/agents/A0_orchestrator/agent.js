@@ -164,7 +164,7 @@ async function sendEmail(subject, html) {
 function stuckAlertHtml(stuckRows) {
   const ts = new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' });
   const rowsHtml = stuckRows
-    .map(({ name, pid }) => `<tr><td style="padding:4px 8px">${name}</td><td style="padding:4px 8px">${pid}</td></tr>`)
+    .map(({ product_name, cj_pid }) => `<tr><td style="padding:4px 8px">${product_name}</td><td style="padding:4px 8px">${cj_pid || '?'}</td></tr>`)
     .join('');
 
   return `<div style="font-family:monospace;max-width:620px">
@@ -326,6 +326,27 @@ function workspaceAlertHtml(violations) {
   </div>`;
 }
 
+// ─── HITL MAINTENANCE ────────────────────────────────────────────────────────
+
+async function expireStaleApprovals(supabase) {
+  try {
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data, error } = await supabase
+      .from('pending_approvals')
+      .update({ status: 'expired' })
+      .eq('status', 'pending')
+      .lt('created_at', cutoff)
+      .select('id');
+    if (error) throw new Error(error.message);
+    const count = data?.length ?? 0;
+    if (count > 0) console.log(`⏰ Expired ${count} stale HitL approval(s) older than 24h`);
+    return count;
+  } catch (e) {
+    console.error('expireStaleApprovals failed:', e.message);
+    return 0;
+  }
+}
+
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -337,9 +358,10 @@ async function main() {
   console.log('✅ Supabase connected');
   await updateA0State(supabase, 'RUNNING');
 
-  // Step 1 — Stuck detection (every run)
-  console.log('\n[1/4] Stuck Detection');
+  // Step 1 — Stuck detection + HitL expiry (every run)
+  console.log('\n[1/4] Stuck Detection & HitL Expiry');
   const { stuckRows, markedCount } = await runStuckDetection(supabase);
+  await expireStaleApprovals(supabase);
 
   if (stuckRows.length > 0) {
     await sendEmail(

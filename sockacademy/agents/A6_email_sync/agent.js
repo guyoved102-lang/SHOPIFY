@@ -7,6 +7,26 @@
 
 require('dotenv').config({ path: '../../.env' });
 const nodemailer = require('nodemailer');
+const { createClient } = require('@supabase/supabase-js');
+
+function getSupabase() {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
+  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+}
+
+async function logHealth(supabase, status, errorMsg = '') {
+  if (!supabase) return;
+  try {
+    const run_status = status === 'failed' ? 'failure' : status;
+    await supabase.from('agent_health_log').insert({
+      agent_id:      'A6',
+      agent_name:    'Email Sync',
+      run_status,
+      error_message: errorMsg || null,
+      metadata:      {},
+    });
+  } catch (e) { console.error('Health log failed:', e.message); }
+}
 
 const KLAVIYO_KEY = process.env.KLAVIYO_PRIVATE_API_KEY;
 const KLAVIYO_BASE = 'https://a.klaviyo.com/api';
@@ -278,6 +298,8 @@ async function sendConfirmation(results) {
 // MAIN
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function main() {
+  const supabase = getSupabase();
+  await logHealth(supabase, 'running');
   console.log('🚀 A6 — Klaviyo Email Sync Agent v1.0');
   console.log('━'.repeat(40));
 
@@ -309,9 +331,11 @@ async function main() {
   console.log(`✅ Done — ${results.filter(r => r.action !== 'error').length}/${results.length} synced`);
 
   await sendConfirmation(results);
+  await logHealth(supabase, 'success');
 }
 
-main().catch(e => {
+main().catch(async e => {
   console.error('💥 Fatal:', e.message);
+  await logHealth(getSupabase(), 'failure', e.message).catch(() => {});
   process.exit(1);
 });

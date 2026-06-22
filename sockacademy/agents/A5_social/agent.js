@@ -9,6 +9,26 @@ const Anthropic = require('@anthropic-ai/sdk');
 const { google } = require('googleapis');
 const { Readable } = require('stream');
 const nodemailer = require('nodemailer');
+const { createClient } = require('@supabase/supabase-js');
+
+function getSupabase() {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
+  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+}
+
+async function logHealth(supabase, status, errorMsg = '') {
+  if (!supabase) return;
+  try {
+    const run_status = status === 'failed' ? 'failure' : status;
+    await supabase.from('agent_health_log').insert({
+      agent_id:      'A5',
+      agent_name:    'Social',
+      run_status,
+      error_message: errorMsg || null,
+      metadata:      {},
+    });
+  } catch (e) { console.error('Health log failed:', e.message); }
+}
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const IG_USER_ID  = process.env.META_IG_USER_ID;
@@ -365,6 +385,8 @@ async function sendWeeklyCalendar(posts, weekNum, theme) {
 // MAIN
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function main() {
+  const supabase = getSupabase();
+  await logHealth(supabase, 'running');
   console.log('🚀 A5 — Social Content Agent v2.0');
   console.log(`🔧 Mode: ${DRY_RUN ? 'DRY-RUN' : 'LIVE'} | Images: ${process.env.OPENAI_API_KEY ? 'DALL-E ✓' : 'SKIP (no OPENAI_API_KEY)'}`);
   console.log('─'.repeat(44));
@@ -436,9 +458,11 @@ async function main() {
 
   console.log(`\n✅ A5 done — ${posts.length} posts generated`);
   await sendWeeklyCalendar(posts, weekNum, theme);
+  await logHealth(supabase, 'success');
 }
 
-main().catch(e => {
+main().catch(async e => {
   console.error('💥 Fatal:', e.message);
+  await logHealth(getSupabase(), 'failure', e.message).catch(() => {});
   process.exit(1);
 });

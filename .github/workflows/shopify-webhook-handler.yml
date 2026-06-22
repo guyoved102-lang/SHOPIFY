@@ -34,6 +34,8 @@ jobs:
         env:
           UPSTASH_REDIS_REST_URL:   ${{ secrets.UPSTASH_REDIS_REST_URL }}
           UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+          SUPABASE_URL:             ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY:     ${{ secrets.SUPABASE_SERVICE_KEY }}
           EVENT_TOPIC:  ${{ github.event.client_payload.topic }}
           EVENT_DATA:   ${{ toJson(github.event.client_payload.data) }}
         run: |
@@ -69,6 +71,8 @@ jobs:
         env:
           UPSTASH_REDIS_REST_URL:   ${{ secrets.UPSTASH_REDIS_REST_URL }}
           UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+          SUPABASE_URL:             ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY:     ${{ secrets.SUPABASE_SERVICE_KEY }}
           STOCK_LOW_THRESHOLD:      ${{ secrets.STOCK_LOW_THRESHOLD }}
           EVENT_DATA:               ${{ toJson(github.event.client_payload.data) }}
         run: |

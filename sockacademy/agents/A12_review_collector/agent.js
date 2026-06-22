@@ -20,6 +20,26 @@ require('dotenv').config({ path: '../../.env' });
 
 const axios = require('axios');
 const nodemailer = require('nodemailer');
+const { createClient } = require('@supabase/supabase-js');
+
+function getSupabase() {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
+  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+}
+
+async function logHealth(supabase, status, errorMsg = '') {
+  if (!supabase) return;
+  try {
+    const run_status = status === 'failed' ? 'failure' : status;
+    await supabase.from('agent_health_log').insert({
+      agent_id:      'A12',
+      agent_name:    'Review Collector',
+      run_status,
+      error_message: errorMsg || null,
+      metadata:      {},
+    });
+  } catch (e) { console.error('Health log failed:', e.message); }
+}
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
@@ -247,6 +267,8 @@ async function sendAdminSummary(sent, failed, transporter) {
 // --- MAIN ---
 
 async function main() {
+  const supabase = getSupabase();
+  await logHealth(supabase, 'running');
   console.log('\n🧦 SockAcademy A12 — Review Collector');
   console.log(`📅 ${new Date().toISOString()}`);
   console.log(DRY_RUN ? '🔬 DRY_RUN — emails go to admin only, no Shopify tagging' : '🌐 LIVE');
@@ -320,8 +342,10 @@ async function main() {
     }
 
     console.log(`\n✅ A12 done — ${sent.length} sent, ${failed.length} failed`);
+    await logHealth(supabase, 'success');
   } catch (err) {
     console.error('❌ A12 fatal error:', err.message);
+    await logHealth(supabase, 'failure', err.message).catch(() => {});
     process.exit(1);
   }
 }

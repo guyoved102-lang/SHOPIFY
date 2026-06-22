@@ -33,5 +33,7 @@ jobs:
           PRICE_WARN_PCT: ${{ secrets.PRICE_WARN_PCT }}
           PRICE_CRITICAL_PCT: ${{ secrets.PRICE_CRITICAL_PCT }}
           MARKUP_MULTIPLIER: ${{ secrets.MARKUP_MULTIPLIER }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: node agent.js
         working-directory: sockacademy/agents/A7_supplier_monitor

@@ -5,6 +5,7 @@
   "main": "agent.js",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.24.0",
+    "@supabase/supabase-js": "^2.39.0",
     "dotenv": "^17.0.0",
     "nodemailer": "^9.0.0"
   }

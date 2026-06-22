@@ -22,8 +22,6 @@ jobs:
       - name: Run A1 Product Research Agent
         working-directory: sockacademy/agents/A1_product_research
         env:
-          CJ_EMAIL: ${{ secrets.CJ_EMAIL }}
-          CJ_PASSWORD: ${{ secrets.CJ_PASSWORD }}
           CJ_API_KEY: ${{ secrets.CJ_API_KEY }}
           SHOPIFY_MASTER_TOKEN: ${{ secrets.SHOPIFY_MASTER_TOKEN }}
           KLAVIYO_PRIVATE_API_KEY: ${{ secrets.KLAVIYO_PRIVATE_API_KEY }}
@@ -31,6 +29,8 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
           MAKE_A1_WEBHOOK: ${{ secrets.MAKE_A1_WEBHOOK }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: node agent.js
 
       - name: Upload results
