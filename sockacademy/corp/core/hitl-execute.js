@@ -92,6 +92,66 @@ async function execute(approvalId, decision) {
     return;
   }
 
+  if (action_type === 'meta_budget') {
+    const { campaign_id, new_daily_budget } = payload_json;
+    if (!process.env.META_ACCESS_TOKEN) throw new Error('META_ACCESS_TOKEN not set');
+    const params = new URLSearchParams({
+      daily_budget: String(new_daily_budget),
+      access_token: process.env.META_ACCESS_TOKEN,
+    });
+    const res = await fetch(`https://graph.facebook.com/v20.0/${campaign_id}`, {
+      method: 'POST',
+      body: params,
+    });
+    const d = await res.json();
+    if (d.error) throw new Error(`Meta API: ${d.error.message}`);
+    console.log(`  ✓ Campaign ${campaign_id} daily budget → ${new_daily_budget} cents ($${(new_daily_budget / 100).toFixed(2)})`);
+    return;
+  }
+
+  if (action_type === 'blast_campaign') {
+    const { campaign_id } = payload_json;
+    if (!process.env.KLAVIYO_PRIVATE_API_KEY) throw new Error('KLAVIYO_PRIVATE_API_KEY not set');
+    const res = await fetch('https://a.klaviyo.com/api/campaign-send-jobs/', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Klaviyo-API-Key ${process.env.KLAVIYO_PRIVATE_API_KEY}`,
+        'Content-Type': 'application/json',
+        'revision': '2024-10-15',
+      },
+      body: JSON.stringify({
+        data: {
+          type: 'campaign-send-job',
+          attributes: { action: 'schedule' },
+          relationships: {
+            campaign: { data: { type: 'campaign', id: campaign_id } },
+          },
+        },
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(`Klaviyo blast_campaign: ${err.errors?.[0]?.detail || JSON.stringify(err)}`);
+    }
+    console.log(`  ✓ Klaviyo campaign ${campaign_id} send job created`);
+    return;
+  }
+
+  if (action_type === 'product_delete') {
+    const { shopify_product_id } = payload_json;
+    const headers = { 'X-Shopify-Access-Token': SHOPIFY_TOKEN };
+    const res = await fetch(`${SHOPIFY_API}/products/${shopify_product_id}.json`, {
+      method: 'DELETE',
+      headers,
+    });
+    if (!res.ok && res.status !== 404) {
+      const err = await res.text();
+      throw new Error(`Shopify DELETE product ${shopify_product_id}: ${err.slice(0, 200)}`);
+    }
+    console.log(`  ✓ Product ${shopify_product_id} deleted from Shopify`);
+    return;
+  }
+
   console.warn(`[HitL Execute] Unknown action_type: ${action_type} — no executor defined.`);
 }
 

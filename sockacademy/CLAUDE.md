@@ -90,24 +90,16 @@ GitHub workflow    → .github/workflows/
 
 ---
 
-## 🎩 CTO COGNITIVE FRAMEWORK — Auto-Trigger Hat System
-
-**Default mode:** Back-End Developer + Software Architect — for all standard engineering work.
-
-The following specialized frames auto-trigger based on context. Active hats are declared at the top of relevant responses: `[Hat: Security Architect + DBA]`.
+## 🎩 CTO Hat Auto-Triggers
 
 | Hat | Auto-triggers when… |
 | :--- | :--- |
 | **Security Architect** | Handling credentials, API keys, secrets, RLS policies, or pre-push checks. |
 | **DevOps Engineer** | Modifying YAML, GitHub Actions, CI/CD pipelines, or cron schedules. |
-| **DBA (Database Admin)** | Changing Supabase schemas, running migrations, indexing, or altering data structures. |
-| **SRE (Site Reliability)** | Diagnosing agent health, infinite loops, silent crashes, or system uptime. |
+| **DBA** | Changing Supabase schemas, migrations, indexing, or data structures. |
+| **SRE** | Diagnosing agent health, infinite loops, silent crashes, or system uptime. |
 | **FinOps Engineer** | Evaluating API token costs, Supabase tiers, or infrastructure expenses. |
 | **Prompt Engineer** | Designing/refining system prompts, agent structures, or strict output formats. |
-
-**Compound rule:** When a question spans multiple triggers, both hats activate simultaneously.
-
-**Explicit override:** Use `hat: <name>` to force a specific frame (e.g., `hat: finops` or `hat: sre + security-architect`).
 
 ---
 

@@ -23,10 +23,23 @@
  *   sa:queue:intel        → Competitor signal   → A4 ads, A3 content
  *
  * Gracefully no-ops when UPSTASH_REDIS_REST_URL is absent.
+ * Always writes to Supabase queue_log when SUPABASE_URL is present.
  */
 
 const { Redis } = require('@upstash/redis');
+const { createClient } = require('@supabase/supabase-js');
 const { randomUUID } = require('crypto');
+
+let _supabase = null;
+
+function getSupabase() {
+  if (_supabase) return _supabase;
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY;
+  if (!url || !key) return null;
+  _supabase = createClient(url, key);
+  return _supabase;
+}
 
 const QUEUES = {
   UPLOAD:  'sa:queue:upload',
@@ -68,9 +81,23 @@ async function push(queue, { type, source, payload = {} }) {
     timestamp: new Date().toISOString(),
   };
 
+  const supabase = getSupabase();
+  if (supabase) {
+    await supabase.from('queue_log').insert({
+      event_id:   event.id,
+      queue,
+      event_type: event.type,
+      source:     event.source,
+      payload:    event.payload,
+      status:     'pending',
+    }).then(({ error }) => {
+      if (error) console.error(`[queue] queue_log write failed: ${error.message}`);
+    });
+  }
+
   if (!redis) {
-    console.warn(`[queue] Redis not configured — event dropped: ${type}`);
-    return null;
+    console.warn(`[queue] Redis not configured — event queued in Supabase only: ${type}`);
+    return event.id;
   }
 
   await redis.rpush(queue, JSON.stringify(event));
