@@ -66,6 +66,11 @@ async function execute(approvalId, decision) {
   }
 
   const { action_type, payload_json } = approval;
+
+  if (payload_json?._test) {
+    console.log('[HitL Execute] _test=true — skipping real execution (smoke test payload).');
+    return;
+  }
   console.log(`[HitL Execute] Executing: ${action_type}`);
 
   if (action_type === 'legal_page_update') {
