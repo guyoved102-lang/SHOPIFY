@@ -1,14 +1,15 @@
 /**
- * A0 — Orchestrator Agent v1.0 (Phase B MVP)
- * Observation only — no triggers, no pipeline automation yet.
+ * A0 — Orchestrator Agent v2.0 (SA-6 Decision Engine integrated)
  *
- * Daily:  stuck detection on A1_Products → alert email if found
- * Weekly: Health Report email to Guy (runs every Sunday)
+ * Daily:  stuck detection + HitL expiry + SA-6 decision engine
+ * Weekly: Health Report email (Sundays) with cluster scores
+ * Always: Workspace structure check
  */
 
 require('dotenv').config({ path: '../../.env' });
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
+const { runOrchestration, CLUSTERS } = require('../../corp/core/orchestration');
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const FORCE_WEEKLY = process.env.FORCE_WEEKLY_REPORT === 'true';
@@ -186,7 +187,92 @@ function stuckAlertHtml(stuckRows) {
   </div>`;
 }
 
-function weeklyReportHtml(summary, ledger, stuckCount) {
+function orchestrationAlertHtml(decisions, clusterScores) {
+  const ts = new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' });
+  const criticals = decisions.filter(d => d.severity === 'critical');
+  const warnings  = decisions.filter(d => d.severity === 'warning');
+
+  const rows = (items, color) => items.map(d =>
+    `<tr>
+      <td style="padding:5px 8px;font-family:monospace;font-size:12px;color:${color}">[${d.type}]</td>
+      <td style="padding:5px 8px;font-size:13px">${d.agentId}</td>
+      <td style="padding:5px 8px;font-size:13px">${d.message}</td>
+    </tr>`
+  ).join('');
+
+  const clusterRows = Object.entries(clusterScores).map(([name, s]) => {
+    const bar = s.score === 100 ? '✅' : s.score >= 50 ? '⚠️' : '🔴';
+    return `<tr>
+      <td style="padding:4px 8px">${bar} ${name}</td>
+      <td style="padding:4px 8px;text-align:center">${s.score}%</td>
+      <td style="padding:4px 8px">${s.healthy}/${s.total} healthy</td>
+      <td style="padding:4px 8px;font-size:11px;color:#9ca3af">${s.failing ? `${s.failing} failing` : ''}${s.stale ? ` ${s.stale} stale` : ''}${s.noData ? ` ${s.noData} no data` : ''}</td>
+    </tr>`;
+  }).join('');
+
+  return `<div style="font-family:monospace;max-width:720px">
+    <h2 style="color:#c0392b">🔴 SA-6 Orchestrator — Critical Alert</h2>
+    <p><strong>Time (IL):</strong> ${ts}</p>
+    <p><strong>${criticals.length} critical issue(s)</strong> detected by SA-6 Decision Engine.</p>
+
+    ${criticals.length > 0 ? `
+    <h3 style="color:#c0392b">🔴 Critical</h3>
+    <table border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;margin:8px 0">
+      <tr style="background:#f2f2f2"><th style="padding:4px 8px">Type</th><th style="padding:4px 8px">Agent</th><th style="padding:4px 8px">Details</th></tr>
+      ${rows(criticals, '#c0392b')}
+    </table>` : ''}
+
+    ${warnings.length > 0 ? `
+    <h3>⚠️ Warnings</h3>
+    <table border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;margin:8px 0">
+      <tr style="background:#f2f2f2"><th style="padding:4px 8px">Type</th><th style="padding:4px 8px">Agent</th><th style="padding:4px 8px">Details</th></tr>
+      ${rows(warnings, '#d97706')}
+    </table>` : ''}
+
+    <h3>Super-Agent Cluster Health</h3>
+    <table border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;margin:8px 0">
+      <tr style="background:#f2f2f2">
+        <th style="padding:4px 8px;text-align:left">Cluster</th>
+        <th style="padding:4px 8px;text-align:center">Score</th>
+        <th style="padding:4px 8px">Status</th>
+        <th style="padding:4px 8px">Issues</th>
+      </tr>
+      ${clusterRows}
+    </table>
+
+    <hr>
+    <p style="color:#888;font-size:11px">SockAcademy SA-6 Orchestrator — Decision Engine v2.0</p>
+  </div>`;
+}
+
+function clusterHealthHtml(clusterScores) {
+  const rows = Object.entries(clusterScores).map(([name, s]) => {
+    const bar   = s.score === 100 ? '✅' : s.score >= 50 ? '⚠️' : '🔴';
+    const issues = [
+      s.failing > 0 ? `${s.failing} failing` : '',
+      s.stale   > 0 ? `${s.stale} stale`     : '',
+      s.noData  > 0 ? `${s.noData} no data`  : '',
+    ].filter(Boolean).join(', ') || '—';
+    return `<tr>
+      <td style="padding:4px 8px">${bar} ${name}</td>
+      <td style="padding:4px 8px;text-align:center;font-weight:bold">${s.score}%</td>
+      <td style="padding:4px 8px">${s.healthy}/${s.total}</td>
+      <td style="padding:4px 8px;color:#6b7280;font-size:12px">${issues}</td>
+    </tr>`;
+  }).join('');
+
+  return `<table border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;margin:8px 0">
+    <tr style="background:#f2f2f2">
+      <th style="padding:4px 8px;text-align:left">Cluster</th>
+      <th style="padding:4px 8px;text-align:center">Score</th>
+      <th style="padding:4px 8px">Healthy</th>
+      <th style="padding:4px 8px">Issues</th>
+    </tr>
+    ${rows}
+  </table>`;
+}
+
+function weeklyReportHtml(summary, ledger, stuckCount, clusterScores) {
   const ts = new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' });
   const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Jerusalem' });
 
@@ -224,21 +310,27 @@ function weeklyReportHtml(summary, ledger, stuckCount) {
       </table>`
     : '<p><em>agent_health_log is empty — agents will write here as they run.</em></p>';
 
+  const clusterSection = clusterScores
+    ? clusterHealthHtml(clusterScores)
+    : '<p><em>SA-6 cluster data not available.</em></p>';
+
   return `<div style="font-family:monospace;max-width:700px">
     <h2>📊 SockAcademy Weekly Health Report</h2>
     <p><strong>${dateStr}</strong><br>Generated: ${ts}</p>
     <hr>
+    <h3>🤖 SA-6 Super-Agent Cluster Health</h3>
+    ${clusterSection}
     <h3>🏭 Product Pipeline (Supabase: products)</h3>
     ${pipelineSection}
-    <h3>📋 agent_health_log</h3>
+    <h3>📋 agent_health_log (latest per agent)</h3>
     ${ledgerSection}
     <h3>${stuckCount > 0 ? `🚨 Stuck Rows This Run: ${stuckCount}` : '✅ Stuck Detection: Clean'}</h3>
     ${stuckCount > 0
-      ? `<p>${stuckCount} row(s) were marked <code>stuck:TIMESTAMP</code> — check the stuck alert email or A1_Products tab.</p>`
+      ? `<p>${stuckCount} row(s) were marked <code>stuck:TIMESTAMP</code> — check the stuck alert email.</p>`
       : '<p>No stuck rows detected. Pipeline is clean.</p>'}
     <hr>
     <p style="color:#888;font-size:11px">
-      SockAcademy A0 Orchestrator — Phase B MVP |
+      SockAcademy SA-6 Orchestrator v2.0 |
       <a href="https://supabase.com/dashboard/project/hpxjlzkdezyvoicqflhl">Open Supabase Dashboard</a>
     </p>
   </div>`;
@@ -350,7 +442,7 @@ async function expireStaleApprovals(supabase) {
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
 async function main() {
-  console.log('\n🤖 A0 Orchestrator — Phase B MVP');
+  console.log('\n🤖 A0 Orchestrator — SA-6 v2.0');
   console.log(`   ${new Date().toISOString()} | DRY_RUN=${DRY_RUN} | FORCE_WEEKLY=${FORCE_WEEKLY}`);
   console.log('─'.repeat(52));
 
@@ -359,7 +451,7 @@ async function main() {
   await updateA0State(supabase, 'RUNNING');
 
   // Step 1 — Stuck detection + HitL expiry (every run)
-  console.log('\n[1/4] Stuck Detection & HitL Expiry');
+  console.log('\n[1/5] Stuck Detection & HitL Expiry');
   const { stuckRows, markedCount } = await runStuckDetection(supabase);
   await expireStaleApprovals(supabase);
 
@@ -370,23 +462,40 @@ async function main() {
     );
   }
 
-  // Step 2 — Weekly health report (Sundays or forced)
+  // Step 2 — SA-6 Decision Engine (every run)
+  console.log('\n[2/5] SA-6 Decision Engine');
+  let orchestrationResult = null;
+  try {
+    orchestrationResult = await runOrchestration(supabase);
+    const { decisions, clusterScores, criticalCount } = orchestrationResult;
+
+    if (criticalCount > 0 && !DRY_RUN) {
+      await sendEmail(
+        `🔴 SA-6 Alert: ${criticalCount} critical issue(s) detected`,
+        orchestrationAlertHtml(decisions, clusterScores)
+      );
+    }
+  } catch (e) {
+    console.error(`⚠️  SA-6 Decision Engine failed: ${e.message}`);
+  }
+
+  // Step 3 — Weekly health report (Sundays or forced)
   const isSunday = new Date().getDay() === 0;
   if (isSunday || FORCE_WEEKLY) {
-    console.log('\n[2/4] Weekly Health Report');
+    console.log('\n[3/5] Weekly Health Report');
     const summary = await buildProductsSummary(supabase);
     const ledger  = await readHealthLog(supabase);
 
     await sendEmail(
       `📊 SockAcademy Weekly Health — ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'Asia/Jerusalem' })}`,
-      weeklyReportHtml(summary, ledger, stuckRows.length)
+      weeklyReportHtml(summary, ledger, stuckRows.length, orchestrationResult?.clusterScores ?? null)
     );
   } else {
-    console.log('\n[2/4] Weekly Report — skipped (not Sunday)');
+    console.log('\n[3/5] Weekly Report — skipped (not Sunday)');
   }
 
-  // Step 3 — Workspace structure health check (every run)
-  console.log('\n[3/4] Workspace Health Check');
+  // Step 4 — Workspace structure health check (every run)
+  console.log('\n[4/5] Workspace Health Check');
   const structureViolations = runWorkspaceHealthCheck();
   if (structureViolations.length === 0) {
     console.log('✅ Workspace structure clean — no violations');
@@ -399,13 +508,15 @@ async function main() {
     );
   }
 
-  // Step 4 — Update A0's own state in health log
-  console.log('\n[4/4] Updating agent_health_log');
+  // Step 5 — Update A0's own state in health log
+  console.log('\n[5/5] Updating agent_health_log');
   await updateA0State(supabase, 'COMPLETE');
   console.log('✅ A0 state written');
 
+  const criticals = orchestrationResult?.criticalCount ?? 0;
+  const warnings  = orchestrationResult?.warningCount  ?? 0;
   console.log('\n' + '─'.repeat(52));
-  console.log(`✅ Done | stuck: ${markedCount} | structure: ${structureViolations.length} violations | DRY_RUN=${DRY_RUN}`);
+  console.log(`✅ Done | stuck: ${markedCount} | SA-6: ${criticals}🔴 ${warnings}⚠️ | structure: ${structureViolations.length} violations`);
 }
 
 main().catch(async err => {
