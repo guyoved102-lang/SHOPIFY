@@ -13,7 +13,7 @@ const { runOrchestration, CLUSTERS } = require('../../corp/core/orchestration');
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const FORCE_WEEKLY = process.env.FORCE_WEEKLY_REPORT === 'true';
-const ADMIN_EMAIL = 'sockacademy.store@gmail.com';
+const ADMIN_EMAIL = 'guyoved102@gmail.com';
 
 // ─── SUPABASE ────────────────────────────────────────────────────────────────
 
