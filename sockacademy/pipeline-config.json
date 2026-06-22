@@ -5,7 +5,8 @@
     "owner": "A0 Orchestrator",
     "description": "Declarative dependency graph + trigger matrix for all 28 SockAcademy agents. A0 reads this file — no hardcoded logic in A0 agent.js.",
     "data_layer": {
-      "supabase_migrated": ["A0", "A1", "A2", "A10", "A11", "A13"],
+      "supabase_migrated_primary": ["A0", "A1", "A2", "A10", "A11", "A13"],
+      "supabase_health_log": ["A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10", "A11", "A12", "A13", "A17"],
       "google_sheets_legacy": ["A7"],
       "supabase_tables": {
         "products":           "A1 write (research) + A2 write (upload) — primary product table",
@@ -262,9 +263,10 @@
   "state_ledger": {
     "location": "supabase",
     "table": "agent_health_log",
-    "columns": ["agent_id", "status", "last_run", "output_key", "error_message", "retry_count", "locked_by"],
-    "status_values": ["PENDING", "RUNNING", "COMPLETE", "FAILED", "DEAD", "SKIPPED", "INVALID"],
-    "setup_note": "Table exists in Supabase with RLS ON. Migrated from Google Sheets 20/06/2026."
+    "columns": ["id", "agent_id", "agent_name", "run_status", "gh_run_id", "gh_run_url", "duration_ms", "items_processed", "error_message", "error_code", "metadata", "created_at"],
+    "run_status_values": ["success", "failure", "warning", "skipped"],
+    "append_only": true,
+    "setup_note": "Table exists in Supabase with RLS ON. Schema fixed 22/06/2026 — corp/core/agent_health_log.sql is source of truth."
   },
 
   "stuck_detection": {

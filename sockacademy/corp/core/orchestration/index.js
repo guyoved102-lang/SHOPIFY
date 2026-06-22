@@ -178,6 +178,41 @@ function generateDecisions(healthMap, clusterScores) {
   return decisions;
 }
 
+// ─── QUEUE DEPTH MONITORING ──────────────────────────────────────────────────
+
+const QUEUES = {
+  UPLOAD:  'sa:queue:upload',
+  CONTENT: 'sa:queue:content',
+  ORDERS:  'sa:queue:orders',
+  STOCK:   'sa:queue:stock',
+  INTEL:   'sa:queue:intel',
+};
+
+const QUEUE_DEPTH_WARN = 20;
+
+async function checkQueueDepths() {
+  const url   = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  if (!url || !token) return null;
+
+  const depths = {};
+  await Promise.all(
+    Object.entries(QUEUES).map(async ([name, key]) => {
+      try {
+        const res  = await fetch(`${url}/llen/${encodeURIComponent(key)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const json = await res.json();
+        depths[name] = typeof json.result === 'number' ? json.result : 0;
+      } catch {
+        depths[name] = -1;
+      }
+    })
+  );
+  return depths;
+}
+
 // ─── HITL BACKLOG ─────────────────────────────────────────────────────────────
 
 async function checkHitLBacklog(supabase) {
@@ -223,6 +258,20 @@ async function runOrchestration(supabase) {
     });
   }
 
+  const queueDepths = await checkQueueDepths();
+  if (queueDepths) {
+    for (const [name, depth] of Object.entries(queueDepths)) {
+      if (depth >= QUEUE_DEPTH_WARN) {
+        decisions.push({
+          severity: 'warning',
+          type:     'QUEUE_OVERFLOW',
+          agentId:  'A0',
+          message:  `${name} queue has ${depth} unprocessed events — consumer may be stuck`,
+        });
+      }
+    }
+  }
+
   const criticalCount = decisions.filter(d => d.severity === 'critical').length;
   const warningCount  = decisions.filter(d => d.severity === 'warning').length;
 
@@ -231,6 +280,12 @@ async function runOrchestration(supabase) {
   console.log(`   Critical decisions:    ${criticalCount}`);
   console.log(`   Warnings:              ${warningCount}`);
   console.log(`   HitL pending:          ${hitlBacklog}`);
+  if (queueDepths) {
+    const queueSummary = Object.entries(queueDepths).map(([n, d]) => `${n}:${d}`).join(' ');
+    console.log(`   Queue depths:          ${queueSummary}`);
+  } else {
+    console.log(`   Queue depths:          Upstash not configured`);
+  }
 
   if (decisions.length > 0) {
     for (const d of decisions) {
@@ -241,7 +296,7 @@ async function runOrchestration(supabase) {
     console.log('   ✅ All agents and clusters healthy');
   }
 
-  return { healthMap, clusterScores, decisions, hitlBacklog, criticalCount, warningCount };
+  return { healthMap, clusterScores, decisions, hitlBacklog, queueDepths, criticalCount, warningCount };
 }
 
-module.exports = { runOrchestration, CLUSTERS, STALENESS_HOURS };
+module.exports = { runOrchestration, CLUSTERS, STALENESS_HOURS, QUEUES, QUEUE_DEPTH_WARN };

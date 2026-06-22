@@ -249,6 +249,27 @@ CREATE TABLE IF NOT EXISTS <name> ( ... );
 
 ---
 
+## 21. PowerShell Heredoc — תחביר שגוי גורם לכישלון git commit
+
+**מה קרה (22/06/2026):** ניסיון להריץ `git commit -m "$(cat <<'EOF')"` ב-PowerShell — גרם לשגיאה "Missing file specification after redirection operator." כי PowerShell לא תומך בbash heredoc syntax.
+**פרוטוקול:**
+- ב-**PowerShell**: השתמש ב-`@'...'@` (single-quoted here-string). הסוגר `'@` חייב להיות בעמודה 0, ללא רווחים לפניו.
+- ב-**Bash tool**: השתמש ב-`$(cat <<'EOF')` — עובד רק בbash.
+- לפני כל git commit — שאל: האם אני ב-PowerShell או Bash? תחביר שונה לחלוטין.
+
+**תבנית PowerShell נכונה:**
+```powershell
+git commit -m @'
+commit message here.
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+'@
+```
+
+**בדיקה:** אם `git commit` נכשל עם "redirection operator" — זה תחביר bash בPowerShell. עבור לתבנית `@'...'@`.
+
+---
+
 ## SESSION CONTINUITY CHECKLIST — בכל שיחה
 
 **פתיחה:**
