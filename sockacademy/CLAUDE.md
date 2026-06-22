@@ -96,10 +96,11 @@ GitHub workflow    → .github/workflows/
 
 ### שלב 1 — QA Sweep
 1. Syntax check: כל agent files שנגענו בשיחה
-2. Credentials scan: `git diff HEAD` — אפס secrets, אפס .env
-3. SMTP check: כל nodemailer config = `sockacademy.store@gmail.com`
-4. Placeholders scan: אפס `TODO|FIXME|coming soon` בקוד חדש
-5. Secrets validation: כל `process.env.X` שנוסף → קיים ב-GitHub Secrets?
+2. `/security-review` — סריקת diff לאיתור חולשות אבטחה (חובה לפני commit)
+3. Credentials scan: `git diff HEAD` — אפס secrets, אפס .env
+4. SMTP check: כל nodemailer config = `sockacademy.store@gmail.com`
+5. Placeholders scan: אפס `TODO|FIXME|coming soon` בקוד חדש
+6. Secrets validation: כל `process.env.X` שנוסף → קיים ב-GitHub Secrets?
 
 ### שלב 2 — שמירת מצב (CRITICAL)
 6. עדכן `memory/project_sockacademy_state.md`:
