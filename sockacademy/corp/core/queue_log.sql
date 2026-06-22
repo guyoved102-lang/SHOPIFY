@@ -23,4 +23,8 @@ create policy "service role full access"
 
 create index queue_log_status_idx  on queue_log (status, created_at);
 create index queue_log_type_idx    on queue_log (event_type);
-create index queue_log_source_idx  on queue_log (source);
+create index if not exists queue_log_source_idx  on queue_log (source);
+
+grant all on public.queue_log to service_role;
+grant all on public.queue_log to anon;
+grant all on public.queue_log to authenticated;

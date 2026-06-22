@@ -60,3 +60,7 @@ create index if not exists products_status_idx        on products (status);
 create index if not exists products_upload_status_idx on products (upload_status);
 create index if not exists products_run_date_idx      on products (run_date desc);
 create index if not exists products_score_idx         on products (score desc);
+
+grant all on public.products to service_role;
+grant all on public.products to anon;
+grant all on public.products to authenticated;
