@@ -725,12 +725,12 @@ async function run() {
         const pr = suggestRetailPrice(p);
         return {
           cj_pid:          p.pid || null,
-          name:            p.name,
+          product_name:    p.name,
           category:        p.category,
-          materials:       p.materials || [],
+          materials:       (p.materials || []).join(', '),
           platform:        p.source,
           rating:          p.rating   || null,
-          orders_count:    p.orders   || null,
+          orders:          p.orders   || null,
           supplier_price:  p.supplierPrice || null,
           retail_price:    pr.retail  || null,
           score:           p.score,

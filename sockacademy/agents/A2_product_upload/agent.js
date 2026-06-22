@@ -69,9 +69,9 @@ async function generateDescription(product) {
 
 Brand voice: authoritative, precise, understated luxury. No hype. No adjective stacking. The tone is that of an expert who has tested every sock in existence and this is the one worth buying.
 
-Product: ${product.name}
+Product: ${product.product_name}
 Category: ${product.category || 'Premium Socks'}
-Materials: ${Array.isArray(product.materials) ? product.materials.join(', ') : (product.materials || 'premium materials')}
+Materials: ${product.materials || 'premium materials'}
 Price: $${product.retail_price}
 
 Rules:
@@ -95,7 +95,7 @@ async function createShopifyProduct(product) {
 
   const payload = {
     product: {
-      title: product.name,
+      title: product.product_name,
       body_html: product.description,
       vendor: 'SockAcademy',
       product_type: product.category || 'Socks',
@@ -109,7 +109,7 @@ async function createShopifyProduct(product) {
         requires_shipping: true,
         taxable: true,
       }],
-      images: product.image_url ? [{ src: product.image_url, alt: product.name }] : [],
+      images: product.image_url ? [{ src: product.image_url, alt: product.product_name }] : [],
     }
   };
 
@@ -137,8 +137,7 @@ async function createShopifyProduct(product) {
 function buildTags(product) {
   const tags = ['sockacademy', 'a2-agent'];
   const cat = (product.category || '').toLowerCase();
-  const matStr = Array.isArray(product.materials) ? product.materials.join(', ') : (product.materials || '');
-  const mat = matStr.toLowerCase();
+  const mat = (product.materials || '').toLowerCase();
 
   if (cat) tags.push(cat.replace(/[^a-z0-9]+/g, '-'));
   if (mat.includes('merino')) tags.push('merino-wool');
@@ -269,15 +268,15 @@ async function main() {
   const results = [];
 
   for (const product of approvedProducts) {
-    if (!product.name) continue;
+    if (!product.product_name) continue;
 
     try {
-      process.stdout.write(`⏳ ${product.name}... `);
+      process.stdout.write(`⏳ ${product.product_name}... `);
 
       if (DRY_RUN) {
         product.description = await generateDescription(product);
         console.log(`✅ [DRY_RUN] description generated, skipping Shopify upload`);
-        results.push({ name: product.name, id: 'DRY_RUN', success: true });
+        results.push({ name: product.product_name, id: 'DRY_RUN', success: true });
       } else {
         // Optimistic lock: write 'uploading' BEFORE calling Shopify.
         // If A2 crashes after this and before markUploaded, the row stays 'uploading'
@@ -289,7 +288,7 @@ async function main() {
 
         await markUploaded(supabase, product.id, shopifyProduct);
         console.log(`✅ #${shopifyProduct.id}`);
-        results.push({ name: product.name, id: shopifyProduct.id, success: true });
+        results.push({ name: product.product_name, id: shopifyProduct.id, success: true });
       }
 
     } catch (e) {
@@ -297,7 +296,7 @@ async function main() {
       try {
         await setUploadStatus(supabase, product.id, `Error: ${e.message.slice(0, 150)}`);
       } catch (_) {}
-      results.push({ name: product.name, error: e.message, success: false });
+      results.push({ name: product.product_name, error: e.message, success: false });
     }
 
     await new Promise(r => setTimeout(r, 800));
