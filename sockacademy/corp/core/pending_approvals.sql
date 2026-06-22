@@ -22,4 +22,8 @@ create policy "service role full access"
   using (true)
   with check (true);
 
-create index pending_approvals_status_idx on pending_approvals (status, created_at);
+create index if not exists pending_approvals_status_idx on pending_approvals (status, created_at);
+
+grant all on public.pending_approvals to service_role;
+grant all on public.pending_approvals to anon;
+grant all on public.pending_approvals to authenticated;

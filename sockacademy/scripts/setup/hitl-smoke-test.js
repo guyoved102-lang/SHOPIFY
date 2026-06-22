@@ -12,7 +12,7 @@
  */
 
 require('dotenv').config({ path: '../../.env' });
-const { requestApproval, getApproval, resolveApproval } = require('./hitl');
+const { requestApproval, getApproval, resolveApproval } = require('../../corp/core/hitl');
 
 async function main() {
   console.log('[Smoke Test] HitL end-to-end validation');
