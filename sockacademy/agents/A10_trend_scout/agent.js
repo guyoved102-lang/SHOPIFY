@@ -23,12 +23,15 @@ function getSupabase() {
 }
 
 async function logHealth(supabase, status, errorMessage = '') {
-  const now = new Date().toISOString();
   try {
-    await supabase.from('agent_health_log').upsert(
-      { agent: 'A10', status, last_run: now, error_message: errorMessage, updated_at: now },
-      { onConflict: 'agent' }
-    );
+    const run_status = status.toLowerCase() === 'failed' ? 'failure' : status.toLowerCase();
+    await supabase.from('agent_health_log').insert({
+      agent_id:      'A10',
+      agent_name:    'Trend Scout',
+      run_status,
+      error_message: errorMessage || null,
+      metadata:      {},
+    });
   } catch (e) { console.error('Health log failed:', e.message); }
 }
 

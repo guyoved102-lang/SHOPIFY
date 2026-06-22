@@ -24,12 +24,15 @@ function getSupabase() {
 // ─── HEALTH MONITORING ───────────────────────────────────────────────────────
 
 async function logHealth(supabase, status, errorMessage = '') {
-  const now = new Date().toISOString();
   try {
-    await supabase.from('agent_health_log').upsert(
-      { agent: 'A8', status, last_run: now, error_message: errorMessage, updated_at: now },
-      { onConflict: 'agent' }
-    );
+    const run_status = status.toLowerCase() === 'failed' ? 'failure' : status.toLowerCase();
+    await supabase.from('agent_health_log').insert({
+      agent_id:      'A8',
+      agent_name:    'Analytics Reporter',
+      run_status,
+      error_message: errorMessage || null,
+      metadata:      {},
+    });
   } catch (e) { console.error('Health log failed:', e.message); }
 }
 

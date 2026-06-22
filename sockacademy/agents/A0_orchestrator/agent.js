@@ -75,14 +75,16 @@ async function readHealthLog(supabase) {
 
   const ledger = {};
   for (const row of rows || []) {
-    if (row.agent) {
-      ledger[row.agent] = {
-        status:       row.status || '',
-        lastRun:      row.last_run || '',
-        outputKey:    row.output_key || '',
-        errorMessage: row.error_message || '',
-        retryCount:   String(row.retry_count || '0'),
-      };
+    if (row.agent_id) {
+      const existing = ledger[row.agent_id];
+      if (!existing || row.created_at > existing.lastRun) {
+        ledger[row.agent_id] = {
+          status:       row.run_status || '',
+          lastRun:      row.created_at || '',
+          errorMessage: row.error_message || '',
+          retryCount:   '0',
+        };
+      }
     }
   }
   return ledger;
@@ -94,12 +96,16 @@ async function updateA0State(supabase, status, errorMessage = '') {
     console.log(`[DRY_RUN] Would log A0 state: ${status}`);
     return;
   }
+  const run_status = status.toLowerCase() === 'failed' ? 'failure' : status.toLowerCase();
   const { error } = await supabase
     .from('agent_health_log')
-    .upsert(
-      { agent: 'A0', status, last_run: now, error_message: errorMessage, updated_at: now },
-      { onConflict: 'agent' }
-    );
+    .insert({
+      agent_id:      'A0',
+      agent_name:    'Orchestrator',
+      run_status,
+      error_message: errorMessage || null,
+      metadata:      {},
+    });
   if (error) console.error(`⚠️  State log failed: ${error.message}`);
   else console.log(`📋 A0 state → ${status}`);
 }
