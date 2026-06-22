@@ -35,3 +35,7 @@ create index if not exists competitor_intel_run_date_idx   on competitor_intel (
 create index if not exists competitor_intel_competitor_idx on competitor_intel (competitor);
 create index if not exists competitor_intel_market_idx     on competitor_intel (market);
 create index if not exists competitor_intel_urgency_idx    on competitor_intel (urgency);
+
+grant all on public.competitor_intel to service_role;
+grant all on public.competitor_intel to anon;
+grant all on public.competitor_intel to authenticated;

@@ -30,3 +30,7 @@ create index if not exists trends_scouted_at_idx   on trends (scouted_at desc);
 create index if not exists trends_rank_idx         on trends (rank);
 create index if not exists trends_category_idx     on trends (category);
 create index if not exists trends_direction_idx    on trends (trend_direction);
+
+grant all on public.trends to service_role;
+grant all on public.trends to anon;
+grant all on public.trends to authenticated;

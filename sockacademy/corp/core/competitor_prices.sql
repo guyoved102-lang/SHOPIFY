@@ -27,3 +27,7 @@ create policy "service role full access"
 create index if not exists competitor_prices_timestamp_idx on competitor_prices (timestamp desc);
 create index if not exists competitor_prices_brand_idx     on competitor_prices (brand);
 create index if not exists competitor_prices_category_idx  on competitor_prices (category);
+
+grant all on public.competitor_prices to service_role;
+grant all on public.competitor_prices to anon;
+grant all on public.competitor_prices to authenticated;
