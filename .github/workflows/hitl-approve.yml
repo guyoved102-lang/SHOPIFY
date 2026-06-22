@@ -12,8 +12,8 @@ on:
         required: true
         type: choice
         options:
-          - approve
-          - reject
+          - approved
+          - rejected
 
 jobs:
   resolve:

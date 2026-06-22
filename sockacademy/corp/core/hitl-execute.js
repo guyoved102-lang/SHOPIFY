@@ -159,7 +159,7 @@ const approvalId = process.env.APPROVAL_ID;
 const decision   = process.env.DECISION;
 
 if (!approvalId || !decision) {
-  console.error('Usage: APPROVAL_ID=<uuid> DECISION=approve|reject node hitl-execute.js');
+  console.error('Usage: APPROVAL_ID=<uuid> DECISION=approved|rejected node hitl-execute.js');
   process.exit(1);
 }
 
