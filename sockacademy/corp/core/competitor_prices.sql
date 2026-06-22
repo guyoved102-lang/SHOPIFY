@@ -20,9 +20,10 @@ create table if not exists competitor_prices (
 
 alter table competitor_prices enable row level security;
 
-create policy "service role full access"
-  on competitor_prices for all to service_role
-  using (true) with check (true);
+do $$ begin
+  create policy "service role full access" on competitor_prices for all to service_role using (true) with check (true);
+exception when duplicate_object then null;
+end $$;
 
 create index if not exists competitor_prices_timestamp_idx on competitor_prices (timestamp desc);
 create index if not exists competitor_prices_brand_idx     on competitor_prices (brand);

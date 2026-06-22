@@ -22,9 +22,10 @@ create table if not exists trends (
 
 alter table trends enable row level security;
 
-create policy "service role full access"
-  on trends for all to service_role
-  using (true) with check (true);
+do $$ begin
+  create policy "service role full access" on trends for all to service_role using (true) with check (true);
+exception when duplicate_object then null;
+end $$;
 
 create index if not exists trends_scouted_at_idx   on trends (scouted_at desc);
 create index if not exists trends_rank_idx         on trends (rank);

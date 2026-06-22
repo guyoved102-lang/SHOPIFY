@@ -27,9 +27,10 @@ create table if not exists competitor_intel (
 
 alter table competitor_intel enable row level security;
 
-create policy "service role full access"
-  on competitor_intel for all to service_role
-  using (true) with check (true);
+do $$ begin
+  create policy "service role full access" on competitor_intel for all to service_role using (true) with check (true);
+exception when duplicate_object then null;
+end $$;
 
 create index if not exists competitor_intel_run_date_idx   on competitor_intel (run_date desc);
 create index if not exists competitor_intel_competitor_idx on competitor_intel (competitor);
