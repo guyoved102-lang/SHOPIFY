@@ -270,6 +270,42 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 
 ---
 
+## 22. CREATE POLICY IF NOT EXISTS לא קיים ב-PostgreSQL
+
+**מה קרה (22/06/2026):** SQL files כללו `CREATE POLICY IF NOT EXISTS` — PostgreSQL החזיר `syntax error at or near "not"`. ה-syntax הזה פשוט לא קיים בשפה.
+**סיבה:** `IF NOT EXISTS` תקף ל-TABLE, INDEX, SEQUENCE — לא ל-POLICY.
+**פרוטוקול:**
+- לעולם לא לכתוב `CREATE POLICY IF NOT EXISTS`
+- תמיד להשתמש ב-DO block עם exception handler:
+```sql
+do $$ begin
+  create policy "service role full access" on <table> for all to service_role using (true) with check (true);
+exception when duplicate_object then null;
+end $$;
+```
+- `when duplicate_object then null` = idempotent — רץ שוב בלי לפוצץ
+
+**בדיקה לפני הרצת SQL:** grep על הקובץ לפני הרצה: `grep -i "create policy if" <file>.sql` — חייב לחזור ריק.
+
+---
+
+## 23. DB Schema Drift — SQL file ≠ DB אמיתי
+
+**מה קרה (22/06/2026):** products_table.sql כלל `name`, `orders_count`, `materials text[]` — אבל ה-DB האמיתי כלל `product_name`, `orders`, `materials text`. A1 נכשל עם `column "name" does not exist`.
+**סיבה:** SQL file לא עודכן כשה-DB שונה ידנית בעבר.
+**פרוטוקול:**
+- Source of truth = DB אמיתי. לפני כל agent שכותב לטבלה: `SELECT column_name FROM information_schema.columns WHERE table_name='<table>';`
+- כשיש divergence — לעדכן ה-SQL file להתאים ל-DB (לא להיפך)
+- trigger stale: אם DB מדווח על trigger שמתייחס לcolumn שלא קיים — `DROP TRIGGER IF EXISTS <name> ON <table>;`
+
+**תבנית verification:**
+```sql
+select column_name, data_type from information_schema.columns
+where table_schema='public' and table_name='products' order by ordinal_position;
+```
+
+---
+
 ## SESSION CONTINUITY CHECKLIST — בכל שיחה
 
 **פתיחה:**
