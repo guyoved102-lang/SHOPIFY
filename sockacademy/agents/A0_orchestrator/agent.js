@@ -375,7 +375,7 @@ function runWorkspaceHealthCheck() {
 
   // docs/ subdirs
   for (const { name, full } of kids(path.join(SA_ROOT, 'docs'))) {
-    if (!['strategy', 'ops'].includes(name))
+    if (!['strategy', 'ops', 'superpowers'].includes(name))
       violations.push({ rule: 'DOCS_CONTAMINATION', file: path.relative(REPO_ROOT, full) });
   }
 

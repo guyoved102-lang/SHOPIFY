@@ -168,11 +168,11 @@ for (const { name, full, isDir } of children(agentsDir)) {
 
 const docsDir = path.join(SA_ROOT, 'docs');
 for (const { name, full } of children(docsDir)) {
-  if (!['strategy', 'ops'].includes(name)) {
+  if (!['strategy', 'ops', 'superpowers'].includes(name)) {
     fail(
       'DOCS_CONTAMINATION',
       full,
-      `docs/ only allows strategy/ and ops/ subdirectories. Got: ${name}`
+      `docs/ only allows strategy/, ops/, and superpowers/ subdirectories. Got: ${name}`
     );
   }
 }
