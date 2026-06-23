@@ -19,7 +19,7 @@
 
 const CLUSTERS = {
   'SA-1 Intelligence': ['A1', 'A10', 'A11', 'A13'],
-  'SA-2 Content':      ['A2', 'A3', 'A5'],
+  'SA-2 Content':      ['A2', 'A2.5', 'A3', 'A5'],
   'SA-3 Revenue':      ['A4', 'A6'],
   'SA-4 Operations':   ['A7', 'A12', 'A9'],
   'SA-5 Analytics':    ['A8'],
@@ -28,21 +28,22 @@ const CLUSTERS = {
 // Max hours since last successful run before agent is considered stale.
 // null = no schedule expectation (manual-only agents).
 const STALENESS_HOURS = {
-  A0:  36,    // daily
-  A1:  200,   // weekly
-  A2:  36,    // daily
-  A3:  200,   // weekly
-  A4:  200,   // weekly
-  A5:  200,   // weekly
-  A6:  200,   // weekly
-  A7:  200,   // weekly
-  A8:  200,   // weekly
-  A9:  null,  // manual only
-  A10: 36,    // daily
-  A11: 200,   // weekly
-  A12: 200,   // weekly
-  A13: 200,   // weekly
-  A17: null,  // bimonthly, no strict threshold
+  A0:    36,    // daily
+  A1:    200,   // weekly
+  A2:    36,    // daily
+  'A2.5': 36,   // daily (runs before A2)
+  A3:    200,   // weekly
+  A4:    200,   // weekly
+  A5:    200,   // weekly
+  A6:    200,   // weekly
+  A7:    200,   // weekly
+  A8:    200,   // weekly
+  A9:    null,  // manual only
+  A10:   36,    // daily
+  A11:   200,   // weekly
+  A12:   200,   // weekly
+  A13:   200,   // weekly
+  A17:   null,  // bimonthly, no strict threshold
 };
 
 // ─── HEALTH DATA ─────────────────────────────────────────────────────────────

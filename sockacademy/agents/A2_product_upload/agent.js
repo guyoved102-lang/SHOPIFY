@@ -29,7 +29,7 @@ async function getApprovedProducts(supabase) {
     .from('products')
     .select('*')
     .eq('status', 'Approved')
-    .eq('upload_status', '');
+    .eq('upload_status', 'qc_approved');
 
   if (error) throw new Error(`Supabase query failed: ${error.message}`);
   return data || [];

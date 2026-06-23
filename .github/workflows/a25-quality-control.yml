@@ -1,0 +1,39 @@
+name: A2.5 — Quality Control (Daily)
+
+on:
+  schedule:
+    - cron: '30 7 * * *'  # 07:30 UTC — runs 30 min before A2 (08:00 UTC)
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (validates but does not update Supabase)'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['true', 'false']
+
+jobs:
+  quality-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: sockacademy/agents/A2_5_quality_control/package-lock.json
+
+      - name: Install dependencies
+        working-directory: sockacademy/agents/A2_5_quality_control
+        run: npm install
+
+      - name: Run A2.5 Quality Control Agent
+        working-directory: sockacademy/agents/A2_5_quality_control
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: node agent.js

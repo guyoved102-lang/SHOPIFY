@@ -336,6 +336,127 @@ function weeklyReportHtml(summary, ledger, stuckCount, clusterScores) {
   </div>`;
 }
 
+// ─── READINESS SCORE ─────────────────────────────────────────────────────────
+// Phase 2 readiness requires Readiness Score ≥ 95/100.
+// Only A0 calculates this. Only Guy activates phases. Zero auto-activation.
+//
+// Breakdown (100 pts):
+//   Agent Health       40 pts — all 15 Phase 1 agents healthy in last 7 days
+//   Pipeline Integrity 20 pts — no stuck products + HitL queue clean
+//   Infrastructure     15 pts — Supabase + products + workspace clean
+//   LAUNCH_MODE        15 pts — system_config LAUNCH_MODE = 'true'
+//   QC Agent Active    10 pts — A2.5 ran successfully in last 7 days
+
+const READINESS_THRESHOLD = 95;
+
+const PHASE1_AGENTS = ['A0','A1','A2','A2.5','A3','A4','A5','A6','A7','A9','A10','A11','A12','A13'];
+
+async function calculateReadinessScore(supabase, workspaceClean) {
+  const breakdown = {};
+  let total = 0;
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+  // ── Agent Health (40 pts) ─────────────────────────────────────────────────
+  const { data: healthRows } = await supabase
+    .from('agent_health_log')
+    .select('agent_id, run_status, created_at')
+    .gte('created_at', sevenDaysAgo)
+    .eq('run_status', 'success');
+
+  const recentHealthy = new Set((healthRows || []).map(r => r.agent_id));
+  const healthyCount  = PHASE1_AGENTS.filter(id => recentHealthy.has(id)).length;
+  const healthScore   = Math.round((healthyCount / PHASE1_AGENTS.length) * 40);
+  breakdown.agent_health = { points: healthScore, max: 40, detail: `${healthyCount}/${PHASE1_AGENTS.length} agents healthy in last 7d` };
+  total += healthScore;
+
+  // ── Pipeline Integrity (20 pts) ───────────────────────────────────────────
+  const { data: stuckRows } = await supabase
+    .from('products')
+    .select('id', { count: 'exact', head: true })
+    .like('upload_status', 'stuck:%');
+  const stuckCount   = stuckRows?.length ?? 0;
+  const stuckScore   = stuckCount === 0 ? 10 : stuckCount <= 2 ? 5 : 0;
+
+  const { data: pendingRows } = await supabase
+    .from('pending_approvals')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'pending');
+  const pendingCount = pendingRows?.length ?? 0;
+  const hitlScore    = pendingCount <= 3 ? 10 : pendingCount <= 8 ? 5 : 0;
+
+  breakdown.pipeline = { points: stuckScore + hitlScore, max: 20, detail: `stuck: ${stuckCount}, pending HitL: ${pendingCount}` };
+  total += stuckScore + hitlScore;
+
+  // ── Infrastructure (15 pts) ──────────────────────────────────────────────
+  // +5 Supabase connected (we're here), +5 products accessible (stuck query ran), +5 workspace clean
+  const infraScore = 5 + 5 + (workspaceClean ? 5 : 0);
+  breakdown.infrastructure = { points: infraScore, max: 15, detail: `Supabase ✅, products ✅, workspace ${workspaceClean ? '✅' : '🔴'}` };
+  total += infraScore;
+
+  // ── LAUNCH_MODE Active (15 pts) ──────────────────────────────────────────
+  let launchScore = 0;
+  try {
+    const { data: cfg } = await supabase
+      .from('system_config')
+      .select('value')
+      .eq('key', 'LAUNCH_MODE')
+      .single();
+    launchScore = cfg?.value === 'true' ? 15 : 0;
+    breakdown.launch_mode = { points: launchScore, max: 15, detail: cfg?.value === 'true' ? 'LAUNCH_MODE=true' : `LAUNCH_MODE=${cfg?.value ?? 'not set'}` };
+  } catch (_) {
+    breakdown.launch_mode = { points: 0, max: 15, detail: 'system_config not accessible' };
+  }
+  total += launchScore;
+
+  // ── QC Agent Active (10 pts) ─────────────────────────────────────────────
+  const qcRan    = (healthRows || []).some(r => r.agent_id === 'A2.5');
+  const qcScore  = qcRan ? 10 : 0;
+  breakdown.qc_agent = { points: qcScore, max: 10, detail: qcRan ? 'A2.5 ran in last 7d' : 'A2.5 no recent run' };
+  total += qcScore;
+
+  return { total, breakdown };
+}
+
+function readinessEmailHtml(readiness) {
+  const ts = new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' });
+  const isReady = readiness.total >= READINESS_THRESHOLD;
+
+  const rows = Object.entries(readiness.breakdown).map(([key, v]) => {
+    const icon = v.points === v.max ? '✅' : v.points > 0 ? '⚠️' : '🔴';
+    return `<tr>
+      <td style="padding:4px 8px">${icon} ${key.replace(/_/g, ' ')}</td>
+      <td style="padding:4px 8px;text-align:center;font-weight:bold">${v.points}/${v.max}</td>
+      <td style="padding:4px 8px;color:#6b7280;font-size:12px">${v.detail}</td>
+    </tr>`;
+  }).join('');
+
+  return `<div style="font-family:monospace;max-width:700px">
+    <h2 style="color:${isReady ? '#16a34a' : '#d97706'}">
+      ${isReady ? '🎯 Phase Ready — Awaiting Your Approval' : '📊 Phase Readiness Score Update'}
+    </h2>
+    <p><strong>Time (IL):</strong> ${ts}</p>
+    <p style="font-size:22px;font-weight:bold">Score: ${readiness.total}/100
+      ${isReady ? '✅ Ready' : `— ${READINESS_THRESHOLD - readiness.total} pts to threshold`}
+    </p>
+    <table border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;margin:12px 0">
+      <tr style="background:#f2f2f2">
+        <th style="padding:4px 8px;text-align:left">Category</th>
+        <th style="padding:4px 8px;text-align:center">Score</th>
+        <th style="padding:4px 8px;text-align:left">Detail</th>
+      </tr>
+      ${rows}
+    </table>
+    ${isReady ? `
+    <div style="background:#f0fdf4;border:1px solid #86efac;padding:16px;border-radius:8px;margin-top:12px">
+      <strong>Action required:</strong> Log into Supabase and set
+      <code>PHASE_2_ACTIVATE_BY_GUY = 'true'</code> in the <code>system_config</code> table
+      to activate Phase 2 agents.
+    </div>` : ''}
+    <hr>
+    <p style="color:#888;font-size:11px">SockAcademy A0 Orchestrator — Phase Readiness Monitor</p>
+  </div>`;
+}
+
 // ─── WORKSPACE HEALTH CHECK ──────────────────────────────────────────────────
 // Runs the same rules as scripts/ci/structure-lint.js but from inside A0.
 // Reports violations by email so Guy is alerted even without a CI run.
@@ -451,7 +572,7 @@ async function main() {
   await updateA0State(supabase, 'RUNNING');
 
   // Step 1 — Stuck detection + HitL expiry (every run)
-  console.log('\n[1/5] Stuck Detection & HitL Expiry');
+  console.log('\n[1/6] Stuck Detection & HitL Expiry');
   const { stuckRows, markedCount } = await runStuckDetection(supabase);
   await expireStaleApprovals(supabase);
 
@@ -463,7 +584,7 @@ async function main() {
   }
 
   // Step 2 — SA-6 Decision Engine (every run)
-  console.log('\n[2/5] SA-6 Decision Engine');
+  console.log('\n[2/6] SA-6 Decision Engine');
   let orchestrationResult = null;
   try {
     orchestrationResult = await runOrchestration(supabase);
@@ -482,7 +603,7 @@ async function main() {
   // Step 3 — Weekly health report (Sundays or forced)
   const isSunday = new Date().getDay() === 0;
   if (isSunday || FORCE_WEEKLY) {
-    console.log('\n[3/5] Weekly Health Report');
+    console.log('\n[3/6] Weekly Health Report');
     const summary = await buildProductsSummary(supabase);
     const ledger  = await readHealthLog(supabase);
 
@@ -491,13 +612,14 @@ async function main() {
       weeklyReportHtml(summary, ledger, stuckRows.length, orchestrationResult?.clusterScores ?? null)
     );
   } else {
-    console.log('\n[3/5] Weekly Report — skipped (not Sunday)');
+    console.log('\n[3/6] Weekly Report — skipped (not Sunday)');
   }
 
   // Step 4 — Workspace structure health check (every run)
-  console.log('\n[4/5] Workspace Health Check');
+  console.log('\n[4/6] Workspace Health Check');
   const structureViolations = runWorkspaceHealthCheck();
-  if (structureViolations.length === 0) {
+  const workspaceClean = structureViolations.length === 0;
+  if (workspaceClean) {
     console.log('✅ Workspace structure clean — no violations');
   } else {
     console.error(`🏗️  ${structureViolations.length} structure violation(s) found:`);
@@ -508,15 +630,39 @@ async function main() {
     );
   }
 
-  // Step 5 — Update A0's own state in health log
-  console.log('\n[5/5] Updating agent_health_log');
+  // Step 5 — Phase Readiness Score (every run)
+  console.log('\n[5/6] Phase Readiness Monitor');
+  let readiness = null;
+  try {
+    readiness = await calculateReadinessScore(supabase, workspaceClean);
+    console.log(`\n📊 Readiness Score: ${readiness.total}/100 (threshold: ${READINESS_THRESHOLD})`);
+    for (const [key, v] of Object.entries(readiness.breakdown)) {
+      const icon = v.points === v.max ? '✅' : v.points > 0 ? '⚠️' : '🔴';
+      console.log(`   ${icon} ${key}: ${v.points}/${v.max} — ${v.detail}`);
+    }
+    if (readiness.total >= READINESS_THRESHOLD) {
+      console.log(`\n🎯 PHASE READY — score ${readiness.total}/100 ≥ ${READINESS_THRESHOLD}`);
+      await sendEmail(
+        `🎯 SockAcademy Phase Readiness: ${readiness.total}/100 — Awaiting Your Approval`,
+        readinessEmailHtml(readiness)
+      );
+    } else {
+      console.log(`⏳ Not ready (${readiness.total}/100) — ${READINESS_THRESHOLD - readiness.total} pts to threshold`);
+    }
+  } catch (e) {
+    console.error(`⚠️  Readiness score failed: ${e.message}`);
+  }
+
+  // Step 6 — Update A0's own state in health log
+  console.log('\n[6/6] Updating agent_health_log');
   await updateA0State(supabase, 'COMPLETE');
   console.log('✅ A0 state written');
 
   const criticals = orchestrationResult?.criticalCount ?? 0;
   const warnings  = orchestrationResult?.warningCount  ?? 0;
+  const readyStr  = readiness ? `readiness: ${readiness.total}/100` : 'readiness: N/A';
   console.log('\n' + '─'.repeat(52));
-  console.log(`✅ Done | stuck: ${markedCount} | SA-6: ${criticals}🔴 ${warnings}⚠️ | structure: ${structureViolations.length} violations`);
+  console.log(`✅ Done | stuck: ${markedCount} | SA-6: ${criticals}🔴 ${warnings}⚠️ | ${readyStr} | structure: ${structureViolations.length}`);
 }
 
 main().catch(async err => {
