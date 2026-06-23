@@ -1,5 +1,5 @@
 # PHASE ARCHITECTURE SKELETON
-## Complete System Build-Before-Run Roadmap (23/06/2026)
+## Complete System Build-Before-Run Roadmap (23/06/2026 — Updated: Phase 4–6 added)
 
 ---
 
@@ -290,6 +290,165 @@ No phase transitions without explicit Guy sign-off. Zero exceptions.
 
 ---
 
+## PHASE 4 — BRAND ELEVATION & INTERNATIONAL
+**Activation Trigger:** $15,000 MRR × 2 consecutive months
+
+**Business Logic:** At this point SockAcademy transitions from dropshipping operation to owned brand. Capital exists for MOQ. Customer base is proven. This phase is about owning the product and expanding geography.
+
+### Structural Skeleton
+
+#### A29 — Private Label at Scale
+**Role:** Transition from dropshipping to owned manufacturing
+- **Input:** A1 research + A7 supplier data + A23 factory relationships
+- **Output:**
+  - Factory RFQ documents (specs, MOQ, pricing, timeline)
+  - Private label product specs: materials, packaging, branding guidelines
+  - Quality control checklist for incoming stock
+  - Break-even analysis per SKU
+- **Trigger:** On-demand (Guy decision) + Quarterly review
+- **Dependencies:** $10K+ capital available for initial MOQ, A23 factory relationships active
+
+#### A30 — International Expansion
+**Role:** EU, UK, Israel market entry — infrastructure and compliance
+- **Input:** A8 analytics (top traffic countries), A26 regulatory data, A15 financial projections
+- **Output:**
+  - Shipping cost matrix: per-country landed cost vs. margin
+  - Compliance checklist: EU VAT, UK import duties, Israel customs
+  - Klaviyo segmentation by country (language, currency, timing)
+  - Localized Shopify markets configuration
+- **Trigger:** Monthly analysis (1st @ 10:00 UTC)
+- **Tech Stack:** Shopify Markets API, Avalara for tax, Klaviyo locale segmentation
+- **Dependencies:** 15%+ of existing traffic from target countries
+
+#### A31 — B2B & Wholesale
+**Role:** Corporate gifts, hotels, golf clubs, men's boutiques
+- **Input:** Order data (customer companies), outbound target research
+- **Output:**
+  - B2B pricing tiers (MOQ 12/24/48 pairs)
+  - Corporate gift catalog PDF
+  - Wholesale inquiry pipeline (CRM-lite in Supabase)
+  - Outreach sequences for target accounts
+- **Trigger:** Weekly prospecting (Monday 09:00 UTC)
+- **Tech Stack:** agent-browser for prospect research, doc-skills for catalog
+- **Dependencies:** Private label products available (A29 active)
+
+#### A32 — Financial Infrastructure Upgrade
+**Role:** Migration from Wave → QuickBooks + bank reconciliation
+- **Input:** A15 CFO financial data
+- **Output:**
+  - QuickBooks automated sync (revenue, COGS, expenses)
+  - Bank reconciliation: Shopify Payments ↔ bank statement
+  - Accountant-ready monthly package
+  - Multi-currency P&L (USD revenue / ILS expenses / ILS VAT)
+- **Trigger:** Monthly (day 2 @ 08:00 UTC — after A15 runs)
+- **Tech Stack:** QuickBooks API (via Zapier MCP), Shopify Payments API
+- **Dependencies:** Accountant onboarded, QuickBooks subscription active
+
+---
+
+## PHASE 5 — MARKET AUTHORITY
+**Activation Trigger:** $40,000 MRR × 2 consecutive months
+
+**Business Logic:** SockAcademy is no longer just a store — it becomes a platform and media brand. At $40K MRR, the customer base is large enough to build community around. The brand has earned the authority to teach, not just sell.
+
+### Structural Skeleton
+
+#### A33 — Content Media Brand
+**Role:** SockAcademy as editorial authority — YouTube, newsletter, industry data
+- **Input:** A10 trend data, A13 competitive intelligence, A12 customer insights
+- **Output:**
+  - Weekly editorial newsletter (The SockAcademy Report): trends, materials science, care guides
+  - YouTube scripts: "The Anatomy of a Perfect Sock" — educational, premium
+  - Annual Sock Industry Report (PDF) — earned media magnet
+- **Trigger:** Weekly editorial calendar (Tuesday + Thursday)
+- **Tech Stack:** Claude, doc-skills, YouTube Data API
+- **Dependencies:** 5,000+ email subscribers, 1,000+ social followers
+
+#### A34 — Community Platform
+**Role:** SockAcademy Members' Circle — curated community for discerning customers
+- **Input:** A16 CX data (VIP segment), A28 subscription members
+- **Output:**
+  - Private community access (Discord or Telegram — curated, not public)
+  - Early access to new products (24h before public)
+  - Member-exclusive research reports
+  - VIP service tier: direct line to Guy for feedback
+- **Trigger:** Monthly new member review (A16 identifies VIP candidates)
+- **Tech Stack:** Discord API or Telegram Bot, Klaviyo VIP segment
+- **Dependencies:** A28 Subscription Club active, 200+ repeat customers
+
+#### A35 — Brand Licensing & Partnerships
+**Role:** SockAcademy brand licensed to premium lifestyle partners
+- **Input:** A13 competitive intel, A27 PR media contacts
+- **Output:**
+  - Partnership pipeline: hotel amenities, airline business class, luxury gyms
+  - Licensing agreement templates
+  - Co-branded product specs (e.g., SockAcademy × Four Seasons)
+  - Revenue share tracking
+- **Trigger:** Quarterly outreach cycle
+- **Tech Stack:** agent-browser for prospect research, doc-skills for agreements
+- **Dependencies:** Trademark registered (A17 IP baseline active)
+
+#### A36 — Data Intelligence Product
+**Role:** Monetize SockAcademy's proprietary market data
+- **Input:** A11 price intelligence, A13 competitive data, A10 trends — aggregated anonymized
+- **Output:**
+  - Quarterly Sock Market Intelligence Report: sold to industry ($199/report)
+  - Trend API (future): real-time data feed for buyers, retailers
+  - Press releases: "SockAcademy Q3 Report: Merino wool searches up 34% YoY"
+- **Trigger:** Quarterly (Jan 15, Apr 15, Jul 15, Oct 15)
+- **Tech Stack:** doc-skills (PDF), Gumroad or Shopify Digital Downloads
+- **Dependencies:** 2+ years of trend data accumulated
+
+---
+
+## PHASE 6 — EXIT READINESS
+**Activation Trigger:** $80,000 MRR × 3 consecutive months OR Guy sets PHASE_6_STRATEGIC_DECISION = true manually
+
+**Business Logic:** This phase does not change how SockAcademy operates — it prepares it for strategic optionality: acquisition, investment, licensing, or intentional scale. The system becomes audit-ready, valuation-ready, and institutionally structured.
+
+**Important:** This phase can be triggered by revenue milestone OR by Guy's strategic decision regardless of MRR. A brand may choose an exit at $50K MRR if the offer is right. The manual trigger exists for that scenario.
+
+### Structural Skeleton
+
+#### A37 — Financial Due Diligence Automation
+**Role:** Prepare full financial audit package on demand
+- **Input:** A15 CFO historical data, A32 QuickBooks sync
+- **Output:**
+  - 3-year P&L (normalized, GAAP-adjacent)
+  - Customer cohort analysis: LTV, CAC, payback period
+  - Revenue quality assessment: MRR stability, churn, concentration risk
+  - EBITDA calculation with add-backs
+  - One-click data room package (PDF + Excel)
+- **Trigger:** On-demand (Guy activation) + Quarterly update
+- **Tech Stack:** doc-skills, A15 financial engine, Supabase historical data
+- **Dependencies:** 24+ months of clean financial data
+
+#### A38 — IP Portfolio Consolidation
+**Role:** Audit, protect, and maximize intellectual property value
+- **Input:** A17 IP watchlist, A9 legal compliance, all brand assets
+- **Output:**
+  - IP inventory: trademarks, designs, domain portfolio, content library
+  - Valuation methodology: brand equity + content + data assets
+  - Trademark status per jurisdiction (US, EU, IL)
+  - DMCA/C&D history and outcomes
+- **Trigger:** Quarterly (aligned with A26 Regulatory Watch)
+- **Tech Stack:** agent-browser, doc-skills
+- **Dependencies:** Trademark registered in at least 2 jurisdictions
+
+#### A39 — Acquisition Intelligence
+**Role:** Monitor potential acquirers and comparable exits in the space
+- **Input:** A13 competitive intelligence, A35 brand partnerships
+- **Output:**
+  - Acquirer watchlist: strategic buyers (Bombas, Berkshire, PE firms active in DTC)
+  - Comparable exits: similar brand acquisitions in last 3 years (multiple, structure)
+  - Brand positioning memo: "Why SockAcademy is an attractive acquisition"
+  - Outbound relationship map: which buyers Guy should know
+- **Trigger:** Quarterly report + immediate alert on relevant acquisitions in space
+- **Tech Stack:** agent-browser, Perplexity, doc-skills
+- **Dependencies:** Phase 5 active, brand has clear differentiated position
+
+---
+
 ## TESTING & VERIFICATION CRITERIA
 
 ### Phase 2 Gate (Before A14–A20 activate) — BULLETPROOF STANDARD
@@ -470,10 +629,21 @@ CREATE TABLE system_metrics (
    - THEN: [same pattern]
    - Email: "Phase 3B ready. Awaiting approval."
 
-   **Phase 4 (Scale) Readiness Check:**
+   **Phase 4 (Brand Elevation) Readiness Check:**
    - IF (mrr ≥ 15000 for 2 consecutive months) AND Readiness ≥ 95
    - THEN: [same pattern]
    - Email: "Phase 4 ready. Awaiting approval."
+
+   **Phase 5 (Market Authority) Readiness Check:**
+   - IF (mrr ≥ 40000 for 2 consecutive months) AND Readiness ≥ 95
+   - THEN: [same pattern]
+   - Email: "Phase 5 ready. Awaiting approval."
+
+   **Phase 6 (Exit Readiness) Readiness Check:**
+   - IF (mrr ≥ 80000 for 3 consecutive months) AND Readiness ≥ 95
+   - OR (Guy sets PHASE_6_STRATEGIC_DECISION = true manually)
+   - THEN: [same pattern]
+   - Email: "Phase 6 ready. Awaiting approval."
 
 5. **Guy-Only Activation**
    - When Guy manually sets: `system_config['PHASE_X_ACTIVATE_BY_GUY'] = true`
