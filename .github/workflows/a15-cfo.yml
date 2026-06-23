@@ -1,0 +1,41 @@
+name: A15 — CFO Weekly Financial Report
+
+on:
+  schedule:
+    - cron: '0 11 * * 1'  # Monday 11:00 UTC — after A14 COO (10:00)
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no email sent)'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['true', 'false']
+
+jobs:
+  cfo-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: sockacademy/agents/A15_cfo/package-lock.json
+
+      - name: Install dependencies
+        working-directory: sockacademy/agents/A15_cfo
+        run: npm install
+
+      - name: Run A15 CFO Report
+        working-directory: sockacademy/agents/A15_cfo
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SHOPIFY_SHOP_DOMAIN: ${{ secrets.SHOPIFY_SHOP_DOMAIN }}
+          SHOPIFY_MASTER_TOKEN: ${{ secrets.SHOPIFY_MASTER_TOKEN }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: node agent.js

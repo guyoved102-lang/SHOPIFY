@@ -1,0 +1,42 @@
+name: A16 — CX Weekly Customer Experience Report
+
+on:
+  schedule:
+    - cron: '0 10 * * 0'  # Sunday 10:00 UTC — same window as A8 Analytics
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no email sent)'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['true', 'false']
+
+jobs:
+  cx-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: sockacademy/agents/A16_cx/package-lock.json
+
+      - name: Install dependencies
+        working-directory: sockacademy/agents/A16_cx
+        run: npm install
+
+      - name: Run A16 CX Report
+        working-directory: sockacademy/agents/A16_cx
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SHOPIFY_SHOP_DOMAIN: ${{ secrets.SHOPIFY_SHOP_DOMAIN }}
+          SHOPIFY_MASTER_TOKEN: ${{ secrets.SHOPIFY_MASTER_TOKEN }}
+          KLAVIYO_PRIVATE_API_KEY: ${{ secrets.KLAVIYO_PRIVATE_API_KEY }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: node agent.js
