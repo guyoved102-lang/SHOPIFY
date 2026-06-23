@@ -188,17 +188,35 @@ async function main() {
     fetchUsdIlsRate(),
   ]);
 
-  const stats = calcOrderStats(orders7d);
+  const stats    = calcOrderStats(orders7d);
+  const progress = phase2Progress(allTimeOrders, stats.revenue);
+  const phase2Hit = progress.orderPct >= 100 || progress.mrrPct >= 100;
   console.log(`   Last 7 days: ${stats.count} orders | $${stats.revenue} revenue`);
   console.log(`   All-time orders: ${allTimeOrders}`);
   console.log(`   USD/ILS: ${ilsRate || 'unavailable'}`);
 
+  // Gap 2: write LAUNCH_MODE to system_config when Phase 2 milestone is hit
+  if (phase2Hit) {
+    console.log('   *** Phase 2 milestone REACHED — orders or MRR threshold crossed ***');
+    if (!DRY_RUN) {
+      try {
+        await supabase
+          .from('system_config')
+          .upsert({ key: 'LAUNCH_MODE', value: 'true' }, { onConflict: 'key' });
+        console.log('   system_config.LAUNCH_MODE → true (A0 notified)');
+      } catch (e) { console.error('   system_config write failed:', e.message); }
+    } else {
+      console.log('   [DRY_RUN] Would set system_config.LAUNCH_MODE = true');
+    }
+  }
+
   const html = buildFinancialHtml(stats, allTimeOrders, ilsRate, weekLabel);
   await sendReport(html, weekLabel);
   await logHealth(supabase, 'success', {
-    orders7d: stats.count,
-    revenue7d: stats.revenue,
+    orders7d:         stats.count,
+    revenue7d:        stats.revenue,
     allTimeOrders,
+    phase2_triggered: phase2Hit,
   });
 
   console.log('\n' + '─'.repeat(52));

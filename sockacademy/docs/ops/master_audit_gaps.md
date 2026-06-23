@@ -88,8 +88,8 @@
 
 ## A14/A15/A16 — C-Suite (COO/CFO/CX)
 🔴 ✅ Gap 1: Separate emails, no consolidated executive summary. (Business Value)
-🟡    Gap 2: A15 CFO missing `system_config` write / A0 notification. (Architecture)
-🟡    Gap 3: A16 CX double-counts total subscribers across Klaviyo lists. (Data Accuracy)
+🟡 ✅ Gap 2: A15 CFO — when Phase 2 milestone hit (`orderPct≥100` or `mrrPct≥100`), upserts `system_config.LAUNCH_MODE = 'true'`; logs `phase2_triggered: true` in health metadata so A0 sees it. (Architecture)
+🟡 ✅ Gap 3: A16 CX — `fetchKlaviyoListStats()` now queries `/api/profiles/?page[size]=1` for unique profile count; falls back to max-list-size (not sum) if `meta.total` unavailable; email shows "(unique profiles)" or "(largest list)" note. (Data Accuracy)
 
 ---
 
@@ -102,7 +102,7 @@
 | Batch 2 | A2 + A2.5 + A3 | ✅ Applied, committed 03a1893 |
 | Batch 3 | A4 + A5 + A6 | ✅ Applied, committed 95a37e1 |
 | Batch 4 | A7 + A11 + A13 | ✅ Applied, committed |
-| Batch 5 | A14 + A15 + A16 | ⏳ Pending |
+| Batch 5 | A14 + A15 + A16 | ✅ Applied, committed |
 
 ---
 

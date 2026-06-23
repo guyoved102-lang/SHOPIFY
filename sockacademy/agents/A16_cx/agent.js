@@ -76,16 +76,40 @@ function analyzeOrders(orders) {
 async function fetchKlaviyoListStats() {
   if (!KLAVIYO_KEY) return null;
   try {
-    const res = await axios.get('https://a.klaviyo.com/api/lists', {
-      headers: {
-        'Authorization': `Klaviyo-API-Key ${KLAVIYO_KEY}`,
-        'revision':      '2024-10-15',
-      },
-      timeout: 8000,
-    });
-    const lists            = res.data?.data || [];
-    const totalSubscribers = lists.reduce((sum, l) => sum + (l.attributes?.profile_count || 0), 0);
-    return { listCount: lists.length, totalSubscribers };
+    const headers = {
+      'Authorization': `Klaviyo-API-Key ${KLAVIYO_KEY}`,
+      'revision':      '2024-10-15',
+    };
+
+    const listsRes = await axios.get('https://a.klaviyo.com/api/lists', { headers, timeout: 8000 });
+    const lists    = listsRes.data?.data || [];
+
+    // Gap 3: get unique profile count — profiles endpoint avoids double-counting subscribers shared across lists
+    let uniqueSubscribers = null;
+    let subscribersNote   = 'largest list (dedup unavailable)';
+    try {
+      const profilesRes = await axios.get('https://a.klaviyo.com/api/profiles/', {
+        headers,
+        params:  { 'page[size]': 1 },
+        timeout: 8000,
+      });
+      const total = profilesRes.data?.meta?.total;
+      if (typeof total === 'number') {
+        uniqueSubscribers = total;
+        subscribersNote   = 'unique profiles';
+      }
+    } catch (_) {}
+
+    // Fallback: max single-list count is better than sum (sum double-counts cross-list members)
+    const fallbackCount = lists.length > 0
+      ? Math.max(...lists.map(l => l.attributes?.profile_count || 0))
+      : 0;
+
+    return {
+      listCount:        lists.length,
+      totalSubscribers: uniqueSubscribers ?? fallbackCount,
+      subscribersNote,
+    };
   } catch (e) {
     console.log(`   [Klaviyo error] ${e.message}`);
     return null;
@@ -128,7 +152,7 @@ function buildCxHtml(orderStats, klaviyo, weekLabel) {
        <table style="width:100%;margin-bottom:8px">
          <tr><td style="color:#9CA3AF;width:200px">Total lists</td><td>${klaviyo.listCount}</td></tr>
          <tr><td style="color:#9CA3AF">Total subscribers</td>
-             <td style="color:${klaviyo.totalSubscribers > 0 ? '#4AAD80' : '#888'}">${klaviyo.totalSubscribers.toLocaleString()}</td></tr>
+             <td style="color:${klaviyo.totalSubscribers > 0 ? '#4AAD80' : '#888'}">${klaviyo.totalSubscribers.toLocaleString()} <span style="color:#555;font-size:10px">(${klaviyo.subscribersNote})</span></td></tr>
        </table>`
     : '<p style="color:#888;font-size:11px">Klaviyo: no data (API error or key not set).</p>';
 
