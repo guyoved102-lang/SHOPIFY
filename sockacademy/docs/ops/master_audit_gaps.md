@@ -40,17 +40,17 @@
 
 ## A4 — Meta Ads
 🔴 ✅ Gap 1: `HERO_PRODUCTS` URLs are hardcoded 404s. (Critical)
-🟡    Gap 2: Product selection is random, ignores past ROAS performance. (Optimization)
-🟡    Gap 3: ROAS check ignores campaigns with 0 conversions burning spend. (Business Logic)
+🟡 ✅ Gap 2: ROAS-weighted product selection — `buildProductROASMap()` reads last 8 runs; `selectROASWeightedProduct()` sorts by avg ROAS, random fallback on first run. (Optimization)
+🟡 ✅ Gap 3: Zero-conversion detection — `actions` field added to insights; spend>$5 + 0 purchases → "PAUSE IMMEDIATELY" section in email, separate from low-ROAS. (Business Logic)
 
 ## A5 — Social Content
 🔴 ✅ Gap 1: Writes images to Shopify theme `/assets/` instead of proper CDN (50MB limit risk). (Infrastructure)
-🟡    Gap 2: Same weekly themes repeat. Content monotony. (Content Strategy)
-🟡    Gap 3: 1024x1024 only. Missing 9:16 vertical for Reels. (Distribution)
+🟡 ✅ Gap 2: Theme deduplication — `selectFreshTheme()` reads last 24 health log runs, picks first unused theme; LRU fallback when all 24 exhausted. (Content Strategy)
+🟡 ✅ Gap 3: Reels support — Tuesday REEL post added with `imageSize:1024x1536`; `generateImage()` uses dynamic size + vertical aspect prompt; `publishToInstagram()` sends `media_type:REELS`. (Distribution)
 
 ## A6 — Email Sync
-🟡    Gap 1: Email copy hardcoded in `agent.js` instead of config/Supabase. (Operability)
-🟡    Gap 2: No A/B test integration for Klaviyo flows. (Optimization)
+🟡 ✅ Gap 1: Email copy extracted to `email_templates.json` — agent loads at startup; content editable without code deploy; exits cleanly if file missing. (Operability)
+🟡 ✅ Gap 2: A/B subject tracking — `getActiveABVariant()` alternates A/B each run via health log; confirmation email shows both subject variants with active badge; Guy updates Klaviyo flow per schedule. (Optimization)
 
 ## A7 — Supplier Monitor
 🔴 ✅ Gap 1: `state.json` persistence broken on GitHub Actions. (Critical)
@@ -100,7 +100,7 @@
 | Batch 0 | A10 (model + DRY_RUN + categories + health metadata) | ✅ Applied, committed |
 | Batch 1 | A0 + A1 | ✅ Applied, committed 90f06ca |
 | Batch 2 | A2 + A2.5 + A3 | ✅ Applied, committed 03a1893 |
-| Batch 3 | A4 + A5 + A6 | ⏳ Pending |
+| Batch 3 | A4 + A5 + A6 | ✅ Applied, committed 95a37e1 |
 | Batch 4 | A7 + A11 + A13 | ⏳ Pending |
 | Batch 5 | A14 + A15 + A16 | ⏳ Pending |
 
