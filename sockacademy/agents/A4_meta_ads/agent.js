@@ -14,7 +14,7 @@ function getSupabase() {
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 }
 
-async function logHealth(supabase, status, errorMsg = '') {
+async function logHealth(supabase, status, errorMsg = '', metadata = {}) {
   if (!supabase) return;
   try {
     const run_status = status === 'failed' ? 'failure' : status;
@@ -23,7 +23,7 @@ async function logHealth(supabase, status, errorMsg = '') {
       agent_name:    'Meta Ads',
       run_status,
       error_message: errorMsg || null,
-      metadata:      {},
+      metadata,
     });
   } catch (e) { console.error('Health log failed:', e.message); }
 }
@@ -80,7 +80,7 @@ const CAMPAIGNS = [
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function generateAdCopy(campaign, product) {
   const msg = await anthropic.messages.create({
-    model: 'claude-haiku-4-5-20251001',
+    model: 'claude-sonnet-4-6',
     max_tokens: 500,
     messages: [{
       role: 'user',
@@ -157,25 +157,74 @@ async function createCampaign(campaign) {
 }
 
 async function checkCampaignROAS() {
-  if (DRY_RUN) return [];
+  if (DRY_RUN) return { lowRoas: [], zeroConversion: [] };
 
   const insights = await metaGet(`${AD_ACCOUNT_ID}/insights`, {
-    fields: 'campaign_name,spend,purchase_roas,impressions,clicks',
+    fields: 'campaign_name,spend,purchase_roas,actions,impressions,clicks',
     date_preset: 'last_7d',
     level: 'campaign',
   });
 
-  const alerts = [];
+  const lowRoas = [];
+  const zeroConversion = [];
   for (const row of (insights.data || [])) {
     const roas = parseFloat(row.purchase_roas?.[0]?.value || 0);
     const spend = parseFloat(row.spend || 0);
-    if (spend > 10 && roas < 2.5) {
-      alerts.push({ name: row.campaign_name, roas, spend });
-      // עצור קמפיין שלא מכניס
+    const purchases = (row.actions || []).find(a => a.action_type === 'offsite_conversion.fb_pixel_purchase');
+    const conversions = parseInt(purchases?.value || 0, 10);
+
+    if (spend > 5 && conversions === 0) {
+      zeroConversion.push({ name: row.campaign_name, spend });
+      console.log(`🔴 ZERO CONVERSIONS — ${row.campaign_name}: $${spend.toFixed(2)} spent, 0 purchases — pause immediately`);
+    } else if (spend > 10 && roas < 2.5) {
+      lowRoas.push({ name: row.campaign_name, roas, spend });
       console.log(`⚠️  ROAS נמוך — ${row.campaign_name}: ${roas} (מינימום 2.5)`);
     }
   }
-  return alerts;
+  return { lowRoas, zeroConversion };
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ROAS-WEIGHTED PRODUCT SELECTION (Gap 2)
+// Reads last 8 successful runs from health log; sorts products by avg ROAS
+// Falls back to random on first run or when no Supabase
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function buildProductROASMap(supabase) {
+  if (!supabase) return {};
+  try {
+    const { data } = await supabase
+      .from('agent_health_log')
+      .select('metadata')
+      .eq('agent_id', 'A4')
+      .eq('run_status', 'success')
+      .order('created_at', { ascending: false })
+      .limit(8);
+    const roasMap = {};
+    for (const row of (data || [])) {
+      for (const entry of (row.metadata?.product_campaign_map || [])) {
+        if (entry.roas != null) {
+          if (!roasMap[entry.product]) roasMap[entry.product] = [];
+          roasMap[entry.product].push(entry.roas);
+        }
+      }
+    }
+    return roasMap;
+  } catch { return {}; }
+}
+
+function selectROASWeightedProduct(liveProducts, usedNames, roasMap) {
+  const available = liveProducts.filter(p => !usedNames.has(p.name));
+  const pool = available.length ? available : liveProducts;
+  if (Object.keys(roasMap).length === 0) {
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+  return pool.slice().sort((a, b) => {
+    const aScores = roasMap[a.name] || [];
+    const bScores = roasMap[b.name] || [];
+    const aAvg = aScores.length ? aScores.reduce((s, v) => s + v, 0) / aScores.length : 0;
+    const bAvg = bScores.length ? bScores.reduce((s, v) => s + v, 0) / bScores.length : 0;
+    return bAvg - aAvg;
+  })[0];
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -208,7 +257,7 @@ async function getHeroProducts(supabase) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // EMAIL REPORT
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function sendReport(adCopies, alerts, mode) {
+async function sendReport(adCopies, { lowRoas = [], zeroConversion = [] } = {}, mode) {
   if (!process.env.GMAIL_APP_PASSWORD) return;
 
   const transporter = nodemailer.createTransport({
@@ -229,12 +278,21 @@ async function sendReport(adCopies, alerts, mode) {
     </div>
   `).join('');
 
-  const alertHtml = alerts.length ? `
+  const zeroConvHtml = zeroConversion.length ? `
+    <div style="background:#450a0a;border:1px solid #ef4444;border-radius:8px;padding:16px;margin:16px 0">
+      <h3 style="color:#ef4444;margin:0 0 8px">🔴 PAUSE IMMEDIATELY — 0 המרות, תקציב נשרף</h3>
+      ${zeroConversion.map(a => `<p style="margin:4px 0;color:#fca5a5">• ${a.name}: $${parseFloat(a.spend).toFixed(2)} הוצאה | 0 רכישות</p>`).join('')}
+    </div>
+  ` : '';
+  const lowRoasHtml = lowRoas.length ? `
     <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:16px;margin:16px 0">
       <h3 style="color:#dc2626;margin:0 0 8px">⚠️ ROAS נמוך — קמפיינים לבדיקה</h3>
-      ${alerts.map(a => `<p style="margin:4px 0">• ${a.name}: ROAS ${a.roas} (מינימום 2.5) | הוצאה: $${a.spend}</p>`).join('')}
+      ${lowRoas.map(a => `<p style="margin:4px 0">• ${a.name}: ROAS ${a.roas} (מינימום 2.5) | הוצאה: $${a.spend}</p>`).join('')}
     </div>
-  ` : '<div style="background:#f0fdf4;border-radius:8px;padding:12px;color:#16a34a">✅ כל הקמפיינים מעל ROAS 2.5</div>';
+  ` : '';
+  const alertHtml = (zeroConvHtml || lowRoasHtml)
+    ? zeroConvHtml + lowRoasHtml
+    : '<div style="background:#f0fdf4;border-radius:8px;padding:12px;color:#16a34a">✅ כל הקמפיינים מעל ROAS 2.5</div>';
 
   const html = `
 <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto">
@@ -289,29 +347,38 @@ async function main() {
 
   // בדיקת ROAS
   console.log('\n📊 בודק ROAS קמפיינים...');
-  const alerts = await checkCampaignROAS();
+  const { lowRoas: roasAlerts, zeroConversion: zeroAlerts } = await checkCampaignROAS();
+  if (zeroAlerts.length) console.log(`🔴 ${zeroAlerts.length} campaign(s) with 0 conversions — immediate action needed`);
 
   // טעינת מוצרים חיים מ-Supabase
   const liveProducts = await getHeroProducts(supabase);
   if (!liveProducts?.length) {
     console.log('⚠️  No uploaded products in Supabase — skipping ad copy generation');
     console.log('   Upload products via A1→A2 pipeline first, then re-run A4');
-    await sendReport([], alerts, DRY_RUN ? 'dry-run' : 'live');
+    await sendReport([], { lowRoas: roasAlerts, zeroConversion: zeroAlerts }, DRY_RUN ? 'dry-run' : 'live');
     await logHealth(supabase, 'success');
     return;
   }
   console.log(`📦 ${liveProducts.length} live product(s) loaded from Supabase`);
 
+  // ROAS-weighted product selection (Gap 2)
+  const roasMap = await buildProductROASMap(supabase);
+  const usedProductNames = new Set();
+  console.log(`📈 ROAS history: ${Object.keys(roasMap).length > 0 ? Object.keys(roasMap).length + ' product(s) with data' : 'no history yet — random fallback'}`);
+
   // יצירת קופי לכל קמפיין × מוצר hero
   console.log('\n✍️  מייצר קופי מודעות עם Claude...');
   const adCopies = [];
+  const productCampaignMap = [];
 
   for (const campaign of CAMPAIGNS) {
-    const product = liveProducts[Math.floor(Math.random() * liveProducts.length)];
+    const product = selectROASWeightedProduct(liveProducts, usedProductNames, roasMap);
+    usedProductNames.add(product.name);
     console.log(`  ⏳ ${campaign.id} × ${product.name}...`);
 
     const copy = await generateAdCopy(campaign, product);
     adCopies.push({ campaign, product, copy });
+    productCampaignMap.push({ campaign: campaign.id, product: product.name, roas: null });
 
     console.log(`  ✅ "${copy.headline}"`);
     await new Promise(r => setTimeout(r, 500));
@@ -333,8 +400,8 @@ async function main() {
   console.log('\n━'.repeat(40));
   console.log(`✅ A4 הושלם — ${adCopies.length} קופי נוצרו`);
 
-  await sendReport(adCopies, alerts, DRY_RUN ? 'dry-run' : 'live');
-  await logHealth(supabase, 'success');
+  await sendReport(adCopies, { lowRoas: roasAlerts, zeroConversion: zeroAlerts }, DRY_RUN ? 'dry-run' : 'live');
+  await logHealth(supabase, 'success', '', { product_campaign_map: productCampaignMap });
 }
 
 main().catch(async e => {

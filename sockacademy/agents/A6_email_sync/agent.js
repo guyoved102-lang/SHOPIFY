@@ -8,13 +8,14 @@
 require('dotenv').config({ path: '../../.env' });
 const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
+const path = require('path');
 
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 }
 
-async function logHealth(supabase, status, errorMsg = '') {
+async function logHealth(supabase, status, errorMsg = '', metadata = {}) {
   if (!supabase) return;
   try {
     const run_status = status === 'failed' ? 'failure' : status;
@@ -23,7 +24,7 @@ async function logHealth(supabase, status, errorMsg = '') {
       agent_name:    'Email Sync',
       run_status,
       error_message: errorMsg || null,
-      metadata:      {},
+      metadata,
     });
   } catch (e) { console.error('Health log failed:', e.message); }
 }
@@ -33,65 +34,39 @@ const KLAVIYO_BASE = 'https://a.klaviyo.com/api';
 const REVISION = '2024-10-15';
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// EMAIL CONTENT — source of truth
+// EMAIL CONTENT — loaded from email_templates.json (Gap 1)
+// Edit email_templates.json to change copy without touching code
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const EMAILS = [
-  {
-    name: 'SA — Abandoned Cart 1h',
-    subject: 'You left something behind',
-    preview: "Your cart is saved. Your standards shouldn't slip.",
-    delay: '1 hour after checkout started',
-    body: `Hi {{ first_name|default:"there" }},
+let EMAILS;
+try {
+  const templates = require(path.join(__dirname, 'email_templates.json'));
+  EMAILS = templates.abandoned_cart;
+  console.log(`📄 Loaded ${EMAILS.length} templates from email_templates.json`);
+} catch (e) {
+  console.error('❌ email_templates.json not found or invalid:', e.message);
+  process.exit(1);
+}
 
-You were close.
-
-Your cart is still saved — including everything you selected at SockAcademy.
-
-We don't follow up often. But when someone takes the time to choose premium socks and then leaves, we'd rather ask once than assume you changed your mind about quality.
-
-→ Return to your cart: {{ checkout_url }}
-
-If something wasn't right — the size, the price, a question about the product — reply to this email. We'll sort it.
-
-— The SockAcademy Team`,
-  },
-  {
-    name: 'SA — Abandoned Cart 24h',
-    subject: "What's still in your cart — and why it's worth it",
-    preview: 'A brief case for not settling.',
-    delay: '24 hours after checkout started',
-    body: `Hi {{ first_name|default:"there" }},
-
-Still thinking about it?
-
-Here's the honest case for finishing what you started:
-
-The socks you selected aren't a luxury purchase — they're a long-term decision. A pair of Merino Wool Crew socks, maintained correctly, lasts 3–5 years. That works out to less than $10 a year for socks you'll actually want to wear every day.
-
-The alternative is buying cheap ones again, replacing them in six months, and still not having what you wanted in the first place.
-
-Your cart is saved. → Complete your order: {{ checkout_url }}
-
-— The SockAcademy Team`,
-  },
-  {
-    name: 'SA — Abandoned Cart 48h',
-    subject: "Last reminder — your cart expires soon",
-    preview: "We won't follow up after this.",
-    delay: '48 hours after checkout started',
-    body: `Hi {{ first_name|default:"there" }},
-
-This is the last time we'll mention it.
-
-Your SockAcademy cart is about to expire. If you were waiting for a reason — this is it: we don't do aggressive discounts or countdown timers. We let the product make the case.
-
-If now isn't the right time, that's fine. We'll be here when it is.
-
-→ {{ checkout_url }}
-
-— The SockAcademy Team`,
-  },
-];
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// A/B VARIANT TRACKING — Gap 2
+// Alternates subject/preview between Variant A and B each run
+// Both variants always defined in email_templates.json
+// Guy updates subject lines in Klaviyo flow per the active variant
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function getActiveABVariant(supabase) {
+  if (!supabase) return 'A';
+  try {
+    const { data } = await supabase
+      .from('agent_health_log')
+      .select('metadata')
+      .eq('agent_id', 'A6')
+      .eq('run_status', 'success')
+      .order('created_at', { ascending: false })
+      .limit(1);
+    const lastVariant = data?.[0]?.metadata?.ab_variant;
+    return lastVariant === 'A' ? 'B' : 'A';
+  } catch { return 'A'; }
+}
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // HTML BUILDER — SockAcademy dark email design
@@ -233,7 +208,7 @@ async function syncTemplate(email, existingTemplates) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // EMAIL CONFIRMATION
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function sendConfirmation(results) {
+async function sendConfirmation(results, abVariant = 'A') {
   if (!process.env.GMAIL_APP_PASSWORD) return;
 
   const transporter = nodemailer.createTransport({
@@ -271,6 +246,25 @@ async function sendConfirmation(results) {
   </table>
 
   <div style="background:#1a1a1a;border:1px solid #C9A84C33;border-radius:6px;padding:16px;margin-top:24px">
+    <div style="font-size:11px;color:#C9A84C;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">A/B TEST — שבוע זה: Variant ${abVariant}</div>
+    <p style="color:#9ca3af;font-size:12px;margin:0 0 10px">עדכן את שורות הנושא ב-Klaviyo Flow לפי הטבלה הבאה:</p>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:12px">
+      <tr style="background:#0f0f0f">
+        <th style="padding:6px 8px;text-align:left;color:#6b7280">Template</th>
+        <th style="padding:6px 8px;text-align:left;color:#6b7280">Variant A</th>
+        <th style="padding:6px 8px;text-align:left;color:#6b7280">Variant B</th>
+        <th style="padding:6px 8px;text-align:center;color:#6b7280">Active</th>
+      </tr>
+      ${EMAILS.map(e => `<tr style="border-top:1px solid #2a2a2a">
+        <td style="padding:6px 8px;color:#9ca3af">${e.name.replace('SA — ', '')}</td>
+        <td style="padding:6px 8px;color:${abVariant === 'A' ? '#F0EDE6' : '#6b7280'}">${e.subject_a}</td>
+        <td style="padding:6px 8px;color:${abVariant === 'B' ? '#F0EDE6' : '#6b7280'}">${e.subject_b}</td>
+        <td style="padding:6px 8px;text-align:center"><span style="background:${abVariant === 'A' ? '#1a3a1a' : '#1a2a3a'};color:${abVariant === 'A' ? '#4ade80' : '#60a5fa'};font-size:10px;font-weight:700;padding:2px 6px;border-radius:2px">${abVariant}</span></td>
+      </tr>`).join('')}
+    </table>
+  </div>
+
+  <div style="background:#1a1a1a;border:1px solid #C9A84C33;border-radius:6px;padding:16px;margin-top:16px">
     <div style="font-size:11px;color:#C9A84C;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">הצעד הבא — הקצאה ב-Klaviyo</div>
     <ol style="color:#9ca3af;font-size:13px;line-height:2;margin:0;padding-left:18px">
       <li>Klaviyo → <strong style="color:#F0EDE6">Flows</strong> → Abandoned Cart flow</li>
@@ -308,6 +302,9 @@ async function main() {
     process.exit(1);
   }
 
+  const abVariant = await getActiveABVariant(supabase);
+  console.log(`🔀 A/B Variant this run: ${abVariant}`);
+
   console.log('📋 Fetching existing Klaviyo templates...');
   const existing = await listTemplates();
   console.log(`   Found ${existing.length} existing templates`);
@@ -328,10 +325,10 @@ async function main() {
   }
 
   console.log('━'.repeat(40));
-  console.log(`✅ Done — ${results.filter(r => r.action !== 'error').length}/${results.length} synced`);
+  console.log(`✅ Done — ${results.filter(r => r.action !== 'error').length}/${results.length} synced | A/B Variant: ${abVariant}`);
 
-  await sendConfirmation(results);
-  await logHealth(supabase, 'success');
+  await sendConfirmation(results, abVariant);
+  await logHealth(supabase, 'success', '', { ab_variant: abVariant });
 }
 
 main().catch(async e => {

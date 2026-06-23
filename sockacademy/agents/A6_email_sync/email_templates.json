@@ -1,0 +1,31 @@
+{
+  "abandoned_cart": [
+    {
+      "name": "SA — Abandoned Cart 1h",
+      "delay": "1 hour after checkout started",
+      "subject_a": "You left something behind",
+      "preview_a": "Your cart is saved. Your standards shouldn't slip.",
+      "subject_b": "Still there, if you want it",
+      "preview_b": "Your cart hasn't moved. Neither has our price.",
+      "body": "Hi {{ first_name|default:\"there\" }},\n\nYou were close.\n\nYour cart is still saved — including everything you selected at SockAcademy.\n\nWe don't follow up often. But when someone takes the time to choose premium socks and then leaves, we'd rather ask once than assume you changed your mind about quality.\n\n→ Return to your cart: {{ checkout_url }}\n\nIf something wasn't right — the size, the price, a question about the product — reply to this email. We'll sort it.\n\n— The SockAcademy Team"
+    },
+    {
+      "name": "SA — Abandoned Cart 24h",
+      "delay": "24 hours after checkout started",
+      "subject_a": "What's still in your cart — and why it's worth it",
+      "preview_a": "A brief case for not settling.",
+      "subject_b": "The math on premium socks",
+      "preview_b": "Less than you think. More than you expect.",
+      "body": "Hi {{ first_name|default:\"there\" }},\n\nStill thinking about it?\n\nHere's the honest case for finishing what you started:\n\nThe socks you selected aren't a luxury purchase — they're a long-term decision. A pair of Merino Wool Crew socks, maintained correctly, lasts 3–5 years. That works out to less than $10 a year for socks you'll actually want to wear every day.\n\nThe alternative is buying cheap ones again, replacing them in six months, and still not having what you wanted in the first place.\n\nYour cart is saved. → Complete your order: {{ checkout_url }}\n\n— The SockAcademy Team"
+    },
+    {
+      "name": "SA — Abandoned Cart 48h",
+      "delay": "48 hours after checkout started",
+      "subject_a": "Last reminder — your cart expires soon",
+      "preview_a": "We won't follow up after this.",
+      "subject_b": "One more thing",
+      "preview_b": "Last chance to finish what you started.",
+      "body": "Hi {{ first_name|default:\"there\" }},\n\nThis is the last time we'll mention it.\n\nYour SockAcademy cart is about to expire. If you were waiting for a reason — this is it: we don't do aggressive discounts or countdown timers. We let the product make the case.\n\nIf now isn't the right time, that's fine. We'll be here when it is.\n\n→ {{ checkout_url }}\n\n— The SockAcademy Team"
+    }
+  ]
+}

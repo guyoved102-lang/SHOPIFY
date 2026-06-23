@@ -16,7 +16,7 @@ function getSupabase() {
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 }
 
-async function logHealth(supabase, status, errorMsg = '') {
+async function logHealth(supabase, status, errorMsg = '', metadata = {}) {
   if (!supabase) return;
   try {
     const run_status = status === 'failed' ? 'failure' : status;
@@ -25,7 +25,7 @@ async function logHealth(supabase, status, errorMsg = '') {
       agent_name:    'Social',
       run_status,
       error_message: errorMsg || null,
-      metadata:      {},
+      metadata,
     });
   } catch (e) { console.error('Health log failed:', e.message); }
 }
@@ -74,6 +74,14 @@ const WEEKLY_CONTENT_PLAN = [
     angle: 'elevate the lifestyle — what wearing premium socks says about you',
     imageStyle: 'man\'s ankle in tailored trousers and premium socks, partial frame, dark flooring, morning light from window, cinematic mood — understated luxury',
   },
+  {
+    day: 'Tuesday',
+    type: 'REEL',
+    description: 'Midweek Reel — vertical short-form for Instagram Reels discovery',
+    angle: 'quick product moment or material reveal optimized for Reels autoplay — stops mid-scroll',
+    imageStyle: 'extreme close-up of premium sock yarn detail or precise fold on deep black surface, vertically centered composition, warm gold rim light, no critical elements near top or bottom edges',
+    imageSize: '1024x1536',
+  },
 ];
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -107,11 +115,43 @@ const WEEKLY_THEMES = [
 ];
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// THEME DEDUPLICATION — Gap 2
+// Reads last 24 successful runs from health log; avoids repeating themes
+// Falls back to modulo rotation when Supabase unavailable
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function selectFreshTheme(supabase, weekNum) {
+  if (!supabase) return WEEKLY_THEMES[weekNum % WEEKLY_THEMES.length];
+  try {
+    const { data } = await supabase
+      .from('agent_health_log')
+      .select('metadata')
+      .eq('agent_id', 'A5')
+      .eq('run_status', 'success')
+      .order('created_at', { ascending: false })
+      .limit(24);
+
+    const usedThemes = new Set((data || []).map(r => r.metadata?.theme).filter(Boolean));
+    const fresh = WEEKLY_THEMES.find(t => !usedThemes.has(t));
+    if (fresh) return fresh;
+
+    // All 24 themes used — pick least recently used
+    const orderedByLRU = WEEKLY_THEMES.slice().sort((a, b) => {
+      const aIdx = (data || []).findIndex(r => r.metadata?.theme === a);
+      const bIdx = (data || []).findIndex(r => r.metadata?.theme === b);
+      return (bIdx === -1 ? Infinity : bIdx) - (aIdx === -1 ? Infinity : aIdx);
+    });
+    return orderedByLRU[0] || WEEKLY_THEMES[weekNum % WEEKLY_THEMES.length];
+  } catch {
+    return WEEKLY_THEMES[weekNum % WEEKLY_THEMES.length];
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // CLAUDE — Instagram caption
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function generateCaption(post, theme) {
   const msg = await anthropic.messages.create({
-    model: 'claude-haiku-4-5-20251001',
+    model: 'claude-sonnet-4-6',
     max_tokens: 300,
     messages: [{
       role: 'user',
@@ -176,7 +216,11 @@ Write the caption in this exact JSON format:
 async function generateImage(post, caption, theme) {
   const visualPrompt = caption.visual_direction || post.imageStyle;
 
-  const dallePrompt = `${visualPrompt}. ${BRAND_VISUAL.style}. Color palette: ${BRAND_VISUAL.palette}. Surface: ${BRAND_VISUAL.surface}. Lighting: ${BRAND_VISUAL.lighting}. Do not include: ${BRAND_VISUAL.avoid}. Aspect ratio 1:1, Instagram square format. Ultra high quality, sharp detail.`;
+  const size = post.imageSize || '1024x1024';
+  const aspectNote = size === '1024x1536'
+    ? 'Vertical portrait 2:3 format for Instagram Reels. Key subject centered. No critical elements in top or bottom 15% of frame.'
+    : 'Square 1:1 format for Instagram feed.';
+  const dallePrompt = `${visualPrompt}. ${BRAND_VISUAL.style}. Color palette: ${BRAND_VISUAL.palette}. Surface: ${BRAND_VISUAL.surface}. Lighting: ${BRAND_VISUAL.lighting}. Do not include: ${BRAND_VISUAL.avoid}. ${aspectNote} Ultra high quality, sharp detail.`;
 
   const response = await fetch('https://api.openai.com/v1/images/generations', {
     method: 'POST',
@@ -188,7 +232,7 @@ async function generateImage(post, caption, theme) {
       model: 'gpt-image-1',
       prompt: dallePrompt,
       n: 1,
-      size: '1024x1024',
+      size,
       quality: 'high',
     }),
   });
@@ -283,15 +327,19 @@ async function uploadToShopifyCDN(base64Data, filename) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // META API — publish to Instagram
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function publishToInstagram(caption, imageUrl) {
+async function publishToInstagram(caption, imageUrl, postType = 'FEED') {
   if (DRY_RUN || !imageUrl) return null;
 
   const META_API = 'https://graph.facebook.com/v20.0';
 
+  const mediaPayload = postType === 'REEL'
+    ? { image_url: imageUrl, caption, media_type: 'REELS', share_to_feed: true, access_token: ACCESS_TOKEN }
+    : { image_url: imageUrl, caption, access_token: ACCESS_TOKEN };
+
   const mediaRes = await fetch(`${META_API}/${IG_USER_ID}/media`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ image_url: imageUrl, caption, access_token: ACCESS_TOKEN }),
+    body: JSON.stringify(mediaPayload),
   });
   const media = await mediaRes.json();
   if (media.error) throw new Error(`Meta media: ${media.error.message}`);
@@ -397,7 +445,7 @@ async function main() {
   }
 
   const weekNum = Math.ceil((new Date() - new Date(new Date().getFullYear(), 0, 1)) / (7 * 24 * 60 * 60 * 1000));
-  const theme = WEEKLY_THEMES[weekNum % WEEKLY_THEMES.length];
+  const theme = await selectFreshTheme(supabase, weekNum);
 
   console.log(`\n📌 Week ${weekNum}: "${theme}"`);
   console.log('\n✍️  Writing captions with Claude...');
@@ -445,7 +493,7 @@ async function main() {
       if (p.imageUrl) {
         const fullCaption = `${p.caption.hook}\n\n${p.caption.body}\n\n${p.caption.cta}\n\n${p.caption.hashtags}`;
         try {
-          const id = await publishToInstagram(fullCaption, p.imageUrl);
+          const id = await publishToInstagram(fullCaption, p.imageUrl, p.plan.type);
           console.log(`  ✅ ${p.plan.day} published — ID: ${id}`);
         } catch (e) {
           console.error(`  ❌ ${p.plan.day}: ${e.message}`);
@@ -458,7 +506,7 @@ async function main() {
 
   console.log(`\n✅ A5 done — ${posts.length} posts generated`);
   await sendWeeklyCalendar(posts, weekNum, theme);
-  await logHealth(supabase, 'success');
+  await logHealth(supabase, 'success', '', { theme, posts: posts.length });
 }
 
 main().catch(async e => {
