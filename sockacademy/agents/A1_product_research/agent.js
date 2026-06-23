@@ -182,22 +182,31 @@ async function searchAliExpress(keyword) {
   ];
 
   for (const ua of userAgents) {
-    try {
-      const searchUrl = `https://www.aliexpress.com/wholesale?SearchText=${encodeURIComponent(keyword)}&SortType=total_tranpro_desc&minStar=4&shipCountry=US`;
-      const res = await fetch(searchUrl, {
-        headers: {
-          'User-Agent': ua,
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.9',
-          'Cache-Control': 'no-cache',
-        },
-        signal: AbortSignal.timeout(10000),
-      });
-      if (!res.ok) continue;
-      const html = await res.text();
-      const products = parseAliExpressHTML(html, keyword);
-      if (products.length > 0) return products;
-    } catch (e) { /* try next ua */ }
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const searchUrl = `https://www.aliexpress.com/wholesale?SearchText=${encodeURIComponent(keyword)}&SortType=total_tranpro_desc&minStar=4&shipCountry=US`;
+        const res = await fetch(searchUrl, {
+          headers: {
+            'User-Agent': ua,
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Cache-Control': 'no-cache',
+          },
+          signal: AbortSignal.timeout(10000),
+        });
+        if (res.status === 429) {
+          const delay = Math.pow(2, attempt) * 1500;
+          console.log(`   AliExpress 429 — backoff ${delay}ms (attempt ${attempt + 1}/3)`);
+          await new Promise(r => setTimeout(r, delay));
+          continue;
+        }
+        if (!res.ok) break;
+        const html = await res.text();
+        const products = parseAliExpressHTML(html, keyword);
+        if (products.length > 0) return products;
+        break;
+      } catch (e) { break; }
+    }
   }
   return [];
 }
@@ -385,6 +394,12 @@ function classifyStyle(name = '') {
   return 'General';
 }
 
+const RETAIL_CEILING = {
+  'Merino Wool': 75, 'Cashmere': 85, 'Egyptian Cotton': 75,
+  'Premium Materials': 70, 'Gift Sets': 90, 'Tactical & Outdoor': 65,
+  'Athletic': 55, 'Casual & No-Show': 45, 'General': 55,
+};
+
 function suggestRetailPrice(product) {
   const { supplierPrice, category, materials } = product;
   if (!supplierPrice || supplierPrice <= 0) return { retail: 28, margin: '0', marginPct: 0 };
@@ -394,7 +409,9 @@ function suggestRetailPrice(product) {
   else if (category === 'Gift Sets') multiplier = 4.5;
   else if (category === 'Tactical & Outdoor') multiplier = 4.5;
   else if (category === 'Athletic') multiplier = 3.8;
-  const retail = Math.round(supplierPrice * multiplier);
+  const premiumMat = materials.find(m => RETAIL_CEILING[m]);
+  const ceiling = premiumMat ? RETAIL_CEILING[premiumMat] : (RETAIL_CEILING[category] ?? 65);
+  const retail = Math.min(Math.round(supplierPrice * multiplier), ceiling);
   const margin = (retail - supplierPrice).toFixed(2);
   const marginPct = Math.round(((retail - supplierPrice) / retail) * 100);
   return { retail, margin, marginPct };

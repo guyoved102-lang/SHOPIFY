@@ -274,6 +274,54 @@ function clusterHealthHtml(clusterScores) {
   </table>`;
 }
 
+function dailyOpsSummaryHtml(stuckCount, clusterScores, readiness, violationCount) {
+  const ts = new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' });
+  const dateStr = new Date().toLocaleDateString('en-US', {
+    weekday: 'long', month: 'short', day: 'numeric', timeZone: 'Asia/Jerusalem',
+  });
+
+  const clusterStatus = !clusterScores ? '— no data'
+    : Object.values(clusterScores).every(s => s.score === 100) ? '✅ All clusters healthy'
+    : Object.values(clusterScores).some(s => s.score < 50)    ? '🔴 Cluster degraded'
+    : '⚠️ Minor issues';
+
+  const clusterRows = clusterScores
+    ? Object.entries(clusterScores).map(([name, s]) => {
+        const icon = s.score === 100 ? '✅' : s.score >= 50 ? '⚠️' : '🔴';
+        return `<tr>
+          <td style="padding:4px 8px">${icon} ${name}</td>
+          <td style="padding:4px 8px;text-align:center;font-weight:bold">${s.score}%</td>
+          <td style="padding:4px 8px;color:#6b7280;font-size:12px">${s.healthy}/${s.total} healthy</td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="3" style="padding:8px;color:#9ca3af">No cluster data</td></tr>';
+
+  return `<div style="font-family:monospace;max-width:640px">
+    <h2 style="color:#111827">📊 SockAcademy — Daily Ops Summary</h2>
+    <p><strong>${dateStr}</strong> · ${ts}</p>
+    <table border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;margin:10px 0">
+      <tr style="background:#f2f2f2">
+        <th style="padding:5px 10px;text-align:left">Metric</th>
+        <th style="padding:5px 10px;text-align:left">Status</th>
+      </tr>
+      <tr><td style="padding:5px 10px">Cluster Health</td><td style="padding:5px 10px">${clusterStatus}</td></tr>
+      <tr><td style="padding:5px 10px">Readiness Score</td><td style="padding:5px 10px">${readiness ? `${readiness.total}/100` : '—'}</td></tr>
+      <tr><td style="padding:5px 10px">Stuck Products</td><td style="padding:5px 10px">${stuckCount > 0 ? `🚨 ${stuckCount} stuck — check alert email` : '✅ Clean'}</td></tr>
+      <tr><td style="padding:5px 10px">Workspace</td><td style="padding:5px 10px">${violationCount === 0 ? '✅ Clean' : `⚠️ ${violationCount} violation(s)`}</td></tr>
+    </table>
+    <h4 style="margin:12px 0 6px">Super-Agent Clusters</h4>
+    <table border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;margin:0 0 12px">
+      <tr style="background:#f2f2f2">
+        <th style="padding:4px 8px;text-align:left">Cluster</th>
+        <th style="padding:4px 8px;text-align:center">Score</th>
+        <th style="padding:4px 8px;text-align:left">Status</th>
+      </tr>
+      ${clusterRows}
+    </table>
+    <p style="color:#888;font-size:11px">Full weekly report → every Sunday | SockAcademy A0 Orchestrator v2.0</p>
+  </div>`;
+}
+
 function weeklyReportHtml(summary, ledger, stuckCount, clusterScores) {
   const ts = new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' });
   const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Jerusalem' });
@@ -614,7 +662,7 @@ async function main() {
       weeklyReportHtml(summary, ledger, stuckRows.length, orchestrationResult?.clusterScores ?? null)
     );
   } else {
-    console.log('\n[3/6] Weekly Report — skipped (not Sunday)');
+    console.log('\n[3/6] Weekly Report — skipped (not Sunday; daily ops summary sends after readiness)');
   }
 
   // Step 4 — Workspace structure health check (every run)
@@ -679,6 +727,22 @@ async function main() {
     } catch (_) {}
   } catch (e) {
     console.error(`⚠️  Readiness score failed: ${e.message}`);
+  }
+
+  // Step 5.5 — Daily Ops Summary (Mon–Sat only, after all data collected)
+  if (!isSunday && !FORCE_WEEKLY) {
+    const dayStr = new Date().toLocaleDateString('en-US', {
+      weekday: 'short', month: 'short', day: 'numeric', timeZone: 'Asia/Jerusalem',
+    });
+    await sendEmail(
+      `📊 A0 Daily Ops — ${dayStr}`,
+      dailyOpsSummaryHtml(
+        stuckRows.length,
+        orchestrationResult?.clusterScores ?? null,
+        readiness,
+        structureViolations.length
+      )
+    );
   }
 
   // Step 6 — Update A0's own state in health log
