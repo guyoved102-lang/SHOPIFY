@@ -16,13 +16,15 @@ const googleTrends   = require('google-trends-api');
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer     = require('nodemailer');
 
+const DRY_RUN = process.env.DRY_RUN === 'true';
+
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY)
     throw new Error('SUPABASE_URL / SUPABASE_SERVICE_KEY not set');
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 }
 
-async function logHealth(supabase, status, errorMessage = '') {
+async function logHealth(supabase, status, errorMessage = '', metadata = {}) {
   try {
     const run_status = status.toLowerCase() === 'failed' ? 'failure' : status.toLowerCase();
     await supabase.from('agent_health_log').insert({
@@ -30,7 +32,7 @@ async function logHealth(supabase, status, errorMessage = '') {
       agent_name:    'Trend Scout',
       run_status,
       error_message: errorMessage || null,
-      metadata:      {},
+      metadata,
     });
   } catch (e) { console.error('Health log failed:', e.message); }
 }
@@ -49,7 +51,6 @@ async function sendErrorAlert(errorMessage) {
   }).catch(e => console.error('Alert email failed:', e.message));
 }
 
-// Seed keywords per category — structural placeholders, expand after market research
 const CATEGORIES = {
   'Merino Wool': [
     'merino wool socks',
@@ -57,17 +58,29 @@ const CATEGORIES = {
     'wool socks men',
     'merino hiking socks',
   ],
+  'Egyptian Cotton': [
+    'egyptian cotton socks',
+    'luxury cotton socks',
+    'cotton dress socks men',
+  ],
   'Performance': [
     'no show socks',
     'running socks men',
     'athletic socks',
     'performance socks',
+    'compression socks men',
   ],
   'Tactical': [
     'tactical socks',
     'hiking boot socks',
     'boot socks men',
     'military socks',
+  ],
+  'Dress & Formal': [
+    'dress socks men',
+    'over the calf socks',
+    'business socks men',
+    'argyle socks',
   ],
 };
 
@@ -253,7 +266,7 @@ Return ONLY valid JSON. No markdown, no explanation outside the array.`;
   console.log('\n🤖 Claude analyzing trends...');
 
   const message = await client.messages.create({
-    model:      'claude-haiku-4-5-20251001',
+    model:      'claude-sonnet-4-6',
     max_tokens: 1500,
     messages:   [{ role: 'user', content: prompt }],
   });
@@ -368,8 +381,8 @@ async function sendEmailDigest(trends) {
   </div>
 
   <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:6px;padding:16px;text-align:center">
-    <div style="color:#9ca3af;font-size:12px;margin-bottom:8px">Full data in Google Sheets</div>
-    <div style="color:#C9A84C;font-size:11px;font-weight:700;letter-spacing:1px">Tab: A10_Trends</div>
+    <div style="color:#9ca3af;font-size:12px;margin-bottom:8px">Full data in Supabase</div>
+    <div style="color:#C9A84C;font-size:11px;font-weight:700;letter-spacing:1px">Table: trends</div>
   </div>
 
   <p style="color:#4b5563;font-size:11px;margin-top:28px;text-align:center">A10 Trend Scout v1.0 · SockAcademy · Runs every Sunday</p>
@@ -430,12 +443,22 @@ async function main() {
 
   // Layer 3 — Output
   console.log('\n💾 Writing outputs...');
-  await writeToSupabase(trends);
-  await sendEmailDigest(trends);
+  if (DRY_RUN) {
+    console.log(`[DRY_RUN] Would write ${trends.length} trends to Supabase`);
+    console.log('[DRY_RUN] Would send email digest to guyoved102@gmail.com');
+  } else {
+    await writeToSupabase(trends);
+    await sendEmailDigest(trends);
+  }
 
   console.log('\n' + '━'.repeat(44));
   console.log(`✅ A10 complete — ${trends.length} trends scouted and logged`);
-  await logHealth(supabase, 'SUCCESS');
+  await logHealth(supabase, 'SUCCESS', '', {
+    trends_found:  trends.length,
+    sources_used:  ['google_trends', 'reddit'],
+    dry_run:       DRY_RUN,
+    categories:    Object.keys(CATEGORIES),
+  });
 }
 
 main().catch(async e => {
