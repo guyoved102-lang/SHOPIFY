@@ -18,6 +18,7 @@ const ADMIN_EMAIL = 'guyoved102@gmail.com';
 const PRICE_MIN = 18;
 const PRICE_MAX = 65;
 const MIN_A1_SCORE = 50;
+const BORDERLINE_SCORE = 45;
 
 // ─── SUPABASE ────────────────────────────────────────────────────────────────
 
@@ -119,8 +120,8 @@ function validateProduct(product, uploadedCjPids) {
   if (product.cj_pid && uploadedCjPids.has(product.cj_pid))
     failures.push(`duplicate: cj_pid ${product.cj_pid} already uploaded`);
 
-  if (product.score !== null && product.score !== undefined && product.score < MIN_A1_SCORE)
-    failures.push(`A1 score ${product.score} below minimum ${MIN_A1_SCORE}`);
+  if (product.score !== null && product.score !== undefined && product.score < BORDERLINE_SCORE)
+    failures.push(`A1 score ${product.score} critically low (below ${BORDERLINE_SCORE})`);
 
   return failures;
 }
@@ -172,6 +173,52 @@ async function sendRejectionEmail(rejected) {
   console.log(`📧 Rejection email sent: ${rejected.length} product(s)`);
 }
 
+async function sendBorderlineAlert(borderlineProducts) {
+  if (!process.env.GMAIL_APP_PASSWORD || borderlineProducts.length === 0) return;
+  if (DRY_RUN) {
+    console.log(`[DRY_RUN] Would send borderline alert for ${borderlineProducts.length} product(s)`);
+    return;
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user: 'sockacademy.store@gmail.com', pass: process.env.GMAIL_APP_PASSWORD },
+  });
+
+  const rows = borderlineProducts
+    .map(p => `<tr>
+        <td style="padding:4px 8px">${p.product_name}</td>
+        <td style="padding:4px 8px;text-align:center;font-weight:bold">${p.score}</td>
+        <td style="padding:4px 8px;color:#92400e">Paused — awaiting review</td>
+      </tr>`)
+    .join('');
+
+  const html = `<div style="font-family:monospace;max-width:650px">
+    <h2 style="color:#92400e">A2.5 QC — ${borderlineProducts.length} Borderline Product(s) Need Review</h2>
+    <p>These products scored ${BORDERLINE_SCORE}–${MIN_A1_SCORE - 1} (borderline range). They are <strong>paused, not rejected</strong>. Review and decide.</p>
+    <table border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;margin:12px 0">
+      <tr style="background:#fef3c7">
+        <th style="padding:4px 8px;text-align:left">Product</th>
+        <th style="padding:4px 8px;text-align:center">A1 Score</th>
+        <th style="padding:4px 8px;text-align:left">Status</th>
+      </tr>
+      ${rows}
+    </table>
+    <p><strong>To approve:</strong> set <code>upload_status = ''</code> and <code>score = null</code> in Supabase — it will re-queue through QC.</p>
+    <p><strong>To reject permanently:</strong> set <code>status = 'Rejected'</code>.</p>
+    <hr>
+    <p style="color:#888;font-size:11px">SockAcademy A2.5 Quality Control Agent — Borderline Alert</p>
+  </div>`;
+
+  await transporter.sendMail({
+    from: '"SockAcademy A2.5" <sockacademy.store@gmail.com>',
+    to: ADMIN_EMAIL,
+    subject: `A2.5 QC: ${borderlineProducts.length} product(s) need your review (borderline score ${BORDERLINE_SCORE}–${MIN_A1_SCORE - 1})`,
+    html,
+  });
+  console.log(`📧 Borderline alert sent: ${borderlineProducts.length} product(s)`);
+}
+
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -196,13 +243,25 @@ async function main() {
 
   let approved = 0;
   let rejected = 0;
+  let borderline = 0;
   const rejectedList = [];
+  const borderlineList = [];
 
   for (const product of products) {
     const failures = validateProduct(product, uploadedCjPids);
     const passed = failures.length === 0;
 
-    if (passed) {
+    const isBorderline = passed
+      && product.score !== null && product.score !== undefined
+      && product.score >= BORDERLINE_SCORE && product.score < MIN_A1_SCORE;
+
+    if (isBorderline) {
+      console.log(`  🟡 BORDERLINE: "${product.product_name}" — score ${product.score} (range ${BORDERLINE_SCORE}–${MIN_A1_SCORE - 1})`);
+      await setUploadStatus(supabase, product.id, `qc_borderline:score_${product.score}`);
+      await logQcResult(supabase, product, false, [`borderline score: ${product.score}`]);
+      borderlineList.push(product);
+      borderline++;
+    } else if (passed) {
       console.log(`  ✅ APPROVED: "${product.product_name}"`);
       await setUploadStatus(supabase, product.id, 'qc_approved');
       await logQcResult(supabase, product, true, []);
@@ -216,16 +275,15 @@ async function main() {
     }
   }
 
-  console.log(`\n📊 QC Summary: ${approved} approved → A2 queue | ${rejected} rejected`);
+  console.log(`\n📊 QC Summary: ${approved} approved → A2 queue | ${borderline} borderline (Guy review) | ${rejected} rejected`);
 
-  if (rejectedList.length > 0) {
-    await sendRejectionEmail(rejectedList);
-  }
+  if (rejectedList.length > 0) await sendRejectionEmail(rejectedList);
+  if (borderlineList.length > 0) await sendBorderlineAlert(borderlineList);
 
-  await updateA25Health(supabase, 'success', { total: products.length, approved, rejected });
+  await updateA25Health(supabase, 'success', { total: products.length, approved, borderline, rejected });
 
   console.log('\n' + '─'.repeat(52));
-  console.log(`✅ Done | ${approved} approved | ${rejected} blocked`);
+  console.log(`✅ Done | ${approved} approved | ${borderline} borderline | ${rejected} blocked`);
 }
 
 main().catch(async err => {

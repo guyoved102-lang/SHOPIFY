@@ -125,25 +125,36 @@ async function createShopifyProduct(product) {
     }
   };
 
-  const res = await fetch(
-    `https://${SHOPIFY_DOMAIN}/admin/api/${SHOPIFY_API_VERSION}/products.json`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Shopify-Access-Token': process.env.SHOPIFY_MASTER_TOKEN,
-      },
-      body: JSON.stringify(payload),
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const res = await fetch(
+      `https://${SHOPIFY_DOMAIN}/admin/api/${SHOPIFY_API_VERSION}/products.json`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Shopify-Access-Token': process.env.SHOPIFY_MASTER_TOKEN,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (res.status === 429) {
+      const retryAfter = parseInt(res.headers.get('Retry-After') || String(Math.pow(2, attempt + 1)), 10);
+      const delay = retryAfter * 1000;
+      console.log(`   Shopify 429 — backoff ${delay}ms (attempt ${attempt + 1}/4)`);
+      await new Promise(r => setTimeout(r, delay));
+      continue;
     }
-  );
 
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Shopify ${res.status}: ${err.slice(0, 200)}`);
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Shopify ${res.status}: ${err.slice(0, 200)}`);
+    }
+
+    const data = await res.json();
+    return data.product;
   }
-
-  const data = await res.json();
-  return data.product;
+  throw new Error('Shopify rate limit: 4 attempts exhausted');
 }
 
 function buildTags(product) {

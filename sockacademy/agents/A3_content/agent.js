@@ -109,7 +109,7 @@ async function writeArticle(topic) {
   console.log(`  ✍️  כותב: "${topic.title}"...`);
 
   const msg = await anthropic.messages.create({
-    model: 'claude-haiku-4-5-20251001',
+    model: 'claude-sonnet-4-6',
     max_tokens: 4000,
     messages: [{
       role: 'user',
@@ -145,6 +145,50 @@ Write the article now:`,
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// INTERNAL LINK VALIDATION
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function validateInternalLinks(html) {
+  const hrefs = [...html.matchAll(/href="(https?:\/\/sockacademy\.store[^"]+)"/g)].map(m => m[1]);
+  const unique = [...new Set(hrefs)];
+  const broken = [];
+
+  for (const url of unique) {
+    try {
+      const res = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(8000) });
+      if (!res.ok) {
+        broken.push(url);
+        console.log(`  ⚠️  Internal link ${res.status}: ${url}`);
+      }
+    } catch {
+      broken.push(url);
+      console.log(`  ⚠️  Internal link unreachable: ${url}`);
+    }
+  }
+
+  let cleanHtml = html;
+  for (const url of broken) {
+    const escaped = url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    cleanHtml = cleanHtml.replace(new RegExp(`<a[^>]*href="${escaped}"[^>]*>(.*?)<\\/a>`, 'gi'), '$1');
+  }
+
+  return { html: cleanHtml, broken };
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PEAK TRAFFIC SCHEDULING
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function getPeakPublishAt() {
+  const now = new Date();
+  const day = now.getUTCDay(); // 0=Sun, 1=Mon, 2=Tue
+  const daysToTuesday = day <= 2 ? (2 - day) || 7 : 9 - day;
+  const target = new Date(now);
+  target.setUTCDate(now.getUTCDate() + daysToTuesday);
+  target.setUTCHours(8, 0, 0, 0); // 08:00 UTC = 10:00 AM Israel
+  if (target <= now) target.setUTCDate(target.getUTCDate() + 7);
+  return target.toISOString();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // SHOPIFY — פרסום מאמר לבלוג
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function publishArticle(topic, bodyHtml) {
@@ -157,6 +201,8 @@ async function publishArticle(topic, bodyHtml) {
 
   const metaDescription = `${topic.title} — Expert guide from SockAcademy, the world's premier sock authority. Premium socks, professional knowledge.`;
 
+  const publishAt = getPeakPublishAt();
+
   const payload = {
     article: {
       title: topic.title,
@@ -165,6 +211,7 @@ async function publishArticle(topic, bodyHtml) {
       author: 'SockAcademy',
       tags: `${topic.category}, SEO, ${topic.keywords.split(',')[0].trim()}`,
       handle,
+      published_at: publishAt,
       metafields: [
         {
           key: 'description_tag',
@@ -312,13 +359,23 @@ async function main() {
   const wordCount = bodyHtml.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).length;
   console.log(`  ✅ ${wordCount} מילים נכתבו`);
 
+  // Validate internal links — strip broken URLs before publishing
+  console.log('  🔍 Validating internal links...');
+  const { html: validatedHtml, broken: brokenLinks } = await validateInternalLinks(bodyHtml);
+  if (brokenLinks.length > 0) {
+    console.log(`  ⚠️  ${brokenLinks.length} broken link(s) stripped from article`);
+  } else {
+    console.log('  ✅ All internal links valid');
+  }
+
   // פרסם ל-Shopify
   let article = null;
   let published = false;
 
   if (DRY_RUN) {
-    console.log('\n📤 [DRY_RUN] מדלג על פרסום Shopify');
-    article = { body_html: bodyHtml, handle: 'dry-run' };
+    const scheduledAt = getPeakPublishAt();
+    console.log(`\n📤 [DRY_RUN] מדלג על פרסום Shopify (would schedule: ${scheduledAt})`);
+    article = { body_html: validatedHtml, handle: 'dry-run' };
   } else {
     console.log('\n📤 מפרסם ל-Shopify...');
     try {
@@ -334,12 +391,12 @@ async function main() {
 
       if (exists) {
         console.log(`  ⏭️  מאמר קיים (${handle}) — מדלג (idempotency guard)`);
-        article = { body_html: bodyHtml, handle };
+        article = { body_html: validatedHtml, handle };
         published = true;
       } else {
-        article = await publishArticle(topic, bodyHtml);
+        article = await publishArticle(topic, validatedHtml);
         published = true;
-        console.log(`  ✅ פורסם: https://sockacademy.store/blogs/news/${article.handle}`);
+        console.log(`  ✅ מתוזמן לפרסום: https://sockacademy.store/blogs/news/${article.handle}`);
       }
     } catch (e) {
       console.error(`  ❌ שגיאה בפרסום: ${e.message}`);
@@ -347,9 +404,9 @@ async function main() {
   }
 
   console.log('\n━'.repeat(40));
-  console.log(`✅ A3 הושלם — ${published ? 'פורסם' : 'נכשל'}`);
+  console.log(`✅ A3 הושלם — ${published ? 'מתוזמן/פורסם' : 'נכשל'}`);
 
-  await sendReport(topic, article || { body_html: bodyHtml, handle: '' }, published);
+  await sendReport(topic, article || { body_html: validatedHtml, handle: '' }, published);
   await logHealth(supabase, 'success');
 }
 
