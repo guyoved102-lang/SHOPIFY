@@ -68,8 +68,8 @@
 
 ## A10 — Trend Scout
 🔴 ✅ Gap 1: Uses `claude-haiku`. Must use Sonnet. (Brand)
-🟡    Gap 2: `google-trends-api` needs robust null-path fallback. (Reliability)
-🟡    Gap 3: Seed keywords static. No vocabulary growth over time. (Intelligence)
+🟡 ✅ Gap 2: `fetchGoogleTrendsScore()` — guard added: `raw.trim()[0] !== '{'` catches HTML/rate-limit responses before JSON.parse; `Array.isArray(timeline)` check; `direction: 'unavailable'` replaces `'unknown'`. (Reliability)
+🟡 ✅ Gap 3: `loadLearnedKeywords()` reads last 8 weeks of `cj_search_term` from Supabase `trends` table; deduplicates against static keywords; `scoutGoogleTrends(extraKeywords)` scans up to 10 learned terms per run — vocabulary grows automatically. (Intelligence)
 
 ## A11 — Price Intelligence
 🔴 ✅ Gap 1: Error alerts go to wrong email. (Ops)
@@ -104,7 +104,8 @@
 | Batch 4 | A7 + A11 + A13 | ✅ Applied, committed |
 | Batch 5 | A14 + A15 + A16 | ✅ Applied, committed |
 | Batch 6 | A0 + A1 (G3+G4 each) | ✅ All 4 gaps confirmed-in-code — audit was stale, no edits needed |
+| Batch 7 | A10 (G2+G3) | ✅ Applied, committed |
 
 ---
 
-*Last updated: 23/06/2026 — Phase 2 in progress*
+*Last updated: 23/06/2026 — Phase 2 COMPLETE ✅ All Yellow gaps closed*

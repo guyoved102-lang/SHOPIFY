@@ -120,30 +120,33 @@ async function fetchGoogleTrendsScore(keyword) {
       hl: 'en-US',
     });
 
-    const parsed   = JSON.parse(raw);
-    const timeline = parsed?.default?.timelineData || [];
-    if (!timeline.length) return { keyword, score: 0, direction: 'flat' };
+    // Gap 2: guard against HTML response (rate-limited) or empty/null return
+    if (!raw || typeof raw !== 'string' || raw.trim()[0] !== '{') {
+      return { keyword, score: 0, direction: 'unavailable' };
+    }
 
-    const values  = timeline.map(d => d.value?.[0] || 0);
-    const avg     = values.reduce((a, b) => a + b, 0) / values.length;
-    const recent  = values.slice(-4);  // last ~1 week (4 data points)
-    const recentAvg = recent.reduce((a, b) => a + b, 0) / recent.length;
+    const parsed   = JSON.parse(raw);
+    const timeline = parsed?.default?.timelineData;
+    if (!Array.isArray(timeline) || !timeline.length) {
+      return { keyword, score: 0, direction: 'flat' };
+    }
+
+    const values    = timeline.map(d => (Array.isArray(d.value) ? d.value[0] : 0) || 0);
+    const avg       = values.reduce((a, b) => a + b, 0) / values.length;
+    const recent    = values.slice(-4);  // last ~1 week (4 data points)
+    const recentAvg = recent.length > 0 ? recent.reduce((a, b) => a + b, 0) / recent.length : 0;
 
     const direction = recentAvg > avg * 1.1 ? 'rising'
                     : recentAvg < avg * 0.9 ? 'falling'
                     : 'stable';
 
-    return {
-      keyword,
-      score: Math.round(recentAvg),
-      direction,
-    };
+    return { keyword, score: Math.round(recentAvg), direction };
   } catch {
-    return { keyword, score: 0, direction: 'unknown' };
+    return { keyword, score: 0, direction: 'unavailable' };
   }
 }
 
-async function scoutGoogleTrends() {
+async function scoutGoogleTrends(extraKeywords = []) {
   console.log('\n📈 Scanning Google Trends...');
   const results = [];
 
@@ -157,7 +160,38 @@ async function scoutGoogleTrends() {
     }
   }
 
+  // Gap 3: scan learned keywords from previous runs (vocabulary growth)
+  for (const keyword of extraKeywords.slice(0, 10)) {
+    process.stdout.write(`   [learned] ${keyword}... `);
+    const data = await fetchGoogleTrendsScore(keyword);
+    console.log(`score=${data.score} (${data.direction})`);
+    results.push({ category: 'Learned', ...data });
+    await new Promise(r => setTimeout(r, 1200));
+  }
+
   return results;
+}
+
+// Gap 3: load cj_search_term values Claude identified in previous 8 runs
+// as seed terms that expand beyond the static CATEGORIES vocabulary
+async function loadLearnedKeywords(supabase) {
+  try {
+    const eightWeeksAgo = new Date(Date.now() - 56 * 24 * 60 * 60 * 1000).toISOString();
+    const { data } = await supabase
+      .from('trends')
+      .select('cj_search_term')
+      .gte('scouted_at', eightWeeksAgo)
+      .not('cj_search_term', 'is', null);
+
+    const staticKeywords = new Set(Object.values(CATEGORIES).flat().map(k => k.toLowerCase()));
+    return [...new Set(
+      (data || [])
+        .map(r => r.cj_search_term?.trim().toLowerCase())
+        .filter(t => t && !staticKeywords.has(t))
+    )];
+  } catch {
+    return [];
+  }
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -418,8 +452,14 @@ async function main() {
   await logHealth(supabase, 'RUNNING');
 
   // Layer 1 — Scout
+  // Gap 3: load learned keywords before scouting (vocabulary grows each run)
+  const learnedKeywords = DRY_RUN ? [] : await loadLearnedKeywords(supabase);
+  if (learnedKeywords.length) {
+    console.log(`   📚 Loaded ${learnedKeywords.length} learned keyword(s) from previous runs: ${learnedKeywords.slice(0, 5).join(', ')}${learnedKeywords.length > 5 ? '...' : ''}`);
+  }
+
   const [trendsData, redditPosts] = await Promise.allSettled([
-    scoutGoogleTrends(),
+    scoutGoogleTrends(learnedKeywords),
     scoutReddit(),
   ]).then(results => results.map(r => r.status === 'fulfilled' ? r.value : []));
 
