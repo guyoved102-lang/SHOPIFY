@@ -13,14 +13,14 @@
 ## A0 — Orchestrator
 🔴 ✅ Gap 1: `readHealthLog()` fetches ALL rows with no time filter. Should filter to last 7 days. (Performance)
 🔴 ✅ Gap 2: Readiness Score never compares to previous score. (Logic)
-🟡    Gap 3: Weekly report only sends on Sunday. No executive summary Mon–Sat. (UX)
-🟡    Gap 4: Stuck product alert mentions "marked in Google Sheets" — stale copy. (Copy)
+🟡 ✅ Gap 3: Daily ops summary (Mon–Sat) — already implemented at Step 5.5 (lines 732-746) via `dailyOpsSummaryHtml()`. Gap was stale in audit. Confirmed in code. (UX)
+🟡 ✅ Gap 4: Stuck alert copy — `stuckAlertHtml()` already directs to "Open Supabase Dashboard → products table" (line 186). No Google Sheets mention. Gap was stale in audit. Confirmed in code. (Copy)
 
 ## A1 — Product Research
 🔴 ✅ Gap 1: `TRENDING_2025` is hardcoded — never reads live trend data from A10. (Intelligence)
 🔴 ✅ Gap 2: No deduplication across weeks. Same products appear every Monday. (Signal Quality)
-🟡    Gap 3: `suggestRetailPrice()` lacks ceiling guard. (Business Logic)
-🟡    Gap 4: AliExpress scraping lacks exponential backoff on 429 errors. (Reliability)
+🟡 ✅ Gap 3: `suggestRetailPrice()` ceiling guard — `RETAIL_CEILING` dict (lines 397-401) + `Math.min(supplierPrice * multiplier, ceiling)` (line 414). Already present. Gap was stale in audit. Confirmed in code. (Business Logic)
+🟡 ✅ Gap 4: AliExpress 429 backoff — `Math.pow(2, attempt) * 1500` in `searchAliExpress()` (lines 197-201). Already present. Gap was stale in audit. Confirmed in code. (Reliability)
 
 ## A2 — Product Upload
 🔴 ✅ Gap 1: `compare_at_price` generates a fake "was" price. Legal/policy risk. (Compliance)
@@ -103,6 +103,7 @@
 | Batch 3 | A4 + A5 + A6 | ✅ Applied, committed 95a37e1 |
 | Batch 4 | A7 + A11 + A13 | ✅ Applied, committed |
 | Batch 5 | A14 + A15 + A16 | ✅ Applied, committed |
+| Batch 6 | A0 + A1 (G3+G4 each) | ✅ All 4 gaps confirmed-in-code — audit was stale, no edits needed |
 
 ---
 
