@@ -25,18 +25,18 @@
 ## A2 — Product Upload
 🔴 ✅ Gap 1: `compare_at_price` generates a fake "was" price. Legal/policy risk. (Compliance)
 🔴 ✅ Gap 2: No image URL validation (404 checks) before upload. (Quality)
-🟡    Gap 3: `buildTags()` cotton check resolves both plain and Egyptian to `egyptian-cotton`. (Data Quality)
-🟡    Gap 4: No Shopify rate limit (429) handling. (Reliability)
+🟡 ✅ Gap 3: `buildTags()` cotton check — verified correct in current code (`&&` + `else if` pattern already disambiguates). (Data Quality)
+🟡 ✅ Gap 4: No Shopify rate limit (429) handling — 4-attempt retry loop with Retry-After header. (Reliability)
 
 ## A2.5 — Quality Control
 🔴 ✅ Gap 1: `qc_rejected` only stores the FIRST failure reason, not all. (Decision Quality)
 🔴 ✅ Gap 2: Products failing mid-upload (`upload_status='error:'`) are invisible to A2.5. (Gap)
-🟡    Gap 3: Binary reject at score=49 is too aggressive. Needs borderline alerts. (Business Logic)
+🟡 ✅ Gap 3: Binary reject at score=49 — BORDERLINE_SCORE=45, scores 45-49 trigger `sendBorderlineAlert()` + `qc_borderline` status. (Business Logic)
 
 ## A3 — Content
-🔴 ✅ Gap 1: Uses `claude-haiku` for brand-critical content. Violates brand DNA. Must use Sonnet. (Brand)
-🟡    Gap 2: No internal link validation (404 checks) for products mentioned in body. (SEO)
-🟡    Gap 3: Articles publish immediately instead of peak traffic times. (Performance)
+🔴 ✅ Gap 1: Uses `claude-haiku` for brand-critical content — was NOT fixed in Phase 1. Fixed now: `claude-sonnet-4-6`. (Brand)
+🟡 ✅ Gap 2: No internal link validation — `validateInternalLinks()` strips broken sockacademy.store hrefs before publish. (SEO)
+🟡 ✅ Gap 3: Articles publish immediately — `getPeakPublishAt()` schedules next Tuesday 08:00 UTC (10:00 AM Israel). (Performance)
 
 ## A4 — Meta Ads
 🔴 ✅ Gap 1: `HERO_PRODUCTS` URLs are hardcoded 404s. (Critical)
@@ -98,8 +98,8 @@
 | Batch | Agents | Status |
 |-------|--------|--------|
 | Batch 0 | A10 (model + DRY_RUN + categories + health metadata) | ✅ Applied, committed |
-| Batch 1 | A0 + A1 | 🔄 In progress |
-| Batch 2 | A2 + A2.5 + A3 | ⏳ Pending |
+| Batch 1 | A0 + A1 | ✅ Applied, committed 90f06ca |
+| Batch 2 | A2 + A2.5 + A3 | ✅ Applied, committed 03a1893 |
 | Batch 3 | A4 + A5 + A6 | ⏳ Pending |
 | Batch 4 | A7 + A11 + A13 | ⏳ Pending |
 | Batch 5 | A14 + A15 + A16 | ⏳ Pending |
