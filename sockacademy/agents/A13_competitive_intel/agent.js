@@ -15,7 +15,7 @@ function getSupabase() {
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 }
 
-async function logHealth(supabase, status, errorMessage = '') {
+async function logHealth(supabase, status, errorMessage = '', metadata = {}) {
   try {
     const run_status = status.toLowerCase() === 'failed' ? 'failure' : status.toLowerCase();
     await supabase.from('agent_health_log').insert({
@@ -23,9 +23,21 @@ async function logHealth(supabase, status, errorMessage = '') {
       agent_name:    'Competitive Intel',
       run_status,
       error_message: errorMessage || null,
-      metadata:      {},
+      metadata,
     });
   } catch (e) { console.error('Health log failed:', e.message); }
+}
+
+async function getRecentHighOpportunities(supabase) {
+  try {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const { data } = await supabase
+      .from('competitor_intel')
+      .select('competitor, market')
+      .eq('opportunity', 'HIGH')
+      .gte('run_date', sevenDaysAgo);
+    return new Set((data || []).map(r => `${r.competitor}|${r.market}`));
+  } catch { return new Set(); }
 }
 
 async function sendErrorAlert(errorMessage) {
@@ -282,7 +294,7 @@ async function logToSupabase(rows) {
 }
 
 // ─── Email Report ─────────────────────────────────────────────────────────────
-function buildEmailHtml(results, mode, runDate) {
+function buildEmailHtml(results, mode, runDate, newStrikeKeys = new Set()) {
   const strikes = results.filter(r => r.intel?.opportunityLevel === 'HIGH');
   const modeLabel = mode === 'strike' ? '⚡ Strike Alert' : '📡 Weekly Deep Scan';
 
@@ -291,6 +303,10 @@ function buildEmailHtml(results, mode, runDate) {
     const color = opp === 'HIGH' ? '#4AAD80' : opp === 'MEDIUM' ? '#C9A84C' : '#888';
     const oos  = r.intel?.outOfStock  ? '🔴 YES' : '✅ No';
     const promo = r.intel?.activePromo ? `🎯 ${r.intel.promoDetail || 'Active'}` : '—';
+    const isNewHigh = opp === 'HIGH' && newStrikeKeys.has(`${r.competitor.name}|${r.market.code}`);
+    const oppLabel = opp === 'HIGH'
+      ? `${opp} ${isNewHigh ? '🆕' : '↩'}`
+      : opp;
     return `
       <tr style="border-bottom:1px solid #1a1a1a">
         <td style="padding:10px;color:#F0EDE6;font-weight:600">${r.competitor.name}</td>
@@ -300,7 +316,7 @@ function buildEmailHtml(results, mode, runDate) {
         <td style="padding:10px;color:#F0EDE6">${oos}</td>
         <td style="padding:10px;color:#F0EDE6">${promo}</td>
         <td style="padding:10px">
-          <span style="background:${color};color:#0A0A0A;padding:3px 8px;border-radius:4px;font-weight:700;font-size:12px">${opp}</span>
+          <span style="background:${color};color:#0A0A0A;padding:3px 8px;border-radius:4px;font-weight:700;font-size:12px">${oppLabel}</span>
         </td>
         <td style="padding:10px;color:#F0EDE6;font-size:12px">${r.intel?.recommendedAction || '—'}</td>
       </tr>`;
@@ -428,23 +444,35 @@ async function run() {
   const strikes = results.filter(r => r.intel?.opportunityLevel === 'HIGH');
   console.log(`\n  📊 Scan complete: ${results.length} intelligence reports | ${strikes.length} HIGH opportunities`);
 
-  // Skip email in strike mode if no HIGH opportunities
-  if (STRIKE_MODE && strikes.length === 0) {
-    console.log('  ✅ No strikes detected — no email sent.');
-    if (!DRY_RUN) await logToSupabase(sheetRows);
+  // Gap 3: deduplication — classify new vs ongoing to prevent alert fatigue
+  const recentHighs = DRY_RUN ? new Set() : await getRecentHighOpportunities(supabase);
+  const newStrikes     = strikes.filter(r => !recentHighs.has(`${r.competitor.name}|${r.market.code}`));
+  const ongoingStrikes = strikes.filter(r =>  recentHighs.has(`${r.competitor.name}|${r.market.code}`));
+  const newStrikeKeys  = new Set(newStrikes.map(r => `${r.competitor.name}|${r.market.code}`));
+
+  if (newStrikes.length)     console.log(`  🆕 New opportunities: ${newStrikes.map(s => `${s.competitor.name}/${s.market.code}`).join(', ')}`);
+  if (ongoingStrikes.length) console.log(`  ↩  Ongoing (already alerted this week): ${ongoingStrikes.map(s => `${s.competitor.name}/${s.market.code}`).join(', ')}`);
+
+  // Skip email in strike mode if no NEW HIGH opportunities
+  if (STRIKE_MODE && newStrikes.length === 0) {
+    console.log(`  ✅ No new strikes — ${ongoingStrikes.length} ongoing already alerted this week.`);
+    if (!DRY_RUN) {
+      await logToSupabase(sheetRows);
+      await logHealth(supabase, 'SUCCESS', '', { mode, results: results.length, newStrikes: 0, ongoingStrikes: ongoingStrikes.length });
+    }
     return;
   }
 
-  const html = buildEmailHtml(results, mode, runDate);
+  const html = buildEmailHtml(results, mode, runDate, newStrikeKeys);
 
   if (!DRY_RUN) {
     await logToSupabase(sheetRows);
-    await sendEmail(html, mode, strikes.length);
+    await sendEmail(html, mode, newStrikes.length);
   } else {
     console.log('  [DRY RUN] Would have logged', sheetRows.length, 'rows and sent email');
   }
 
-  await logHealth(supabase, 'SUCCESS');
+  await logHealth(supabase, 'SUCCESS', '', { mode, results: results.length, newStrikes: newStrikes.length, ongoingStrikes: ongoingStrikes.length });
   console.log('\n✅ A13 complete.\n');
 }
 

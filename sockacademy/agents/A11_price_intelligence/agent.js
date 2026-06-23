@@ -32,7 +32,7 @@ function getSupabase() {
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 }
 
-async function logHealth(supabase, status, errorMessage = '') {
+async function logHealth(supabase, status, errorMessage = '', metadata = {}) {
   try {
     const run_status = status.toLowerCase() === 'failed' ? 'failure' : status.toLowerCase();
     await supabase.from('agent_health_log').insert({
@@ -40,7 +40,7 @@ async function logHealth(supabase, status, errorMessage = '') {
       agent_name:    'Price Intelligence',
       run_status,
       error_message: errorMessage || null,
-      metadata:      {},
+      metadata,
     });
   } catch (e) { console.error('Health log failed:', e.message); }
 }
@@ -309,6 +309,57 @@ async function scoutAllCompetitors() {
   return results;
 }
 
+async function buildPriceTrends(supabase, results) {
+  try {
+    const weekAgo    = new Date(Date.now() -  7 * 24 * 60 * 60 * 1000).toISOString();
+    const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+
+    const { data } = await supabase
+      .from('competitor_prices')
+      .select('brand, category, price_usd')
+      .gte('timestamp', twoWeeksAgo)
+      .lt('timestamp', weekAgo)
+      .not('price_usd', 'is', null);
+
+    const prevMap = {};
+    for (const row of (data || [])) {
+      const key = `${row.brand}|${row.category}`;
+      if (!prevMap[key]) prevMap[key] = [];
+      prevMap[key].push(row.price_usd);
+    }
+
+    const currentMap = {};
+    for (const r of results) {
+      if (!r.price_usd) continue;
+      const key = `${r.brand}|${r.category}`;
+      if (!currentMap[key]) currentMap[key] = [];
+      currentMap[key].push(r.price_usd);
+    }
+
+    const trends = [];
+    for (const [key, prices] of Object.entries(currentMap)) {
+      const [brand, category] = key.split('|');
+      const currAvg = prices.reduce((a, b) => a + b, 0) / prices.length;
+      const prevPrices = prevMap[key];
+      if (!prevPrices || !prevPrices.length) {
+        trends.push({ brand, category, currAvg: parseFloat(currAvg.toFixed(2)), prevAvg: null, pctChange: null, direction: '—' });
+        continue;
+      }
+      const prevAvg = prevPrices.reduce((a, b) => a + b, 0) / prevPrices.length;
+      const pctChange = ((currAvg - prevAvg) / prevAvg) * 100;
+      const direction = pctChange > 2 ? '↑' : pctChange < -2 ? '↓' : '→';
+      trends.push({
+        brand, category,
+        currAvg: parseFloat(currAvg.toFixed(2)),
+        prevAvg: parseFloat(prevAvg.toFixed(2)),
+        pctChange: parseFloat(pctChange.toFixed(1)),
+        direction,
+      });
+    }
+    return trends;
+  } catch { return []; }
+}
+
 function buildMarketSummary(results) {
   const byCategory = {};
 
@@ -359,7 +410,7 @@ async function writeToSupabase(results) {
   console.log(`\n✅ Supabase: ${results.length} rows → competitor_prices`);
 }
 
-function buildEmailHtml(results, summary, dateStr) {
+function buildEmailHtml(results, summary, dateStr, trends = []) {
   const successCount = results.filter((r) => r.price_usd).length;
   const failCount = results.filter((r) => !r.price_usd && r.status !== 'DRY_RUN').length;
 
@@ -396,6 +447,29 @@ function buildEmailHtml(results, summary, dateStr) {
     .filter((r) => r.status === 'FETCH_FAILED')
     .map((r) => r.brand);
   const uniqueFailed = [...new Set(failedBrands)];
+
+  const trendsBlock = trends.length ? `
+  <tr><td style="padding:16px 40px 8px;">
+    <p style="margin:0 0 12px;font-size:11px;color:#C9A84C;letter-spacing:2px;text-transform:uppercase;">WEEK-OVER-WEEK PRICE TRENDS</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #2a2a2a;border-radius:6px;overflow:hidden;">
+      <tr style="background:#0d0d0d;">
+        <th style="padding:8px 12px;text-align:left;font-size:10px;color:#555;letter-spacing:1px;font-weight:400;text-transform:uppercase;">Brand</th>
+        <th style="padding:8px 12px;text-align:left;font-size:10px;color:#555;letter-spacing:1px;font-weight:400;text-transform:uppercase;">Category</th>
+        <th style="padding:8px 12px;text-align:right;font-size:10px;color:#555;letter-spacing:1px;font-weight:400;text-transform:uppercase;">This Week</th>
+        <th style="padding:8px 12px;text-align:right;font-size:10px;color:#555;letter-spacing:1px;font-weight:400;text-transform:uppercase;">Last Week</th>
+        <th style="padding:8px 12px;text-align:center;font-size:10px;color:#555;letter-spacing:1px;font-weight:400;text-transform:uppercase;">Change</th>
+      </tr>
+      ${trends.map(t => `
+      <tr>
+        <td style="padding:8px 12px;border-bottom:1px solid #1e1e1e;color:#F0EDE6;font-family:Arial,sans-serif;font-size:12px;">${t.brand}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #1e1e1e;color:#888;font-family:Arial,sans-serif;font-size:12px;">${t.category}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #1e1e1e;color:#C9A84C;font-family:Arial,sans-serif;font-size:12px;text-align:right;">$${t.currAvg}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #1e1e1e;color:#555;font-family:Arial,sans-serif;font-size:12px;text-align:right;">${t.prevAvg ? '$' + t.prevAvg : '—'}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #1e1e1e;font-family:Arial,sans-serif;font-size:13px;text-align:center;font-weight:700;color:${t.direction === '↑' ? '#ff6b6b' : t.direction === '↓' ? '#4CAF50' : '#888'};">${t.pctChange !== null ? (t.pctChange > 0 ? '+' : '') + t.pctChange + '% ' : ''}${t.direction}</td>
+      </tr>`).join('')}
+    </table>
+    <p style="margin:8px 0 0;font-size:11px;color:#555;">↑ competitor raised prices (SA gains ground). ↓ competitor cut prices (review positioning). → stable.</p>
+  </td></tr>` : '';
 
   return `<!DOCTYPE html>
 <html>
@@ -447,6 +521,8 @@ function buildEmailHtml(results, summary, dateStr) {
     </table>
   </td></tr>
 
+  ${trendsBlock}
+
   ${
     uniqueFailed.length > 0
       ? `<tr><td style="padding:0 40px 20px;">
@@ -467,7 +543,7 @@ function buildEmailHtml(results, summary, dateStr) {
 </html>`;
 }
 
-async function sendEmailDigest(results, summary) {
+async function sendEmailDigest(results, summary, trends = []) {
   if (!process.env.GMAIL_APP_PASSWORD) {
     console.log('⚠️  Email env not set — skipping');
     return;
@@ -491,7 +567,7 @@ async function sendEmailDigest(results, summary) {
     from: `"SockAcademy A11" <${GMAIL_USER}>`,
     to: ALERT_EMAIL,
     subject: `[A11] Price Intel · ${dateStr} · ${successCount}/${results.length} prices`,
-    html: buildEmailHtml(results, summary, dateStr),
+    html: buildEmailHtml(results, summary, dateStr, trends),
   });
 
   console.log(`✅ Email digest sent → ${ALERT_EMAIL}`);
@@ -509,6 +585,15 @@ async function main() {
   try {
     const results = await scoutAllCompetitors();
 
+    // Gap 3: alert when >50% of competitor fetches fail
+    const liveResults = results.filter(r => r.status !== 'DRY_RUN');
+    const failedCount = liveResults.filter(r => !r.price_usd).length;
+    if (liveResults.length > 0 && failedCount / liveResults.length > 0.5) {
+      const msg = `High fetch failure rate: ${failedCount}/${liveResults.length} products failed (${((failedCount / liveResults.length) * 100).toFixed(0)}%)`;
+      console.warn(`⚠️  ${msg}`);
+      await sendErrorAlert(msg);
+    }
+
     const summary = buildMarketSummary(results);
 
     console.log('\n📊 Market Summary:');
@@ -518,9 +603,18 @@ async function main() {
       );
     }
 
+    // Gap 2: price trend analysis vs previous week
+    const trends = DRY_RUN ? [] : await buildPriceTrends(supabase, results);
+    if (trends.length) {
+      console.log('\n📈 Price Trends (week-over-week):');
+      for (const t of trends) {
+        console.log(`  ${t.direction} ${t.brand} ${t.category}: $${t.currAvg}${t.prevAvg ? ` (prev $${t.prevAvg}, ${t.pctChange > 0 ? '+' : ''}${t.pctChange}%)` : ' (no prior data)'}`);
+      }
+    }
+
     if (!DRY_RUN) {
       await writeToSupabase(results);
-      await sendEmailDigest(results, summary);
+      await sendEmailDigest(results, summary, trends);
     } else {
       console.log('\n🔬 DRY_RUN: skipping Sheets + email');
       console.log('Sample output:', JSON.stringify(results.slice(0, 2), null, 2));
@@ -528,7 +622,7 @@ async function main() {
 
     const okCount = results.filter((r) => r.price_usd || r.status === 'DRY_RUN').length;
     console.log(`\n✅ A11 done — ${okCount}/${results.length} products processed`);
-    await logHealth(supabase, 'SUCCESS');
+    await logHealth(supabase, 'SUCCESS', '', { total: results.length, ok: okCount, trends: trends.length });
   } catch (err) {
     console.error('❌ A11 fatal error:', err.message);
     await logHealth(supabase, 'ERROR', err.message);

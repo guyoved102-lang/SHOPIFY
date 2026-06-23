@@ -55,7 +55,7 @@
 ## A7 — Supplier Monitor
 🔴 ✅ Gap 1: `state.json` persistence broken on GitHub Actions. (Critical)
 🔴 ✅ Gap 2: Monitors `MOCK_PRODUCTS` instead of real Supabase products. (Critical)
-🟡    Gap 3: Shopify API version is `2024-01` instead of `2025-01`. (Consistency)
+🟡 ✅ Gap 3: Shopify API version — already `2025-01` in code (line 218). Gap was stale in audit. Confirmed correct. (Consistency)
 
 ## A8 — Analytics Reporter
 🔴 ✅ Gap 1: Error alerts go to wrong email (`sockacademy.store` instead of `guyoved102`). (Ops)
@@ -73,8 +73,8 @@
 
 ## A11 — Price Intelligence
 🔴 ✅ Gap 1: Error alerts go to wrong email. (Ops)
-🔴    Gap 2: No price trend analysis over time. (Intelligence)
-🟡    Gap 3: No alert when >50% of competitor fetches fail. (Data Quality)
+🔴 ✅ Gap 2: Price trend analysis — `buildPriceTrends()` queries `competitor_prices` for prev week, computes % change per brand+category; ↑/↓/→ shown in email trends table. (Intelligence)
+🟡 ✅ Gap 3: Fetch failure rate alert — after `scoutAllCompetitors()`, if `failedCount / total > 0.5` → `sendErrorAlert()` fires immediately. (Data Quality)
 
 ## A12 — Review Collector
 🔴 ✅ Gap 1: `buildProductHandle()` is a guess, risks 404s. (Quality)
@@ -84,7 +84,7 @@
 ## A13 — Competitive Intelligence
 🔴 ✅ Gap 1: Error alerts go to wrong email. (Ops)
 🔴 ✅ Gap 2: Strike mode requires manual CLI trigger instead of automation. (Automation)
-🟡    Gap 3: No deduplication across runs (alert fatigue). (Signal Quality)
+🟡 ✅ Gap 3: Deduplication — `getRecentHighOpportunities()` queries last 7 days; HIGH opps already alerted show ↩ badge; strike mode skips email entirely if all HIGHs are ongoing. (Signal Quality)
 
 ## A14/A15/A16 — C-Suite (COO/CFO/CX)
 🔴 ✅ Gap 1: Separate emails, no consolidated executive summary. (Business Value)
@@ -101,7 +101,7 @@
 | Batch 1 | A0 + A1 | ✅ Applied, committed 90f06ca |
 | Batch 2 | A2 + A2.5 + A3 | ✅ Applied, committed 03a1893 |
 | Batch 3 | A4 + A5 + A6 | ✅ Applied, committed 95a37e1 |
-| Batch 4 | A7 + A11 + A13 | ⏳ Pending |
+| Batch 4 | A7 + A11 + A13 | ✅ Applied, committed |
 | Batch 5 | A14 + A15 + A16 | ⏳ Pending |
 
 ---
