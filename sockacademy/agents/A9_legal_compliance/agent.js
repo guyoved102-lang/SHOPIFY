@@ -36,7 +36,7 @@ const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
 const SHOPIFY_TOKEN  = process.env.SHOPIFY_MASTER_TOKEN;
 const SHOPIFY_API    = `https://${SHOPIFY_DOMAIN}/admin/api/2025-01`;
 
-const EFFECTIVE_DATE = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+let EFFECTIVE_DATE = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 const BRAND          = 'SockAcademy';
 const STORE_URL      = 'sockacademy.store';
 const CONTACT_EMAIL  = 'hello@sockacademy.store';
@@ -44,9 +44,11 @@ const ENTITY         = 'SockAcademy';   // UPDATE: legal entity name after forma
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // LEGAL TEMPLATES — English, enterprise-grade, Delaware / GDPR / CCPA
+// Built as a function so EFFECTIVE_DATE is captured at call time (after Supabase read),
+// not at module-load time, ensuring a frozen date across all runs.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-const LEGAL_PAGES = [
+function buildLegalPages() { return [
 
   // ──────────────────────────────────────────────────────────────
   // 1. TERMS OF SERVICE
@@ -324,7 +326,7 @@ const LEGAL_PAGES = [
 </div>
 `
   },
-];
+]; }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // SHOPIFY API
@@ -489,6 +491,46 @@ async function sendConfirmation(results) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// HITL EXECUTE — publish pages when approval is found in Supabase
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+async function getApprovedHitL(supabase) {
+  if (!supabase) return null;
+  try {
+    const { data } = await supabase
+      .from('pending_approvals')
+      .select('*')
+      .eq('agent_id', 'A9')
+      .eq('action_type', 'legal_page_update')
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false })
+      .limit(1);
+    return data?.[0] || null;
+  } catch { return null; }
+}
+
+async function executeHitLPublish(supabase, approval) {
+  const rawPayload = approval.payload;
+  const payload = typeof rawPayload === 'string' ? JSON.parse(rawPayload) : rawPayload;
+  const pages   = payload?.pages || [];
+
+  console.log(`Publishing ${pages.length} legal page(s) to Shopify...`);
+  const results = [];
+  for (const page of pages) {
+    try {
+      const result = await syncPage(page);
+      results.push(result);
+      console.log(`  ✅ ${page.title} — ${result.action}`);
+    } catch (e) {
+      console.error(`  ❌ ${page.title}: ${e.message}`);
+    }
+  }
+  await supabase.from('pending_approvals').update({ status: 'executed' }).eq('id', approval.id);
+  console.log(`  HitL approval marked as 'executed' (ID: ${approval.id})`);
+  return results;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // MAIN
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -498,12 +540,44 @@ async function main() {
   console.log('A9 — Legal Compliance Agent v2.0 (HitL enabled)');
   console.log('━'.repeat(48));
   console.log('Governing law: Delaware, USA | GDPR + CCPA compliant');
-  console.log(`Pages to publish: ${LEGAL_PAGES.length}\n`);
 
   if (!SHOPIFY_DOMAIN || !SHOPIFY_TOKEN) {
     console.error('ERROR: Missing SHOPIFY_SHOP_DOMAIN or SHOPIFY_MASTER_TOKEN');
     process.exit(1);
   }
+
+  // Check for an already-approved HitL request — execute immediately without re-requesting approval
+  const approvedHitL = await getApprovedHitL(supabase);
+  if (approvedHitL) {
+    console.log(`\nApproval found (ID: ${approvedHitL.id}) — publishing legal pages now...`);
+    const results = await executeHitLPublish(supabase, approvedHitL);
+    if (results.length > 0) await sendConfirmation(results);
+    await logHealth(supabase, 'success');
+    return;
+  }
+
+  // Freeze EFFECTIVE_DATE: read from system_config, or lock today's date on first run
+  try {
+    if (supabase) {
+      const { data: cfgDate } = await supabase
+        .from('system_config')
+        .select('value')
+        .eq('key', 'legal_effective_date')
+        .single();
+      if (cfgDate?.value) {
+        EFFECTIVE_DATE = cfgDate.value;
+        console.log(`Effective Date (frozen): ${EFFECTIVE_DATE}`);
+      } else {
+        await supabase.from('system_config').insert({ key: 'legal_effective_date', value: EFFECTIVE_DATE });
+        console.log(`Effective Date (set for first time): ${EFFECTIVE_DATE}`);
+      }
+    }
+  } catch (_) {
+    console.log(`Could not read legal_effective_date from system_config — using today: ${EFFECTIVE_DATE}`);
+  }
+
+  const LEGAL_PAGES = buildLegalPages();
+  console.log(`Pages to publish: ${LEGAL_PAGES.length}\n`);
 
   const pagesSummary = LEGAL_PAGES.map(p => `• ${p.title} (/pages/${p.handle})`).join('\n');
   console.log('Submitting for approval:\n' + pagesSummary + '\n');
@@ -519,7 +593,7 @@ async function main() {
 
   console.log(`\nApproval submitted. ID: ${approvalId}`);
   console.log('Check guyoved102@gmail.com for approval instructions.');
-  console.log('Pages will NOT be published until you approve via GitHub Actions → hitl-approve.yml');
+  console.log('After approving in Supabase (status → "approved"), re-run A9 to publish.');
   await logHealth(supabase, 'success');
 }
 

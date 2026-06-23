@@ -180,13 +180,30 @@ async function checkCampaignROAS() {
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // PRODUCTS — מוצרי SockAcademy לפרסום
+// קורא מ-Supabase מוצרים שהועלו בפועל ל-Shopify
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const HERO_PRODUCTS = [
-  { name: 'Merino Wool Crew Socks', price: 34.99, url: 'https://sockacademy.store/products/merino-wool-crew-socks', category: 'Premium Materials' },
-  { name: 'Egyptian Cotton Dress Socks', price: 29.99, url: 'https://sockacademy.store/products/egyptian-cotton-dress-socks', category: 'Dress & Formal' },
-  { name: 'Tactical Hiking Socks', price: 44.99, url: 'https://sockacademy.store/products/tactical-hiking-socks-thermolite', category: 'Tactical & Outdoor' },
-  { name: 'SockAcademy Gift Set', price: 79.99, url: 'https://sockacademy.store/products/sockacademy-essentials-gift-set-3-pairs', category: 'Gift Sets' },
-];
+async function getHeroProducts(supabase) {
+  if (!supabase) return null;
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('product_name, retail_price, shopify_url, category')
+      .like('upload_status', 'uploaded:%')
+      .not('shopify_url', 'is', null)
+      .limit(20);
+
+    if (error || !data?.length) return null;
+
+    return data.map(p => ({
+      name:     p.product_name,
+      price:    parseFloat(p.retail_price) || 29.99,
+      url:      p.shopify_url,
+      category: p.category || 'Premium Socks',
+    }));
+  } catch {
+    return null;
+  }
+}
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // EMAIL REPORT
@@ -274,12 +291,23 @@ async function main() {
   console.log('\n📊 בודק ROAS קמפיינים...');
   const alerts = await checkCampaignROAS();
 
+  // טעינת מוצרים חיים מ-Supabase
+  const liveProducts = await getHeroProducts(supabase);
+  if (!liveProducts?.length) {
+    console.log('⚠️  No uploaded products in Supabase — skipping ad copy generation');
+    console.log('   Upload products via A1→A2 pipeline first, then re-run A4');
+    await sendReport([], alerts, DRY_RUN ? 'dry-run' : 'live');
+    await logHealth(supabase, 'success');
+    return;
+  }
+  console.log(`📦 ${liveProducts.length} live product(s) loaded from Supabase`);
+
   // יצירת קופי לכל קמפיין × מוצר hero
   console.log('\n✍️  מייצר קופי מודעות עם Claude...');
   const adCopies = [];
 
   for (const campaign of CAMPAIGNS) {
-    const product = HERO_PRODUCTS[Math.floor(Math.random() * HERO_PRODUCTS.length)];
+    const product = liveProducts[Math.floor(Math.random() * liveProducts.length)];
     console.log(`  ⏳ ${campaign.id} × ${product.name}...`);
 
     const copy = await generateAdCopy(campaign, product);

@@ -100,7 +100,7 @@ async function getOrdersDueForReview() {
   updatedMax.setDate(updatedMax.getDate() - REVIEW_DAYS);
 
   const data = await shopifyGet(
-    `/orders.json?status=any&fulfillment_status=shipped` +
+    `/orders.json?status=any&fulfillment_status=fulfilled` +
     `&updated_at_min=${updatedMin.toISOString()}` +
     `&updated_at_max=${updatedMax.toISOString()}` +
     `&limit=250` +
@@ -136,7 +136,32 @@ function buildProductHandle(title) {
     .replace(/\s+/g, '-');
 }
 
-function buildReviewEmailHtml(order) {
+async function resolveHandles(lineItems, supabase) {
+  const handles = {};
+  for (const item of lineItems) {
+    if (item.gift_card) continue;
+    let handle = buildProductHandle(item.title);
+    if (supabase) {
+      try {
+        const { data } = await supabase
+          .from('products')
+          .select('shopify_url')
+          .ilike('product_name', item.title)
+          .not('shopify_url', 'is', null)
+          .limit(1);
+        const url = data?.[0]?.shopify_url;
+        if (url) {
+          const slug = url.split('/products/')[1];
+          if (slug) handle = slug;
+        }
+      } catch (_) {}
+    }
+    handles[item.title] = handle;
+  }
+  return handles;
+}
+
+function buildReviewEmailHtml(order, handles) {
   const firstName = order.customer?.first_name || 'there';
 
   const products = order.line_items
@@ -144,7 +169,7 @@ function buildReviewEmailHtml(order) {
     .map((item) => ({
       name: item.title,
       variant: item.variant_title !== 'Default Title' ? item.variant_title : null,
-      handle: buildProductHandle(item.title),
+      handle: handles[item.title] || buildProductHandle(item.title),
     }));
 
   const productCards = products
@@ -211,7 +236,8 @@ function buildReviewEmailHtml(order) {
       <a href="${STORE_URL}" style="color:#555;text-decoration:none;">sockacademy.store</a>
     </p>
     <p style="margin:6px 0 0;font-size:10px;color:#333;text-align:center;">
-      You're receiving this because you placed an order with us.
+      You're receiving this because you placed an order with us. &nbsp;·&nbsp;
+      <a href="mailto:hello@sockacademy.store?subject=Unsubscribe%20from%20review%20requests" style="color:#444;text-decoration:underline;">Unsubscribe</a>
     </p>
   </td></tr>
 
@@ -224,15 +250,16 @@ function buildReviewEmailHtml(order) {
 
 // --- EMAIL SENDING ---
 
-async function sendReviewRequest(order, transporter) {
+async function sendReviewRequest(order, transporter, supabase) {
   const firstName = order.customer?.first_name || 'there';
   const to = DRY_RUN ? ADMIN_EMAIL : order.email;
+  const handles = await resolveHandles(order.line_items, supabase);
 
   await transporter.sendMail({
     from: `"SockAcademy" <${GMAIL_USER}>`,
     to,
     subject: `How are your SockAcademy socks, ${firstName}?`,
-    html: buildReviewEmailHtml(order),
+    html: buildReviewEmailHtml(order, handles),
   });
 
   return { order_id: String(order.id), order_name: order.name, email: order.email };
@@ -319,7 +346,7 @@ async function main() {
     for (const order of orders) {
       try {
         process.stdout.write(`  → ${order.name} (${order.email}) ... `);
-        const result = await sendReviewRequest(order, transporter);
+        const result = await sendReviewRequest(order, transporter, supabase);
 
         // Tag order in Shopify so we never send twice
         if (!DRY_RUN) {

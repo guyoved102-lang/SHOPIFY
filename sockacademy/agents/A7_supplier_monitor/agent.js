@@ -11,8 +11,6 @@
  */
 
 require('dotenv').config({ path: '../../.env' });
-const fs = require('fs');
-const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
 
 function getSupabase() {
@@ -51,54 +49,63 @@ const CONFIG = {
 };
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// MOCK PRODUCTS — structural placeholders
-// Replace with Google Sheets integration (A1 data) when products are sourced
-// cj_product_id: use real CJ product IDs for live testing
+// LIVE PRODUCTS — קורא מוצרים שהועלו ל-Shopify מ-Supabase
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const MOCK_PRODUCTS = [
-  {
-    name: "Merino Wool Crew Socks — Men's",
-    cj_product_id: 'MOCK_CJ_001',
-    shopify_id: null,
-    variant_id: null,
-    supplier_price: 8.50,
-    retail_price: 35.00,
-    category: 'Merino Wool',
-  },
-  {
-    name: 'No-Show Performance Socks',
-    cj_product_id: 'MOCK_CJ_002',
-    shopify_id: null,
-    variant_id: null,
-    supplier_price: 5.20,
-    retail_price: 22.00,
-    category: 'Performance',
-  },
-  {
-    name: 'Tactical Hiking Boot Socks',
-    cj_product_id: 'MOCK_CJ_003',
-    shopify_id: null,
-    variant_id: null,
-    supplier_price: 12.00,
-    retail_price: 42.00,
-    category: 'Tactical',
-  },
-];
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// STATE MANAGEMENT — persists last-known values between runs
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const STATE_FILE = path.join(__dirname, 'state.json');
-
-function loadState() {
-  if (!fs.existsSync(STATE_FILE)) return { products: {}, last_run: null };
-  try { return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')); }
-  catch { return { products: {}, last_run: null }; }
+async function getMonitoredProducts(supabase) {
+  if (!supabase) return [];
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('product_name, cj_pid, shopify_id, retail_price, category')
+      .like('upload_status', 'uploaded:%')
+      .not('cj_pid', 'is', null);
+    if (error) throw error;
+    return (data || []).map(p => ({
+      name:           p.product_name,
+      cj_product_id:  p.cj_pid,
+      shopify_id:     p.shopify_id ? String(p.shopify_id) : null,
+      variant_id:     null,
+      supplier_price: null,
+      retail_price:   parseFloat(p.retail_price) || 0,
+      category:       p.category || 'Premium Socks',
+    }));
+  } catch (e) {
+    console.log(`   [products] Could not load from Supabase: ${e.message}`);
+    return [];
+  }
 }
 
-function saveState(state) {
-  state.last_run = new Date().toISOString();
-  fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// STATE MANAGEMENT — Supabase supplier_state table (persists across GH Actions runs)
+// Schema: CREATE TABLE supplier_state (cj_pid text PRIMARY KEY, price numeric,
+//         stock integer, status text, checked_at timestamptz);
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function loadStateFromSupabase(supabase) {
+  if (!supabase) return {};
+  try {
+    const { data, error } = await supabase.from('supplier_state').select('*');
+    if (error) throw error;
+    const state = {};
+    for (const row of data || []) {
+      state[row.cj_pid] = { price: row.price, stock: row.stock, status: row.status, checked_at: row.checked_at };
+    }
+    return state;
+  } catch (e) {
+    console.log(`   [state] Could not load from Supabase: ${e.message} — treating as fresh run`);
+    return {};
+  }
+}
+
+async function saveStateToSupabase(supabase, cjPid, stateData) {
+  if (!supabase) return;
+  try {
+    await supabase.from('supplier_state').upsert(
+      { cj_pid: cjPid, price: stateData.price, stock: stateData.stock, status: stateData.status, checked_at: stateData.checked_at },
+      { onConflict: 'cj_pid' }
+    );
+  } catch (e) {
+    console.log(`   [state] Save failed for ${cjPid}: ${e.message}`);
+  }
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -208,7 +215,7 @@ function buildMessage(change, product, current) {
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN || '11eqwi-ji.myshopify.com';
 
 async function shopifyPut(endpoint, body) {
-  const res = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/${endpoint}`, {
+  const res = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2025-01/${endpoint}`, {
     method: 'PUT',
     headers: {
       'X-Shopify-Access-Token': process.env.SHOPIFY_MASTER_TOKEN,
@@ -323,17 +330,25 @@ async function main() {
   console.log('━'.repeat(40));
   console.log(`⚙️  stock_threshold=${CONFIG.STOCK_LOW_THRESHOLD ?? 'TBD'} | price_warn=${CONFIG.PRICE_CHANGE_WARN_PCT ?? 'TBD'}% | price_critical=${CONFIG.PRICE_CHANGE_CRITICAL_PCT ?? 'TBD'}%`);
   console.log(`⚙️  markup=${CONFIG.MARKUP_MULTIPLIER}x | auto_draft=${CONFIG.STOCK_ZERO_AUTO_DRAFT} | auto_price=${CONFIG.AUTO_UPDATE_SHOPIFY_PRICE}`);
-  console.log(`📦 Monitoring ${MOCK_PRODUCTS.length} products [MOCK MODE]\n`);
 
-  const state = loadState();
+  const products = await getMonitoredProducts(supabase);
+  if (!products.length) {
+    console.log('⚠️  No monitored products (no uploaded products with cj_pid in Supabase)');
+    console.log('   Upload products via A1→A2 pipeline first, then A7 will monitor them');
+    await logHealth(supabase, 'success');
+    return;
+  }
+  console.log(`📦 Monitoring ${products.length} live product(s) from Supabase\n`);
+
+  const previousState = await loadStateFromSupabase(supabase);
   const allChanges = [];
 
-  for (const product of MOCK_PRODUCTS) {
+  for (const product of products) {
     process.stdout.write(`  ${product.name}... `);
 
     try {
       const current = await getCJProduct(product.cj_product_id);
-      const previous = state.products[product.cj_product_id] ?? null;
+      const previous = previousState[product.cj_product_id] ?? null;
       const changes = detectChanges(product, current, previous);
 
       for (const change of changes) {
@@ -346,12 +361,12 @@ async function main() {
         allChanges.push(change);
       }
 
-      state.products[product.cj_product_id] = {
-        price: current.price ?? product.supplier_price,
-        stock: current.stock,
-        status: current.status,
+      await saveStateToSupabase(supabase, product.cj_product_id, {
+        price:      current.price ?? product.supplier_price,
+        stock:      current.stock,
+        status:     current.status,
         checked_at: new Date().toISOString(),
-      };
+      });
 
       if (changes.length === 0) {
         console.log(`✅ no changes (stock: ${current.stock})`);
@@ -366,9 +381,8 @@ async function main() {
     await new Promise(r => setTimeout(r, 400));
   }
 
-  saveState(state);
   console.log('\n' + '━'.repeat(40));
-  console.log(`✅ Done — ${allChanges.length} change(s) across ${MOCK_PRODUCTS.length} products`);
+  console.log(`✅ Done — ${allChanges.length} change(s) across ${products.length} products`);
   if (allChanges.length) await sendAlert(allChanges);
   await logHealth(supabase, 'success');
 }

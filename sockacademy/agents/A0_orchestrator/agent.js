@@ -65,9 +65,11 @@ async function runStuckDetection(supabase) {
 // ─── HEALTH LOG ───────────────────────────────────────────────────────────────
 
 async function readHealthLog(supabase) {
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const { data: rows, error } = await supabase
     .from('agent_health_log')
-    .select('*');
+    .select('*')
+    .gte('created_at', sevenDaysAgo);
 
   if (error) {
     console.log(`⚠️  Could not read agent_health_log: ${error.message}`);
@@ -172,7 +174,7 @@ function stuckAlertHtml(stuckRows) {
     <h2 style="color:#c0392b">🚨 A0 Stuck Detection Alert</h2>
     <p><strong>Time (IL):</strong> ${ts}</p>
     <p><strong>${stuckRows.length} row(s)</strong> had <code>Upload Status = "uploading"</code> past A2's 20-min timeout.</p>
-    <p>These rows have been marked <code>stuck:UNIX_TIMESTAMP</code> in Google Sheets.</p>
+    <p>These rows have been marked <code>stuck:UNIX_TIMESTAMP</code> in Supabase.</p>
     <table border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;margin:12px 0">
       <tr style="background:#f2f2f2">
         <th style="padding:4px 8px;text-align:left">Product Name</th>
@@ -649,6 +651,32 @@ async function main() {
     } else {
       console.log(`⏳ Not ready (${readiness.total}/100) — ${READINESS_THRESHOLD - readiness.total} pts to threshold`);
     }
+
+    // Score drop detection + persistence
+    try {
+      const { data: prevData } = await supabase
+        .from('system_config')
+        .select('value')
+        .eq('key', 'readiness_score_last')
+        .single();
+      const prevScore = prevData?.value ? parseInt(prevData.value) : null;
+      if (prevScore !== null && (prevScore - readiness.total) >= 10) {
+        console.log(`🔴 Score drop detected: ${prevScore} → ${readiness.total} (−${prevScore - readiness.total} pts)`);
+        await sendEmail(
+          `⚠️ A0 Alert: Readiness Score dropped ${prevScore - readiness.total} pts (${prevScore} → ${readiness.total})`,
+          `<div style="font-family:monospace;max-width:600px">
+            <h2 style="color:#d97706">⚠️ Readiness Score Drop Detected</h2>
+            <p>Score dropped from <strong>${prevScore}</strong> to <strong>${readiness.total}</strong> — a decline of <strong>${prevScore - readiness.total} points</strong>.</p>
+            <p>Review the readiness breakdown and check which agents have stopped reporting in Supabase.</p>
+            <hr><p style="color:#888;font-size:11px">SockAcademy A0 Orchestrator</p>
+          </div>`
+        );
+      }
+      await supabase.from('system_config').upsert(
+        { key: 'readiness_score_last', value: String(readiness.total) },
+        { onConflict: 'key' }
+      );
+    } catch (_) {}
   } catch (e) {
     console.error(`⚠️  Readiness score failed: ${e.message}`);
   }

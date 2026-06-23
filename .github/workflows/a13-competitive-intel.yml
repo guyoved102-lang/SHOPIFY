@@ -1,13 +1,22 @@
-name: A13  -  Global Competitive Intelligence (Weekly)
+name: A13 — Global Competitive Intelligence
 
 on:
   schedule:
-    - cron: '0 6 * * 0'
+    - cron: '0 6 * * 0'      # Sunday 06:00 UTC — weekly deep scan
+    - cron: '0 1 * * 1,3,5'  # Mon/Wed/Fri 01:00 UTC — automated strike alert
   workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Run mode (deep or strike)'
+        required: false
+        default: 'deep'
+        type: choice
+        options: ['deep', 'strike']
 
 jobs:
   competitive-intel:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -29,4 +38,11 @@ jobs:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: node agent.js
+        run: |
+          if [ "${{ github.event.inputs.mode }}" = "strike" ] || [ "${{ github.event.schedule }}" = "0 1 * * 1,3,5" ]; then
+            echo "Running in STRIKE mode (automated)"
+            node agent.js --strike
+          else
+            echo "Running in DEEP SCAN mode"
+            node agent.js
+          fi

@@ -88,6 +88,19 @@ Rules:
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// IMAGE VALIDATION
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function validateImageUrl(url) {
+  if (!url) return false;
+  try {
+    const res = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(8000) });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // SHOPIFY
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function createShopifyProduct(product) {
@@ -103,7 +116,6 @@ async function createShopifyProduct(product) {
       tags: tags.join(', '),
       variants: [{
         price: Number(product.retail_price).toFixed(2),
-        compare_at_price: (Number(product.retail_price) * 1.25).toFixed(2),
         inventory_management: null,
         fulfillment_service: 'manual',
         requires_shipping: true,
@@ -143,7 +155,8 @@ function buildTags(product) {
   if (mat.includes('merino')) tags.push('merino-wool');
   if (mat.includes('bamboo')) tags.push('bamboo');
   if (mat.includes('cashmere')) tags.push('cashmere');
-  if (mat.includes('cotton')) tags.push('egyptian-cotton');
+  if (mat.includes('egyptian') && mat.includes('cotton')) tags.push('egyptian-cotton');
+  else if (mat.includes('cotton')) tags.push('cotton');
   if (mat.includes('copper')) tags.push('copper-fiber');
   if (cat.includes('athletic')) tags.push('sport', 'performance');
   if (cat.includes('dress')) tags.push('dress-socks', 'formal');
@@ -284,6 +297,15 @@ async function main() {
         await setUploadStatus(supabase, product.id, 'uploading');
 
         product.description = await generateDescription(product);
+
+        if (product.image_url) {
+          const imageOk = await validateImageUrl(product.image_url);
+          if (!imageOk) {
+            console.log(`   ⚠️  Image URL unreachable — uploading without image`);
+            product.image_url = null;
+          }
+        }
+
         const shopifyProduct = await createShopifyProduct(product);
 
         await markUploaded(supabase, product.id, shopifyProduct);

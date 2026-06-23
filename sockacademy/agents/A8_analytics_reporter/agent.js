@@ -44,7 +44,7 @@ async function sendErrorAlert(errorMessage) {
   });
   await transporter.sendMail({
     from: '"SockAcademy Agents" <sockacademy.store@gmail.com>',
-    to: 'sockacademy.store@gmail.com',
+    to: ADMIN_EMAIL,
     subject: 'A8 Analytics Reporter FAILED — action needed',
     html: `<div style="font-family:monospace"><h2>A8 Failed</h2><p><strong>Time:</strong> ${new Date().toISOString()}</p><pre style="background:#f5f5f5;padding:12px">${errorMessage}</pre></div>`,
   }).catch(e => console.error('Alert email failed:', e.message));
@@ -64,6 +64,35 @@ async function fetchWeeklyMetrics(client) {
   const [response] = await client.runReport({
     property: `properties/${PROPERTY_ID}`,
     dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
+    metrics: [
+      { name: 'sessions' },
+      { name: 'totalUsers' },
+      { name: 'screenPageViews' },
+      { name: 'bounceRate' },
+      { name: 'averageSessionDuration' },
+      { name: 'conversions' },
+      { name: 'totalRevenue' },
+    ],
+  });
+
+  const row = response.rows?.[0];
+  if (!row) return null;
+
+  return {
+    sessions:           parseInt(row.metricValues[0].value  || '0'),
+    users:              parseInt(row.metricValues[1].value  || '0'),
+    pageviews:          parseInt(row.metricValues[2].value  || '0'),
+    bounceRate:         parseFloat(row.metricValues[3].value || '0'),
+    avgSessionDuration: parseFloat(row.metricValues[4].value || '0'),
+    conversions:        parseInt(row.metricValues[5].value  || '0'),
+    revenue:            parseFloat(row.metricValues[6].value || '0'),
+  };
+}
+
+async function fetchPrevWeekMetrics(client) {
+  const [response] = await client.runReport({
+    property: `properties/${PROPERTY_ID}`,
+    dateRanges: [{ startDate: '14daysAgo', endDate: '7daysAgo' }],
     metrics: [
       { name: 'sessions' },
       { name: 'totalUsers' },
@@ -129,13 +158,41 @@ function formatDuration(seconds) {
   return `${m}m ${s}s`;
 }
 
-function buildReportHtml(metrics, topPages, sources) {
+function buildReportHtml(metrics, topPages, sources, prevMetrics) {
   const dateStr = new Date().toLocaleDateString('en-US', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
     timeZone: 'Asia/Jerusalem',
   });
   const ts = new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' });
   const noData = !metrics || (metrics.sessions === 0 && metrics.users === 0);
+
+  const n = (v) => v ?? 0;
+
+  const cvr = (metrics && metrics.sessions > 0)
+    ? `${((metrics.conversions / metrics.sessions) * 100).toFixed(2)}%`
+    : '—';
+
+  const pctDeltaHtml = (curr, prev) => {
+    if (!prev) return '<span style="color:#aaa">—</span>';
+    const pct = Math.round(((curr - prev) / prev) * 100);
+    const color = pct >= 0 ? '#4AAD80' : '#F96E6E';
+    return `<span style="color:${color};font-weight:600">${pct >= 0 ? '+' : ''}${pct}%</span>`;
+  };
+
+  const wowRows = prevMetrics
+    ? [
+        ['Sessions',    n(metrics?.sessions).toLocaleString(),    n(prevMetrics.sessions).toLocaleString(),    pctDeltaHtml(n(metrics?.sessions), n(prevMetrics.sessions))],
+        ['Users',       n(metrics?.users).toLocaleString(),       n(prevMetrics.users).toLocaleString(),       pctDeltaHtml(n(metrics?.users), n(prevMetrics.users))],
+        ['Revenue',     `$${n(metrics?.revenue).toFixed(2)}`,     `$${n(prevMetrics.revenue).toFixed(2)}`,     pctDeltaHtml(n(metrics?.revenue), n(prevMetrics.revenue))],
+        ['Conversions', n(metrics?.conversions).toLocaleString(), n(prevMetrics.conversions).toLocaleString(), pctDeltaHtml(n(metrics?.conversions), n(prevMetrics.conversions))],
+      ].map(([label, curr, prev, delta], i) =>
+        `<tr style="background:${i % 2 === 0 ? '#fff' : '#fafafa'}">
+          <td style="padding:6px 10px;color:#555;font-size:13px">${label}</td>
+          <td style="padding:6px 10px;text-align:right;font-size:13px">${curr}</td>
+          <td style="padding:6px 10px;text-align:right;font-size:13px;color:#aaa">${prev}</td>
+          <td style="padding:6px 10px;text-align:right;font-size:13px">${delta}</td>
+        </tr>`).join('')
+    : '<tr><td colspan="4" style="padding:10px;color:#aaa;text-align:center;font-size:13px">No prior week data available</td></tr>';
 
   const statCards = [
     ['Sessions',     metrics?.sessions?.toLocaleString()                   || '0'],
@@ -210,9 +267,26 @@ function buildReportHtml(metrics, topPages, sources) {
       ${sourcesHtml}
     </table>
 
+    <h2 style="font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;margin:0 0 10px">Conversion Rate</h2>
+    <div style="background:#f8f8f8;border-radius:6px;padding:14px;margin-bottom:28px">
+      <span style="font-size:26px;font-weight:700;color:#1a1a1a">${cvr}</span>
+      <span style="font-size:12px;color:#888;margin-left:12px">${n(metrics?.conversions).toLocaleString()} conversions from ${n(metrics?.sessions).toLocaleString()} sessions</span>
+    </div>
+
+    <h2 style="font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;margin:0 0 10px">Week over Week</h2>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:28px">
+      <tr style="background:#f2f2f2">
+        <th style="padding:6px 10px;text-align:left;font-size:12px;font-weight:600">Metric</th>
+        <th style="padding:6px 10px;text-align:right;font-size:12px;font-weight:600">This Week</th>
+        <th style="padding:6px 10px;text-align:right;font-size:12px;font-weight:600">Last Week</th>
+        <th style="padding:6px 10px;text-align:right;font-size:12px;font-weight:600">Change</th>
+      </tr>
+      ${wowRows}
+    </table>
+
     <hr style="border:none;border-top:1px solid #eee;margin:20px 0">
     <p style="color:#bbb;font-size:11px;margin:0">
-      SockAcademy A8 Analytics Reporter v1.0 &nbsp;|&nbsp; GA4 Property: ${PROPERTY_ID} &nbsp;|&nbsp; ${ts}
+      SockAcademy A8 Analytics Reporter v1.1 &nbsp;|&nbsp; GA4 Property: ${PROPERTY_ID} &nbsp;|&nbsp; ${ts}
     </p>
   </div>
 </div>`;
@@ -260,15 +334,18 @@ async function main() {
   const client = getGA4Client();
   console.log('GA4 client initialized');
 
-  const [metrics, topPages, sources] = await Promise.all([
+  const [metrics, prevMetrics, topPages, sources] = await Promise.all([
     fetchWeeklyMetrics(client),
+    fetchPrevWeekMetrics(client),
     fetchTopPages(client),
     fetchTrafficSources(client),
   ]);
 
-  console.log(`Sessions: ${metrics?.sessions ?? 0} | Users: ${metrics?.users ?? 0} | Revenue: $${metrics?.revenue?.toFixed(2) ?? '0.00'}`);
+  const cvr = (metrics && metrics.sessions > 0)
+    ? `${((metrics.conversions / metrics.sessions) * 100).toFixed(2)}%` : '—';
+  console.log(`Sessions: ${metrics?.sessions ?? 0} | Users: ${metrics?.users ?? 0} | Revenue: $${metrics?.revenue?.toFixed(2) ?? '0.00'} | CVR: ${cvr}`);
 
-  const html = buildReportHtml(metrics, topPages, sources);
+  const html = buildReportHtml(metrics, topPages, sources, prevMetrics);
   await sendReport(html);
 
   await logHealth(supabase, 'SUCCESS');

@@ -43,7 +43,7 @@ async function sendErrorAlert(errorMessage) {
   });
   await transporter.sendMail({
     from: '"SockAcademy Agents" <sockacademy.store@gmail.com>',
-    to: 'sockacademy.store@gmail.com',
+    to: 'guyoved102@gmail.com',
     subject: '🚨 A10 Trend Scout FAILED — action needed',
     html: `<div style="font-family:monospace"><h2>🚨 A10 Failed</h2><p><strong>Time:</strong> ${new Date().toISOString()}</p><pre style="background:#f5f5f5;padding:12px;border-radius:4px">${errorMessage}</pre></div>`,
   }).catch(e => console.error('Alert email failed:', e.message));

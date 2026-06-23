@@ -209,7 +209,7 @@ async function main() {
       approved++;
     } else {
       console.log(`  🔴 REJECTED: "${product.product_name}" — ${failures.join('; ')}`);
-      await setUploadStatus(supabase, product.id, `qc_rejected:${failures[0]}`);
+      await setUploadStatus(supabase, product.id, `qc_rejected:${failures.join('; ')}`);
       await logQcResult(supabase, product, false, failures);
       rejectedList.push({ product, reasons: failures });
       rejected++;
