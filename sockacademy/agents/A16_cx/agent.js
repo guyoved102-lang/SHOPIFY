@@ -1,19 +1,20 @@
 /**
- * A16 — CX (Customer Experience) Agent
+ * A16 — CX Agent (Customer Experience)
  *
- * Runs every Sunday 10:00 UTC.
+ * Runs daily at 22:00 UTC.
  * Analyzes Shopify order fulfillment and repeat purchase rate (last 30 days).
  * Pulls Klaviyo subscriber count.
- * Generates a Weekly CX Report and emails it to Guy.
+ * Writes: executive_reports (agent_id='A16', report_type='daily')
+ * Sends: daily CX digest email to Guy
  */
 
 require('dotenv').config({ path: '../../.env' });
-const axios = require('axios');
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 
 const DRY_RUN        = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL    = 'guyoved102@gmail.com';
+const REPORT_DATE    = new Date().toISOString().split('T')[0];
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
 const SHOPIFY_TOKEN  = process.env.SHOPIFY_MASTER_TOKEN;
 const KLAVIYO_KEY    = process.env.KLAVIYO_PRIVATE_API_KEY;
@@ -45,11 +46,11 @@ async function fetchOrders(daysBack) {
     return [];
   }
   const since = new Date(Date.now() - daysBack * 24 * 60 * 60 * 1000).toISOString();
-  const res = await axios.get(`${SHOPIFY_API}/orders.json`, {
-    headers: { 'X-Shopify-Access-Token': SHOPIFY_TOKEN },
-    params:  { created_at_min: since, status: 'any', limit: 250 },
-  });
-  return res.data.orders || [];
+  const url = `${SHOPIFY_API}/orders.json?created_at_min=${encodeURIComponent(since)}&status=any&limit=250`;
+  const res = await fetch(url, { headers: { 'X-Shopify-Access-Token': SHOPIFY_TOKEN } });
+  if (!res.ok) throw new Error(`Shopify orders fetch failed: ${res.status}`);
+  const data = await res.json();
+  return data.orders || [];
 }
 
 function analyzeOrders(orders) {
@@ -81,22 +82,20 @@ async function fetchKlaviyoListStats() {
       'revision':      '2024-10-15',
     };
 
-    const listsRes = await axios.get('https://a.klaviyo.com/api/lists', { headers, timeout: 8000 });
-    const lists    = listsRes.data?.data || [];
+    const listsRes = await fetch('https://a.klaviyo.com/api/lists', { headers });
+    const lists    = listsRes.ok ? ((await listsRes.json()).data || []) : [];
 
-    // Gap 3: get unique profile count — profiles endpoint avoids double-counting subscribers shared across lists
+    // get unique profile count — profiles endpoint avoids double-counting subscribers shared across lists
     let uniqueSubscribers = null;
     let subscribersNote   = 'largest list (dedup unavailable)';
     try {
-      const profilesRes = await axios.get('https://a.klaviyo.com/api/profiles/', {
-        headers,
-        params:  { 'page[size]': 1 },
-        timeout: 8000,
-      });
-      const total = profilesRes.data?.meta?.total;
-      if (typeof total === 'number') {
-        uniqueSubscribers = total;
-        subscribersNote   = 'unique profiles';
+      const profilesRes = await fetch('https://a.klaviyo.com/api/profiles/?page[size]=1', { headers });
+      if (profilesRes.ok) {
+        const total = (await profilesRes.json())?.meta?.total;
+        if (typeof total === 'number') {
+          uniqueSubscribers = total;
+          subscribersNote   = 'unique profiles';
+        }
       }
     } catch (_) {}
 
@@ -114,6 +113,36 @@ async function fetchKlaviyoListStats() {
     console.log(`   [Klaviyo error] ${e.message}`);
     return null;
   }
+}
+
+// ─── ALERTS ──────────────────────────────────────────────────────────────────
+
+function buildAlerts(orderStats, klaviyo) {
+  const alerts = [];
+  if (!klaviyo) alerts.push({ level: 'warning', message: 'Klaviyo data unavailable — check API key' });
+  if (orderStats.total === 0) alerts.push({ level: 'info', message: 'Pre-revenue: CX monitoring active, awaiting first orders' });
+  if (orderStats.total > 0 && orderStats.fulfillmentRate < 80)
+    alerts.push({ level: 'critical', message: `Low fulfillment rate: ${orderStats.fulfillmentRate}% — investigate supplier` });
+  if (orderStats.repeatRate > 15) alerts.push({ level: 'info', message: `Repeat purchase rate: ${orderStats.repeatRate}% — healthy loyalty signal` });
+  return alerts;
+}
+
+// ─── PERSISTENCE ─────────────────────────────────────────────────────────────
+
+async function writeReport(sb, kpis, alerts) {
+  if (DRY_RUN) {
+    console.log('\n[DRY_RUN] Would upsert to executive_reports (A16)');
+    return;
+  }
+  const { error } = await sb.from('executive_reports').upsert({
+    agent_id:    'A16',
+    report_date: REPORT_DATE,
+    report_type: 'daily',
+    kpis,
+    alerts,
+    narrative:   null,
+  }, { onConflict: 'agent_id,report_date,report_type' });
+  if (error) throw new Error(`executive_reports upsert failed: ${error.message}`);
 }
 
 // ─── EMAIL ────────────────────────────────────────────────────────────────────
@@ -218,6 +247,17 @@ async function main() {
   console.log(`   Repeat rate: ${orderStats.repeatRate}%`);
   if (klaviyo) console.log(`   Klaviyo: ${klaviyo.totalSubscribers} subscribers`);
 
+  const alerts = buildAlerts(orderStats, klaviyo);
+  const kpis   = { orderStats, klaviyo };
+
+  if (alerts.length > 0) {
+    console.log(`\n⚠️  ${alerts.length} alert(s):`);
+    alerts.forEach(a => console.log(`   [${a.level.toUpperCase()}] ${a.message}`));
+  } else {
+    console.log('\n✅ No alerts');
+  }
+
+  await writeReport(supabase, kpis, alerts);
   const html = buildCxHtml(orderStats, klaviyo, weekLabel);
   await sendReport(html, weekLabel);
   await logHealth(supabase, 'success', {
@@ -225,10 +265,11 @@ async function main() {
     fulfillmentRate:  orderStats.fulfillmentRate,
     repeatRate:       orderStats.repeatRate,
     klaviyoSubs:      klaviyo?.totalSubscribers || 0,
+    alerts:           alerts.length,
   });
 
   console.log('\n' + '─'.repeat(52));
-  console.log('Done');
+  console.log('✅ A16 CX complete');
 }
 
 main().catch(async err => {

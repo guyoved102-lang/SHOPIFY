@@ -1,8 +1,8 @@
-name: A16 — CX Weekly Customer Experience Report
+name: A16 — CX Daily Customer Experience Report
 
 on:
   schedule:
-    - cron: '0 10 * * 0'  # Sunday 10:00 UTC — same window as A8 Analytics
+    - cron: '0 22 * * *'
   workflow_dispatch:
     inputs:
       dry_run:

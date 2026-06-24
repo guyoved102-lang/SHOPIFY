@@ -1,20 +1,21 @@
 /**
- * A15 — CFO (Chief Financial Officer) Agent
+ * A15 — CFO Agent (Chief Financial Officer)
  *
- * Runs every Monday 11:00 UTC.
- * Pulls Shopify order data for the past 7 days.
+ * Runs daily at 22:30 UTC.
+ * PRE-REVENUE mode (orders=0): reports catalog margin analysis from products table.
+ * LIVE mode (orders>0): reports realized revenue, COGS, gross margin, Phase 2 progress.
  * Fetches live USD/ILS exchange rate.
- * Tracks progress toward Phase 2 milestone (25 orders OR $1,000 MRR).
- * Generates a Weekly Financial Report and emails it to Guy.
+ * Writes: executive_reports (agent_id='A15', report_type='daily')
+ * Sends: daily financial digest email to Guy
  */
 
 require('dotenv').config({ path: '../../.env' });
-const axios = require('axios');
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 
 const DRY_RUN        = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL    = 'guyoved102@gmail.com';
+const REPORT_DATE    = new Date().toISOString().split('T')[0];
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
 const SHOPIFY_TOKEN  = process.env.SHOPIFY_MASTER_TOKEN;
 const SHOPIFY_API    = `https://${SHOPIFY_DOMAIN}/admin/api/2025-01`;
@@ -47,32 +48,66 @@ async function fetchOrdersLastNDays(days) {
     console.log('   [skip] Shopify credentials not set');
     return [];
   }
-  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
-  const res = await axios.get(`${SHOPIFY_API}/orders.json`, {
-    headers: { 'X-Shopify-Access-Token': SHOPIFY_TOKEN },
-    params:  { created_at_min: since, status: 'any', limit: 250 },
-  });
-  return res.data.orders || [];
+  const since = new Date(Date.now() - days * 86400000).toISOString();
+  const url   = `${SHOPIFY_API}/orders.json?created_at_min=${encodeURIComponent(since)}&status=any&limit=250`;
+  const res   = await fetch(url, { headers: { 'X-Shopify-Access-Token': SHOPIFY_TOKEN } });
+  if (!res.ok) throw new Error(`Shopify orders fetch failed: ${res.status}`);
+  return (await res.json()).orders || [];
 }
 
 async function fetchAllTimeOrderCount() {
   if (!SHOPIFY_DOMAIN || !SHOPIFY_TOKEN) return 0;
-  const res = await axios.get(`${SHOPIFY_API}/orders/count.json`, {
-    headers: { 'X-Shopify-Access-Token': SHOPIFY_TOKEN },
-    params:  { status: 'any' },
-  });
-  return res.data.count || 0;
+  const url = `${SHOPIFY_API}/orders/count.json?status=any`;
+  const res = await fetch(url, { headers: { 'X-Shopify-Access-Token': SHOPIFY_TOKEN } });
+  if (!res.ok) return 0;
+  return (await res.json()).count || 0;
 }
 
 // ─── EXCHANGE RATE ────────────────────────────────────────────────────────────
 
 async function fetchUsdIlsRate() {
   try {
-    const res = await axios.get('https://open.er-api.com/v6/latest/USD', { timeout: 6000 });
-    return res.data?.rates?.ILS || null;
+    const res = await fetch('https://open.er-api.com/v6/latest/USD', { signal: AbortSignal.timeout(6000) });
+    return res.ok ? ((await res.json())?.rates?.ILS || null) : null;
   } catch (_) {
     return null;
   }
+}
+
+// ─── CATALOG MARGIN ANALYSIS (PRE-REVENUE) ────────────────────────────────────
+
+async function getCatalogMargins(supabase) {
+  const { data, error } = await supabase
+    .from('products')
+    .select('product_name, supplier_price, retail_price, category')
+    .like('upload_status', 'uploaded:%');
+  if (error || !data?.length) return null;
+
+  const margins = data
+    .filter(p => p.supplier_price > 0 && p.retail_price > 0)
+    .map(p => ({
+      name:            p.product_name,
+      category:        p.category,
+      supplier_price:  parseFloat(p.supplier_price),
+      retail_price:    parseFloat(p.retail_price),
+      gross_margin_pct: Math.round(((p.retail_price - p.supplier_price) / p.retail_price) * 100),
+    }));
+
+  if (!margins.length) return null;
+
+  const avg_margin = Math.round(margins.reduce((s, m) => s + m.gross_margin_pct, 0) / margins.length);
+  const min_margin = Math.min(...margins.map(m => m.gross_margin_pct));
+  const max_margin = Math.max(...margins.map(m => m.gross_margin_pct));
+  const potential_revenue_at_sell_through = margins.reduce((s, m) => s + m.retail_price, 0);
+
+  return {
+    products_analyzed: margins.length,
+    avg_gross_margin_pct: avg_margin,
+    min_gross_margin_pct: min_margin,
+    max_gross_margin_pct: max_margin,
+    potential_revenue_at_sell_through: parseFloat(potential_revenue_at_sell_through.toFixed(2)),
+    top_margin_products: [...margins].sort((a, b) => b.gross_margin_pct - a.gross_margin_pct).slice(0, 3),
+  };
 }
 
 // ─── CALCULATIONS ─────────────────────────────────────────────────────────────
@@ -100,6 +135,40 @@ function progressBar(pct) {
   const filled = Math.round(pct / 5);
   const empty  = 20 - filled;
   return `${'|'.repeat(filled)}${'-'.repeat(empty)} ${pct}%`;
+}
+
+// ─── ALERTS ──────────────────────────────────────────────────────────────────
+
+function buildAlerts(stats7d, allTimeOrders, catalog) {
+  const alerts = [];
+  if (allTimeOrders === 0)
+    alerts.push({ level: 'info', message: 'Pre-revenue phase — showing projected catalog margins' });
+  if (stats7d.refunds > 0 && stats7d.revenue > 0 && (stats7d.refunds / stats7d.revenue) > 0.1)
+    alerts.push({ level: 'critical', message: `High refund rate: ${Math.round((stats7d.refunds / stats7d.revenue) * 100)}% of revenue refunded this week` });
+  if (catalog && catalog.avg_gross_margin_pct < 40)
+    alerts.push({ level: 'warning', message: `Low avg catalog margin: ${catalog.avg_gross_margin_pct}% — review supplier pricing` });
+  const progress = phase2Progress(allTimeOrders, stats7d.revenue);
+  if (progress.orderPct >= 100 || progress.mrrPct >= 100)
+    alerts.push({ level: 'info', message: 'Phase 2 milestone reached — activate C-Suite cluster' });
+  return alerts;
+}
+
+// ─── PERSISTENCE ─────────────────────────────────────────────────────────────
+
+async function writeReport(sb, kpis, alerts) {
+  if (DRY_RUN) {
+    console.log('\n[DRY_RUN] Would upsert to executive_reports (A15)');
+    return;
+  }
+  const { error } = await sb.from('executive_reports').upsert({
+    agent_id:    'A15',
+    report_date: REPORT_DATE,
+    report_type: 'daily',
+    kpis,
+    alerts,
+    narrative:   null,
+  }, { onConflict: 'agent_id,report_date,report_type' });
+  if (error) throw new Error(`executive_reports upsert failed: ${error.message}`);
 }
 
 // ─── EMAIL ────────────────────────────────────────────────────────────────────
@@ -140,7 +209,7 @@ function buildFinancialHtml(stats7d, allTimeOrders, ilsRate, weekLabel) {
   ${phase2Hit ? '<p style="color:#4AAD80;font-weight:bold">Phase 2 trigger reached — activate COO/CFO/CX cluster and confirm with Guy.</p>' : ''}
 
   <hr style="border-color:#333;margin:20px 0">
-  <p style="color:#555;font-size:11px">SockAcademy A15 CFO Agent — Weekly Financial Report</p>
+  <p style="color:#555;font-size:11px">SockAcademy A15 CFO Agent — ${weekLabel}</p>
 </div>`;
 }
 
@@ -182,10 +251,11 @@ async function main() {
   });
 
   console.log('\nFetching financial data...');
-  const [orders7d, allTimeOrders, ilsRate] = await Promise.all([
+  const [orders7d, allTimeOrders, ilsRate, catalog] = await Promise.all([
     fetchOrdersLastNDays(7),
     fetchAllTimeOrderCount(),
     fetchUsdIlsRate(),
+    getCatalogMargins(supabase),
   ]);
 
   const stats    = calcOrderStats(orders7d);
@@ -194,22 +264,32 @@ async function main() {
   console.log(`   Last 7 days: ${stats.count} orders | $${stats.revenue} revenue`);
   console.log(`   All-time orders: ${allTimeOrders}`);
   console.log(`   USD/ILS: ${ilsRate || 'unavailable'}`);
+  if (catalog) console.log(`   Catalog margins: avg ${catalog.avg_gross_margin_pct}% (${catalog.products_analyzed} products)`);
+  if (allTimeOrders === 0) console.log('   [PRE-REVENUE MODE] Reporting projected catalog metrics');
 
-  // Gap 2: write LAUNCH_MODE to system_config when Phase 2 milestone is hit
+  // Write LAUNCH_MODE when Phase 2 is hit
   if (phase2Hit) {
-    console.log('   *** Phase 2 milestone REACHED — orders or MRR threshold crossed ***');
+    console.log('   *** Phase 2 milestone REACHED ***');
     if (!DRY_RUN) {
       try {
-        await supabase
-          .from('system_config')
+        await supabase.from('system_config')
           .upsert({ key: 'LAUNCH_MODE', value: 'true' }, { onConflict: 'key' });
-        console.log('   system_config.LAUNCH_MODE → true (A0 notified)');
+        console.log('   system_config.LAUNCH_MODE → true');
       } catch (e) { console.error('   system_config write failed:', e.message); }
     } else {
       console.log('   [DRY_RUN] Would set system_config.LAUNCH_MODE = true');
     }
   }
 
+  const alerts = buildAlerts(stats, allTimeOrders, catalog);
+  const kpis   = { stats7d: stats, allTimeOrders, ilsRate, catalog, phase2Progress: progress };
+
+  if (alerts.length > 0) {
+    console.log(`\n⚠️  ${alerts.length} alert(s):`);
+    alerts.forEach(a => console.log(`   [${a.level.toUpperCase()}] ${a.message}`));
+  }
+
+  await writeReport(supabase, kpis, alerts);
   const html = buildFinancialHtml(stats, allTimeOrders, ilsRate, weekLabel);
   await sendReport(html, weekLabel);
   await logHealth(supabase, 'success', {
@@ -217,10 +297,11 @@ async function main() {
     revenue7d:        stats.revenue,
     allTimeOrders,
     phase2_triggered: phase2Hit,
+    alerts:           alerts.length,
   });
 
   console.log('\n' + '─'.repeat(52));
-  console.log('Done');
+  console.log('✅ A15 CFO complete');
 }
 
 main().catch(async err => {

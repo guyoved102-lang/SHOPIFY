@@ -1,12 +1,12 @@
-name: A14 — COO Weekly Operations Report
+name: A14 — COO Daily Operations Report
 
 on:
   schedule:
-    - cron: '0 10 * * 1'  # Monday 10:00 UTC — after A0 (09:00)
+    - cron: '0 21 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Dry run (no email sent)'
+        description: 'Dry run (reads data, skips email + DB write)'
         required: false
         default: 'false'
         type: choice
@@ -29,11 +29,12 @@ jobs:
         working-directory: sockacademy/agents/A14_coo
         run: npm install
 
-      - name: Run A14 COO Report
+      - name: Run A14 COO Agent
         working-directory: sockacademy/agents/A14_coo
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
         run: node agent.js
