@@ -1,0 +1,41 @@
+name: A23 — Factory Relations (Monthly)
+
+on:
+  schedule:
+    - cron: '0 9 1 * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (reads data, skips DB write + email)'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['true', 'false']
+
+jobs:
+  factory-relations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: sockacademy/agents/A23_factory_relations/package-lock.json
+
+      - name: Install dependencies
+        working-directory: sockacademy/agents/A23_factory_relations
+        run: npm ci
+
+      - name: Run A23 Factory Relations
+        working-directory: sockacademy/agents/A23_factory_relations
+        env:
+          SUPABASE_URL:          ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY:  ${{ secrets.SUPABASE_SERVICE_KEY }}
+          PERPLEXITY_API_KEY:    ${{ secrets.PERPLEXITY_API_KEY }}
+          ANTHROPIC_API_KEY:     ${{ secrets.ANTHROPIC_API_KEY }}
+          GMAIL_APP_PASSWORD:    ${{ secrets.GMAIL_APP_PASSWORD }}
+          DRY_RUN:               ${{ github.event.inputs.dry_run || 'false' }}
+        run: node agent.js

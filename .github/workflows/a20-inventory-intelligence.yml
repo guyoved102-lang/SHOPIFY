@@ -1,0 +1,42 @@
+name: A20 — Inventory Intelligence (Daily)
+
+on:
+  schedule:
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (reads data, skips DB write + email)'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['true', 'false']
+
+jobs:
+  inventory-intelligence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: sockacademy/agents/A20_inventory_intelligence/package-lock.json
+
+      - name: Install dependencies
+        working-directory: sockacademy/agents/A20_inventory_intelligence
+        run: npm ci
+
+      - name: Run A20 Inventory Intelligence
+        working-directory: sockacademy/agents/A20_inventory_intelligence
+        env:
+          SUPABASE_URL:          ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY:  ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SHOPIFY_SHOP_DOMAIN:   ${{ secrets.SHOPIFY_SHOP_DOMAIN }}
+          SHOPIFY_MASTER_TOKEN:  ${{ secrets.SHOPIFY_MASTER_TOKEN }}
+          ANTHROPIC_API_KEY:     ${{ secrets.ANTHROPIC_API_KEY }}
+          GMAIL_APP_PASSWORD:    ${{ secrets.GMAIL_APP_PASSWORD }}
+          DRY_RUN:               ${{ github.event.inputs.dry_run || 'false' }}
+        run: node agent.js
