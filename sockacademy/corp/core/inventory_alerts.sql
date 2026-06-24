@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS inventory_alerts (
   created_at          timestamp with time zone DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS inventory_alerts_sku_idx         ON inventory_alerts(sku);
+CREATE UNIQUE INDEX IF NOT EXISTS inventory_alerts_sku_idx  ON inventory_alerts(sku);
 CREATE INDEX IF NOT EXISTS inventory_alerts_alert_level_idx ON inventory_alerts(alert_level);
 CREATE INDEX IF NOT EXISTS inventory_alerts_checked_at_idx  ON inventory_alerts(checked_at DESC);
 
