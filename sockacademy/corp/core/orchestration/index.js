@@ -37,13 +37,20 @@ const STALENESS_HOURS = {
   A5:    200,   // weekly
   A6:    200,   // weekly
   A7:    200,   // weekly
-  A8:    200,   // weekly
+  A8:    36,    // daily
   A9:    null,  // manual only
   A10:   36,    // daily
   A11:   200,   // weekly
   A12:   200,   // weekly
   A13:   200,   // weekly
+  A14:   null,  // monthly, no strict threshold
+  A15:   36,    // daily
+  A16:   200,   // weekly
   A17:   null,  // bimonthly, no strict threshold
+  A19:   36,    // daily
+  A20:   36,    // daily
+  A22:   36,    // daily
+  A23:   null,  // monthly, no strict threshold
 };
 
 // ─── HEALTH DATA ─────────────────────────────────────────────────────────────
