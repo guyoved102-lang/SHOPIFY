@@ -1,0 +1,12 @@
+{
+  "name": "a18-fraud-cybersecurity",
+  "version": "1.0.0",
+  "description": "A18 — Fraud & Cybersecurity: chargeback monitoring, bot traffic detection, payment health",
+  "main": "agent.js",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0",
+    "@supabase/supabase-js": "^2.45.0",
+    "dotenv": "^17.0.0",
+    "nodemailer": "^9.0.0"
+  }
+}

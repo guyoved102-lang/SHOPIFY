@@ -1,0 +1,36 @@
+name: A18 — Fraud & Cybersecurity
+
+on:
+  schedule:
+    - cron: '0 9 * * *'    # 09:00 UTC daily — 30 min after A19 (08:30 UTC)
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: sockacademy/agents/A18_fraud_cybersecurity/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: sockacademy/agents/A18_fraud_cybersecurity
+
+      - name: Run A18 Fraud & Cybersecurity
+        run: node agent.js
+        working-directory: sockacademy/agents/A18_fraud_cybersecurity
+        env:
+          DRY_RUN:              'false'
+          CLOUDFLARE_ACTIVE:    'false'
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SHOPIFY_MASTER_TOKEN: ${{ secrets.SHOPIFY_MASTER_TOKEN }}
+          SHOPIFY_SHOP_DOMAIN:  ${{ secrets.SHOPIFY_SHOP_DOMAIN }}
+          GMAIL_APP_PASSWORD:   ${{ secrets.GMAIL_APP_PASSWORD }}
+          ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
