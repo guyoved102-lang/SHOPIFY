@@ -1,0 +1,35 @@
+name: A21 — Affiliate & Influencer ROI
+
+on:
+  schedule:
+    - cron: '0 10 * * *'    # 10:00 UTC daily — 1h after A19 (08:30), 1h after A18 (09:00)
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: sockacademy/agents/A21_affiliate_roi/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: sockacademy/agents/A21_affiliate_roi
+
+      - name: Run A21 Affiliate & Influencer ROI
+        run: node agent.js
+        working-directory: sockacademy/agents/A21_affiliate_roi
+        env:
+          DRY_RUN:              'false'
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SHOPIFY_MASTER_TOKEN: ${{ secrets.SHOPIFY_MASTER_TOKEN }}
+          SHOPIFY_SHOP_DOMAIN:  ${{ secrets.SHOPIFY_SHOP_DOMAIN }}
+          GMAIL_APP_PASSWORD:   ${{ secrets.GMAIL_APP_PASSWORD }}
+          ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
