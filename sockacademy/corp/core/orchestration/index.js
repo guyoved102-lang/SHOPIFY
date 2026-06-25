@@ -18,11 +18,13 @@
  */
 
 const CLUSTERS = {
-  'SA-1 Intelligence': ['A1', 'A10', 'A11', 'A13'],
-  'SA-2 Content':      ['A2', 'A2.5', 'A3', 'A5'],
-  'SA-3 Revenue':      ['A4', 'A6'],
-  'SA-4 Operations':   ['A7', 'A12', 'A9'],
-  'SA-5 Analytics':    ['A8'],
+  'SA-1 Intelligence':  ['A1', 'A10', 'A11', 'A13'],
+  'SA-2 Content':       ['A2', 'A2.5', 'A3', 'A5'],
+  'SA-3 Revenue':       ['A4', 'A6'],
+  'SA-4 Operations':    ['A7', 'A12', 'A9'],
+  'SA-5 Analytics':     ['A8'],
+  'SA-7 C-Suite':       ['A14', 'A15', 'A16'],
+  'SA-8 Supply Chain':  ['A19', 'A20', 'A22', 'A23'],
 };
 
 // Max hours since last successful run before agent is considered stale.

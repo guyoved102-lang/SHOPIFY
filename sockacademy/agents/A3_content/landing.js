@@ -6,8 +6,11 @@
 
 require('dotenv').config({ path: '../../.env' });
 
-const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN || '11eqwi-ji.myshopify.com';
-const SHOPIFY_TOKEN = process.env.SHOPIFY_MASTER_TOKEN;
+const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
+const SHOPIFY_TOKEN  = process.env.SHOPIFY_MASTER_TOKEN;
+
+if (!SHOPIFY_DOMAIN) throw new Error('SHOPIFY_SHOP_DOMAIN env var is required');
+if (!SHOPIFY_TOKEN)  throw new Error('SHOPIFY_MASTER_TOKEN env var is required');
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // HTML — דף נחיתה פרמיום SockAcademy

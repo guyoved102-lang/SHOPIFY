@@ -212,7 +212,8 @@ function buildMessage(change, product, current) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // SHOPIFY ACTIONS
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN || '11eqwi-ji.myshopify.com';
+const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
+if (!SHOPIFY_DOMAIN) throw new Error('SHOPIFY_SHOP_DOMAIN env var is required');
 
 async function shopifyPut(endpoint, body) {
   const res = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2025-01/${endpoint}`, {

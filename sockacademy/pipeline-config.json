@@ -129,7 +129,7 @@
           "agent": "A11",
           "workflow": "a11-price-intelligence.yml",
           "timeout_minutes": 20,
-          "note": "Replace cheerio with Perplexity API — pending PERPLEXITY_API_KEY secret",
+          "note": "Replace cheerio with Perplexity API — PERPLEXITY_API_KEY confirmed in GitHub Secrets (24/06/2026)",
           "data_output": {
             "via": "supabase",
             "table": "competitor_prices",
