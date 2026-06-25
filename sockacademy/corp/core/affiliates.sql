@@ -49,3 +49,10 @@ ALTER TABLE affiliate_performance ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX IF NOT EXISTS idx_affiliate_perf_date ON affiliate_performance (report_date DESC);
 CREATE INDEX IF NOT EXISTS idx_affiliate_perf_aff  ON affiliate_performance (affiliate_id);
+
+-- ─── GRANTS — service_role must have explicit access ─────────────────────────
+
+GRANT ALL ON TABLE affiliates           TO service_role, anon, authenticated;
+GRANT ALL ON TABLE affiliate_performance TO service_role, anon, authenticated;
+GRANT USAGE, SELECT ON SEQUENCE affiliates_id_seq            TO service_role, anon, authenticated;
+GRANT USAGE, SELECT ON SEQUENCE affiliate_performance_id_seq TO service_role, anon, authenticated;

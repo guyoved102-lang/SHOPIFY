@@ -334,6 +334,23 @@ sockacademy/agents/A<N>_*/*.cache
   1. `feat(SA-X): agent code + YAML`
   2. `feat(orchestration): add SA-X to CLUSTERS + STALENESS_HOURS`
 - לא לסגור שיחת בניית cluster לפני שstep 2 בוצע
+
+---
+
+## 26. Supabase GRANT חסר — service_role מקבל "permission denied"
+
+**מה קרה (25/06/2026):** טבלות `affiliates` ו-`affiliate_performance` נוצרו ב-SQL editor — אבל DRY_RUN test נכשל עם `permission denied for table affiliates`. `SUPABASE_SERVICE_KEY` (service_role) לא קיבל GRANT אוטומטי.
+**סיבה:** ב-Supabase, `ALTER DEFAULT PRIVILEGES` לא תמיד מכסה טבלאות שנוצרות ב-SQL editor. service_role צריך GRANT מפורש.
+**פרוטוקול:**
+- **כל SQL file של agent חדש** חייב לכלול בסוף:
+```sql
+GRANT ALL ON TABLE <table_name> TO service_role, anon, authenticated;
+GRANT USAGE, SELECT ON SEQUENCE <table_name>_id_seq TO service_role, anon, authenticated;
+```
+- לכלול את ה-GRANTs בקובץ `.sql` עצמו — לא כ-step נפרד
+- אם agent קורא מ-Supabase (READ) — GRANT חייב להיות **לפני** DRY_RUN test
+
+**בדיקה:** אחרי הרצת SQL ב-Supabase — מריצים `DRY_RUN=true node agent.js`. אם "permission denied" → הרץ GRANT ידנית ועדכן את ה-.sql file.
 - STALENESS_HOURS: agents שרצים יומי = 36h | שבועי = 200h | חד-פעמי/bimonthly = null
 
 **בדיקה:** `grep -c "SA-" sockacademy/corp/core/orchestration/index.js` — מספר הclusters צריך להתאים למספר Super-Agents שנבנו.
