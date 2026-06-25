@@ -306,6 +306,40 @@ where table_schema='public' and table_name='products' order by ordinal_position;
 
 ---
 
+## 24. Runtime State Files Committed to Git
+
+**מה קרה (25/06/2026):** A7/state.json (mock supplier data) נמצא tracked ב-git. קבצי runtime/mock state שהיו אמורים להיות local-only הגיעו ל-repo.
+**סיבה:** בניית agent חדש → `git add .` ללא בדיקה → state file נכנס ל-tracking.
+**פרוטוקול:**
+- לפני `git add` של agent חדש: `git status --short` ולבדוק כל קובץ ידנית
+- state files, last_run.json, mock data, cache files — תמיד ל-.gitignore לפני commit ראשון
+- תבנית .gitignore לכל agent חדש:
+```
+sockacademy/agents/A<N>_*/state.json
+sockacademy/agents/A<N>_*/last_run.json
+sockacademy/agents/A<N>_*/*.cache
+```
+- אם כבר נכנס ל-tracking: `git rm --cached <file>` + הוספה ל-.gitignore
+
+**בדיקה:** `git ls-files sockacademy/agents/ | grep -E "(state\.json|last_run|\.cache)"` — חייב לחזור ריק.
+
+---
+
+## 25. Agent Cluster Built — CLUSTERS Map לא עודכן
+
+**מה קרה (25/06/2026):** SA-7 C-Suite (A14/A15/A16) ו-SA-8 Supply Chain (A19/A20/A22/A23) נבנו ו-committed — אבל לא נוספו ל-CLUSTERS map בcorp/core/orchestration/index.js. A0 לא יכל לזהות אם agents אלו נכשלים שקטה.
+**סיבה:** בניית cluster חדש = שני שלבים (קוד + orchestration) — השני נשכח.
+**פרוטוקול:**
+- כל בניית SA cluster חדש כולל שני commits חובה:
+  1. `feat(SA-X): agent code + YAML`
+  2. `feat(orchestration): add SA-X to CLUSTERS + STALENESS_HOURS`
+- לא לסגור שיחת בניית cluster לפני שstep 2 בוצע
+- STALENESS_HOURS: agents שרצים יומי = 36h | שבועי = 200h | חד-פעמי/bimonthly = null
+
+**בדיקה:** `grep -c "SA-" sockacademy/corp/core/orchestration/index.js` — מספר הclusters צריך להתאים למספר Super-Agents שנבנו.
+
+---
+
 ## SESSION CONTINUITY CHECKLIST — בכל שיחה
 
 **פתיחה:**
