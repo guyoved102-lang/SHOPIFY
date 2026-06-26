@@ -27,7 +27,6 @@ jobs:
           SHOPIFY_SHOP_DOMAIN: ${{ secrets.SHOPIFY_SHOP_DOMAIN }}
           SHOPIFY_MASTER_TOKEN: ${{ secrets.SHOPIFY_MASTER_TOKEN }}
           CJ_API_KEY: ${{ secrets.CJ_API_KEY }}
-          CJ_EMAIL: ${{ secrets.CJ_EMAIL }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           STOCK_LOW_THRESHOLD: ${{ secrets.STOCK_LOW_THRESHOLD }}
           PRICE_WARN_PCT: ${{ secrets.PRICE_WARN_PCT }}
