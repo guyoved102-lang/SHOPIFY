@@ -1,0 +1,33 @@
+name: A26 — Regulatory Watch
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'   # Every Monday 08:00 UTC
+  workflow_dispatch:
+
+jobs:
+  regulatory-watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: sockacademy/agents/A26_regulatory_watch/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: sockacademy/agents/A26_regulatory_watch
+
+      - name: Run A26 Regulatory Watch
+        run: node agent.js
+        working-directory: sockacademy/agents/A26_regulatory_watch
+        env:
+          DRY_RUN:              'false'
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          PERPLEXITY_API_KEY:   ${{ secrets.PERPLEXITY_API_KEY }}
+          GMAIL_APP_PASSWORD:   ${{ secrets.GMAIL_APP_PASSWORD }}
+          ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
