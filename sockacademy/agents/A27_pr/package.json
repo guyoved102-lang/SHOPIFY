@@ -1,0 +1,12 @@
+{
+  "name": "a27-pr",
+  "version": "1.0.0",
+  "description": "SockAcademy A27 — Weekly PR agent: contact research, coverage monitoring, and media outreach",
+  "main": "agent.js",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0",
+    "@supabase/supabase-js": "^2.45.0",
+    "dotenv": "^17.0.0",
+    "nodemailer": "^9.0.0"
+  }
+}
