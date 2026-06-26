@@ -1,0 +1,13 @@
+{
+  "name": "a24-cro",
+  "version": "1.0.0",
+  "description": "A24 — CRO Agent: GA4 funnel intelligence, conversion tracking, bottleneck analysis",
+  "main": "agent.js",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0",
+    "@google-analytics/data": "^4.0.0",
+    "@supabase/supabase-js": "^2.45.0",
+    "dotenv": "^17.0.0",
+    "nodemailer": "^9.0.0"
+  }
+}
