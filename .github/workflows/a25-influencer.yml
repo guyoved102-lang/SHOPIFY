@@ -26,6 +26,7 @@ jobs:
         run: node agent.js
         working-directory: sockacademy/agents/A25_influencer
         env:
+          LAUNCH_MODE:          'false'
           DRY_RUN:              'false'
           SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}

@@ -22,6 +22,7 @@ jobs:
       - name: Run A4 Meta Ads Agent
         working-directory: sockacademy/agents/A4_meta_ads
         env:
+          LAUNCH_MODE: 'false'
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}

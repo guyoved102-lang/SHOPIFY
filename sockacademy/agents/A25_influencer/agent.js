@@ -290,6 +290,12 @@ async function sendEmail(narrative, processedLeads) {
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 (async () => {
+  // LAUNCH_MODE gate — protocol #27
+  if (process.env.LAUNCH_MODE !== 'true') {
+    console.log('[A25] LAUNCH_MODE not active — exiting without API calls.');
+    process.exit(0);
+  }
+
   console.log(`[A25] Starting — DRY_RUN=${DRY_RUN} DATE=${REPORT_DATE}`);
 
   let processedLeads = [];

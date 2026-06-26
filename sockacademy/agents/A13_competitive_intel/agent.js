@@ -54,6 +54,12 @@ async function sendErrorAlert(errorMessage) {
   }).catch(e => console.error('Alert email failed:', e.message));
 }
 
+// ─── LAUNCH_MODE Gate — protocol #27 ────────────────────────────────────────
+if (process.env.LAUNCH_MODE !== 'true') {
+  console.log('[A13] LAUNCH_MODE not active — exiting without API calls.');
+  process.exit(0);
+}
+
 // ─── Startup Guards ──────────────────────────────────────────────────────────
 const REQUIRED = ['PERPLEXITY_API_KEY', 'ANTHROPIC_API_KEY', 'GMAIL_APP_PASSWORD',
                   'SUPABASE_URL', 'SUPABASE_SERVICE_KEY'];

@@ -335,6 +335,12 @@ async function sendReport(adCopies, { lowRoas = [], zeroConversion = [] } = {}, 
 // MAIN
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function main() {
+  // LAUNCH_MODE gate — protocol #27
+  if (process.env.LAUNCH_MODE !== 'true') {
+    console.log('[A4] LAUNCH_MODE not active — exiting without API calls.');
+    process.exit(0);
+  }
+
   const supabase = getSupabase();
   await logHealth(supabase, 'running');
   console.log('🚀 A4 — Meta Ads Agent v1.0');

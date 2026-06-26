@@ -33,6 +33,7 @@ jobs:
       - name: Run A13 Competitive Intelligence Agent
         working-directory: sockacademy/agents/A13_competitive_intel
         env:
+          LAUNCH_MODE: 'false'
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}

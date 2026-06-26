@@ -438,6 +438,12 @@ async function sendEmailDigest(trends) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 async function main() {
+  // LAUNCH_MODE gate — protocol #27
+  if (process.env.LAUNCH_MODE !== 'true') {
+    console.log('[A10] LAUNCH_MODE not active — exiting without API calls.');
+    process.exit(0);
+  }
+
   console.log('🚀 A10 — Trend Scout Agent v1.0');
   console.log('━'.repeat(44));
   console.log(`📦 Categories: ${Object.keys(CATEGORIES).join(' | ')}`);

@@ -23,6 +23,7 @@ jobs:
       - name: Run A10 Trend Scout Agent
         working-directory: sockacademy/agents/A10_trend_scout
         env:
+          LAUNCH_MODE: 'false'
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
