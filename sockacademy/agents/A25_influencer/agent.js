@@ -4,6 +4,7 @@ require('dotenv').config();
 const Anthropic = require('@anthropic-ai/sdk');
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
+const { withRetry } = require('../../corp/core/anthropic-retry.js');
 
 // ── Environment ──────────────────────────────────────────────────────────────
 const DRY_RUN     = process.env.DRY_RUN === 'true';
@@ -60,11 +61,11 @@ Scoring rubric:
 
 Return ONLY valid JSON. No markdown. No explanation outside JSON.`;
 
-  const response = await anthropic.messages.create({
+  const response = await withRetry(() => anthropic.messages.create({
     model:     'claude-sonnet-4-6',
     max_tokens: 150,
     messages:  [{ role: 'user', content: prompt }]
-  });
+  }), 'A25');
 
   return JSON.parse(response.content[0].text.trim());
 }
@@ -89,11 +90,11 @@ Output JSON only:
 
 Return ONLY valid JSON. No markdown.`;
 
-  const response = await anthropic.messages.create({
+  const response = await withRetry(() => anthropic.messages.create({
     model:     'claude-sonnet-4-6',
     max_tokens: 300,
     messages:  [{ role: 'user', content: prompt }]
-  });
+  }), 'A25');
 
   return JSON.parse(response.content[0].text.trim());
 }
@@ -176,11 +177,11 @@ async function buildNarrative(processedLeads) {
 
 כתוב 3-4 משפטים בלבד + המלצה עסקית אחת לשיפור תהליך גיוס influencers.`;
 
-  const response = await anthropic.messages.create({
+  const response = await withRetry(() => anthropic.messages.create({
     model:     'claude-sonnet-4-6',
     max_tokens: 250,
     messages:  [{ role: 'user', content: prompt }]
-  });
+  }), 'A25');
 
   return response.content[0].text.trim();
 }

@@ -28,6 +28,7 @@ async function logHealth(supabase, status, errorMsg = '', metadata = {}) {
   } catch (e) { console.error('Health log failed:', e.message); }
 }
 const nodemailer = require('nodemailer');
+const { withRetry } = require('../../corp/core/anthropic-retry.js');
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -79,7 +80,7 @@ const CAMPAIGNS = [
 // CLAUDE — יצירת קופי למודעות
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function generateAdCopy(campaign, product) {
-  const msg = await anthropic.messages.create({
+  const msg = await withRetry(() => anthropic.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 500,
     messages: [{
@@ -113,7 +114,7 @@ Write:
 
 Return as JSON: { "primary": "...", "headline": "...", "description": "...", "hook": "..." }`
     }],
-  });
+  }), 'A4');
 
   try {
     const text = msg.content[0].text.trim();

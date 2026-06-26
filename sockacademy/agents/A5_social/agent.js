@@ -10,6 +10,7 @@ const { google } = require('googleapis');
 const { Readable } = require('stream');
 const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
+const { withRetry } = require('../../corp/core/anthropic-retry.js');
 
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
@@ -150,7 +151,7 @@ async function selectFreshTheme(supabase, weekNum) {
 // CLAUDE — Instagram caption
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function generateCaption(post, theme) {
-  const msg = await anthropic.messages.create({
+  const msg = await withRetry(() => anthropic.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 300,
     messages: [{
@@ -194,7 +195,7 @@ Write the caption in this exact JSON format:
   "visual_direction": "One precise sentence: surface, lighting, composition, mood. No vague adjectives."
 }`,
     }],
-  });
+  }), 'A5');
 
   try {
     const json = msg.content[0].text.trim().match(/\{[\s\S]*\}/)?.[0];

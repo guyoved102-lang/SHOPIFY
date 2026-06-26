@@ -8,6 +8,7 @@ require('dotenv').config({ path: '../../.env' });
 const { createClient } = require('@supabase/supabase-js');
 const Anthropic = require('@anthropic-ai/sdk');
 const nodemailer = require('nodemailer');
+const { withRetry } = require('../../corp/core/anthropic-retry.js');
 
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
 const SHOPIFY_API_VERSION = '2025-01';
@@ -60,7 +61,7 @@ async function markUploaded(supabase, id, shopifyProduct) {
 // CLAUDE — תיאור SEO
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function generateDescription(product) {
-  const msg = await anthropic.messages.create({
+  const msg = await withRetry(() => anthropic.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 600,
     messages: [{
@@ -83,7 +84,7 @@ Rules:
 - End with a calm, confident close — no pushy CTA
 - Return ONLY the HTML, no explanation`
     }],
-  });
+  }), 'A2');
   return msg.content[0].text.trim();
 }
 

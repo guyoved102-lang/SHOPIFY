@@ -26,6 +26,7 @@ const { createClient }           = require('@supabase/supabase-js');
 const Anthropic                  = require('@anthropic-ai/sdk');
 const nodemailer                 = require('nodemailer');
 const { BetaAnalyticsDataClient } = require('@google-analytics/data');
+const { withRetry }               = require('../../corp/core/anthropic-retry.js');
 
 const DRY_RUN    = process.env.DRY_RUN    === 'true';
 const GA4_ACTIVE = process.env.GA4_ACTIVE === 'true';
@@ -290,11 +291,11 @@ async function buildNarrative(funnel, rates, shopify, bottleneck, prev) {
     `- ${bottleneckLine}\n` +
     `- ${wowLine}`;
 
-  const msg = await new Anthropic().messages.create({
+  const msg = await withRetry(() => new Anthropic().messages.create({
     model:      'claude-sonnet-4-6',
     max_tokens: 250,
     messages:   [{ role: 'user', content: prompt }],
-  });
+  }), 'A24');
   return msg.content[0].text;
 }
 

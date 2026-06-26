@@ -21,6 +21,7 @@ require('dotenv').config({ path: '../../.env' });
 const { createClient } = require('@supabase/supabase-js');
 const Anthropic        = require('@anthropic-ai/sdk');
 const nodemailer       = require('nodemailer');
+const { withRetry }    = require('../../corp/core/anthropic-retry.js');
 
 const DRY_RUN     = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL = 'guyoved102@gmail.com';
@@ -209,11 +210,11 @@ async function buildNarrative(ranked, totals) {
     `- Net ROI: ₪${totals.totalNetRoi}\n\n` +
     `דירוג שותפים:\n${rankingSummary}`;
 
-  const msg = await new Anthropic().messages.create({
+  const msg = await withRetry(() => new Anthropic().messages.create({
     model:      'claude-sonnet-4-6',
     max_tokens: 200,
     messages:   [{ role: 'user', content: prompt }],
-  });
+  }), 'A21');
   return msg.content[0].text;
 }
 

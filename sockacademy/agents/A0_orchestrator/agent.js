@@ -530,7 +530,7 @@ function runWorkspaceHealthCheck() {
   }
 
   // Root entries
-  const ALLOWED_ROOT = new Set(['.github', 'sockacademy', '.gitignore', '.gitattributes', 'README.md', '.editorconfig']);
+  const ALLOWED_ROOT = new Set(['.github', 'sockacademy', '.gitignore', '.gitattributes', 'README.md', '.editorconfig', '.agents', 'structure-violations.json']);
   for (const { name, full } of kids(REPO_ROOT)) {
     if (name === '.git') continue;
     if (!ALLOWED_ROOT.has(name))
@@ -538,7 +538,13 @@ function runWorkspaceHealthCheck() {
   }
 
   // sockacademy/ root entries
-  const ALLOWED_SA = new Set(['CLAUDE.md', '.env.example', 'pipeline-config.json', 'agents', 'corp', 'docs', 'schemas', 'scripts']);
+  const ALLOWED_SA = new Set([
+    'CLAUDE.md', '.env.example', 'pipeline-config.json',
+    'agents', 'corp', 'docs', 'schemas', 'scripts',
+    // Shopify theme directories (legitimate — co-located with agent fleet)
+    'assets', 'config', 'layout', 'locales', 'sections', 'snippets', 'templates',
+    '.gitignore',
+  ]);
   for (const { name, full } of kids(SA_ROOT)) {
     if (!ALLOWED_SA.has(name))
       violations.push({ rule: 'SA_ROOT_CONTAMINATION', file: path.relative(REPO_ROOT, full) });

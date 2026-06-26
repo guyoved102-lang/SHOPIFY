@@ -24,6 +24,7 @@ require('dotenv').config({ path: '../../.env' });
 const { createClient } = require('@supabase/supabase-js');
 const Anthropic        = require('@anthropic-ai/sdk');
 const nodemailer       = require('nodemailer');
+const { withRetry }    = require('../../corp/core/anthropic-retry.js');
 
 const DRY_RUN           = process.env.DRY_RUN === 'true';
 const CLOUDFLARE_ACTIVE = process.env.CLOUDFLARE_ACTIVE === 'true';
@@ -422,14 +423,14 @@ async function generateNarrative(summary) {
       .map(([k]) => k),
   });
 
-  const msg = await client.messages.create({
+  const msg = await withRetry(() => client.messages.create({
     model:      'claude-sonnet-4-6',
     max_tokens: 200,
     messages: [{
       role:    'user',
       content: `You are the Fraud & Cybersecurity intelligence system for SockAcademy, a premium sock brand. Write a 2-3 sentence security briefing for the CEO. Assess the overall threat level. Name the most significant signal if events exist. Give one concrete recommendation if action is required. If 0 events, confirm clean security posture and system monitoring status. Be direct and precise.\n\n${briefingData}`,
     }],
-  });
+  }), 'A18');
   return msg.content[0].text.trim();
 }
 

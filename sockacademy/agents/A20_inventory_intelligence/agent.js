@@ -18,6 +18,7 @@ require('dotenv').config({ path: '../../.env' });
 const { createClient } = require('@supabase/supabase-js');
 const Anthropic        = require('@anthropic-ai/sdk');
 const nodemailer       = require('nodemailer');
+const { withRetry }    = require('../../corp/core/anthropic-retry.js');
 
 const DRY_RUN              = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL          = 'guyoved102@gmail.com';
@@ -208,14 +209,14 @@ async function logHealth(sb, status, meta = {}) {
 async function generateNarrative(summary) {
   if (!process.env.ANTHROPIC_API_KEY) return null;
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const msg = await client.messages.create({
+  const msg = await withRetry(() => client.messages.create({
     model:      'claude-haiku-4-5-20251001',
     max_tokens: 180,
     messages: [{
       role:    'user',
       content: `You are the Inventory Intelligence system for SockAcademy, a premium sock brand. Write a 2-sentence inventory briefing for the CEO based on this data. Be direct and factual. If pre-revenue (0 orders), note the system is monitoring and ready.\n\n${JSON.stringify(summary)}`,
     }],
-  });
+  }), 'A20');
   return msg.content[0].text.trim();
 }
 

@@ -17,6 +17,7 @@ require('dotenv').config({ path: '../../.env' });
 const { createClient } = require('@supabase/supabase-js');
 const Anthropic        = require('@anthropic-ai/sdk');
 const nodemailer       = require('nodemailer');
+const { withRetry }    = require('../../corp/core/anthropic-retry.js');
 
 const DRY_RUN     = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL = 'guyoved102@gmail.com';
@@ -203,14 +204,14 @@ function buildAlerts(scoreData) {
 async function generateNarrative(scoreData) {
   if (!process.env.ANTHROPIC_API_KEY) return null;
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const msg = await client.messages.create({
+  const msg = await withRetry(() => client.messages.create({
     model:      'claude-haiku-4-5-20251001',
     max_tokens: 150,
     messages: [{
       role:    'user',
       content: `You are the Supply Chain Intelligence system for SockAcademy, a premium sock brand. Write a 2-sentence supply chain briefing for the CEO. Be direct and action-oriented.\n\n${JSON.stringify(scoreData)}`,
     }],
-  });
+  }), 'A22');
   return msg.content[0].text.trim();
 }
 

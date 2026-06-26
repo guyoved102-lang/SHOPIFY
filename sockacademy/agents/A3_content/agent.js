@@ -8,6 +8,7 @@ require('dotenv').config({ path: '../../.env' });
 const Anthropic = require('@anthropic-ai/sdk');
 const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
+const { withRetry } = require('../../corp/core/anthropic-retry.js');
 
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
@@ -108,7 +109,7 @@ async function articleExists(handle) {
 async function writeArticle(topic) {
   console.log(`  ✍️  כותב: "${topic.title}"...`);
 
-  const msg = await anthropic.messages.create({
+  const msg = await withRetry(() => anthropic.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 4000,
     messages: [{
@@ -139,7 +140,7 @@ Format the entire article as clean HTML:
 
 Write the article now:`,
     }],
-  });
+  }), 'A3');
 
   return msg.content[0].text.trim();
 }

@@ -15,6 +15,7 @@ const Anthropic      = require('@anthropic-ai/sdk');
 const googleTrends   = require('google-trends-api');
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer     = require('nodemailer');
+const { withRetry }  = require('../../corp/core/anthropic-retry.js');
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 
@@ -299,11 +300,11 @@ Return ONLY valid JSON. No markdown, no explanation outside the array.`;
 
   console.log('\n🤖 Claude analyzing trends...');
 
-  const message = await client.messages.create({
+  const message = await withRetry(() => client.messages.create({
     model:      'claude-sonnet-4-6',
     max_tokens: 1500,
     messages:   [{ role: 'user', content: prompt }],
-  });
+  }), 'A10');
 
   const raw = message.content[0]?.text || '[]';
 

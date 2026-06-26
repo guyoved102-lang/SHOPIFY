@@ -11,6 +11,7 @@ require('dotenv').config({ path: '../../.env' });
 const { createClient } = require('@supabase/supabase-js');
 const Anthropic = require('@anthropic-ai/sdk');
 const nodemailer = require('nodemailer');
+const { withRetry } = require('../../corp/core/anthropic-retry.js');
 
 const DRY_RUN     = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL = 'guyoved102@gmail.com';
@@ -142,14 +143,14 @@ async function generateNarrative(health, pipeline, qc, alerts) {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
   const ctx = JSON.stringify({ health, pipeline, qc, alerts }, null, 2);
-  const msg = await client.messages.create({
+  const msg = await withRetry(() => client.messages.create({
     model:      'claude-sonnet-4-6',
     max_tokens: 200,
     messages: [{
       role:    'user',
       content: `You are the COO of SockAcademy, a premium sock e-commerce brand. Write a 3-sentence daily operations briefing for the CEO based on this data. Be direct, factual, and flag only what needs attention. No greetings, no sign-off.\n\n${ctx}`,
     }],
-  });
+  }), 'A14');
   return msg.content[0].text.trim();
 }
 
