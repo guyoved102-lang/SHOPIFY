@@ -270,6 +270,11 @@ async function sendDigestEmail(health, pipeline, qc, alerts, narrative) {
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
 async function main() {
+  if (process.env.LAUNCH_MODE !== 'true') {
+    console.log('[A14] DORMANT — set LAUNCH_MODE=true to activate. No API calls made.');
+    process.exit(0);
+  }
+
   console.log('\n📊 A14 — COO Operations Agent');
   console.log(`   ${new Date().toISOString()} | DRY_RUN=${DRY_RUN}`);
   console.log('─'.repeat(52));

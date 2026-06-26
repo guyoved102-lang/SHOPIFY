@@ -338,6 +338,12 @@ async function sendEmail(summary, narrative) {
 // ─── main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
+  const LAUNCH_MODE = process.env.LAUNCH_MODE === 'true';
+  if (!LAUNCH_MODE) {
+    console.log('[A26] DORMANT — set LAUNCH_MODE=true to activate. No API calls made.');
+    process.exit(0);
+  }
+
   console.log(`[A26] Regulatory Watch starting — ${REPORT_DATE} | DRY_RUN=${DRY_RUN}`);
   const sb = getSupabase();
 

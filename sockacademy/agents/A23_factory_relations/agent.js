@@ -265,6 +265,11 @@ async function sendEmail(allReports, summary, narrative) {
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
 async function main() {
+  if (process.env.LAUNCH_MODE !== 'true') {
+    console.log('[A23] DORMANT — set LAUNCH_MODE=true to activate. No API calls made.');
+    process.exit(0);
+  }
+
   console.log('\n🏭 A23 — Factory Relations Agent');
   console.log(`   ${new Date().toISOString()} | DRY_RUN=${DRY_RUN}`);
   console.log('─'.repeat(52));

@@ -27,6 +27,7 @@ jobs:
         working-directory: sockacademy/agents/A18_fraud_cybersecurity
         env:
           DRY_RUN:              'false'
+          LAUNCH_MODE:          'false'
           CLOUDFLARE_ACTIVE:    'false'
           SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}

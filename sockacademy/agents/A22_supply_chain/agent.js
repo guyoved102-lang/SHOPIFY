@@ -288,6 +288,11 @@ async function sendEmail(scoreData, alerts, narrative) {
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
 async function main() {
+  if (process.env.LAUNCH_MODE !== 'true') {
+    console.log('[A22] DORMANT — set LAUNCH_MODE=true to activate. No API calls made.');
+    process.exit(0);
+  }
+
   console.log('\n🚢 A22 — Supply Chain Intelligence Agent');
   console.log(`   ${new Date().toISOString()} | DRY_RUN=${DRY_RUN}`);
   console.log('─'.repeat(52));

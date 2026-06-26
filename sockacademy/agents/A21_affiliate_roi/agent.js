@@ -318,6 +318,11 @@ async function sendEmail(ranked, totals, narrative) {
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
 async function main() {
+  if (process.env.LAUNCH_MODE !== 'true') {
+    console.log('[A21] DORMANT — set LAUNCH_MODE=true to activate. No API calls made.');
+    process.exit(0);
+  }
+
   console.log(`[A21] Starting Affiliate & Influencer ROI — ${REPORT_DATE}`);
   if (DRY_RUN) console.log('[A21] DRY_RUN=true — no writes, no emails');
 

@@ -558,6 +558,11 @@ async function sendEmail(summary, narrative) {
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
 async function main() {
+  if (process.env.LAUNCH_MODE !== 'true') {
+    console.log('[A18] DORMANT — set LAUNCH_MODE=true to activate. No API calls made.');
+    process.exit(0);
+  }
+
   console.log('\n🔐 A18 — Fraud & Cybersecurity Agent');
   console.log(`   ${new Date().toISOString()} | DRY_RUN=${DRY_RUN} | CLOUDFLARE_ACTIVE=${CLOUDFLARE_ACTIVE}`);
   console.log('─'.repeat(60));
