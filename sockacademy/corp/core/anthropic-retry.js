@@ -17,8 +17,8 @@ const RETRYABLE_SIGNALS = [
   'network timeout',
 ];
 
-const MAX_RETRIES  = 3;
-const BASE_DELAY   = 2000; // ms — doubles each retry: 2s → 4s → 8s
+const MAX_RETRIES  = 5;
+const BASE_DELAY   = 2000; // ms — doubles each retry: 2s → 4s → 8s → 16s → 32s (~62s total window)
 
 async function withRetry(fn, label = 'Anthropic') {
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
@@ -29,7 +29,7 @@ async function withRetry(fn, label = 'Anthropic') {
       const isRetryable = RETRYABLE_SIGNALS.some(sig => msg.includes(sig));
 
       if (isRetryable && attempt < MAX_RETRIES) {
-        const delay = BASE_DELAY * Math.pow(2, attempt - 1); // 2s, 4s
+        const delay = BASE_DELAY * Math.pow(2, attempt - 1); // 2s, 4s, 8s, 16s, 32s
         console.log(`[${label}] transient error (attempt ${attempt}/${MAX_RETRIES}): ${msg} — retrying in ${delay / 1000}s`);
         await new Promise(r => setTimeout(r, delay));
       } else {
