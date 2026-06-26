@@ -1,0 +1,12 @@
+{
+  "name": "a28-club",
+  "version": "1.0.0",
+  "description": "SockAcademy A28 — Weekly subscription club agent: member identification, cycle management, and renewal orchestration",
+  "main": "agent.js",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0",
+    "@supabase/supabase-js": "^2.45.0",
+    "dotenv": "^17.0.0",
+    "nodemailer": "^9.0.0"
+  }
+}

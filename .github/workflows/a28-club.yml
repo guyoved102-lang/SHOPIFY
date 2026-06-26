@@ -1,0 +1,37 @@
+name: A28 — SockAcademy Club
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'   # Monday 08:00 UTC — start of editorial week
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: sockacademy/agents/A28_club/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: sockacademy/agents/A28_club
+
+      - name: Run A28 Club Agent
+        run: node agent.js
+        working-directory: sockacademy/agents/A28_club
+        env:
+          LAUNCH_MODE:          'false'
+          INVITATIONS_ACTIVE:   'false'
+          DRY_RUN:              'true'
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
+          SHOPIFY_SHOP_DOMAIN:  ${{ secrets.SHOPIFY_SHOP_DOMAIN }}
+          SHOPIFY_MASTER_TOKEN: ${{ secrets.SHOPIFY_MASTER_TOKEN }}
+          GMAIL_APP_PASSWORD:   ${{ secrets.GMAIL_APP_PASSWORD }}
