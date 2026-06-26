@@ -357,6 +357,35 @@ GRANT USAGE, SELECT ON SEQUENCE <table_name>_id_seq TO service_role, anon, authe
 
 ---
 
+## 27. Agent Dormant ללא LAUNCH_MODE Gate — שריפת קרדיטים לפני Launch
+
+**מה קרה (26/06/2026):** A14/A18/A19/A20/A21/A22/A23 נבנו כ-"dormant" אבל ללא gate אמיתי — `DRY_RUN=false` עצר רק כתיבה לDB, אבל Anthropic + Perplexity API calls רצו בכל cron. אחרי Anthropic outage התגלה שכולם שרפו קרדיטים ללא ערך.
+
+**סיבה:** DRY_RUN ≠ dormancy. DRY_RUN מונע Supabase writes. LAUNCH_MODE מונע כל API call.
+
+**פרוטוקול:**
+- כל agent שנבנה אך לא מופעל עד Launch → חייב 4 שורות בתחילת `main()`:
+```javascript
+if (process.env.LAUNCH_MODE !== 'true') {
+  console.log('[AXX] DORMANT — set LAUNCH_MODE=true to activate. No API calls made.');
+  process.exit(0);
+}
+```
+- YAML מקביל → `LAUNCH_MODE: 'false'` בסעיף `env:`
+- **DRY_RUN** = מצב בדיקה (API calls כן, DB writes לא)
+- **LAUNCH_MODE=false** = dormancy מוחלטת (אפס API calls)
+
+**LAUNCH ACTIVATION PROTOCOL — חוק ממשל:**
+שינוי `LAUNCH_MODE: 'false'` → `'true'` מחייב אישור גיא + CTO **באותה שיחה**. אין חריגות. אין הפעלה אוטומטית.
+
+**בדיקה לפני כל push של agent dormant חדש:**
+```bash
+grep -c "LAUNCH_MODE" sockacademy/agents/A<N>_*/agent.js   # חייב לחזור ≥1
+grep "LAUNCH_MODE" .github/workflows/a<N>-*.yml            # חייב לחזור 'false'
+```
+
+---
+
 ## SESSION CONTINUITY CHECKLIST — בכל שיחה
 
 **פתיחה:**
