@@ -13,6 +13,8 @@ require('dotenv').config({ path: '../../.env' });
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 
+const { sendTelegram } = require('../../corp/core/telegram.js');
+
 const DRY_RUN        = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL    = 'guyoved102@gmail.com';
 const REPORT_DATE    = new Date().toISOString().split('T')[0];
@@ -235,6 +237,39 @@ async function sendReport(html, weekLabel) {
   console.log('   Email sent');
 }
 
+// ─── TELEGRAM ────────────────────────────────────────────────────────────────
+
+async function sendTelegramReport(stats, allTimeOrders, ilsRate, catalog, alerts, weekLabel) {
+  if (DRY_RUN) { console.log('[DRY_RUN] Would send A15 Telegram report'); return; }
+
+  const progress   = phase2Progress(allTimeOrders, stats.revenue);
+  const ilsStr     = ilsRate ? ` | ₪${(stats.revenue * ilsRate).toFixed(0)}` : '';
+  const marginStr  = catalog ? `${catalog.avg_gross_margin_pct}% שוליים ממוצעים (${catalog.products_analyzed} מוצרים)` : 'שוליים: אין נתון';
+  const criticals  = alerts.filter(a => a.level === 'critical');
+  const alertBlock = criticals.length > 0
+    ? '\n\n⚠️ <b>התראות:</b>\n' + criticals.map(a => `• ${a.message}`).join('\n')
+    : '';
+
+  const lines = [
+    `💰 <b>A15 CFO — דוח פיננסי שבועי</b>`,
+    `📅 ${weekLabel}`,
+    '',
+    `<b>הכנסות (7 ימים):</b>`,
+    `• הזמנות: ${stats.count} | הכנסות: $${stats.revenue}${ilsStr}`,
+    `• AOV: $${stats.aov}`,
+    ilsRate ? `• שער USD/ILS: ${ilsRate.toFixed(3)}` : '',
+    '',
+    marginStr,
+    '',
+    `<b>פרוגרס Phase 2:</b>`,
+    `• הזמנות: ${progress.orderPct}% מתוך ${PHASE2_ORDER_TRIGGER}`,
+    `• MRR משוער: $${progress.estimatedMrr} — ${progress.mrrPct}% מתוך $${PHASE2_MRR_TRIGGER}`,
+    alertBlock,
+  ];
+
+  await sendTelegram(lines.filter(l => l !== '').join('\n'));
+}
+
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -292,6 +327,7 @@ async function main() {
   await writeReport(supabase, kpis, alerts);
   const html = buildFinancialHtml(stats, allTimeOrders, ilsRate, weekLabel);
   await sendReport(html, weekLabel);
+  await sendTelegramReport(stats, allTimeOrders, ilsRate, catalog, alerts, weekLabel);
   await logHealth(supabase, 'success', {
     orders7d:         stats.count,
     revenue7d:        stats.revenue,

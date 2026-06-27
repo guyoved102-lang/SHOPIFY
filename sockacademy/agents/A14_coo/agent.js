@@ -11,7 +11,8 @@ require('dotenv').config({ path: '../../.env' });
 const { createClient } = require('@supabase/supabase-js');
 const Anthropic = require('@anthropic-ai/sdk');
 const nodemailer = require('nodemailer');
-const { withRetry } = require('../../corp/core/anthropic-retry.js');
+const { withRetry }    = require('../../corp/core/anthropic-retry.js');
+const { sendTelegram } = require('../../corp/core/telegram.js');
 
 const DRY_RUN     = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL = 'guyoved102@gmail.com';
@@ -148,7 +149,7 @@ async function generateNarrative(health, pipeline, qc, alerts) {
     max_tokens: 200,
     messages: [{
       role:    'user',
-      content: `You are the COO of SockAcademy, a premium sock e-commerce brand. Write a 3-sentence daily operations briefing for the CEO based on this data. Be direct, factual, and flag only what needs attention. No greetings, no sign-off.\n\n${ctx}`,
+      content: `אתה ה-COO של SockAcademy, מותג גרביים פרמיום. כתוב בעברית עסקית ומקצועית ברמה גבוהה דוח תפעולי יומי של 3 משפטים עבור ה-CEO, בהתבסס על הנתונים הבאים. היה ישיר, עובדתי, וסמן רק מה שדורש תשומת לב. ללא ברכות, ללא חתימה.\n\n${ctx}`,
     }],
   }), 'A14');
   return msg.content[0].text.trim();
@@ -267,6 +268,40 @@ async function sendDigestEmail(health, pipeline, qc, alerts, narrative) {
   console.log('📧 COO digest sent');
 }
 
+// ─── TELEGRAM ────────────────────────────────────────────────────────────────
+
+async function sendTelegramReport(health, pipeline, qc, alerts, narrative) {
+  if (DRY_RUN) { console.log('[DRY_RUN] Would send A14 Telegram report'); return; }
+
+  const statusLine = health.failed > 0
+    ? `🔴 ${health.failed} כישלון/ות`
+    : `🟢 כל הסוכנים תקינים`;
+
+  const criticals = alerts.filter(a => a.level === 'critical');
+  const alertBlock = criticals.length > 0
+    ? '\n\n⚠️ <b>התראות קריטיות:</b>\n' + criticals.map(a => `• ${a.message}`).join('\n')
+    : '';
+
+  const lines = [
+    `📊 <b>A14 COO — דוח תפעולי יומי</b>`,
+    `📅 ${REPORT_DATE}`,
+    '',
+    narrative || '',
+    '',
+    `<b>סוכנים (24 שעות):</b> ${statusLine}`,
+    `• תקינים: ${health.healthy} | נכשלו: ${health.failed} | אזהרות: ${health.warning}`,
+    '',
+    `<b>צינור מוצרים:</b>`,
+    `• ממתינים ל-QC: ${pipeline.pending_qc}`,
+    `• מאושרים להעלאה: ${pipeline.qc_approved}`,
+    `• הועלו (7 ימים): ${pipeline.uploaded_7d} | סה"כ חי: ${pipeline.total_uploaded}`,
+    qc.qc_pass_rate_7d !== null ? `• QC pass rate (7 ימים): ${qc.qc_pass_rate_7d}%` : '',
+    alertBlock,
+  ];
+
+  await sendTelegram(lines.filter(l => l !== '').join('\n'));
+}
+
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -312,6 +347,7 @@ async function main() {
 
   await writeReport(sb, kpis, alerts, narrative);
   await sendDigestEmail(health, pipeline, qc, alerts, narrative);
+  await sendTelegramReport(health, pipeline, qc, alerts, narrative);
   await logHealth(sb, 'success', { agents_seen: health.agents_seen, alerts: alerts.length });
 
   console.log('\n' + '─'.repeat(52));
