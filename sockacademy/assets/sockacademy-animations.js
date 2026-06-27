@@ -249,45 +249,58 @@
 })();
 
 /* ─────────────────────────────────────────────
-   SCROLL ENTRANCE ANIMATIONS (Intersection Observer)
+   SCROLL ENTRANCE ANIMATIONS — GSAP ScrollTrigger
+   Phase 4 Layer 1A — replaces IntersectionObserver
 ───────────────────────────────────────────── */
 
 (function () {
   'use strict';
 
-  function initScrollEntrance() {
-    if (!('IntersectionObserver' in window)) {
-      // Fallback: make everything visible immediately
+  function initGSAPReveal() {
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
       document.querySelectorAll('.shopify-section').forEach(function (el) {
-        el.classList.add('is-visible');
+        el.style.opacity = '1';
+        el.style.transform = 'none';
       });
       return;
     }
 
-    var observer = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    gsap.registerPlugin(ScrollTrigger);
 
-    document.querySelectorAll('.shopify-section').forEach(function (el) {
-      observer.observe(el);
+    // Mobile 70% Fallback Rule — half intensity on < 750px
+    var mobile   = window.matchMedia('(max-width: 749px)').matches;
+    var yOffset  = mobile ? 22 : 38;
+    var duration = mobile ? 0.55 : 0.85;
+    var stagger  = mobile ? 0 : 0.1;
+
+    // Set initial state — hero exempt (CRO Arbiter)
+    gsap.set('.shopify-section:not(:first-child)', { opacity: 0, y: yOffset });
+
+    ScrollTrigger.batch('.shopify-section:not(:first-child)', {
+      onEnter: function (batch) {
+        gsap.to(batch, {
+          opacity: 1,
+          y: 0,
+          duration: duration,
+          stagger: stagger,
+          ease: 'power2.out',
+          clearProps: 'transform',
+        });
+      },
+      start: 'top 92%',
+      once: true,
     });
 
-    // Re-observe sections added dynamically in Theme Editor
-    document.addEventListener('shopify:section:load', function (e) {
-      var section = e.target.closest('.shopify-section');
-      if (section) observer.observe(section);
+    // Shopify Theme Editor — refresh on section load/reorder
+    document.addEventListener('shopify:section:load', function () {
+      ScrollTrigger.refresh();
     });
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initScrollEntrance);
+    document.addEventListener('DOMContentLoaded', initGSAPReveal);
   } else {
-    initScrollEntrance();
+    initGSAPReveal();
   }
 
 })();
@@ -307,7 +320,13 @@
       smoothTouch: false,
       touchMultiplier: 2,
     });
-    (function raf(t) { lenis.raf(t); requestAnimationFrame(raf); })(0);
+    if (typeof gsap !== 'undefined') {
+      // Sync with GSAP RAF — eliminates jank between Lenis + ScrollTrigger
+      gsap.ticker.add(function (time) { lenis.raf(time * 1000); });
+      gsap.ticker.lagSmoothing(0);
+    } else {
+      (function raf(t) { lenis.raf(t); requestAnimationFrame(raf); })(0);
+    }
   }
 
   initLenis();

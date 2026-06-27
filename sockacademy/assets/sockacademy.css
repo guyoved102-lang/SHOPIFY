@@ -232,3 +232,37 @@ textarea:focus {
     grid-template-columns: repeat(2, 1fr) !important;
   }
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PHASE 4 — FLUID TYPOGRAPHY SCALE
+   clamp(min, preferred, max) — responsive without breakpoints
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+:root {
+  --text-xs:   clamp(0.6875rem, 0.65rem  + 0.19vw, 0.8125rem);
+  --text-sm:   clamp(0.8125rem, 0.77rem  + 0.22vw, 0.9375rem);
+  --text-base: clamp(0.9375rem, 0.875rem + 0.31vw, 1.0625rem);
+  --text-lg:   clamp(1.125rem,  1rem     + 0.63vw, 1.375rem);
+  --text-xl:   clamp(1.375rem,  1.1rem   + 1.38vw, 2rem);
+  --text-2xl:  clamp(1.875rem,  1.35rem  + 2.63vw, 3rem);
+  --text-3xl:  clamp(2.5rem,    1.75rem  + 3.75vw, 4.5rem);
+  --text-hero: clamp(3rem,      2rem     + 5vw,    6rem);
+}
+
+/* Section headings — targeted, avoids Dawn theme settings conflict */
+.hero__title,
+.banner__heading,
+[class*="section__title"],
+[class*="section-heading"] {
+  font-size: var(--text-hero);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.featured-collection .collection__title,
+h2.h1 {
+  font-size: var(--text-3xl);
+  line-height: 1.1;
+}
+
+h3, .h3 { font-size: var(--text-2xl); line-height: 1.2; }
+h4, .h4 { font-size: var(--text-xl);  line-height: 1.25; }

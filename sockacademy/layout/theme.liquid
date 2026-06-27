@@ -59,11 +59,18 @@
 
     <link rel="stylesheet" href="{{ 'sockacademy.css' | asset_url }}">
     <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
     <script src="{{ 'sockacademy-animations.js' | asset_url }}" defer="defer"></script>
     <style>
-      .sa-section, section, .shopify-section { opacity: 1 !important; visibility: visible !important; }
-      .shopify-section { transform: translateY(30px); transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
-      .shopify-section.is-visible { transform: translateY(0); }
+      /* GSAP controls animation — CSS sets initial invisible state only */
+      .shopify-section:not(:first-child) { opacity: 0; }
+      /* Hero always visible — CRO Arbiter */
+      .shopify-section:first-child { opacity: 1 !important; transform: none !important; }
+      /* Reduced motion — skip all animation */
+      @media (prefers-reduced-motion: reduce) {
+        .shopify-section { opacity: 1 !important; transform: none !important; }
+      }
     </style>
 
     {{ content_for_header }}
