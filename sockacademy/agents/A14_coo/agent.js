@@ -13,6 +13,7 @@ const Anthropic = require('@anthropic-ai/sdk');
 const nodemailer = require('nodemailer');
 const { withRetry }    = require('../../corp/core/anthropic-retry.js');
 const { sendTelegram } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 
 const DRY_RUN     = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL = 'guyoved102@gmail.com';
@@ -346,6 +347,21 @@ async function main() {
   }
 
   await writeReport(sb, kpis, alerts, narrative);
+
+  if (!DRY_RUN) {
+    await writeMetrics(sb, 'A14', REPORT_DATE, [
+      { name: 'agents_healthy',       value: health.healthy,          unit: 'count' },
+      { name: 'agents_failed',        value: health.failed,           unit: 'count' },
+      { name: 'agents_warning',       value: health.warning,          unit: 'count' },
+      { name: 'agents_total_runs',    value: health.total_runs,       unit: 'count' },
+      { name: 'pipeline_pending_qc',  value: pipeline.pending_qc,     unit: 'count' },
+      { name: 'pipeline_qc_approved', value: pipeline.qc_approved,    unit: 'count' },
+      { name: 'pipeline_uploaded_7d', value: pipeline.uploaded_7d,    unit: 'count' },
+      { name: 'pipeline_total_live',  value: pipeline.total_uploaded,  unit: 'count' },
+      ...(qc.qc_pass_rate_7d !== null ? [{ name: 'qc_pass_rate_7d', value: qc.qc_pass_rate_7d, unit: 'pct' }] : []),
+    ]);
+  }
+
   await sendDigestEmail(health, pipeline, qc, alerts, narrative);
   await sendTelegramReport(health, pipeline, qc, alerts, narrative);
   await logHealth(sb, 'success', { agents_seen: health.agents_seen, alerts: alerts.length });

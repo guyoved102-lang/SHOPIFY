@@ -14,6 +14,7 @@ const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 
 const { sendTelegram } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 
 const DRY_RUN        = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL    = 'guyoved102@gmail.com';
@@ -325,6 +326,26 @@ async function main() {
   }
 
   await writeReport(supabase, kpis, alerts);
+
+  if (!DRY_RUN) {
+    await writeMetrics(supabase, 'A15', REPORT_DATE, [
+      { name: 'orders_7d',             value: stats.count,                                    unit: 'count' },
+      { name: 'revenue_7d_usd',        value: stats.revenue,                                  unit: 'usd' },
+      { name: 'aov_7d',                value: stats.aov,                                      unit: 'usd' },
+      { name: 'refunds_7d_usd',        value: stats.refunds,                                  unit: 'usd' },
+      { name: 'orders_all_time',       value: allTimeOrders,                                  unit: 'count' },
+      { name: 'estimated_mrr_usd',     value: progress.estimatedMrr,                          unit: 'usd' },
+      { name: 'phase2_order_pct',      value: progress.orderPct,                              unit: 'pct' },
+      { name: 'phase2_mrr_pct',        value: progress.mrrPct,                                unit: 'pct' },
+      ...(ilsRate ? [{ name: 'usd_ils_rate', value: ilsRate, unit: 'rate' }] : []),
+      ...(catalog ? [
+        { name: 'catalog_avg_margin_pct', value: catalog.avg_gross_margin_pct,               unit: 'pct' },
+        { name: 'catalog_products',       value: catalog.products_analyzed,                   unit: 'count' },
+        { name: 'catalog_potential_rev',  value: catalog.potential_revenue_at_sell_through,   unit: 'usd' },
+      ] : []),
+    ]);
+  }
+
   const html = buildFinancialHtml(stats, allTimeOrders, ilsRate, weekLabel);
   await sendReport(html, weekLabel);
   await sendTelegramReport(stats, allTimeOrders, ilsRate, catalog, alerts, weekLabel);
