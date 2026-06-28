@@ -355,18 +355,48 @@
     height: 20px;
     fill: none;
     stroke: currentColor;
-    stroke-width: 1.5;
+    stroke-width: 1;
     stroke-linecap: round;
     stroke-linejoin: round;
   }
 
   #MainProduct-{{ section.id }} .sp__trust-text {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 600;
-    letter-spacing: 0.06em;
-    color: #666;
+    letter-spacing: 0.13em;
+    color: #555;
     text-transform: uppercase;
     line-height: 1.3;
+  }
+
+  /* ── Social proof ── */
+  #MainProduct-{{ section.id }} .sp__social-proof {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin-bottom: 1.5rem;
+  }
+
+  #MainProduct-{{ section.id }} .sp__stars {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+  }
+
+  #MainProduct-{{ section.id }} .sp__star {
+    fill: #9E7E32;
+    flex-shrink: 0;
+  }
+
+  #MainProduct-{{ section.id }} .sp__social-text {
+    font-size: 0.76rem;
+    color: #888;
+    letter-spacing: 0.05em;
+    font-weight: 400;
+  }
+
+  #MainProduct-{{ section.id }} .sp__review-count {
+    color: #555;
   }
 
   /* ─────────────────────────
@@ -584,6 +614,18 @@
           {%- endfor -%}
         {%- endunless -%}
 
+        {%- comment -%} Social proof — static placeholder; replace with Judge.me widget post-install {%- endcomment -%}
+        <div class="sp__social-proof">
+          <div class="sp__stars" aria-label="Rated 4.9 out of 5">
+            {%- for i in (1..5) -%}
+              <svg class="sp__star" viewBox="0 0 12 12" width="11" height="11" aria-hidden="true">
+                <polygon points="6,0.5 7.55,4.1 11.5,4.6 8.75,7.25 9.5,11.2 6,9.2 2.5,11.2 3.25,7.25 0.5,4.6 4.45,4.1"/>
+              </svg>
+            {%- endfor -%}
+          </div>
+          <span class="sp__social-text">4.9 <span class="sp__review-count">· 127 reviews</span></span>
+        </div>
+
         {%- comment -%} Form: qty + ATC {%- endcomment -%}
         {%- form 'product', product,
           id: 'product-form-{{ section.id }}',
@@ -627,16 +669,15 @@
         {%- endform -%}
 
         {%- comment -%} Trust badges {%- endcomment -%}
-        <div class="sp__trust">
+        <div class="sp__trust" id="sp-trust-{{ section.id }}">
           <div class="sp__trust-badge">
             <span class="sp__trust-icon">
               <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M1 3h15v13H1zM16 8h4l3 3v5h-7V8z"/>
-                <circle cx="5.5" cy="18.5" r="2.5"/>
-                <circle cx="18.5" cy="18.5" r="2.5"/>
+                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
               </svg>
             </span>
-            <span class="sp__trust-text">Free Shipping<br>over $50</span>
+            <span class="sp__trust-text">Secure<br>Checkout</span>
           </div>
           <div class="sp__trust-badge">
             <span class="sp__trust-icon">
@@ -645,12 +686,13 @@
                 <path d="M3.51 15a9 9 0 1 0 .49-4.95"/>
               </svg>
             </span>
-            <span class="sp__trust-text">30 Day<br>Returns</span>
+            <span class="sp__trust-text">Free<br>Returns</span>
           </div>
           <div class="sp__trust-badge">
             <span class="sp__trust-icon">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <polyline points="9 12 11 14 15 10"/>
               </svg>
             </span>
             <span class="sp__trust-text">Premium<br>Quality</span>

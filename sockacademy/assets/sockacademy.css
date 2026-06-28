@@ -266,3 +266,112 @@ h2.h1 {
 
 h3, .h3 { font-size: var(--text-2xl); line-height: 1.2; }
 h4, .h4 { font-size: var(--text-xl);  line-height: 1.25; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PHASE 4 LAYER 3 — STICKY ATC BAR
+   Mobile only (≤ 749px). GSAP controls translateY.
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@keyframes sa-gold-sweep {
+  0%, 6%  { transform: translateX(-130%) skewX(-14deg); opacity: 0; }
+  8%      {                                              opacity: 1; }
+  20%     { transform: translateX(260%)  skewX(-14deg); opacity: 0; }
+  21%     { transform: translateX(-130%) skewX(-14deg); opacity: 0; }
+  100%    { transform: translateX(-130%) skewX(-14deg); opacity: 0; }
+}
+
+@media screen and (max-width: 749px) {
+  #sa-sticky-atc {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 9998;
+    background: #111111;
+    border-top: 1px solid rgba(201, 168, 76, 0.12);
+    transform: translateY(100%); /* GSAP owns this */
+    will-change: transform;
+    -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+  }
+
+  .sa-sticky-atc__inner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.875rem 1.25rem;
+    padding-bottom: calc(0.875rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .sa-sticky-atc__info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .sa-sticky-atc__price {
+    font-family: 'Playfair Display', sans-serif;
+    font-size: 1.05rem;
+    letter-spacing: 0.04em;
+    color: #C9A84C;
+    line-height: 1;
+  }
+
+  .sa-sticky-atc__variant {
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: #555;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sa-sticky-atc__btn {
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #C9A84C;
+    border: none;
+    color: #1A1A1A;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.70rem;
+    font-weight: 700;
+    letter-spacing: 0.17em;
+    text-transform: uppercase;
+    padding: 0.9rem 1.4rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.18s;
+  }
+
+  .sa-sticky-atc__btn:disabled {
+    background: #2A2A2A;
+    color: #444;
+    cursor: not-allowed;
+  }
+
+  /* Light-reflection sweep — luxury watch sapphire effect */
+  .sa-sticky-atc__shimmer {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      108deg,
+      transparent            30%,
+      rgba(255, 255, 255, 0.26) 46%,
+      rgba(255, 255, 255, 0.10) 54%,
+      transparent            70%
+    );
+    animation: sa-gold-sweep 7s linear infinite;
+    pointer-events: none;
+    will-change: transform, opacity;
+  }
+
+  .sa-sticky-atc__btn:disabled .sa-sticky-atc__shimmer {
+    animation: none;
+  }
+}

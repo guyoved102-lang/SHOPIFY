@@ -427,3 +427,125 @@
   initLenis();
 
 })();
+
+/* ─────────────────────────────────────────────
+   PRODUCT CRO — Trust badges + Sticky ATC bar
+   Phase 4 Layer 3 — social proof reveal + mobile ATC
+───────────────────────────────────────────── */
+(function () {
+  'use strict';
+
+  function initProductCRO() {
+    var isMobile = window.matchMedia('(max-width: 749px)').matches;
+
+    /* ── Social proof: GSAP fade-in ─────────────────────────── */
+    var social = document.querySelector('.sp__social-proof');
+    if (social && typeof gsap !== 'undefined') {
+      gsap.from(social, {
+        opacity: 0, y: 6,
+        duration: 0.55, ease: 'power2.out', delay: 0.30,
+        clearProps: 'transform',
+      });
+    }
+
+    /* ── Trust badges: GSAP fade-in ─────────────────────────── */
+    var trust = document.querySelector('.sp__trust');
+    if (trust && typeof gsap !== 'undefined') {
+      gsap.from(trust, {
+        opacity: 0, y: 8,
+        duration: 0.65, ease: 'power2.out', delay: 0.45,
+        clearProps: 'transform',
+      });
+    }
+
+    /* ── Sticky ATC bar — mobile only ───────────────────────── */
+    if (!isMobile) return;
+    if (typeof gsap === 'undefined') return;
+
+    var nativeBtn = document.querySelector('.sp__atc-btn');
+    if (!nativeBtn) return;
+
+    /* Build bar DOM */
+    var bar = document.createElement('div');
+    bar.id = 'sa-sticky-atc';
+    bar.setAttribute('aria-hidden', 'true');
+
+    function getPriceText() {
+      var el = document.querySelector('.sp__price');
+      return el ? el.textContent.trim() : '';
+    }
+
+    function getVariantLabel() {
+      var parts = [];
+      document.querySelectorAll('.sp__opt-btn--active').forEach(function (b) {
+        parts.push(b.dataset.optionValue);
+      });
+      return parts.length ? parts.join(' · ') : '';
+    }
+
+    bar.innerHTML =
+      '<div class="sa-sticky-atc__inner">' +
+        '<div class="sa-sticky-atc__info">' +
+          '<span class="sa-sticky-atc__price">' + getPriceText() + '</span>' +
+          '<span class="sa-sticky-atc__variant">' + getVariantLabel() + '</span>' +
+        '</div>' +
+        '<button type="button" class="sa-sticky-atc__btn"' +
+          (nativeBtn.disabled ? ' disabled' : '') +
+          ' aria-label="Add to cart">' +
+          '<span class="sa-sticky-atc__shimmer" aria-hidden="true"></span>' +
+          '<span class="sa-sticky-atc__label">ADD TO CART</span>' +
+        '</button>' +
+      '</div>';
+
+    document.body.appendChild(bar);
+
+    /* Keep price + variant in sync with native form state */
+    function syncBar() {
+      var ps = bar.querySelector('.sa-sticky-atc__price');
+      var vs = bar.querySelector('.sa-sticky-atc__variant');
+      var sb = bar.querySelector('.sa-sticky-atc__btn');
+      if (ps) ps.textContent = getPriceText();
+      if (vs) vs.textContent = getVariantLabel();
+      if (sb) sb.disabled   = nativeBtn.disabled;
+    }
+
+    document.querySelectorAll('.sp__opt-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () { setTimeout(syncBar, 60); });
+    });
+
+    /* Watch price span for variant-driven mutations */
+    var priceEl = document.querySelector('.sp__price');
+    if (priceEl) {
+      new MutationObserver(syncBar).observe(priceEl, {
+        childList: true, subtree: true, characterData: true,
+      });
+    }
+
+    /* Show / hide via IntersectionObserver → GSAP slide */
+    var shown = false;
+    new IntersectionObserver(function (entries) {
+      var nativeInView = entries[0].isIntersecting;
+      if (!nativeInView && !shown) {
+        shown = true;
+        bar.setAttribute('aria-hidden', 'false');
+        gsap.to(bar, { y: '0%', duration: 0.42, ease: 'power3.out' });
+      } else if (nativeInView && shown) {
+        shown = false;
+        bar.setAttribute('aria-hidden', 'true');
+        gsap.to(bar, { y: '100%', duration: 0.32, ease: 'power2.in' });
+      }
+    }, { threshold: 0.1 }).observe(nativeBtn);
+
+    /* Tap sticky btn → trigger native form submit */
+    bar.querySelector('.sa-sticky-atc__btn').addEventListener('click', function () {
+      if (!nativeBtn.disabled) nativeBtn.click();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initProductCRO);
+  } else {
+    initProductCRO();
+  }
+
+})();
