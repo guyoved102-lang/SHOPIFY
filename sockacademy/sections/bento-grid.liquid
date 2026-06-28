@@ -1,0 +1,614 @@
+{%- style -%}
+  #SaBento-{{ section.id }} {
+    background-color: #1A1A1A;
+    padding: 6rem 2rem;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__eyebrow {
+    text-align: center;
+    color: #C9A84C;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin: 0 0 0.75rem;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__heading {
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.75rem, 3.5vw, 2.75rem);
+    font-weight: 400;
+    font-style: italic;
+    color: #F0EDE6;
+    margin: 0 0 3rem;
+    line-height: 1.15;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    grid-template-rows: 240px 240px auto;
+    gap: 0.875rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__tile {
+    background: #1E1E1E;
+    border: 1px solid #252525;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    transition: border-color 0.38s ease, box-shadow 0.38s ease;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__tile:hover {
+    border-color: rgba(201, 168, 76, 0.22);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.50);
+  }
+
+  /* ── Featured (large — spans 2 rows) ── */
+  #SaBento-{{ section.id }} .sa-bento__tile--featured {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 2.25rem;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__tile-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__tile--featured:hover .sa-bento__tile-bg {
+    transform: scale(1.04);
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__tile-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.85) 0%,
+      rgba(0, 0, 0, 0.30) 50%,
+      transparent 100%
+    );
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__tile-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__tile-label {
+    display: block;
+    font-size: 0.63rem;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #C9A84C;
+    margin-bottom: 0.6rem;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__tile-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.4rem, 2.6vw, 2.1rem);
+    font-weight: 400;
+    color: #F0EDE6;
+    line-height: 1.1;
+    margin: 0 0 0.55rem;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__tile-sub {
+    font-size: 0.875rem;
+    color: rgba(240, 237, 230, 0.6);
+    margin: 0 0 1.35rem;
+    line-height: 1.5;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #1A1A1A;
+    background: #C9A84C;
+    padding: 0.7rem 1.35rem;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: background 0.2s;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__cta:hover {
+    background: #E2C47A;
+  }
+
+  /* ── Stat tile ── */
+  #SaBento-{{ section.id }} .sa-bento__tile--stat {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+    background: #111111;
+    border-color: rgba(201, 168, 76, 0.14);
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__stat-number {
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 4.5vw, 3.75rem);
+    font-weight: 700;
+    color: #C9A84C;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__stat-label {
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #555;
+    margin: 0.65rem 0 0;
+    max-width: 16ch;
+    line-height: 1.45;
+  }
+
+  /* ── Link tile ── */
+  #SaBento-{{ section.id }} .sa-bento__tile--link {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.75rem;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__tile--link .sa-bento__tile-title {
+    font-size: clamp(1rem, 1.7vw, 1.25rem);
+    margin: 0 0 0.35rem;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__tile--link .sa-bento__tile-sub {
+    font-size: 0.82rem;
+    color: #555;
+    margin: 0;
+    flex: 1;
+    line-height: 1.5;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__tile-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 1.25rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #C9A84C;
+    transition: gap 0.22s ease;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__tile--link:hover .sa-bento__tile-arrow {
+    gap: 0.75rem;
+  }
+
+  /* Subtle gold line appears on hover */
+  #SaBento-{{ section.id }} .sa-bento__tile--link::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(201, 168, 76, 0.7) 50%, transparent);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__tile--link:hover::after {
+    opacity: 1;
+  }
+
+  /* ── Quote tile ── */
+  #SaBento-{{ section.id }} .sa-bento__tile--quote {
+    grid-column: 1;
+    grid-row: 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem 2.5rem;
+    border-color: rgba(201, 168, 76, 0.08);
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__quote-mark {
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem;
+    color: rgba(201, 168, 76, 0.22);
+    line-height: 0.8;
+    margin-bottom: 0.5rem;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__quote-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(0.95rem, 1.5vw, 1.15rem);
+    font-style: italic;
+    color: #F0EDE6;
+    line-height: 1.6;
+    margin: 0 0 1rem;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__quote-attr {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #444;
+  }
+
+  /* ── Benefit tile ── */
+  #SaBento-{{ section.id }} .sa-bento__tile--benefit {
+    grid-column: 2;
+    grid-row: 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 2rem;
+    background: #111111;
+    border-color: rgba(201, 168, 76, 0.1);
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__benefit-icon {
+    width: 34px;
+    height: 34px;
+    color: #C9A84C;
+    margin-bottom: 1rem;
+    flex-shrink: 0;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__benefit-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__benefit-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #F0EDE6;
+    margin: 0 0 0.35rem;
+  }
+
+  #SaBento-{{ section.id }} .sa-bento__benefit-sub {
+    font-size: 0.82rem;
+    color: #555;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     MOBILE
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  @media screen and (max-width: 749px) {
+    #SaBento-{{ section.id }} {
+      padding: 3.5rem 1.25rem;
+    }
+
+    #SaBento-{{ section.id }} .sa-bento__grid {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+      gap: 0.75rem;
+    }
+
+    #SaBento-{{ section.id }} .sa-bento__tile--featured {
+      grid-column: 1;
+      grid-row: auto;
+      min-height: 300px;
+    }
+
+    #SaBento-{{ section.id }} .sa-bento__tile--stat,
+    #SaBento-{{ section.id }} .sa-bento__tile--link,
+    #SaBento-{{ section.id }} .sa-bento__tile--quote,
+    #SaBento-{{ section.id }} .sa-bento__tile--benefit {
+      grid-column: 1;
+      grid-row: auto;
+      min-height: 150px;
+    }
+
+    #SaBento-{{ section.id }} .sa-bento__tile--quote {
+      padding: 1.75rem;
+    }
+  }
+{%- endstyle -%}
+
+<section id="SaBento-{{ section.id }}">
+
+  {%- if section.settings.eyebrow != blank or section.settings.heading != blank -%}
+    <header>
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="sa-bento__eyebrow">{{ section.settings.eyebrow }}</p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="sa-bento__heading">{{ section.settings.heading }}</h2>
+      {%- endif -%}
+    </header>
+  {%- endif -%}
+
+  <div class="sa-bento__grid">
+
+    <!-- Tile 1: Featured — large card spanning 2 rows -->
+    <div class="sa-bento__tile sa-bento__tile--featured">
+      {%- if section.settings.featured_image != blank -%}
+        <div
+          class="sa-bento__tile-bg"
+          style="background-image: url('{{ section.settings.featured_image | image_url: width: 900 }}');"
+          aria-hidden="true"
+        ></div>
+      {%- else -%}
+        <div
+          class="sa-bento__tile-bg"
+          style="background: linear-gradient(135deg, #1A1A1A 0%, #222 100%);"
+          aria-hidden="true"
+        ></div>
+      {%- endif -%}
+      <div class="sa-bento__tile-overlay" aria-hidden="true"></div>
+      <div class="sa-bento__tile-content">
+        {%- if section.settings.featured_label != blank -%}
+          <span class="sa-bento__tile-label">{{ section.settings.featured_label }}</span>
+        {%- endif -%}
+        <h3 class="sa-bento__tile-title">{{ section.settings.featured_heading }}</h3>
+        {%- if section.settings.featured_sub != blank -%}
+          <p class="sa-bento__tile-sub">{{ section.settings.featured_sub }}</p>
+        {%- endif -%}
+        {%- if section.settings.featured_cta != blank and section.settings.featured_link != blank -%}
+          <a href="{{ section.settings.featured_link }}" class="sa-bento__cta">
+            {{- section.settings.featured_cta -}}
+          </a>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <!-- Tile 2: Stat — numeric impact -->
+    <div class="sa-bento__tile sa-bento__tile--stat">
+      <span class="sa-bento__stat-number">{{ section.settings.stat_number }}</span>
+      <p class="sa-bento__stat-label">{{ section.settings.stat_label }}</p>
+    </div>
+
+    <!-- Tile 3: Link — collection CTA -->
+    <a
+      class="sa-bento__tile sa-bento__tile--link"
+      {% if section.settings.link_url != blank %}
+        href="{{ section.settings.link_url }}"
+      {% else %}
+        role="link" aria-disabled="true"
+      {% endif %}
+    >
+      <div>
+        <h3 class="sa-bento__tile-title">{{ section.settings.link_heading }}</h3>
+        <p class="sa-bento__tile-sub">{{ section.settings.link_sub }}</p>
+      </div>
+      {%- if section.settings.link_cta != blank -%}
+        <span class="sa-bento__tile-arrow">
+          {{ section.settings.link_cta }}
+          <span aria-hidden="true">&#8594;</span>
+        </span>
+      {%- endif -%}
+    </a>
+
+    <!-- Tile 4: Quote — customer voice -->
+    <div class="sa-bento__tile sa-bento__tile--quote">
+      <span class="sa-bento__quote-mark" aria-hidden="true">&ldquo;</span>
+      <blockquote>
+        <p class="sa-bento__quote-text">{{ section.settings.quote_text }}</p>
+        {%- if section.settings.quote_attr != blank -%}
+          <footer>
+            <cite class="sa-bento__quote-attr">— {{ section.settings.quote_attr }}</cite>
+          </footer>
+        {%- endif -%}
+      </blockquote>
+    </div>
+
+    <!-- Tile 5: Benefit -->
+    <div class="sa-bento__tile sa-bento__tile--benefit">
+      <div class="sa-bento__benefit-icon" aria-hidden="true">
+        {%- case section.settings.benefit_icon -%}
+          {%- when 'shipping' -%}
+            <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v4h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          {%- when 'return' -%}
+            <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+          {%- when 'shield' -%}
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          {%- when 'star' -%}
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        {%- endcase -%}
+      </div>
+      <p class="sa-bento__benefit-title">{{ section.settings.benefit_heading }}</p>
+      <p class="sa-bento__benefit-sub">{{ section.settings.benefit_sub }}</p>
+    </div>
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SA Bento Grid",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "The Edit"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "What We're About"
+    },
+    {
+      "type": "header",
+      "content": "Featured tile (large)"
+    },
+    {
+      "type": "image_picker",
+      "id": "featured_image",
+      "label": "Background image"
+    },
+    {
+      "type": "text",
+      "id": "featured_label",
+      "label": "Eyebrow label",
+      "default": "New Arrivals"
+    },
+    {
+      "type": "text",
+      "id": "featured_heading",
+      "label": "Heading",
+      "default": "The Foundation Pieces"
+    },
+    {
+      "type": "text",
+      "id": "featured_sub",
+      "label": "Subtext",
+      "default": "What your drawer should look like."
+    },
+    {
+      "type": "text",
+      "id": "featured_cta",
+      "label": "Button label",
+      "default": "Start Here"
+    },
+    {
+      "type": "url",
+      "id": "featured_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Stat tile"
+    },
+    {
+      "type": "text",
+      "id": "stat_number",
+      "label": "Number",
+      "default": "10,247"
+    },
+    {
+      "type": "text",
+      "id": "stat_label",
+      "label": "Label",
+      "default": "pairs shipped this month"
+    },
+    {
+      "type": "header",
+      "content": "Link tile"
+    },
+    {
+      "type": "text",
+      "id": "link_heading",
+      "label": "Heading",
+      "default": "Everything Merino"
+    },
+    {
+      "type": "text",
+      "id": "link_sub",
+      "label": "Subtext",
+      "default": "The material that has no competition."
+    },
+    {
+      "type": "text",
+      "id": "link_cta",
+      "label": "CTA label",
+      "default": "Shop the Range"
+    },
+    {
+      "type": "url",
+      "id": "link_url",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Quote tile"
+    },
+    {
+      "type": "textarea",
+      "id": "quote_text",
+      "label": "Quote",
+      "default": "Finally. A sock worth remembering."
+    },
+    {
+      "type": "text",
+      "id": "quote_attr",
+      "label": "Attribution",
+      "default": "D.K., Tel Aviv"
+    },
+    {
+      "type": "header",
+      "content": "Benefit tile"
+    },
+    {
+      "type": "select",
+      "id": "benefit_icon",
+      "label": "Icon",
+      "options": [
+        { "value": "shipping", "label": "Shipping truck" },
+        { "value": "return",   "label": "Return / refresh" },
+        { "value": "shield",   "label": "Shield / protection" },
+        { "value": "star",     "label": "Star / quality" }
+      ],
+      "default": "shipping"
+    },
+    {
+      "type": "text",
+      "id": "benefit_heading",
+      "label": "Heading",
+      "default": "Free Shipping"
+    },
+    {
+      "type": "text",
+      "id": "benefit_sub",
+      "label": "Subtext",
+      "default": "On every order. No threshold."
+    }
+  ],
+  "presets": [
+    {
+      "name": "SA Bento Grid"
+    }
+  ]
+}
+{% endschema %}

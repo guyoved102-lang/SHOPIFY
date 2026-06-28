@@ -325,7 +325,7 @@
           gsap.to(batch, {
             opacity: 1, y: 0, filter: 'blur(0px)',
             duration: dur, stagger: mobile ? 0 : 0.10,
-            ease: 'power3.out',
+            ease: 'expo.out',
             clearProps: 'transform,filter',
           });
         },
@@ -349,7 +349,7 @@
           gsap.to(cards, {
             opacity: 1, y: 0, filter: 'blur(0px)',
             duration: dur, stagger: stagger,
-            ease: 'power3.out', delay: 0.10,
+            ease: 'back.out(1.7)', delay: 0.10,
             clearProps: 'transform,filter',
           });
         },
@@ -368,7 +368,7 @@
         onEnter: function () {
           gsap.to(sec, {
             opacity: 1, filter: 'blur(0px)',
-            duration: dur, ease: 'power3.out',
+            duration: dur, ease: 'expo.out',
             clearProps: 'filter',
           });
         },
@@ -546,6 +546,56 @@
     document.addEventListener('DOMContentLoaded', initProductCRO);
   } else {
     initProductCRO();
+  }
+
+})();
+
+/* ─────────────────────────────────────────────
+   MAGNETIC ATC HOVER — Desktop only
+   Phase 4 Layer 5 — premium pull effect on .sp__atc-btn
+   pointer: fine = mouse only (not touch/mobile)
+───────────────────────────────────────────── */
+(function () {
+  'use strict';
+
+  function initMagneticATC() {
+    if (!window.matchMedia('(pointer: fine)').matches) return;
+    if (typeof gsap === 'undefined') return;
+
+    var btns = document.querySelectorAll('.sp__atc-btn');
+    if (!btns.length) return;
+
+    btns.forEach(function (btn) {
+      btn.addEventListener('mousemove', function (e) {
+        if (btn.disabled) return;
+        var rect = btn.getBoundingClientRect();
+        var cx   = rect.left + rect.width  / 2;
+        var cy   = rect.top  + rect.height / 2;
+        var dx   = (e.clientX - cx) * 0.28;
+        var dy   = (e.clientY - cy) * 0.28;
+        gsap.to(btn, {
+          x: dx, y: dy,
+          duration: 0.38,
+          ease: 'power2.out',
+          overwrite: 'auto',
+        });
+      });
+
+      btn.addEventListener('mouseleave', function () {
+        gsap.to(btn, {
+          x: 0, y: 0,
+          duration: 0.70,
+          ease: 'elastic.out(1, 0.6)',
+          overwrite: 'auto',
+        });
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMagneticATC);
+  } else {
+    initMagneticATC();
   }
 
 })();
