@@ -6,11 +6,13 @@
 
   var KEN_BURNS_DURATION   = 10000; // ms — user-requested 10 s zoom
   var KEN_BURNS_END_SCALE  = 1.14;  // zoom in to 114%
-  var PARALLAX_FACTOR      = 0.28;  // bg scrolls at 28% of banner scroll speed
-  var PARALLAX_CLAMP       = 110;   // max px shift, must fit inside buffer below
+  var PARALLAX_FACTOR      = 0.40;  // bg scrolls at 40% of banner scroll speed
+  var PARALLAX_CLAMP       = 120;   // max px shift, must fit inside buffer (14% of ~900px = 126px)
+  var DEPTH_FACTOR         = 0.20;  // second depth layer: opposite direction, 20%
+  var DEPTH_CLAMP          = 60;    // depth layer max shift
 
   // The parallax wrapper overhangs the banner by BUFFER_PCT on top + bottom.
-  // At 100vh ≈ 900 px, 14% ≈ 126 px — comfortably above the 110 px clamp.
+  // At 100vh ≈ 900 px, 14% ≈ 126 px — comfortably above the 120 px clamp.
   var BUFFER_PCT = '14%';
 
   var PARTICLE_COUNT  = 38;
@@ -71,6 +73,20 @@
     probe.src = BG_URL;
 
     wrap.appendChild(bg);
+
+    // ── Depth layer (desktop only): second parallax plane, moves opposite to bg ──
+    var depthLayer = null;
+    if (window.innerWidth >= 750) {
+      depthLayer = document.createElement('div');
+      setStyles(depthLayer, {
+        position:      'absolute',
+        inset:         '0',
+        background:    'radial-gradient(ellipse at 40% 35%, rgba(201,168,76,0.05) 0%, rgba(201,168,76,0.02) 40%, transparent 70%)',
+        willChange:    'transform',
+        pointerEvents: 'none',
+      });
+      wrap.appendChild(depthLayer);
+    }
 
     // ── Layer 1: overlay ────────────────────────────────────────────────
     var overlay = document.createElement('div');
@@ -142,6 +158,13 @@
 
       // Apply both transforms to bg in one declaration — no conflict
       bg.style.transform = 'translateY(' + offset + 'px) scale(' + scale + ')';
+
+      // Depth layer: opposite direction → cinematic front/back separation
+      if (depthLayer) {
+        var depthRaw    = rect.top * DEPTH_FACTOR;
+        var depthOffset = Math.max(-DEPTH_CLAMP, Math.min(DEPTH_CLAMP, depthRaw));
+        depthLayer.style.transform = 'translateY(' + depthOffset + 'px)';
+      }
 
       // Particle canvas drifts at 0.3× scroll speed for depth separation
       var canvasRaw = rect.top * -0.30;
@@ -250,45 +273,117 @@
 
 /* ─────────────────────────────────────────────
    SCROLL ENTRANCE ANIMATIONS — GSAP ScrollTrigger
-   Phase 4 Layer 1A — replaces IntersectionObserver
+   Phase 4 Layer 2 — blur entrance, card stagger, featured parallax
 ───────────────────────────────────────────── */
 
 (function () {
   'use strict';
 
+  var CARD_SEL     = '.card-wrapper';
+  var FEATURED_SEL = '.featured-collection, [id*="FeaturedCollection"]';
+
   function initGSAPReveal() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
       document.querySelectorAll('.shopify-section').forEach(function (el) {
-        el.style.opacity = '1';
+        el.style.opacity   = '1';
         el.style.transform = 'none';
+        el.style.filter    = 'none';
       });
       return;
     }
 
     gsap.registerPlugin(ScrollTrigger);
 
-    // Mobile 70% Fallback Rule — half intensity on < 750px
-    var mobile   = window.matchMedia('(max-width: 749px)').matches;
-    var yOffset  = mobile ? 22 : 38;
-    var duration = mobile ? 0.55 : 0.85;
-    var stagger  = mobile ? 0 : 0.1;
+    // Mobile 70% Rule: half intensity, no blur, no stagger
+    var mobile  = window.matchMedia('(max-width: 749px)').matches;
+    var yOff    = mobile ? 22 : 48;
+    var dur     = mobile ? 0.40 : 0.70;
+    var blurIn  = mobile ? 'blur(0px)' : 'blur(10px)';
+    var stagger = mobile ? 0 : 0.08;
 
-    // Set initial state — hero exempt (CRO Arbiter)
-    gsap.set('.shopify-section:not(:first-child)', { opacity: 0, y: yOffset });
+    var standardSecs = [];
+    var featuredSecs = [];
+    var cardSecs     = [];
 
-    ScrollTrigger.batch('.shopify-section:not(:first-child)', {
-      onEnter: function (batch) {
-        gsap.to(batch, {
-          opacity: 1,
-          y: 0,
-          duration: duration,
-          stagger: stagger,
-          ease: 'power2.out',
-          clearProps: 'transform',
+    document.querySelectorAll('.shopify-section:not(:first-child)').forEach(function (sec) {
+      if (sec.querySelector(FEATURED_SEL)) {
+        featuredSecs.push(sec);
+      } else if (sec.querySelector(CARD_SEL)) {
+        cardSecs.push(sec);
+      } else {
+        standardSecs.push(sec);
+      }
+    });
+
+    // ── A. Standard sections: opacity + translateY + blur ─────────
+    if (standardSecs.length) {
+      gsap.set(standardSecs, { opacity: 0, y: yOff, filter: blurIn });
+      ScrollTrigger.batch(standardSecs, {
+        start: 'top 92%',
+        once: true,
+        onEnter: function (batch) {
+          gsap.to(batch, {
+            opacity: 1, y: 0, filter: 'blur(0px)',
+            duration: dur, stagger: mobile ? 0 : 0.10,
+            ease: 'power3.out',
+            clearProps: 'transform,filter',
+          });
+        },
+      });
+    }
+
+    // ── B. Card grid sections: section fade-in + dealing-cards stagger ──
+    cardSecs.forEach(function (sec) {
+      var cards = sec.querySelectorAll(CARD_SEL);
+
+      // CRO Arbiter: stagger 0.08s × N cards — always ≤ 0.5s total delay
+      gsap.set(sec,   { opacity: 0 });
+      gsap.set(cards, { opacity: 0, y: yOff, filter: blurIn });
+
+      ScrollTrigger.create({
+        trigger: sec,
+        start: 'top 88%',
+        once: true,
+        onEnter: function () {
+          gsap.to(sec, { opacity: 1, duration: 0.25 });
+          gsap.to(cards, {
+            opacity: 1, y: 0, filter: 'blur(0px)',
+            duration: dur, stagger: stagger,
+            ease: 'power3.out', delay: 0.10,
+            clearProps: 'transform,filter',
+          });
+        },
+      });
+    });
+
+    // ── C. Featured Collection: blur entrance + parallax scrub ────
+    featuredSecs.forEach(function (sec) {
+      var inner = sec.querySelector(FEATURED_SEL) || sec;
+
+      gsap.set(sec, { opacity: 0, filter: blurIn });
+      ScrollTrigger.create({
+        trigger: sec,
+        start: 'top 85%',
+        once: true,
+        onEnter: function () {
+          gsap.to(sec, {
+            opacity: 1, filter: 'blur(0px)',
+            duration: dur, ease: 'power3.out',
+            clearProps: 'filter',
+          });
+        },
+      });
+
+      // Parallax scrub: inner content drifts 6% top→bottom — desktop only
+      if (!mobile) {
+        gsap.fromTo(inner, { y: '6%' }, {
+          y: '-6%',
+          ease: 'none',
+          scrollTrigger: {
+            trigger: sec, start: 'top bottom', end: 'bottom top', scrub: 1.5,
+          },
         });
-      },
-      start: 'top 92%',
-      once: true,
+      }
     });
 
     // Shopify Theme Editor — refresh on section load/reorder
