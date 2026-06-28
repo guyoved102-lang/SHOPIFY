@@ -35,9 +35,9 @@
 | Glassmorphism cart drawer | Phase 4 Layer 4 | ✅ Live |
 | Product image hover depth | Phase 4 Layer 4 | ✅ Live |
 | Ken Burns collection banner | Phase 4 Layer 4 | ✅ Live |
-| Bento Grid Homepage | Phase 4 Layer 5 | 🔄 In progress |
-| GSAP Physics Easing upgrade | Phase 4 Layer 5 | 🔄 In progress |
-| Magnetic ATC Hover (desktop) | Phase 4 Layer 5 | 🔄 In progress |
+| Bento Grid Homepage | Phase 4 Layer 5 | ✅ Live |
+| GSAP Physics Easing upgrade | Phase 4 Layer 5 | ✅ Live |
+| Magnetic ATC Hover (desktop) | Phase 4 Layer 5 | ✅ Live |
 
 ---
 
@@ -89,4 +89,4 @@ All GSAP built-in eases — zero new dependencies.
 
 ---
 
-*Last updated: 28/06/2026 — Phase 4 Layer 5 planning*
+*Last updated: 28/06/2026 — Phase 4 Layer 5 complete and live*
