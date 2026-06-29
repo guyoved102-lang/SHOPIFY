@@ -453,6 +453,13 @@ h4, .h4 { font-size: var(--text-xl);  line-height: 1.25; }
   }
 }
 
+/* ── Academy Material Insight — page wrapper ─────────── */
+.sp__academy-section {
+  max-width: 680px;
+  margin: 2.5rem auto 0;
+  padding: 0 1.5rem;
+}
+
 /* ── Academy Material Insight Snippet ───────────────────
    Namespace: academy.*  |  Layouts: default + compact
    Reads metafields — renders nothing if empty.

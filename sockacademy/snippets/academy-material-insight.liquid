@@ -6,21 +6,37 @@
   Usage:
     {% render 'academy-material-insight', product: product %}
     {% render 'academy-material-insight', product: product, layout: 'compact' %}
+    {% render 'academy-material-insight', product: product, preview: true %}
 
   Layouts:
     default — full block with all specs (product pages)
     compact — grade + origin only (collection cards)
+
+  Preview mode (preview: true):
+    Renders with Merino 18.5μ dummy data — use for visual QA only.
+    Remove preview: true before going live.
 {% endcomment %}
 
 {%- liquid
-  assign grade         = product.metafields.academy.material_grade.value
-  assign origin        = product.metafields.academy.material_origin.value
-  assign composition   = product.metafields.academy.fiber_composition.value
-  assign gauge         = product.metafields.academy.construction_gauge.value
-  assign weave         = product.metafields.academy.weave_type.value
-  assign certification = product.metafields.academy.certification.value
-  assign note          = product.metafields.academy.material_note.value
-  assign layout        = layout | default: 'default'
+  assign layout = layout | default: 'default'
+
+  if preview == true
+    assign grade         = 'MERINO 18.5μ'
+    assign origin        = 'New Zealand Highlands'
+    assign composition   = '78% ZQ Merino Wool · 20% Nylon · 2% Elastane'
+    assign gauge         = '200-needle gauge'
+    assign weave         = 'Plain rib · Single-link toe'
+    assign certification = 'ZQ Merino Certified'
+    assign note          = 'Below the irritation threshold. Above every standard.'
+  else
+    assign grade         = product.metafields.academy.material_grade.value
+    assign origin        = product.metafields.academy.material_origin.value
+    assign composition   = product.metafields.academy.fiber_composition.value
+    assign gauge         = product.metafields.academy.construction_gauge.value
+    assign weave         = product.metafields.academy.weave_type.value
+    assign certification = product.metafields.academy.certification.value
+    assign note          = product.metafields.academy.material_note.value
+  endif
 -%}
 
 {% if grade != blank %}
