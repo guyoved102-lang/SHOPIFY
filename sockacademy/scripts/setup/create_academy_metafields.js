@@ -5,6 +5,8 @@
  *
  * Usage: node sockacademy/scripts/setup/create_academy_metafields.js
  * Requires: SHOPIFY_SHOP_DOMAIN + SHOPIFY_MASTER_TOKEN in .env
+ *
+ * Note: Shopify 2025-01 uses GraphQL for metafield definitions (REST removed).
  */
 
 require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
@@ -18,7 +20,7 @@ if (!SHOP || !TOKEN) {
   process.exit(1);
 }
 
-const BASE_URL = `https://${SHOP}/admin/api/${API_VER}`;
+const GQL_URL = `https://${SHOP}/admin/api/${API_VER}/graphql.json`;
 
 const METAFIELD_DEFINITIONS = [
   {
@@ -77,39 +79,76 @@ const METAFIELD_DEFINITIONS = [
   },
 ];
 
-async function shopifyRequest(endpoint, method = 'GET', body = null) {
-  const res = await fetch(`${BASE_URL}${endpoint}`, {
-    method,
+async function gql(query, variables = {}) {
+  const res = await fetch(GQL_URL, {
+    method: 'POST',
     headers: {
       'X-Shopify-Access-Token': TOKEN,
       'Content-Type': 'application/json',
     },
-    body: body ? JSON.stringify(body) : undefined,
+    body: JSON.stringify({ query, variables }),
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(`Shopify API ${res.status}: ${JSON.stringify(data.errors || data)}`);
-  return data;
+  const json = await res.json();
+  if (json.errors) throw new Error(JSON.stringify(json.errors));
+  return json.data;
 }
 
 async function getExistingDefinitions() {
-  const data = await shopifyRequest('/metafield_definitions.json?owner_type=PRODUCT&limit=250');
-  return data.metafield_definitions || [];
+  const query = `
+    query {
+      metafieldDefinitions(ownerType: PRODUCT, first: 250) {
+        edges {
+          node {
+            namespace
+            key
+            name
+          }
+        }
+      }
+    }
+  `;
+  const data = await gql(query);
+  return data.metafieldDefinitions.edges.map(e => e.node);
 }
 
 async function createDefinition(def) {
-  const body = {
-    metafield_definition: {
+  const mutation = `
+    mutation CreateMetafieldDefinition($definition: MetafieldDefinitionInput!) {
+      metafieldDefinitionCreate(definition: $definition) {
+        createdDefinition {
+          id
+          name
+          namespace
+          key
+        }
+        userErrors {
+          field
+          message
+          code
+        }
+      }
+    }
+  `;
+  const variables = {
+    definition: {
       namespace:   'academy',
-      owner_type:  'PRODUCT',
-      ...def,
+      ownerType:   'PRODUCT',
+      key:         def.key,
+      name:        def.name,
+      description: def.description,
+      type:        def.type,
     },
   };
-  const data = await shopifyRequest('/metafield_definitions.json', 'POST', body);
-  return data.metafield_definition;
+  const data = await gql(mutation, variables);
+  const result = data.metafieldDefinitionCreate;
+  if (result.userErrors && result.userErrors.length > 0) {
+    throw new Error(result.userErrors.map(e => `${e.code}: ${e.message}`).join('; '));
+  }
+  return result.createdDefinition;
 }
 
 async function run() {
-  console.log('🎓  SockAcademy — Metafield Definition Setup');
+  console.log('🎓  SockAcademy — Metafield Definition Setup (GraphQL)');
   console.log(`    Shop: ${SHOP} | API: ${API_VER}\n`);
 
   const existing = await getExistingDefinitions();
