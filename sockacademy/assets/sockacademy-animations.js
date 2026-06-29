@@ -599,3 +599,49 @@
   }
 
 })();
+
+/* ── Academy Material Insight — Scroll Reveal ────────────
+   Triggers .is-visible on [data-academy-insight] elements
+   when they enter the viewport. Uses IntersectionObserver
+   as a lightweight fallback when GSAP ScrollTrigger isn't
+   available (e.g. GSAP hasn't loaded yet on collection grids).
+   ────────────────────────────────────────────────────── */
+(function initAcademyInsight() {
+  function reveal() {
+    const insights = document.querySelectorAll('[data-academy-insight]');
+    if (!insights.length) return;
+
+    if (window.gsap && window.ScrollTrigger) {
+      insights.forEach(function (el) {
+        gsap.to(el, {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 88%',
+            once: true,
+          },
+        });
+      });
+    } else {
+      const io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+
+      insights.forEach(function (el) { io.observe(el); });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', reveal);
+  } else {
+    reveal();
+  }
+})();

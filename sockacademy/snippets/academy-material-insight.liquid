@@ -1,0 +1,88 @@
+{% comment %}
+  academy-material-insight.liquid
+  Renders the Academy Material Insight block for a product.
+  Reads from academy.* metafields — displays nothing if no metafields set.
+
+  Usage:
+    {% render 'academy-material-insight', product: product %}
+    {% render 'academy-material-insight', product: product, layout: 'compact' %}
+
+  Layouts:
+    default — full block with all specs (product pages)
+    compact — grade + origin only (collection cards)
+{% endcomment %}
+
+{%- liquid
+  assign grade         = product.metafields.academy.material_grade.value
+  assign origin        = product.metafields.academy.material_origin.value
+  assign composition   = product.metafields.academy.fiber_composition.value
+  assign gauge         = product.metafields.academy.construction_gauge.value
+  assign weave         = product.metafields.academy.weave_type.value
+  assign certification = product.metafields.academy.certification.value
+  assign note          = product.metafields.academy.material_note.value
+  assign layout        = layout | default: 'default'
+-%}
+
+{% if grade != blank %}
+  <div class="academy-material-insight academy-material-insight--{{ layout }}" data-academy-insight>
+
+    <div class="academy-material-insight__header">
+      <span class="academy-material-insight__label">MATERIAL PROFILE</span>
+      <span class="academy-material-insight__divider"></span>
+    </div>
+
+    <div class="academy-material-insight__grade">
+      {{ grade }}
+    </div>
+
+    {% if origin != blank %}
+      <div class="academy-material-insight__origin">
+        {{ origin }}
+      </div>
+    {% endif %}
+
+    {% if layout == 'default' %}
+
+      {% if composition != blank or gauge != blank or weave != blank %}
+        <dl class="academy-material-insight__specs">
+          {% if composition != blank %}
+            <div class="academy-material-insight__spec">
+              <dt>Composition</dt>
+              <dd>{{ composition }}</dd>
+            </div>
+          {% endif %}
+          {% if gauge != blank %}
+            <div class="academy-material-insight__spec">
+              <dt>Construction</dt>
+              <dd>{{ gauge }}</dd>
+            </div>
+          {% endif %}
+          {% if weave != blank %}
+            <div class="academy-material-insight__spec">
+              <dt>Weave</dt>
+              <dd>{{ weave }}</dd>
+            </div>
+          {% endif %}
+        </dl>
+      {% endif %}
+
+      {% if certification != blank %}
+        <div class="academy-material-insight__cert">
+          <svg class="academy-material-insight__cert-icon" width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+            <circle cx="5" cy="5" r="4.5" stroke="#C9A84C" stroke-width="1"/>
+            <path d="M3 5l1.5 1.5L7 3.5" stroke="#C9A84C" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          {{ certification }}
+        </div>
+      {% endif %}
+
+      {% if note != blank %}
+        <blockquote class="academy-material-insight__note">
+          {{ note }}
+        </blockquote>
+      {% endif %}
+
+    {% endif %}
+
+  </div>
+{% endif %}
