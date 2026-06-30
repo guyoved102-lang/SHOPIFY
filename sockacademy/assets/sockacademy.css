@@ -1,5 +1,5 @@
-/* SOCKACADEMY — Global Brand Overrides */
-/* Palette: #1A1A1A | #C9A84C gold | #F0EDE6 cream | #888 gray */
+/* SOCKACADEMY — Visual Identity System */
+/* Tokens: --surface-* | --gold | --cream | --muted | --space-* | --text-* — see :root */
 /* Header + sections already styled inline — this file handles global components */
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap');
@@ -233,19 +233,102 @@ textarea:focus {
   }
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   PHASE 4 — FLUID TYPOGRAPHY SCALE
-   clamp(min, preferred, max) — responsive without breakpoints
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   VISUAL IDENTITY ARCHITECTURE — TOKEN FOUNDATION (Phase 1)
+   System definition. All components reference these tokens.
+   Override per scope (.page--editorial, .page--curatorial, etc.)
+   Never hard-code a hex or px value that has a token equivalent.
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 :root {
-  --text-xs:   clamp(0.6875rem, 0.65rem  + 0.19vw, 0.8125rem);
-  --text-sm:   clamp(0.8125rem, 0.77rem  + 0.22vw, 0.9375rem);
-  --text-base: clamp(0.9375rem, 0.875rem + 0.31vw, 1.0625rem);
-  --text-lg:   clamp(1.125rem,  1rem     + 0.63vw, 1.375rem);
-  --text-xl:   clamp(1.375rem,  1.1rem   + 1.38vw, 2rem);
-  --text-2xl:  clamp(1.875rem,  1.35rem  + 2.63vw, 3rem);
-  --text-3xl:  clamp(2.5rem,    1.75rem  + 3.75vw, 4.5rem);
-  --text-hero: clamp(3rem,      2rem     + 5vw,    6rem);
+
+  /* ── SPACING — 8px base unit ──────────────────────────────────
+     Every margin / padding / gap = a multiple of 8.
+     The gap between major sections is --space-9 or --space-10.
+     This radical whitespace IS the luxury. Do not compress it. */
+  --space-1:    8px;
+  --space-2:   16px;
+  --space-3:   24px;
+  --space-4:   32px;
+  --space-5:   48px;
+  --space-6:   64px;
+  --space-7:   96px;
+  --space-8:  128px;
+  --space-9:  192px;
+  --space-10: 256px;
+
+  /* ── LAYOUT ───────────────────────────────────────────────────
+     Narrower than Dawn default (1440px) — focused authority. */
+  --width-page:       1320px;  /* max page container */
+  --width-content:    1200px;  /* standard content width */
+  --width-editorial:   800px;  /* prose, Academy sections, policies */
+  --grid-gap:          32px;   /* standard grid gap (= --space-4) */
+  --grid-cols-catalog:    3;   /* SACRED — Curatorial mode. Never 4. */
+
+  /* ── SURFACE HIERARCHY ────────────────────────────────────────
+     Depth increases as number decreases. Use tokens, never hex. */
+  --surface-void:   #111111;  /* footer, deep overlays */
+  --surface-base:   #1A1A1A;  /* page background — the stage */
+  --surface-raised: #222222;  /* cards, inputs, drawers */
+  --surface-border: #2A2A2A;  /* dividers, card edges */
+
+  /* ── GOLD — The Academy's voice ───────────────────────────────
+     DISCIPLINE LAW — gold appears max 2–3 times per page.
+     PERMITTED:   primary CTA | authority/cert badge |
+                  structural divider or keyline accent
+     FORBIDDEN:   body text | headings | text hover states |
+                  decorative fills | background washes */
+  --gold:      #C9A84C;
+  --gold-dim:  rgba(201, 168, 76, 0.25);  /* borders, dividers */
+  --gold-glow: rgba(201, 168, 76, 0.10);  /* shadows, ambient */
+
+  /* ── TEXT COLORS ──────────────────────────────────────────────
+     Never pure white — cream reads warmer on dark surfaces. */
+  --cream: #F0EDE6;                     /* primary text */
+  --muted: rgba(240, 237, 230, 0.55);   /* secondary, metadata */
+  --ghost: rgba(240, 237, 230, 0.25);   /* placeholders, disabled */
+
+  /* ── TYPOGRAPHY — Fluid scale (clamp) ────────────────────────
+     Responsive without breakpoints. Pixel ranges shown as guides. */
+  --text-xs:   clamp(0.6875rem, 0.65rem  + 0.19vw, 0.8125rem);  /* 11–13px */
+  --text-sm:   clamp(0.8125rem, 0.77rem  + 0.22vw, 0.9375rem);  /* 13–15px */
+  --text-base: clamp(0.9375rem, 0.875rem + 0.31vw, 1.0625rem);  /* 15–17px */
+  --text-lg:   clamp(1.125rem,  1rem     + 0.63vw, 1.375rem);   /* 18–22px */
+  --text-xl:   clamp(1.375rem,  1.1rem   + 1.38vw, 2rem);       /* 22–32px */
+  --text-2xl:  clamp(1.875rem,  1.35rem  + 2.63vw, 3rem);       /* 30–48px */
+  --text-3xl:  clamp(2.5rem,    1.75rem  + 3.75vw, 4.5rem);     /* 40–72px */
+  --text-hero: clamp(3rem,      2rem     + 5vw,    6rem);        /* 48–96px */
+
+  /* ── TYPOGRAPHY — Weight ──────────────────────────────────────*/
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* ── TYPOGRAPHY — Letter-spacing ──────────────────────────────*/
+  --tracking-tight:  -0.02em;  /* hero headlines, Playfair at size */
+  --tracking-normal:  0;        /* body, DM Sans prose */
+  --tracking-wide:    0.08em;  /* secondary headings */
+  --tracking-wider:   0.12em;  /* card labels, filter text */
+  --tracking-widest:  0.18em;  /* eyebrows, ALL CAPS authority labels */
+
+  /* ── TYPOGRAPHY — Line-height ──────────────────────────────── */
+  --leading-tight:   1.05;  /* hero headlines */
+  --leading-snug:    1.2;   /* display, h2/h3 */
+  --leading-normal:  1.4;   /* UI text, specs */
+  --leading-relaxed: 1.6;   /* editorial subtext */
+  --leading-loose:   1.75;  /* long-form prose */
+
+  /* ── MOTION ───────────────────────────────────────────────────
+     One easing curve for all transitions. No bounce, no spring. */
+  --ease-luxury:        cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --duration-micro:     0.2s;   /* hover, state changes */
+  --duration-reveal:    0.55s;  /* scroll reveals, drawer open */
+  --duration-cinematic: 9s;     /* Ken Burns, environmental */
+
+  /* ── BORDERS & RADIUS ─────────────────────────────────────────
+     The Academy does not round corners. Sharp edges = authority. */
+  --radius-none: 0;    /* Academy standard */
+  --radius-sm:   2px;  /* badges and buttons only — never more */
 }
 
 /* Section headings — targeted, avoids Dawn theme settings conflict */
