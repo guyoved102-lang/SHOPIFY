@@ -1,59 +1,69 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 {%- style -%}
+  /* ━━━ PRODUCT PAGE — Precision Mode ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     All values reference Phase 1 tokens from sockacademy.css :root.
+     Zero hardcoded hex values. Gold count (max 3):
+       #1 — ATC button fill (primary CTA)
+       #2 — Material Insight authority block (cert badge + label)
+       #3 — Active variant/thumb accent (structural, functional)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
   #MainProduct-{{ section.id }} {
-    background-color: #1A1A1A;
-    padding: 4rem 2rem 0;
-    color: #F0EDE6;
+    background: var(--surface-base);
+    padding: var(--space-6) var(--space-3) 0;
+    color: var(--cream);
     font-family: 'DM Sans', sans-serif;
   }
 
   #MainProduct-{{ section.id }} .sp__inner {
-    max-width: 1200px;
+    max-width: var(--width-content);
     margin: 0 auto;
   }
 
-  /* ── Breadcrumb ── */
+  /* ── Breadcrumb ─────────────────────────────────────────────────── */
   #MainProduct-{{ section.id }} .sp__breadcrumb {
-    font-size: 0.78rem;
-    color: #444;
-    margin-bottom: 2.5rem;
+    font-size: var(--text-xs);
+    color: var(--ghost);
+    margin-bottom: var(--space-4);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--space-1);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
   }
 
   #MainProduct-{{ section.id }} .sp__breadcrumb a {
-    color: #555;
+    color: var(--ghost);
     text-decoration: none;
-    transition: color 0.2s;
+    transition: color var(--duration-micro) var(--ease-luxury);
   }
 
-  #MainProduct-{{ section.id }} .sp__breadcrumb a:hover { color: #C9A84C; }
-  #MainProduct-{{ section.id }} .sp__breadcrumb span { color: #333; }
+  #MainProduct-{{ section.id }} .sp__breadcrumb a:hover { color: var(--cream); }
+  #MainProduct-{{ section.id }} .sp__breadcrumb span   { color: var(--muted); }
 
-  /* ── Two-column layout ── */
+  /* ── Two-column layout ──────────────────────────────────────────── */
   #MainProduct-{{ section.id }} .sp__layout {
     display: grid;
     grid-template-columns: 55% 1fr;
-    gap: 4rem;
+    gap: var(--space-6);
     align-items: start;
   }
 
-  /* ─────────────────────────
+  /* ─────────────────────────────────────────────────────────────────
      GALLERY
-  ───────────────────────── */
+  ───────────────────────────────────────────────────────────────── */
   #MainProduct-{{ section.id }} .sp__gallery {
     position: sticky;
-    top: 2rem;
+    top: var(--space-3);
   }
 
   #MainProduct-{{ section.id }} .sp__main-img-wrap {
-    background: #222222;
-    border: 1px solid #1A1A1A;
-    aspect-ratio: 1 / 1;
+    background: var(--surface-raised);
+    border: 1px solid var(--surface-border);
+    aspect-ratio: 3 / 4;
     overflow: hidden;
     position: relative;
   }
@@ -62,7 +72,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: opacity 0.2s ease;
+    transition: opacity var(--duration-micro) var(--ease-luxury);
     display: block;
   }
 
@@ -72,29 +82,26 @@
 
   #MainProduct-{{ section.id }} .sp__thumbs {
     display: flex;
-    gap: 0.625rem;
-    margin-top: 0.75rem;
+    gap: var(--space-1);
+    margin-top: var(--space-1);
     flex-wrap: wrap;
   }
 
   #MainProduct-{{ section.id }} .sp__thumb {
-    width: 72px;
-    height: 72px;
-    background: #222222;
-    border: 1.5px solid #1A1A1A;
+    width: 64px;
+    height: 80px;
+    background: var(--surface-raised);
+    border: 1.5px solid var(--surface-border);
     cursor: pointer;
     overflow: hidden;
     padding: 0;
-    transition: border-color 0.18s ease;
+    transition: border-color var(--duration-micro) var(--ease-luxury);
     flex-shrink: 0;
   }
 
-  #MainProduct-{{ section.id }} .sp__thumb:hover {
-    border-color: #C9A84C;
-  }
-
+  #MainProduct-{{ section.id }} .sp__thumb:hover,
   #MainProduct-{{ section.id }} .sp__thumb--active {
-    border-color: #C9A84C;
+    border-color: var(--gold);
   }
 
   #MainProduct-{{ section.id }} .sp__thumb img {
@@ -104,9 +111,9 @@
     display: block;
   }
 
-  /* ─────────────────────────
+  /* ─────────────────────────────────────────────────────────────────
      PRODUCT INFO
-  ───────────────────────── */
+  ───────────────────────────────────────────────────────────────── */
   #MainProduct-{{ section.id }} .sp__info {
     display: flex;
     flex-direction: column;
@@ -114,119 +121,136 @@
   }
 
   #MainProduct-{{ section.id }} .sp__vendor {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.2em;
+    font-size: var(--text-xs);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-widest);
     text-transform: uppercase;
-    color: #C9A84C;
-    margin: 0 0 0.6rem;
+    color: var(--muted);
+    margin: 0 0 var(--space-1);
   }
 
   #MainProduct-{{ section.id }} .sp__title {
-    font-family: 'Playfair Display', sans-serif;
-    font-size: clamp(2.2rem, 5vw, 3.2rem);
-    font-weight: 400;
-    letter-spacing: 0.04em;
-    color: #F0EDE6;
+    font-family: 'Playfair Display', serif;
+    font-size: var(--text-2xl);
+    font-weight: var(--weight-regular);
+    letter-spacing: var(--tracking-tight);
+    color: var(--cream);
     text-transform: uppercase;
-    line-height: 1;
-    margin: 0 0 1.25rem;
+    line-height: var(--leading-tight);
+    margin: 0 0 var(--space-3);
   }
 
-  /* ── Price ── */
+  /* ── Price ─────────────────────────────────────────────────────── */
   #MainProduct-{{ section.id }} .sp__price-row {
     display: flex;
     align-items: baseline;
-    gap: 0.75rem;
-    margin-bottom: 1.25rem;
+    gap: var(--space-1);
+    margin-bottom: var(--space-3);
     flex-wrap: wrap;
   }
 
   #MainProduct-{{ section.id }} .sp__price {
-    font-family: 'Playfair Display', sans-serif;
-    font-size: 2rem;
+    font-family: 'Playfair Display', serif;
+    font-size: var(--text-xl);
     letter-spacing: 0.04em;
-    color: #C9A84C;
-    line-height: 1;
+    color: var(--cream);
+    line-height: var(--leading-tight);
+    font-weight: var(--weight-regular);
   }
 
   #MainProduct-{{ section.id }} .sp__compare-price {
-    font-size: 1.1rem;
-    color: #444;
+    font-size: var(--text-sm);
+    color: var(--ghost);
     text-decoration: line-through;
   }
 
   #MainProduct-{{ section.id }} .sp__badge-sale {
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
+    font-size: var(--text-xs);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-wide);
     text-transform: uppercase;
-    color: #FFFFFF;
-    background: #C9A84C;
-    padding: 0.2rem 0.6rem;
-    border-radius: 2px;
+    color: var(--surface-void);
+    background: var(--gold);
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-sm);
   }
 
-  /* ── Short description ── */
+  /* ── Short description ─────────────────────────────────────────── */
   #MainProduct-{{ section.id }} .sp__short-desc {
-    font-size: 0.925rem;
-    color: #888;
-    line-height: 1.7;
-    margin: 0 0 1.75rem;
-    border-left: 2px solid #1E1E1E;
-    padding-left: 1rem;
+    font-size: var(--text-sm);
+    color: var(--muted);
+    line-height: var(--leading-relaxed);
+    margin: 0 0 var(--space-3);
+    border-left: 2px solid var(--surface-border);
+    padding-left: var(--space-2);
   }
 
-  /* ── Option groups ── */
+  /* ── Material Insight — authority card (in-column) ─────────────── */
+  #MainProduct-{{ section.id }} .sp__material-wrap {
+    background: var(--surface-raised);
+    border: 1px solid var(--surface-border);
+    padding: var(--space-3);
+    margin: 0 0 var(--space-3);
+  }
+
+  #MainProduct-{{ section.id }} .sp__material-wrap .academy-material-insight {
+    border-top: none;
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  /* ── Option groups ─────────────────────────────────────────────── */
   #MainProduct-{{ section.id }} .sp__option-group {
-    margin-bottom: 1.25rem;
+    margin-bottom: var(--space-2);
   }
 
   #MainProduct-{{ section.id }} .sp__option-label {
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.14em;
+    font-size: var(--text-xs);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-wide);
     text-transform: uppercase;
-    color: #666;
-    margin-bottom: 0.6rem;
+    color: var(--ghost);
+    margin-bottom: var(--space-1);
     display: flex;
     gap: 0.4rem;
   }
 
   #MainProduct-{{ section.id }} .sp__option-selected {
-    color: #F0EDE6;
+    color: var(--cream);
   }
 
   #MainProduct-{{ section.id }} .sp__option-values {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: var(--space-1);
   }
 
   #MainProduct-{{ section.id }} .sp__opt-btn {
-    background: #222222;
-    border: 1.5px solid #1E1E1E;
-    color: #F0EDE6;
+    background: var(--surface-raised);
+    border: 1.5px solid var(--surface-border);
+    color: var(--cream);
     font-family: 'DM Sans', sans-serif;
-    font-size: 0.825rem;
-    font-weight: 600;
-    padding: 0.5rem 1.1rem;
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    padding: var(--space-1) var(--space-2);
     cursor: pointer;
-    transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
+    transition: border-color var(--duration-micro) var(--ease-luxury),
+                color var(--duration-micro) var(--ease-luxury),
+                background var(--duration-micro) var(--ease-luxury);
     letter-spacing: 0.04em;
     min-width: 48px;
     text-align: center;
   }
 
   #MainProduct-{{ section.id }} .sp__opt-btn:hover {
-    border-color: #C9A84C;
-    color: #C9A84C;
+    border-color: var(--gold);
+    color: var(--gold);
   }
 
   #MainProduct-{{ section.id }} .sp__opt-btn--active {
-    border-color: #C9A84C;
-    color: #C9A84C;
-    background: rgba(201, 168, 76, 0.07);
+    border-color: var(--gold);
+    color: var(--gold);
+    background: var(--gold-glow);
   }
 
   #MainProduct-{{ section.id }} .sp__opt-btn--unavailable {
@@ -235,31 +259,62 @@
     text-decoration: line-through;
   }
 
-  /* ── Form: quantity + ATC ── */
+  /* ── Social proof ─────────────────────────────────────────────── */
+  #MainProduct-{{ section.id }} .sp__social-proof {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    margin: 0 0 var(--space-3);
+  }
+
+  #MainProduct-{{ section.id }} .sp__stars {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+  }
+
+  #MainProduct-{{ section.id }} .sp__star {
+    fill: var(--ghost);
+    flex-shrink: 0;
+  }
+
+  #MainProduct-{{ section.id }} .sp__social-text {
+    font-size: var(--text-xs);
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    font-weight: var(--weight-regular);
+  }
+
+  #MainProduct-{{ section.id }} .sp__review-count {
+    color: var(--ghost);
+  }
+
+  /* ── Form: quantity + ATC ──────────────────────────────────────── */
   #MainProduct-{{ section.id }} .sp__form-row {
     display: flex;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
+    gap: var(--space-1);
+    margin-bottom: var(--space-2);
     align-items: stretch;
   }
 
   #MainProduct-{{ section.id }} .sp__qty-wrap {
     display: flex;
     align-items: center;
-    border: 1.5px solid #1E1E1E;
-    background: #222222;
+    border: 1.5px solid var(--surface-border);
+    background: var(--surface-raised);
     flex-shrink: 0;
+    min-height: var(--space-6);
   }
 
   #MainProduct-{{ section.id }} .sp__qty-btn {
     background: none;
     border: none;
-    color: #F0EDE6;
-    font-size: 1.2rem;
+    color: var(--cream);
+    font-size: var(--text-lg);
     width: 2.5rem;
     height: 100%;
     cursor: pointer;
-    transition: color 0.18s ease;
+    transition: color var(--duration-micro) var(--ease-luxury);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -267,17 +322,17 @@
     line-height: 1;
   }
 
-  #MainProduct-{{ section.id }} .sp__qty-btn:hover { color: #C9A84C; }
+  #MainProduct-{{ section.id }} .sp__qty-btn:hover { color: var(--muted); }
 
   #MainProduct-{{ section.id }} .sp__qty-input {
     background: none;
     border: none;
-    border-left: 1px solid #1E1E1E;
-    border-right: 1px solid #1E1E1E;
-    color: #F0EDE6;
+    border-left: 1px solid var(--surface-border);
+    border-right: 1px solid var(--surface-border);
+    color: var(--cream);
     font-family: 'DM Sans', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 600;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
     text-align: center;
     width: 3rem;
     padding: 0.5rem 0;
@@ -292,28 +347,33 @@
 
   #MainProduct-{{ section.id }} .sp__atc-btn {
     flex: 1;
-    background: #C9A84C;
-    color: #FFFFFF;
-    border: 2px solid #C9A84C;
-    font-family: 'Playfair Display', sans-serif;
-    font-size: 1.15rem;
-    letter-spacing: 0.14em;
+    background: var(--gold);
+    color: var(--surface-void);
+    border: 2px solid var(--gold);
+    font-family: 'DM Sans', sans-serif;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-wider);
     text-transform: uppercase;
     cursor: pointer;
-    padding: 0 2rem;
-    transition: background 0.22s ease, color 0.22s ease, border-color 0.22s ease;
+    padding: 0 var(--space-4);
+    min-height: var(--space-6);
+    transition: background var(--duration-micro) var(--ease-luxury),
+                color var(--duration-micro) var(--ease-luxury),
+                border-color var(--duration-micro) var(--ease-luxury);
     white-space: nowrap;
   }
 
   #MainProduct-{{ section.id }} .sp__atc-btn:hover:not(:disabled) {
-    background: #E2C47A;
-    border-color: #C9A84C;
+    background: transparent;
+    color: var(--gold);
+    border-color: var(--gold);
   }
 
   #MainProduct-{{ section.id }} .sp__atc-btn:disabled {
-    background: #222;
-    border-color: #222;
-    color: #555;
+    background: var(--surface-raised);
+    border-color: var(--surface-border);
+    color: var(--ghost);
     cursor: not-allowed;
   }
 
@@ -322,12 +382,12 @@
     pointer-events: none;
   }
 
-  /* ── Trust badges ── */
+  /* ── Trust badges ─────────────────────────────────────────────── */
   #MainProduct-{{ section.id }} .sp__trust {
     display: flex;
     gap: 0;
-    border: 1px solid #1A1A1A;
-    margin-top: 1.5rem;
+    border: 1px solid var(--surface-border);
+    margin-top: var(--space-3);
   }
 
   #MainProduct-{{ section.id }} .sp__trust-badge {
@@ -336,8 +396,8 @@
     flex-direction: column;
     align-items: center;
     gap: 0.4rem;
-    padding: 1rem 0.5rem;
-    border-right: 1px solid #1A1A1A;
+    padding: var(--space-2) var(--space-1);
+    border-right: 1px solid var(--surface-border);
     text-align: center;
   }
 
@@ -346,13 +406,13 @@
   }
 
   #MainProduct-{{ section.id }} .sp__trust-icon {
-    color: #C9A84C;
+    color: var(--muted);
     flex-shrink: 0;
   }
 
   #MainProduct-{{ section.id }} .sp__trust-icon svg {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     fill: none;
     stroke: currentColor;
     stroke-width: 1;
@@ -361,83 +421,54 @@
   }
 
   #MainProduct-{{ section.id }} .sp__trust-text {
-    font-size: 0.68rem;
-    font-weight: 600;
-    letter-spacing: 0.13em;
-    color: #555;
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-wide);
+    color: var(--ghost);
     text-transform: uppercase;
-    line-height: 1.3;
+    line-height: var(--leading-snug);
   }
 
-  /* ── Social proof ── */
-  #MainProduct-{{ section.id }} .sp__social-proof {
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
-    margin-bottom: 1.5rem;
-  }
-
-  #MainProduct-{{ section.id }} .sp__stars {
-    display: flex;
-    gap: 2px;
-    align-items: center;
-  }
-
-  #MainProduct-{{ section.id }} .sp__star {
-    fill: #9E7E32;
-    flex-shrink: 0;
-  }
-
-  #MainProduct-{{ section.id }} .sp__social-text {
-    font-size: 0.76rem;
-    color: #888;
-    letter-spacing: 0.05em;
-    font-weight: 400;
-  }
-
-  #MainProduct-{{ section.id }} .sp__review-count {
-    color: #555;
-  }
-
-  /* ─────────────────────────
-     DESCRIPTION SECTION
-  ───────────────────────── */
+  /* ─────────────────────────────────────────────────────────────────
+     DESCRIPTION — Full width, luxury whitespace below the fold
+  ───────────────────────────────────────────────────────────────── */
   #MainProduct-{{ section.id }} .sp__desc-section {
-    margin-top: 5rem;
-    border-top: 1px solid #1A1A1A;
-    padding: 4rem 0 5rem;
+    margin-top: var(--space-9);
+    border-top: 1px solid var(--surface-border);
+    padding: var(--space-6) 0 var(--space-7);
   }
 
   #MainProduct-{{ section.id }} .sp__desc-header {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 2.5rem;
+    gap: var(--space-2);
+    margin-bottom: var(--space-5);
   }
 
   #MainProduct-{{ section.id }} .sp__desc-heading {
-    font-family: 'Playfair Display', sans-serif;
-    font-size: 1.8rem;
-    letter-spacing: 0.08em;
-    color: #F0EDE6;
+    font-family: 'Playfair Display', serif;
+    font-size: var(--text-lg);
+    letter-spacing: var(--tracking-wider);
+    color: var(--cream);
     text-transform: uppercase;
     margin: 0;
-    line-height: 1;
+    line-height: var(--leading-tight);
+    white-space: nowrap;
   }
 
   #MainProduct-{{ section.id }} .sp__desc-line {
     flex: 1;
     height: 1px;
-    background: #1A1A1A;
+    background: var(--surface-border);
   }
 
   #MainProduct-{{ section.id }} .sp__desc-body {
-    font-size: 0.95rem;
-    color: #888;
-    line-height: 1.8;
-    max-width: 800px;
+    font-size: var(--text-sm);
+    color: var(--muted);
+    line-height: var(--leading-relaxed);
+    max-width: var(--width-editorial);
     columns: 2;
-    column-gap: 3rem;
+    column-gap: var(--space-6);
   }
 
   #MainProduct-{{ section.id }} .sp__desc-body p {
@@ -445,11 +476,11 @@
     break-inside: avoid;
   }
 
-  /* ── Mobile ── */
+  /* ── Mobile ─────────────────────────────────────────────────────── */
   @media screen and (max-width: 899px) {
     #MainProduct-{{ section.id }} .sp__layout {
       grid-template-columns: 1fr;
-      gap: 2.5rem;
+      gap: var(--space-5);
     }
 
     #MainProduct-{{ section.id }} .sp__gallery {
@@ -459,11 +490,15 @@
     #MainProduct-{{ section.id }} .sp__desc-body {
       columns: 1;
     }
+
+    #MainProduct-{{ section.id }} .sp__desc-section {
+      margin-top: var(--space-7);
+    }
   }
 
   @media screen and (max-width: 479px) {
     #MainProduct-{{ section.id }} {
-      padding: 2.5rem 1.25rem 0;
+      padding: var(--space-5) var(--space-2) 0;
     }
 
     #MainProduct-{{ section.id }} .sp__form-row {
@@ -471,7 +506,7 @@
     }
 
     #MainProduct-{{ section.id }} .sp__atc-btn {
-      padding: 0.9rem;
+      padding: 0 var(--space-3);
     }
 
     #MainProduct-{{ section.id }} .sp__trust {
@@ -481,10 +516,10 @@
     #MainProduct-{{ section.id }} .sp__trust-badge {
       flex-direction: row;
       border-right: none;
-      border-bottom: 1px solid #1A1A1A;
-      padding: 0.875rem 1rem;
+      border-bottom: 1px solid var(--surface-border);
+      padding: var(--space-2) var(--space-2);
       text-align: left;
-      gap: 0.75rem;
+      gap: var(--space-1);
     }
 
     #MainProduct-{{ section.id }} .sp__trust-badge:last-child {
@@ -544,10 +579,10 @@
                 aria-label="View image {{ forloop.index }}"
               >
                 <img
-                  src="{{ image | image_url: width: 150 }}"
+                  src="{{ image | image_url: width: 160 }}"
                   alt="{{ image.alt | escape | default: product.title }}"
-                  width="72"
-                  height="72"
+                  width="64"
+                  height="80"
                   loading="lazy"
                 >
               </button>
@@ -588,6 +623,11 @@
         {%- elsif product.description != blank -%}
           <p class="sp__short-desc">{{ product.description | strip_html | truncatewords: 28 }}</p>
         {%- endif -%}
+
+        {%- comment -%} Material Insight — authority position (between desc + variants) {%- endcomment -%}
+        <div class="sp__material-wrap">
+          {% render 'academy-material-insight', product: product %}
+        </div>
 
         {%- comment -%} Variant options {%- endcomment -%}
         {%- unless product.has_only_default_variant -%}
@@ -715,10 +755,6 @@
       </div>
     {%- endif -%}
 
-    <div class="sp__academy-section">
-      {% render 'academy-material-insight', product: product %}
-    </div>
-
   </div>
 </section>
 
@@ -752,31 +788,27 @@
   function applyVariant(v) {
     if (!v) return;
 
-    /* variant ID input */
     var idInput = document.getElementById('variant-id-' + SID);
     if (idInput) idInput.value = v.id;
 
-    /* price */
     var priceEl   = document.getElementById('sp-price-' + SID);
     var compareEl = document.getElementById('sp-compare-' + SID);
-    if (priceEl)   priceEl.textContent  = formatMoney(v.price);
+    if (priceEl)   priceEl.textContent = formatMoney(v.price);
     if (compareEl) {
       if (v.compare_at_price > v.price) {
-        compareEl.textContent    = formatMoney(v.compare_at_price);
-        compareEl.style.display  = '';
+        compareEl.textContent   = formatMoney(v.compare_at_price);
+        compareEl.style.display = '';
       } else {
-        compareEl.style.display  = 'none';
+        compareEl.style.display = 'none';
       }
     }
 
-    /* ATC button */
     var atcBtn = document.getElementById('sp-atc-' + SID);
     if (atcBtn) {
       atcBtn.disabled    = !v.available;
       atcBtn.textContent = v.available ? 'Add to Cart' : 'Sold Out';
     }
 
-    /* swap to variant image */
     if (v.featured_image) {
       switchMainImage(v.featured_image.src, null);
     }
@@ -812,13 +844,11 @@
       var pos = parseInt(btn.dataset.optionPosition, 10);
       var val = btn.dataset.optionValue;
 
-      /* update active state within group */
       document.querySelectorAll(
         '#MainProduct-' + SID + ' [data-option-position="' + pos + '"]'
       ).forEach(function (b) { b.classList.remove('sp__opt-btn--active'); });
       btn.classList.add('sp__opt-btn--active');
 
-      /* update label */
       var labelEl = document.getElementById('sp-opt-val-' + SID + '-' + pos);
       if (labelEl) labelEl.textContent = val;
 
@@ -848,6 +878,23 @@
       var atc = document.getElementById('sp-atc-' + SID);
       if (atc) atc.classList.add('sp__atc-btn--loading');
     });
+  }
+
+  /* ── Material Insight reveal (IntersectionObserver) ── */
+  var insightEl = document.querySelector('#MainProduct-' + SID + ' [data-academy-insight]');
+  if (insightEl) {
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries, obs) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 }).observe(insightEl);
+    } else {
+      insightEl.classList.add('is-visible');
+    }
   }
 
 })();
