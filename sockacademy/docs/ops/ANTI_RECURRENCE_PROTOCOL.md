@@ -386,6 +386,41 @@ grep "LAUNCH_MODE" .github/workflows/a<N>-*.yml            # חייב לחזור
 
 ---
 
+## 28. CSS Reveal Animation ללא JavaScript Trigger — אלמנט בלתי נראה לנצח
+
+**מה קרה (30/06/2026):** `academy-material-insight` קיבל `opacity: 0` + `.is-visible` CSS class למנגנון reveal, אבל אף פעם לא נכתב IntersectionObserver שמוסיף את הclass. התוצאה: המידע המרכזי ביותר בעמוד המוצר היה בלתי נראה לחלוטין לכל גולש.
+**למה קרה:** CSS animation pattern הוסף ב-sockacademy.css, אבל ה-JavaScript trigger ב-main-product.liquid נשכח. שני הקבצים עודכנו בשיחות שונות.
+**מה מונע חזרה:** כל פעם שמוסיפים `opacity: 0` + `transition` לאלמנט — חובה לבדוק מיד שיש trigger מתאים:
+- IntersectionObserver ב-JS, **או**
+- class שמתווסף ב-setTimeout, **או**
+- `.is-active` שנשלט מ-JS
+```bash
+# בדיקה: מצא כל opacity:0 ב-CSS ואמת שיש trigger מתאים
+grep -r "opacity: 0" sockacademy/assets/ sockacademy/sections/ sockacademy/snippets/
+```
+
+---
+
+## 29. Shopify Product 404 — שני סיבות נפרדות: Non-ASCII Handle + publishedAt null
+
+**מה קרה (30/06/2026):** מוצר נגיש ב-admin אבל 404 ב-storefront. שתי בעיות נפרדות שנראו כאחת:
+1. Handle עם תו μ (Greek mu, U+03BC) — Shopify router ו-browser URL encoding לא מסכימים
+2. `publishedAt: null` — המוצר היה `status: ACTIVE` (לא draft) אבל **אף פעם לא פורסם לOnline Store channel**. אלה שני states שונים לחלוטין ב-Shopify.
+**למה קרה:**
+1. Handle נוצר ב-admin עם copy-paste מטקסט עם תו Unicode
+2. המוצר נוצר דרך API בלי `published: true` — Shopify API יוצר ACTIVE (לא draft) אבל לא published
+**מה מונע חזרה:**
+- כל handle חדש — ASCII בלבד. בדיקה: `handle.match(/[^\x00-\x7F]/)` → reject אם true
+- אחרי יצירת מוצר דרך API — תמיד לאמת `publishedAt != null`:
+```bash
+# GraphQL check
+{ product(id: "gid://shopify/Product/XXX") { publishedAt status } }
+# Fix if null:
+curl -X PUT .../products/XXX.json -d '{"product":{"id":XXX,"published":true}}'
+```
+
+---
+
 ## SESSION CONTINUITY CHECKLIST — בכל שיחה
 
 **פתיחה:**
