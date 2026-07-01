@@ -1,0 +1,69 @@
+{%- comment -%}
+  academy-card-product.liquid — Curatorial Mode card
+  Used exclusively in main-collection-product-grid.liquid.
+  Image: 3:4 portrait | Material micro-badge | No ATC.
+  Gold discipline: cert icon only (#1 gold per card, max).
+
+  Accepts:
+    card_product {Object} — Shopify product object (required)
+    lazy_load    {Boolean} — false for first 3 above-the-fold cards
+{%- endcomment -%}
+
+{%- liquid
+  assign material_grade  = card_product.metafields.academy.material_grade.value
+  assign material_origin = card_product.metafields.academy.material_origin.value
+  assign certification   = card_product.metafields.academy.certification.value
+-%}
+
+<div class="ac-card">
+  <a href="{{ card_product.url }}" class="ac-card__link" aria-label="{{ card_product.title | escape }}">
+
+    <div class="ac-card__media">
+      {%- if card_product.featured_media -%}
+        <img
+          srcset="
+            {%- if card_product.featured_media.width >= 400 -%}{{ card_product.featured_media | image_url: width: 400 }} 400w,{%- endif -%}
+            {%- if card_product.featured_media.width >= 600 -%}{{ card_product.featured_media | image_url: width: 600 }} 600w,{%- endif -%}
+            {%- if card_product.featured_media.width >= 900 -%}{{ card_product.featured_media | image_url: width: 900 }} 900w,{%- endif -%}
+            {{ card_product.featured_media | image_url }} {{ card_product.featured_media.width }}w
+          "
+          src="{{ card_product.featured_media | image_url: width: 600 }}"
+          sizes="(min-width: 1320px) 419px, (min-width: 990px) calc((100vw - 112px) / 3), (min-width: 590px) calc((100vw - 72px) / 2), calc(100vw - 48px)"
+          alt="{{ card_product.featured_media.alt | escape }}"
+          class="ac-card__img"
+          {% if lazy_load == false %}loading="eager"{% else %}loading="lazy"{% endif %}
+          width="{{ card_product.featured_media.width }}"
+          height="{{ card_product.featured_media.height }}"
+        >
+      {%- else -%}
+        <div class="ac-card__placeholder">
+          {{ 'product-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="ac-card__info">
+      <p class="ac-card__vendor">{{ card_product.vendor | upcase }}</p>
+
+      <h3 class="ac-card__title">{{ card_product.title | escape }}</h3>
+
+      {%- if material_grade != blank -%}
+        <div class="ac-card__material">
+          {%- if certification != blank -%}
+            <svg class="ac-card__cert-icon" width="9" height="9" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+              <circle cx="5" cy="5" r="4.5" stroke="currentColor" stroke-width="1"/>
+              <path d="M3 5l1.5 1.5L7 3.5" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          {%- endif -%}
+          <span class="ac-card__grade">{{ material_grade }}</span>
+          {%- if material_origin != blank -%}
+            <span class="ac-card__origin">{{ material_origin }}</span>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      <p class="ac-card__price">{{ card_product.price | money }}</p>
+    </div>
+
+  </a>
+</div>
