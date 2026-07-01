@@ -1,22 +1,25 @@
 (function () {
   'use strict';
 
-  var BG_URL = 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=1600&auto=format&fit=crop';
-  var BG_FALLBACK = 'linear-gradient(180deg, #111111 0%, #1A1A1A 100%)';
+  // Read design tokens from CSS at runtime — single source of truth
+  var _cs   = getComputedStyle(document.documentElement);
+  var _void = _cs.getPropertyValue('--surface-void').trim() || '#111111';
+  var _base = _cs.getPropertyValue('--surface-base').trim() || '#1A1A1A';
+  var _gold = _cs.getPropertyValue('--gold').trim()         || '#C9A84C';
 
-  var KEN_BURNS_DURATION   = 10000; // ms — user-requested 10 s zoom
-  var KEN_BURNS_END_SCALE  = 1.14;  // zoom in to 114%
-  var PARALLAX_FACTOR      = 0.40;  // bg scrolls at 40% of banner scroll speed
-  var PARALLAX_CLAMP       = 120;   // max px shift, must fit inside buffer (14% of ~900px = 126px)
-  var DEPTH_FACTOR         = 0.20;  // second depth layer: opposite direction, 20%
-  var DEPTH_CLAMP          = 60;    // depth layer max shift
+  var BG_URL      = '';  // P1-7: External Unsplash dependency removed
+  var BG_FALLBACK = 'linear-gradient(180deg, ' + _void + ' 0%, ' + _base + ' 100%)';
 
-  // The parallax wrapper overhangs the banner by BUFFER_PCT on top + bottom.
-  // At 100vh ≈ 900 px, 14% ≈ 126 px — comfortably above the 120 px clamp.
-  var BUFFER_PCT = '14%';
+  var KEN_BURNS_DURATION   = 10000;
+  var KEN_BURNS_END_SCALE  = 1.14;
+  var PARALLAX_FACTOR      = 0.40;
+  var PARALLAX_CLAMP       = 120;
+  var DEPTH_FACTOR         = 0.20;
+  var DEPTH_CLAMP          = 60;
+  var BUFFER_PCT           = '14%';
 
   var PARTICLE_COUNT  = 38;
-  var PARTICLE_COLORS = ['#C9A84C', '#C9A84C', '#C9A84C'];
+  var PARTICLE_COLORS = [_gold, _gold, _gold];
 
   /* ─────────────────────────────────────────────
      BANNER INIT
@@ -53,24 +56,14 @@
 
     var bg = document.createElement('div');
     setStyles(bg, {
-      position:         'absolute',
-      inset:            '0',
-      backgroundImage:  'url("' + BG_URL + '")',
-      backgroundSize:   'cover',
+      position:           'absolute',
+      inset:              '0',
+      backgroundImage:    BG_FALLBACK,
+      backgroundSize:     'cover',
       backgroundPosition: 'center',
-      willChange:       'transform',
-      transformOrigin:  'center center',
+      willChange:         'transform',
+      transformOrigin:    'center center',
     });
-
-    // Probe the image; fall back to CSS gradient if it fails to load
-    var probe = new Image();
-    probe.onload = function () {
-      bg.style.backgroundImage = 'url("' + BG_URL + '")';
-    };
-    probe.onerror = function () {
-      bg.style.backgroundImage = BG_FALLBACK;
-    };
-    probe.src = BG_URL;
 
     wrap.appendChild(bg);
 
