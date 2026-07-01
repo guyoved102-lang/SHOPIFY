@@ -1,6 +1,7 @@
 # MG-1: The Complete Guide to Merino Wool
-**Status:** Draft in progress — Section 1 of 5
+**Status:** Draft complete — 5 of 5 sections + CTA pending
 **Brief:** MG-1-MERINO-GUIDE-OUTLINE.md
+**Note:** Sections 2–5 below follow a revised structure (Foot Health / Certification / Durability / Care) approved 01/07/2026 — supersedes the original outline's Section 2–5 ordering (Micron / Mechanics / Construction / ZQ). Original outline content on micron measurement and construction is preserved inside these sections where relevant.
 
 ---
 
@@ -24,6 +25,58 @@ This is the standard against which every material decision in this guide is meas
 
 ---
 
-*Word count: ~615*
-*Next section: Section 2 (outline) — Fiber Mechanics and Odor Resistance, or reorder per final structure*
+## Section 2: The Science of Foot Health — Moisture Managed at the Fiber, Not the Surface
+
+The foot is the body's most demanding textile environment: roughly 250,000 sweat glands per pair, enclosed in a shoe for eight to twelve hours, generating up to half a pint of moisture on an active day. Whatever fiber sits against that skin determines whether the day ends in comfort or in the specific discomfort of a damp, cooling sock.
+
+Synthetic fiber addresses this problem at the surface. Wicking moves liquid moisture along the exterior of the fiber, away from the skin — a mechanical transport process that does nothing to the water itself. Cotton addresses it not at all: cotton absorbs moisture into a hollow fiber structure and holds it there, which is why a cotton sock becomes heavier, colder, and slower to dry as the day progresses.
+
+Merino is the only one of the three that manages moisture from inside the fiber. Its cortex is hygroscopic — a protein structure capable of absorbing atmospheric moisture vapor directly into the fiber, before it condenses into liquid sweat on the skin. This is a chemical and thermal process, not a mechanical one. As vapor bonds to the fiber's protein chains, a measurable exothermic reaction occurs, releasing warmth. As the fiber later releases that moisture, the reverse — an endothermic, cooling reaction — occurs. The fiber is not passive. It participates in regulating the microclimate against the skin in both directions.
+
+This is why we do not describe our product as "moisture-wicking," a term that would be technically true but would understate what the fiber does. Wicking is what a shirt sold at a gas station claims. Absorption, phase-change, and thermal buffering are what a fiber engineered at 18.5 microns and knitted at 200-needle gauge actually performs. This is the standard we hold every specification to — and the reason "Foot Health" appears in our name in principle, if not literally: the product is doing structural, measurable work, not making a comfort claim we cannot defend.
+
+---
+
+## Section 3: The Certification Gap — Why "Certified" Is the Only Word That Means Anything
+
+Three certification systems govern the wool and textile industry, and they answer three different questions. Conflating them is how most brands mislead — not through false claims, but through certifications that sound equivalent and are not.
+
+**ZQ Merino** (New Zealand Merino Company) certifies fiber quality and farm-level animal welfare: micron count by lot, mulesing-free practice, and land stewardship, with a documented chain from farm to garment. It is the only program that ties a specific micron specification back to a traceable source.
+
+**Responsible Wool Standard (RWS)** certifies animal welfare and land management. It says nothing about fiber diameter. A garment can carry RWS certification and still contain 24-micron wool — ethically sourced, but not fine enough to avoid the itch threshold this guide opened with.
+
+**OEKO-TEX Standard 100** certifies chemical safety — the absence of harmful substances in the finished textile. It says nothing about fiber origin, animal welfare, or micron count at all.
+
+A brand can hold any one of these and describe its product as "certified" without disclosing which standard, or what that standard actually governs. This is the gap we require our suppliers to close in writing: not "certified," but certified to which standard, verifying which claim. Our Sourcing Brief requires ZQ documentation specifically, because it is the only certification that validates the number this entire guide is built around — 18.5 microns, traceable to a named source. RWS and OEKO-TEX compliance are requested in addition, not instead.
+
+---
+
+## Section 4: The Durability Myth — Engineering Around Merino's One Real Weakness
+
+Merino's reputation for fragility is not a myth in the sense of being false — it is a myth in the sense of being incomplete. Pure, unreinforced Merino wool at 18.5 microns is genuinely less abrasion-resistant than synthetic fiber at the specific points where a sock experiences the most repetitive mechanical stress: the heel strike and the toe push-off. Reporting this and stopping there is how most technical descriptions of Merino end. It is also where the useful engineering begins.
+
+The fiber science bears this out directly. A wool fiber can be flexed roughly 20,000 times before breaking, compared to about 3,200 cycles for cotton. That is not a weak fiber — it is a strong fiber undergoing stress in a shoe than it would in almost any other application. The solution is not a different fiber. It is a different ratio in a different location.
+
+An 80/20 Merino-to-nylon blend — full Merino through the leg and foot for softness and thermal performance, nylon reinforcement concentrated in the heel and toe — is not a compromise on the material claim. It is where knitting engineering, not fiber substitution, does the work: at 200-needle gauge, this ratio is what allows a sock to sustain in excess of 10,000 Martindale abrasion cycles in high-wear zones, well above the 8,000-cycle minimum we require of any supplier as a baseline. The nylon is not there because the wool failed. It is there because a sock, unlike a sweater, spends its life being stepped on.
+
+---
+
+## Section 5: The Academy Care Protocol — Maintaining the Fiber Correctly
+
+A correctly specified Merino sock can last years. An incorrectly washed one will not survive a season, regardless of what it was made from. The failure, when it happens, is almost always a laundering error, not a manufacturing one.
+
+**Wash cold, on a wool or delicate cycle.** Superwash treatment — a bio-enzymatic process that smooths the fiber's outer scales — is what makes machine washing possible at all. It is not a license to wash Merino the way one washes cotton. Heat accelerates felting even on Superwash-treated fiber; 30°C is the ceiling, not a suggestion.
+
+**Do not use fabric softener.** Softener coats the fiber in a residue that blocks the hygroscopic exchange this entire guide describes. A softened Merino sock still looks like Merino. It no longer performs like it.
+
+**Dry flat, away from direct heat.** Tumble drying is the single most common cause of premature shrinkage in wool product, Superwash-treated or not. Flat drying preserves both dimensional stability and the fiber's natural loft.
+
+**Rotate, do not repeat.** Wool fiber recovers its shape over roughly 24 hours of rest after wear. A rotation of at least three pairs is not a purchasing upsell — it is the condition under which the fiber's recovery properties actually function as engineered.
+
+This protocol is not incidental to the product. A customer who follows it will own a garment that improves in comfort over its first several wears and holds its construction for years. A customer who does not will experience a failure that looks like a manufacturing defect and is, in fact, a laundering one. We publish this protocol because the difference between those two outcomes is entirely within the customer's control, and an authority does not withhold the information that makes its own claims true.
+
+---
+
+*Section word counts: S1 ~615 | S2 ~330 | S3 ~305 | S4 ~310 | S5 ~305*
 *Voice check: zero marketing adjectives, zero named competitor references, zero therapeutic claims — passes BRAND_DNA.md Section II*
+*Remaining: CTA block (see MG-1-MERINO-GUIDE-OUTLINE.md — Founding Cohort conversion, already drafted, ready to append)*
