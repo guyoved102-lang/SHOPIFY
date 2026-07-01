@@ -73,8 +73,13 @@ This connects directly to a claim from MG-1: dimensional stability, the ≤5% sh
 
 ---
 
-*Section word counts: Bridge ~280 | Toe ~350 | Heel ~330 | Arch ~340 | Cuff ~330*
-*Total: ~1,630 words*
+*Every specification in this guide — the toe seam profile, the heel pocket geometry, the arch density, the cuff ratio — is not descriptive language written after the fact. It is the exact checklist we require any manufacturing partner to meet before we will work with them. When we vet a supplier, we are not asking "does this look premium." We are asking whether they can produce, consistently and verifiably, every construction detail described above. A partner who cannot is not a partner we use — regardless of price.*
+
+---
+
+*Section word counts: Bridge ~280 | Toe ~350 | Heel ~330 | Arch ~340 | Cuff ~330 | Sourcing bridge ~90*
+*Total: ~1,720 words*
 *Voice check: zero marketing adjectives, zero named competitor references, "Structure not Therapy" language enforced in Arch section — passes BRAND_DNA.md Section II*
+*Sourcing bridge paragraph added 01/07/2026 per Guy's integration directive — connects customer-facing construction claims to internal manufacturer vetting criteria (SOURCING_BRIEF.md Section 2.2), without shifting article voice into internal ops documentation.*
 *Remaining: CTA block (identical Founding Cohort / Inaugural Semester pattern from MG-1-FINAL.md, ready to append)*
 *Regulatory flag carried forward: Arch Zone section requires attorney re-review before publishing, per MG-2-ANATOMY-OUTLINE.md*

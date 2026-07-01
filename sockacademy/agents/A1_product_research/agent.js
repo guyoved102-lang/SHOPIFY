@@ -48,37 +48,32 @@ const emailTransporter = nodemailer.createTransport({
 // 4 קטגוריות בלבד: Premium Materials / Performance / Dress & Formal / Tactical & Outdoor
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// RE-SCOPED 01/07/2026 — Premium Hosiery Market Intelligence
+// Was: broad multi-category dropship trend scanner (Athletic, Tactical,
+// Gift Sets, Cashmere, Bamboo, Copper, generic Dress/Formal).
+// Now: single-SKU Merino wool authority strategy (PRIVATE_LABEL_ROADMAP.md).
+// This agent no longer scouts products to sell. It watches how competitors
+// position "premium" wool hosiery in the market — content/positioning
+// intelligence, NOT a supplier or product-sourcing decision. CJ/AliExpress/
+// Alibaba listings cannot verify micron count, ZQ certification, or
+// construction quality — actual manufacturer vetting stays a manual
+// process (see SOURCING_BRIEF.md). Do not treat a high-scoring result
+// here as a vetted sourcing candidate.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 const SEARCH_QUERIES = [
-  // Premium Materials — חומרים איכותיים
   'merino wool crew socks men premium',
   'merino wool ankle socks performance',
-  'egyptian cotton dress socks men luxury',
-  'bamboo socks men antibacterial premium',
-  'cashmere blend socks men luxury',
-  'copper infused socks odor control men',
-  // Performance / Athletic
-  'compression socks running men athletic',
-  'no show socks men athletic performance',
-  'cycling socks elite sport men',
-  'anti-blister hiking socks cushioned wool',
-  'gym ankle socks men cushioned performance',
-  // Dress & Formal
-  'dress socks men formal luxury over the calf',
-  'argyle socks premium wool men business',
-  'patterned dress socks men office luxury',
-  'loafer no show socks men premium invisible',
-  'ribbed dress socks men luxury cotton',
-  // Tactical & Outdoor
-  'thermal hiking socks winter merino wool',
-  'waterproof hiking socks merino outdoor men',
-  'tactical boot socks men cushioned',
-  'merino wool outdoor socks men',
-  // Gift Sets
-  'dress socks men gift box premium set',
-  'men luxury socks gift set premium',
+  '18.5 micron merino wool socks',
+  'ZQ certified merino wool socks',
+  'merino wool dress socks men luxury',
+  'merino wool ribbed socks men business',
+  'merino wool gift box premium set',
+  'superfine merino wool socks men',
 ];
 
-// מה שאסור — לא מתאים לSockAcademy
+// מה שאסור — לא מתאים לSockAcademy (single-SKU Merino authority)
 const EXCLUDE_WORDS = [
   // ילדים ובעלי חיים — לא רלוונטי
   'children', 'kids', 'baby', 'toddler', 'infant',
@@ -90,23 +85,29 @@ const EXCLUDE_WORDS = [
   'diabetic', 'five finger', 'toe separated', 'toe shoe',
   // ידיים
   'gloves', 'mittens',
+  // חומרים שאינם Merino — לא רלוונטי לאסטרטגיית single-SKU
+  'cashmere', 'bamboo', 'copper', 'egyptian cotton', 'acrylic',
+  'polyester blend', 'compression', 'athletic', 'tactical', 'hiking',
 ];
 
-// מה שחייב להיות — לפחות מילה אחת מהרשימה
+// מה שחייב להיות — לפחות מילה אחת מהרשימה (Merino-only)
 const BRAND_KEYWORDS = [
-  'merino', 'cashmere', 'bamboo', 'cotton', 'wool', 'copper', 'thermal',
-  'compression', 'performance', 'athletic', 'sport', 'cycling', 'hiking',
-  'tactical', 'waterproof', 'outdoor',
-  'dress', 'formal', 'argyle', 'business', 'luxury', 'ribbed',
-  'no show', 'no-show', 'invisible', 'loafer',
+  'merino', 'wool', 'superfine', 'micron',
+  'dress', 'formal', 'business', 'luxury', 'ribbed',
+  'no show', 'no-show', 'invisible',
   'premium', 'gift', 'set',
 ];
 
-// טרנדים 2025 — בסיס סטטי (מתעדכן רבעונית)
+// אותות איכות — טקסט בלבד, לא אימות מאומת. משמש כ-noise filter,
+// לא כערבות לתקינות. ראה SOURCING_BRIEF.md לאימות אמיתי.
+const MERINO_QUALITY_SIGNALS = [
+  '18.5 micron', '18.5μ', 'zq certified', 'zq merino', 'superfine merino',
+  'superwash', 'linked toe', 'fine merino', 'new zealand merino',
+];
+
+// טרנדים 2025 — בסיס סטטי (מתעדכן רבעונית), Merino-only
 const TRENDING_2025 = [
-  'merino', 'bamboo', 'copper', 'compression', 'no show', 'no-show',
-  'tactical', 'waterproof', 'odor', 'antibacterial', 'gift set',
-  'egyptian cotton', 'cashmere', 'thermal', 'hiking', 'loafer',
+  'merino', 'superfine', 'zq certified', '18.5 micron', 'no show', 'no-show',
 ];
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -437,12 +438,19 @@ function scoreProduct(p, trendKeywords = []) {
   else if (p.orders >= 1000) { score += 11; reasons.push('1K+ מכירות'); }
   else if (p.orders >= 200) { score += 5; }
 
-  // מרג'ין (20 נק')
-  if (p.supplierPrice > 0 && p.supplierPrice <= 3) { score += 20; reasons.push('מרג\'ין 75%+'); }
-  else if (p.supplierPrice <= 5) { score += 16; reasons.push('מרג\'ין 70%+'); }
-  else if (p.supplierPrice <= 8) { score += 11; reasons.push('מרג\'ין 65%+'); }
-  else if (p.supplierPrice <= 12) { score += 6; }
-  else if (p.supplierPrice <= 18) { score += 3; }
+  // מרג'ין (20 נק') — RE-SCOPED 01/07/2026: מחיר ספק זול כבר לא "טוב" סתם.
+  // גרב Merino אמיתי (18.5μ, ZQ certified) לא יכול לעלות $2-3 מהספק —
+  // סף כזה הוא flag לחומר מזויף/מתויג-שגוי, לא הזדמנות מרג'ין.
+  // ראה MERINO_QUALITY_SIGNALS למעלה — זה text-match בלבד, לא אימות.
+  const claimsMerino = /merino|wool/i.test(p.name || '');
+  const MERINO_MIN_PLAUSIBLE_COST = 4; // USD — מתחת לזה, Merino אמיתי לא סביר
+
+  if (claimsMerino && p.supplierPrice > 0 && p.supplierPrice < MERINO_MIN_PLAUSIBLE_COST) {
+    reasons.push(`🚩 מחיר חשוד ל-Merino: $${p.supplierPrice} — סביר שחומר לא אמיתי, אמת ידנית`);
+    // אין ניקוד מרג'ין — אסור לתת בונוס על מה שכנראה זיוף
+  } else if (p.supplierPrice > 0 && p.supplierPrice <= 8) { score += 11; reasons.push('מחיר ספק סביר ל-Merino אמיתי'); }
+  else if (p.supplierPrice <= 12) { score += 8; }
+  else if (p.supplierPrice <= 18) { score += 4; }
 
   // ביקורות (15 נק')
   if (p.reviews >= 2000) { score += 15; reasons.push('2K+ ביקורות'); }
@@ -460,6 +468,13 @@ function scoreProduct(p, trendKeywords = []) {
   const trendMatches = [...new Set(allTrendWords.filter(t => name.includes(t)))];
   if (trendMatches.length >= 2) { score += 20; reasons.push(`🔥 טרנד: ${trendMatches.slice(0, 2).join(', ')}`); }
   else if (trendMatches.length === 1) { score += 10; reasons.push(`📈 טרנד: ${trendMatches[0]}`); }
+
+  // אותות איכות Merino בטקסט (בונוס 10 נק') — text-match בלבד, לא אימות
+  const qualitySignalMatches = MERINO_QUALITY_SIGNALS.filter(s => name.includes(s));
+  if (qualitySignalMatches.length > 0) {
+    score += 10;
+    reasons.push(`✓ אות איכות: ${qualitySignalMatches[0]} (לא מאומת — בדוק ידנית)`);
+  }
 
   return { score: Math.min(100, Math.round(score)), reasons };
 }
@@ -515,7 +530,7 @@ function buildHTMLEmail(top10, stats, date) {
 
   return `<!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><title>SockAcademy — דוח מוצרים שבועי</title></head>
+<head><meta charset="UTF-8"><title>SockAcademy — Premium Hosiery Market Intelligence</title></head>
 <body style="margin:0;padding:20px;background:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;direction:rtl;">
 <div style="max-width:680px;margin:0 auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
 
@@ -676,7 +691,7 @@ async function run() {
       await emailTransporter.sendMail({
         from: '"SockAcademy A1 Agent" <sockacademy.store@gmail.com>',
         to: 'guyoved102@gmail.com',
-        subject: `🧦 SockAcademy — דוח שבועי ${date} | ${stats.totalScanned} מוצרים נסרקו`,
+        subject: `🧦 SockAcademy — Merino Market Intelligence ${date} | ${stats.totalScanned} נסרקו (market intel — לא המלצת ספק)`,
         html,
         text: `SockAcademy דוח שבועי ${date}\n\nTOP 10:\n` +
           top10.map((p, i) => `${i+1}. [${p.score}/100] ${p.name} — ${p.url}`).join('\n'),
