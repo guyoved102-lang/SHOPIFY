@@ -74,11 +74,12 @@
   /* SockAcademy header overrides */
   .section-header .header-wrapper {
     background-color: transparent;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
+    transition: background-color var(--duration-micro) var(--ease-luxury),
+                border-color     var(--duration-micro) var(--ease-luxury);
   }
 
   .section-header .header-wrapper.sa-scrolled {
-    background-color: #1A1A1A;
+    background-color: var(--surface-base);
   }
 
   .section-header .header-wrapper--border-bottom {
@@ -86,27 +87,29 @@
   }
 
   .section-header .header-wrapper.sa-scrolled.header-wrapper--border-bottom {
-    border-bottom-color: #2A2A2A;
+    border-bottom-color: var(--surface-border);
   }
 
   .section-header .list-menu__item--link,
   .section-header .header__menu-item {
-    color: #F0EDE6;
+    color: var(--cream);
   }
 
+  /* Nav hover: cream not gold — text hover states are a forbidden gold use */
   .section-header .list-menu__item--link:hover,
   .section-header .list-menu__item--link:focus,
   .section-header .header__menu-item:hover {
-    color: #C9A84C;
+    color: var(--cream);
   }
 
   .section-header .header__icon,
   .section-header .header__icon:visited {
-    color: #F0EDE6;
+    color: var(--cream);
   }
 
+  /* Icon hover: cream not gold — UI icon hover is a forbidden gold use */
   .section-header .header__icon:hover {
-    color: #C9A84C;
+    color: var(--cream);
   }
 
   .section-header .header__icon svg,
