@@ -1,7 +1,7 @@
 /**
  * A1 — Product Research Agent v2.0
- * פלטפורמות: CJ Dropshipping (API) + AliExpress + Alibaba + ניתוח טרנדים TikTok
- * [עתידי] Spocket — כשמנוי פעיל
+ * פלטפורמות: CJ Dropshipping (API) + AliExpress + Alibaba + Spocket (כשמוגדר SPOCKET_API_KEY) + ניתוח טרנדים TikTok
+ * קטלוג רחב, curated dropship — per VISION.md + PHASE_ARCHITECTURE_SKELETON.md Phase 1.
  * הרצה: node agent.js | GitHub Actions: כל יום שני 10:00 ישראל
  */
 
@@ -49,31 +49,51 @@ const emailTransporter = nodemailer.createTransport({
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// RE-SCOPED 01/07/2026 — Premium Hosiery Market Intelligence
-// Was: broad multi-category dropship trend scanner (Athletic, Tactical,
-// Gift Sets, Cashmere, Bamboo, Copper, generic Dress/Formal).
-// Now: single-SKU Merino wool authority strategy (PRIVATE_LABEL_ROADMAP.md).
-// This agent no longer scouts products to sell. It watches how competitors
-// position "premium" wool hosiery in the market — content/positioning
-// intelligence, NOT a supplier or product-sourcing decision. CJ/AliExpress/
-// Alibaba listings cannot verify micron count, ZQ certification, or
-// construction quality — actual manufacturer vetting stays a manual
-// process (see SOURCING_BRIEF.md). Do not treat a high-scoring result
-// here as a vetted sourcing candidate.
+// RESTORED 01/07/2026 — Curated Multi-Category Dropship (per VISION.md +
+// PHASE_ARCHITECTURE_SKELETON.md Phase 1, the canonical/active plan).
+// Earlier the same day this was narrowed to Merino-only under a
+// PRIVATE_LABEL_ROADMAP.md draft that turned out to contradict VISION.md
+// (dropship-first, private label = Phase 4 / Year 2 target). See
+// ANTI_RECURRENCE_PROTOCOL.md #31. Restored to full catalog scope.
+// Quality-gate improvements from that draft are KEPT below (Merino price-
+// sanity check, quality-signal keywords) — they apply within the broader
+// catalog, not instead of it. A2.5 Quality Control Gatekeeper remains the
+// actual pre-Shopify approval gate; this agent finds candidates.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 const SEARCH_QUERIES = [
+  // Premium Materials — חומרים איכותיים
   'merino wool crew socks men premium',
   'merino wool ankle socks performance',
   '18.5 micron merino wool socks',
   'ZQ certified merino wool socks',
-  'merino wool dress socks men luxury',
-  'merino wool ribbed socks men business',
-  'merino wool gift box premium set',
-  'superfine merino wool socks men',
+  'egyptian cotton dress socks men luxury',
+  'bamboo socks men antibacterial premium',
+  'cashmere blend socks men luxury',
+  'copper infused socks odor control men',
+  // Performance / Athletic
+  'compression socks running men athletic',
+  'no show socks men athletic performance',
+  'cycling socks elite sport men',
+  'anti-blister hiking socks cushioned wool',
+  'gym ankle socks men cushioned performance',
+  // Dress & Formal
+  'dress socks men formal luxury over the calf',
+  'argyle socks premium wool men business',
+  'patterned dress socks men office luxury',
+  'loafer no show socks men premium invisible',
+  'ribbed dress socks men luxury cotton',
+  // Tactical & Outdoor
+  'thermal hiking socks winter merino wool',
+  'waterproof hiking socks merino outdoor men',
+  'tactical boot socks men cushioned',
+  'merino wool outdoor socks men',
+  // Gift Sets
+  'dress socks men gift box premium set',
+  'men luxury socks gift set premium',
 ];
 
-// מה שאסור — לא מתאים לSockAcademy (single-SKU Merino authority)
+// מה שאסור — לא מתאים לSockAcademy
 const EXCLUDE_WORDS = [
   // ילדים ובעלי חיים — לא רלוונטי
   'children', 'kids', 'baby', 'toddler', 'infant',
@@ -85,29 +105,31 @@ const EXCLUDE_WORDS = [
   'diabetic', 'five finger', 'toe separated', 'toe shoe',
   // ידיים
   'gloves', 'mittens',
-  // חומרים שאינם Merino — לא רלוונטי לאסטרטגיית single-SKU
-  'cashmere', 'bamboo', 'copper', 'egyptian cotton', 'acrylic',
-  'polyester blend', 'compression', 'athletic', 'tactical', 'hiking',
 ];
 
-// מה שחייב להיות — לפחות מילה אחת מהרשימה (Merino-only)
+// מה שחייב להיות — לפחות מילה אחת מהרשימה
 const BRAND_KEYWORDS = [
-  'merino', 'wool', 'superfine', 'micron',
-  'dress', 'formal', 'business', 'luxury', 'ribbed',
-  'no show', 'no-show', 'invisible',
+  'merino', 'cashmere', 'bamboo', 'cotton', 'wool', 'copper', 'thermal',
+  'compression', 'performance', 'athletic', 'sport', 'cycling', 'hiking',
+  'tactical', 'waterproof', 'outdoor',
+  'dress', 'formal', 'argyle', 'business', 'luxury', 'ribbed',
+  'no show', 'no-show', 'invisible', 'loafer',
   'premium', 'gift', 'set',
 ];
 
-// אותות איכות — טקסט בלבד, לא אימות מאומת. משמש כ-noise filter,
-// לא כערבות לתקינות. ראה SOURCING_BRIEF.md לאימות אמיתי.
+// אותות איכות Merino — טקסט בלבד, לא אימות מאומת. בונוס ניקוד בתוך
+// הקטלוג הרחב, לא סינון בלעדי. ראה SOURCING_BRIEF.md לאימות אמיתי
+// (רלוונטי רק ב-Phase 4, לא היום).
 const MERINO_QUALITY_SIGNALS = [
   '18.5 micron', '18.5μ', 'zq certified', 'zq merino', 'superfine merino',
   'superwash', 'linked toe', 'fine merino', 'new zealand merino',
 ];
 
-// טרנדים 2025 — בסיס סטטי (מתעדכן רבעונית), Merino-only
+// טרנדים 2025 — בסיס סטטי (מתעדכן רבעונית)
 const TRENDING_2025 = [
-  'merino', 'superfine', 'zq certified', '18.5 micron', 'no show', 'no-show',
+  'merino', 'bamboo', 'copper', 'compression', 'no show', 'no-show',
+  'tactical', 'waterproof', 'odor', 'antibacterial', 'gift set',
+  'egyptian cotton', 'cashmere', 'thermal', 'hiking', 'loafer',
 ];
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -337,8 +359,47 @@ function parseAlibabaHTML(html, keyword) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// PLATFORM 4: TIKTOK TRENDS
-// [עתידי] PLATFORM 5: SPOCKET (כשמנוי פעיל)
+// PLATFORM 4: SPOCKET — curated/vetted dropship (higher quality bar than
+// raw AliExpress/CJ). Requires SPOCKET_API_KEY in GitHub Secrets + .env
+// once a Spocket account/subscription exists — until then this is a
+// graceful no-op, not a crash. Endpoint/auth shape below follows Spocket's
+// published REST pattern as of this writing; VERIFY against current
+// Spocket API docs before first live use — do not assume unchanged.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function searchSpocket(keyword) {
+  const apiKey = process.env.SPOCKET_API_KEY;
+  if (!apiKey) {
+    return []; // no subscription configured yet — silent skip, not an error
+  }
+  try {
+    const res = await fetch(`https://api.spocket.co/api/v1/products/search?query=${encodeURIComponent(keyword)}`, {
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Accept': 'application/json' },
+    });
+    if (!res.ok) {
+      console.log(`   ⚠️ Spocket API ${res.status} — skipping this query`);
+      return [];
+    }
+    const data = await res.json();
+    const items = data.products || data.data || [];
+    return items.map(p => ({
+      name: p.title || p.name || '',
+      supplierPrice: parseFloat(p.price || p.cost || 0),
+      rating: parseFloat(p.rating || 0),
+      orders: parseInt(p.orders_count || 0, 10),
+      reviews: parseInt(p.reviews_count || 0, 10),
+      url: p.url || p.product_url || '',
+      source: 'Spocket',
+      materials: extractMaterials(p.title || p.name || ''),
+      category: classifyStyle(p.title || p.name || ''),
+    })).filter(p => p.name);
+  } catch (e) {
+    console.log(`   ⚠️ Spocket error: ${e.message}`);
+    return [];
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PLATFORM 5: TIKTOK TRENDS
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function getTikTokTrends() {
   const trendKeywords = [];
@@ -530,7 +591,7 @@ function buildHTMLEmail(top10, stats, date) {
 
   return `<!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><title>SockAcademy — Premium Hosiery Market Intelligence</title></head>
+<head><meta charset="UTF-8"><title>SockAcademy — דוח מוצרים שבועי</title></head>
 <body style="margin:0;padding:20px;background:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;direction:rtl;">
 <div style="max-width:680px;margin:0 auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
 
@@ -592,10 +653,12 @@ async function run() {
   const supabase = getSupabase();
   await logHealth(supabase, 'running');
   console.log('🚀 A1 Product Research Agent v2.0\n');
-  console.log('📡 פלטפורמות: CJ Dropshipping + AliExpress + Alibaba + TikTok Trends\n');
+  console.log('📡 פלטפורמות: CJ Dropshipping + AliExpress + Alibaba + Spocket + TikTok Trends\n');
 
   // CJ Auth
   const cjToken = await getCJToken();
+  const spocketActive = !!process.env.SPOCKET_API_KEY;
+  if (!spocketActive) console.log('ℹ️ Spocket: SPOCKET_API_KEY לא מוגדר — פלטפורמה מדולגת (לא שגיאה)\n');
 
   // טרנדים
   console.log('📈 מנתח טרנדים TikTok 2025...');
@@ -603,9 +666,9 @@ async function run() {
   console.log('');
 
   const allProducts = [];
-  const platformStats = { CJ: 0, AliExpress: 0, Alibaba: 0 };
+  const platformStats = { CJ: 0, AliExpress: 0, Alibaba: 0, Spocket: 0 };
 
-  // סריקה עמוקה — כל שאילתה × 3 פלטפורמות
+  // סריקה עמוקה — כל שאילתה × עד 4 פלטפורמות
   for (let i = 0; i < SEARCH_QUERIES.length; i++) {
     const query = SEARCH_QUERIES[i];
     console.log(`🔍 [${i+1}/${SEARCH_QUERIES.length}] "${query}"`);
@@ -624,10 +687,15 @@ async function run() {
       if (alibR.length) { console.log(`   Alibaba: ${alibR.length}`); platformStats.Alibaba += alibR.length; allProducts.push(...alibR); }
     }
 
+    if (spocketActive) {
+      const spR = await searchSpocket(query);
+      if (spR.length) { console.log(`   Spocket: ${spR.length}`); platformStats.Spocket += spR.length; allProducts.push(...spR); }
+    }
+
     await new Promise(r => setTimeout(r, 800));
   }
 
-  console.log(`\n📊 סה"כ נסרקו: ${allProducts.length} | CJ:${platformStats.CJ} AliExpress:${platformStats.AliExpress} Alibaba:${platformStats.Alibaba}\n`);
+  console.log(`\n📊 סה"כ נסרקו: ${allProducts.length} | CJ:${platformStats.CJ} AliExpress:${platformStats.AliExpress} Alibaba:${platformStats.Alibaba} Spocket:${platformStats.Spocket}\n`);
 
   // סינון ייחודיות
   const seen = new Set();
@@ -691,7 +759,7 @@ async function run() {
       await emailTransporter.sendMail({
         from: '"SockAcademy A1 Agent" <sockacademy.store@gmail.com>',
         to: 'guyoved102@gmail.com',
-        subject: `🧦 SockAcademy — Merino Market Intelligence ${date} | ${stats.totalScanned} נסרקו (market intel — לא המלצת ספק)`,
+        subject: `🧦 SockAcademy — דוח שבועי ${date} | ${stats.totalScanned} מוצרים נסרקו`,
         html,
         text: `SockAcademy דוח שבועי ${date}\n\nTOP 10:\n` +
           top10.map((p, i) => `${i+1}. [${p.score}/100] ${p.name} — ${p.url}`).join('\n'),

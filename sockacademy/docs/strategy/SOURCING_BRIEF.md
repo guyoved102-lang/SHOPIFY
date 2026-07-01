@@ -1,7 +1,7 @@
 # SockAcademy — Manufacturer Sourcing Brief
 **Private Label Partnership Inquiry**
 **Confidential — For Supplier Evaluation Only**
-**Issued: July 2026**
+**Status: PREPARED, NOT YET ISSUED.** This brief is ready-to-send reference material for Sub-Phase B of `PRIVATE_LABEL_ROADMAP.md`, gated behind SA-Cluster Phase 4 (Activation Trigger: $15,000 MRR × 2 consecutive months, per `PHASE_ARCHITECTURE_SKELETON.md`). Do not send to manufacturers before that trigger + Guy's explicit sign-off. Contact email and deadline below are placeholders to fill in at actual send time — the 29 July 2026 date is illustrative only.
 
 ---
 

@@ -81,5 +81,6 @@ This connects directly to a claim from MG-1: dimensional stability, the ≤5% sh
 *Total: ~1,720 words*
 *Voice check: zero marketing adjectives, zero named competitor references, "Structure not Therapy" language enforced in Arch section — passes BRAND_DNA.md Section II*
 *Sourcing bridge paragraph added 01/07/2026 per Guy's integration directive — connects customer-facing construction claims to internal manufacturer vetting criteria (SOURCING_BRIEF.md Section 2.2), without shifting article voice into internal ops documentation.*
+*Catalog scope note: this manufacturer-vetting criteria described applies at Phase 4 (private label, $15K MRR trigger) — the sourcing bridge paragraph describes future-state vetting standards, not a claim about how today's curated dropship catalog is sourced. See ANTI_RECURRENCE_PROTOCOL.md #31.*
 *Remaining: CTA block (identical Founding Cohort / Inaugural Semester pattern from MG-1-FINAL.md, ready to append)*
 *Regulatory flag carried forward: Arch Zone section requires attorney re-review before publishing, per MG-2-ANATOMY-OUTLINE.md*

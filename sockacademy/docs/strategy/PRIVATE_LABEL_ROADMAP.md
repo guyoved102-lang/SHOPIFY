@@ -1,21 +1,23 @@
-# SockAcademy — Private Label Roadmap
-**Transition: Dropshipping Vision → Private Label Authority**
-**Locked: 01/07/2026. Authority: CTO + CEO.**
+# SockAcademy — Private Label Roadmap (Phase 4 Detail Document)
+**Supersedes:** Nothing. **Subordinate to:** `PHASE_ARCHITECTURE_SKELETON.md` — this document details the execution plan for **SA-Cluster Phase 4 — Brand Elevation & International** (Activation Trigger: $15,000 MRR × 2 consecutive months), it does not define a new independent timeline.
+**Corrected: 01/07/2026** (see `ANTI_RECURRENCE_PROTOCOL.md` #31 — this document was originally written as an immediate transition, contradicting `VISION.md` and `PHASE_ARCHITECTURE_SKELETON.md`. Reconciled same day.)
 
 ---
 
 ## Executive Summary
 
-SockAcademy is transitioning from a Shopify store with dropshipping intent to a private label brand built on three pillars: Foot Health authority, Material Science precision, and Editorial credibility. This roadmap defines the exact sequence, capital gates, and quality standards required to execute this transition without compromising the brand foundation already built.
+SockAcademy's founding plan (`VISION.md`) is: begin as a curated, quality-gated dropshipping catalog (multiple SockAcademy-standard products, sourced via A1 + A2.5 Quality Control Gatekeeper), grow through the existing revenue-triggered phase system, and transition to private label manufacturing at **Phase 4 — $15,000 MRR × 2 consecutive months** (Target: Year 2 per `VISION.md`).
 
-No inventory is purchased before the capital gates in Phase 2 are met. No paid acquisition before Phase 4 content gates are met.
+This document is the **execution detail for that Phase 4 transition** — the sourcing standards, capital gates, content flywheel, and manufacturer vetting criteria that apply *once the $15K MRR trigger is reached*. It is preparatory reference material, not a directive to act now. The Sourcing Brief, capital deployment, and 5-phase sequence below all remain gated behind the Phase 4 trigger, per `PHASE_ARCHITECTURE_SKELETON.md`'s governing rule: *"No phase transitions without explicit Guy sign-off. Zero exceptions."*
 
-**⚠️ AMENDMENT (01/07/2026):** Guy has clarified that a Bridge Sourcing phase — dropshipping from a vetted, quality supplier (explicitly NOT AliExpress-tier, NOT generic CJ marketplace trend-chasing) — is needed before full private label capital deployment. This qualifies, not reverses, the "no dropshipping" framing above: the objection was never to dropshipping as a mechanism, it was to low-quality, unvetted, high-return-rate suppliers undermining the authority brand before it exists. `A1_product_research` remains LIVE (not gated) to support this. **Open question, not yet resolved:** A1's current logic scans generic CJ Dropshipping trending products across many SKUs — this needs to be re-scoped to source specifically for premium hosiery / Merino-adjacent quality suppliers rather than broad trend-chasing, or it continues producing recommendations misaligned with the one-SKU authority strategy even while technically "allowed" to run. Flagged for Guy's decision on A1's actual sourcing criteria — not yet actioned.
+**What is active today, pre-Phase-4:** curated dropshipping (A1 + A2.5), quality-gated to SockAcademy's material/construction standards (18.5μ Merino among the approved categories, not the only one) — per Phase 1 in `PHASE_ARCHITECTURE_SKELETON.md`. MG-1 and MG-2 (Merino material guides) are authority content for the Merino line within that broader catalog, not a declaration that Merino is the only product.
+
+**Bridge Sourcing (dropship phase, active now):** A1 sources from quality-curated platforms (Spocket-tier and equivalent — vetted suppliers, not raw AliExpress/CJ generic listings) across SockAcademy's approved categories. A2.5 gates every product before it reaches Shopify. No capital committed to inventory or MOQ until the Phase 4 trigger.
 
 ---
 
-## Phase 0: Foundation
-**Timeline:** Now → Month 3
+## Sub-Phase A: Foundation
+**Timeline:** Now → Month 3 — ACTIVE, runs concurrently with curated dropshipping (not gated behind the $15K MRR trigger)
 **Status:** IN PROGRESS
 
 ### Objective
@@ -42,8 +44,9 @@ $0 (infrastructure only)
 
 ---
 
-## Phase 1: Supplier Discovery + Sampling
-**Timeline:** Month 3 → Month 6
+## Sub-Phase B: Supplier Discovery + Sampling
+**🔒 Gated behind SA-Cluster Phase 4 trigger ($15K MRR × 2 months). Do not begin before trigger + Guy sign-off.**
+**Timeline (post-trigger):** Month 1 → Month 3
 
 ### Objective
 Identify 2–3 manufacturers capable of meeting Academy Grade standards. Receive and evaluate physical samples.
@@ -71,8 +74,9 @@ $500–2,000 (samples, shipping, optional lab testing)
 
 ---
 
-## Phase 2: MOQ Negotiation + Initial PO
-**Timeline:** Month 6 → Month 9
+## Sub-Phase C: MOQ Negotiation + Initial PO
+**🔒 Gated behind SA-Cluster Phase 4 trigger ($15K MRR × 2 months). Do not begin before trigger + Guy sign-off.**
+**Timeline (post-trigger):** Month 3 → Month 6
 
 ### ⚠️ CAPITAL COMMITMENT GATE
 **$15,000–28,000 total commitment. Do not proceed until ALL 5 gates below are met.**
@@ -118,8 +122,9 @@ Add branding/trademark costs ($2,000–5,000) → upper bound reaches $18,000.
 
 ---
 
-## Phase 3: 3PL + Quality Control Infrastructure
-**Timeline:** Month 9 → Month 11
+## Sub-Phase D: 3PL + Quality Control Infrastructure
+**🔒 Gated behind SA-Cluster Phase 4 trigger ($15K MRR × 2 months). Do not begin before trigger + Guy sign-off.**
+**Timeline (post-trigger):** Month 6 → Month 8
 
 ### Objective
 Receive inventory, pass inbound QC, establish fulfillment infrastructure, and prepare subscription flow.
@@ -147,8 +152,9 @@ $2,000–5,000 (3PL setup, test orders, editorial card print run)
 
 ---
 
-## Phase 4: Waitlist Launch → First Cohort
-**Timeline:** Month 11 → Month 14
+## Sub-Phase E: Waitlist Launch → First Cohort
+**🔒 Gated behind SA-Cluster Phase 4 trigger ($15K MRR × 2 months). Do not begin before trigger + Guy sign-off.**
+**Timeline (post-trigger):** Month 8 → Month 11
 
 ### Objective
 Convert waitlist to Founding Members. Execute first subscription term with zero delivery failures.
