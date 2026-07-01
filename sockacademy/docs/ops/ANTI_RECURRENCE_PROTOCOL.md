@@ -421,6 +421,19 @@ curl -X PUT .../products/XXX.json -d '{"product":{"id":XXX,"published":true}}'
 
 ---
 
+## 30. docs/ Subdirectory Whitelist — content/ נדחה ע"י Structure Lint
+
+**מה קרה (01/07/2026):** נוצרה תיקייה `sockacademy/docs/content/` עבור MG-1 outline + draft. Structure Lint נכשל: `docs/ only allows strategy/, ops/, and superpowers/ subdirectories. Got: content`.
+**סיבה:** File Creation Protocol (שאלה 1) מפרט רק `docs/strategy/` ו-`docs/ops/` כיעדים למסמכים — לא נבדק מול הlint לפני היצירה. הנחתי ש-`docs/content/` הגיוני סמנטית בלי לאמת מול הrules בפועל.
+**תיקון:** `git mv` שני הקבצים ל-`docs/strategy/` — עבר CI ירוק תוך run אחד.
+**מה מונע חזרה:**
+- `docs/` מקבל **רק** 3 תת-תיקיות: `strategy/`, `ops/`, `superpowers/`. תוכן עריכה/פרסום (כמו MG-1, articles, guides) → `docs/strategy/` כברירת מחדל.
+- לפני יצירת תת-תיקיה חדשה תחת `docs/`: להריץ מקומית `node sockacademy/scripts/ci/structure-lint.js` על עותק זמני, או לבדוק את allowed list בקובץ הlint עצמו לפני Write.
+
+**בדיקה:** `grep -A3 "docs/ only allows" sockacademy/scripts/ci/structure-lint.js` — מציג את הרשימה המדויקת המותרת.
+
+---
+
 ## SESSION CONTINUITY CHECKLIST — בכל שיחה
 
 **פתיחה:**
