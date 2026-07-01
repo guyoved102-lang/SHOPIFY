@@ -161,7 +161,7 @@
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: #555;
+    color: var(--muted);
     margin: 0.65rem 0 0;
     max-width: 16ch;
     line-height: 1.45;
@@ -186,7 +186,7 @@
 
   #SaBento-{{ section.id }} .sa-bento__tile--link .sa-bento__tile-sub {
     font-size: 0.82rem;
-    color: #555;
+    color: var(--muted);
     margin: 0;
     flex: 1;
     line-height: 1.5;
@@ -261,7 +261,7 @@
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #444;
+    color: var(--muted);
   }
 
   /* ── Benefit tile ── */
@@ -306,7 +306,7 @@
 
   #SaBento-{{ section.id }} .sa-bento__benefit-sub {
     font-size: 0.82rem;
-    color: #555;
+    color: var(--muted);
     margin: 0;
     line-height: 1.5;
   }
@@ -372,7 +372,7 @@
       {%- else -%}
         <div
           class="sa-bento__tile-bg"
-          style="background: radial-gradient(ellipse at 68% 18%, rgba(201,168,76,0.10) 0%, transparent 58%), linear-gradient(158deg, #1E1B12 0%, #151310 45%, #0F0D09 100%);"
+          style="background: radial-gradient(ellipse at 68% 18%, var(--gold-glow) 0%, transparent 58%), linear-gradient(158deg, var(--surface-raised) 0%, var(--surface-base) 45%, var(--surface-void) 100%);"
           aria-hidden="true"
         ></div>
       {%- endif -%}

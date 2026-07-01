@@ -10,6 +10,8 @@ SockAcademy is transitioning from a Shopify store with dropshipping intent to a 
 
 No inventory is purchased before the capital gates in Phase 2 are met. No paid acquisition before Phase 4 content gates are met.
 
+**⚠️ AMENDMENT (01/07/2026):** Guy has clarified that a Bridge Sourcing phase — dropshipping from a vetted, quality supplier (explicitly NOT AliExpress-tier, NOT generic CJ marketplace trend-chasing) — is needed before full private label capital deployment. This qualifies, not reverses, the "no dropshipping" framing above: the objection was never to dropshipping as a mechanism, it was to low-quality, unvetted, high-return-rate suppliers undermining the authority brand before it exists. `A1_product_research` remains LIVE (not gated) to support this. **Open question, not yet resolved:** A1's current logic scans generic CJ Dropshipping trending products across many SKUs — this needs to be re-scoped to source specifically for premium hosiery / Merino-adjacent quality suppliers rather than broad trend-chasing, or it continues producing recommendations misaligned with the one-SKU authority strategy even while technically "allowed" to run. Flagged for Guy's decision on A1's actual sourcing criteria — not yet actioned.
+
 ---
 
 ## Phase 0: Foundation

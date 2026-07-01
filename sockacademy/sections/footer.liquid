@@ -51,7 +51,7 @@
     display: inline-block;
     width: 2px;
     height: 2rem;
-    background-color: #3A3A3A;
+    background-color: var(--surface-border);
     margin: 0 0.55rem 0.15rem;
     vertical-align: middle;
   }
@@ -130,7 +130,7 @@
   }
 
   #sa-footer-{{ section.id }} .sf__email-input::placeholder {
-    color: #555555;
+    color: var(--ghost);
   }
 
   #sa-footer-{{ section.id }} .sf__email-input:focus {
@@ -156,7 +156,7 @@
 
   #sa-footer-{{ section.id }} .sf__newsletter-fine {
     font-size: 0.72rem;
-    color: #555555;
+    color: var(--muted);
     margin: 0.6rem 0 0;
   }
 
@@ -173,7 +173,7 @@
 
   #sa-footer-{{ section.id }} .sf__legal-bar a {
     font-size: 0.72rem;
-    color: #555;
+    color: var(--muted);
     text-decoration: none;
     letter-spacing: 0.05em;
     transition: color 0.2s;
@@ -184,7 +184,7 @@
   }
 
   #sa-footer-{{ section.id }} .sf__legal-bar span {
-    color: #333;
+    color: var(--ghost);
     font-size: 0.6rem;
   }
 
@@ -200,7 +200,7 @@
 
   #sa-footer-{{ section.id }} .sf__copyright {
     font-size: 0.8rem;
-    color: #555555;
+    color: var(--muted);
     margin: 0;
   }
 
@@ -215,7 +215,7 @@
   }
 
   #sa-footer-{{ section.id }} .sf__social-link {
-    color: #555555;
+    color: var(--muted);
     text-decoration: none;
     font-size: 0.75rem;
     font-weight: 700;

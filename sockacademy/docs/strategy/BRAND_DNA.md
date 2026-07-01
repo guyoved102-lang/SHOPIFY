@@ -241,7 +241,8 @@ Some values have no exact token equivalent and may remain hardcoded:
 - `rgba(13,13,13,*)` — gradient veil in hero (deeper than `--surface-void`, intentional)
 - `#888888` — neutral body copy in legacy sections (between `--muted` and `--ghost`)
 - `#666` — disabled/tertiary text
-- `#E2C47A` — lighter gold hover variant (above `--gold`, intentional warmth shift)
+- `#E2C47A` — lighter gold hover variant (above `--gold`, intentional warmth shift) — used for structural accent reveals (borders, keylines)
+- `#A8843C` — darker gold hover/press variant (below `--gold`) — used only for solid gold-filled buttons darkening on hover (e.g. footer newsletter submit button). Not for text or borders — that is `#E2C47A`'s role.
 - `rgba(201,168,76,0.12–0.20)` — shadow values below `--gold-glow` threshold
 - Specific `clamp()` ranges in hero headline that exceed `--text-hero` ceiling
 

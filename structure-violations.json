@@ -1,7 +1,0 @@
-[
-  {
-    "rule": "ROOT_CONTAMINATION",
-    "file": ".superpowers",
-    "hint": "Files must live inside sockacademy/. Move to the correct subfolder or add to ALLOWED_ROOT_ENTRIES if truly needed at root."
-  }
-]

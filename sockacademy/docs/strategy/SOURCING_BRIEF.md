@@ -187,11 +187,11 @@ Responses that do not address all 5 points will not proceed to sample stage.
 
 ## 8. Contact & Submission
 
-Submissions and questions: **[INSERT CONTACT EMAIL]**
+Submissions and questions: **sockacademy.store@gmail.com**
 
 Subject line format: `SockAcademy Sourcing Brief Response — [Your Company Name] — [Country]`
 
-Evaluation deadline: **[INSERT DATE — recommend 4 weeks from send]**
+Evaluation deadline: **29 July 2026** (4 weeks from issue date)
 
 ---
 

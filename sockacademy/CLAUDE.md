@@ -17,9 +17,12 @@ GitHub workflow    → .github/workflows/
 ```
 **אם הקובץ לא מתאים לאף קטגוריה → לשאול לפני יצירה.**
 
+**⚠️ `docs/` מקבל רק 3 תת-תיקיות:** `strategy/`, `ops/`, `superpowers/`. תוכן חדש (guides, articles, briefs) → `docs/strategy/` כברירת מחדל. `docs/content/` או כל תת-תיקיה אחרת **תיכשל ב-CI** (ANTI_RECURRENCE #30).
+
 ### שאלה 2 — Am I about to contaminate a root?
-- **אסור בכל מצב:** קבצים בשורש הרפו (`/`) מלבד `.github/`, `sockacademy/`, `.gitignore`, `.gitattributes`, `README.md`
+- **אסור בכל מצב:** קבצים בשורש הרפו (`/`) מלבד הרשימה המדויקת ב-`structure-lint.js` (`ALLOWED_ROOT_ENTRIES`, מעודכן 01/07/2026): `.github`, `sockacademy`, `.gitignore`, `.gitattributes`, `README.md`, `.editorconfig`, `.claude`, `.agents`, `skills-lock.json`, `structure-violations.json`
 - **אסור בכל מצב:** קבצים בשורש `sockacademy/` מלבד `CLAUDE.md`, `.env.example`, `pipeline-config.json`, וספריות canonical
+- **מקור אמת:** אם יש ספק — `grep -A15 "ALLOWED_ROOT_ENTRIES" sockacademy/scripts/ci/structure-lint.js` — הקוד גובר על התיעוד הזה תמיד
 
 ### שאלה 3 — Will CI catch me if I'm wrong?
 - `structure-lint.yml` רץ על כל push ומכשיל CI תוך 60 שניות אם קובץ נמצא במקום הלא נכון

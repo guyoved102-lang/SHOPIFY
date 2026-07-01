@@ -323,6 +323,8 @@ sockacademy/agents/A<N>_*/*.cache
 
 **בדיקה:** `git ls-files sockacademy/agents/ | grep -E "(state\.json|last_run|\.cache)"` — חייב לחזור ריק.
 
+**Recurrence (01/07/2026):** `structure-violations.json` בroot — CI artifact שנכתב ע"י `structure-lint.js` בכישלון (הקוד עצמו אומר "written by this script on failure") — נמצא tracked ב-git עם תוכן מיושן מ-23/06. אותה קטגוריה בדיוק: קובץ שנוצר בזמן ריצה (הפעם CI, לא agent) הגיע ל-tracking. תוקן: `git rm --cached` + נוסף ל-`.gitignore`. **לקח מורחב:** הכלל לא רק ל-agent state files — כל קובץ שקוד אומר על עצמו "נכתב אוטומטית" חייב .gitignore, ללא קשר אם זה agent runtime או CI script output.
+
 ---
 
 ## 25. Agent Cluster Built — CLUSTERS Map לא עודכן

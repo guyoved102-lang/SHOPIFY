@@ -6,4 +6,4 @@ sockacademy/.env
 skills-lock.json
 sockacademy/agents/A1_product_research/last_run.json
 sockacademy/agents/A7_supplier_monitor/state.json
-.claude/
+structure-violations.json
