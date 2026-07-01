@@ -1,12 +1,13 @@
 {%- style -%}
   #CollectionsPreview-{{ section.id }} {
-    background-color: #1A1A1A;
-    padding: 6.25rem 2rem;
+    background-color: var(--surface-base);
+    padding: var(--space-7) var(--space-4);
   }
 
+  /* Eyebrow: muted, not gold — label text is forbidden gold use */
   #CollectionsPreview-{{ section.id }} .cp__eyebrow {
     text-align: center;
-    color: #C9A84C;
+    color: var(--muted);
     font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 0.2em;
@@ -18,7 +19,7 @@
     text-align: center;
     font-size: clamp(1.8rem, 4vw, 2.8rem);
     font-weight: 900;
-    color: #F0EDE6;
+    color: var(--cream);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     margin: 0 0 0.75rem;
@@ -28,25 +29,30 @@
     text-align: center;
     color: #888888;
     font-size: 1rem;
-    margin: 0 0 4rem;
+    margin: 0 0 var(--space-6);
   }
 
   #CollectionsPreview-{{ section.id }} .cp__grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.25rem;
+    gap: var(--grid-gap);
     max-width: 1100px;
     margin: 0 auto;
   }
 
+  /* Border-top hidden at rest — gold reveals on hover only (structural accent) */
   #CollectionsPreview-{{ section.id }} .cp__card {
-    background-color: #222222;
-    border: 1px solid #1A1A1A;
-    border-top: 3px solid #C9A84C;
+    background-color: var(--surface-raised);
+    border: 1px solid var(--surface-base);
+    border-top: 3px solid var(--surface-raised);
     padding: 2rem 2rem 2rem;
     display: flex;
     flex-direction: column;
-    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+    transition:
+      transform          var(--duration-reveal) var(--ease-luxury),
+      background-color   var(--duration-reveal) var(--ease-luxury),
+      border-color       var(--duration-reveal) var(--ease-luxury),
+      box-shadow         var(--duration-reveal) var(--ease-luxury);
     text-decoration: none;
     position: relative;
     overflow: hidden;
@@ -54,7 +60,7 @@
 
   #CollectionsPreview-{{ section.id }} .cp__card:hover {
     transform: translateY(-8px);
-    background-color: #2A2A2A;
+    background-color: var(--surface-border);
     border-top-color: #E2C47A;
     box-shadow: 0 12px 48px rgba(201, 168, 76, 0.15);
   }
@@ -64,25 +70,17 @@
     flex-direction: column;
     gap: 0.6rem;
     flex: 1;
-    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform var(--duration-reveal) var(--ease-luxury);
   }
 
   #CollectionsPreview-{{ section.id }} .cp__card:hover .cp__card-inner {
     transform: translateY(-4px);
   }
 
-  /* Alternate accent cards (even positions) */
-  #CollectionsPreview-{{ section.id }} .cp__card--accent {
-    border-top-color: #C9A84C;
-  }
-
+  /* Accent cards: same rest state as base, distinct hover shadow */
   #CollectionsPreview-{{ section.id }} .cp__card--accent:hover {
     border-top-color: #E2C47A;
     box-shadow: 0 8px 32px rgba(201, 168, 76, 0.12);
-  }
-
-  #CollectionsPreview-{{ section.id }} .cp__card--accent .cp__card-btn {
-    color: #C9A84C;
   }
 
   #CollectionsPreview-{{ section.id }} .cp__card-icon {
@@ -92,6 +90,7 @@
     display: flex;
     align-items: center;
     justify-content: flex-start;
+    color: var(--cream);
   }
 
   #CollectionsPreview-{{ section.id }} .cp__card-icon svg {
@@ -103,7 +102,7 @@
   #CollectionsPreview-{{ section.id }} .cp__card-title {
     font-size: 1rem;
     font-weight: 800;
-    color: #F0EDE6;
+    color: var(--cream);
     letter-spacing: 0.06em;
     text-transform: uppercase;
     margin: 0;
@@ -118,6 +117,7 @@
     flex-grow: 1;
   }
 
+  /* Nav label: cream, not gold — link labels are forbidden gold use */
   #CollectionsPreview-{{ section.id }} .cp__card-btn {
     display: inline-flex;
     align-items: center;
@@ -127,9 +127,9 @@
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: #C9A84C;
+    color: var(--cream);
     text-decoration: none;
-    transition: gap 0.2s ease;
+    transition: gap var(--duration-micro) var(--ease-luxury);
   }
 
   #CollectionsPreview-{{ section.id }} .cp__card:hover .cp__card-btn {
@@ -144,11 +144,11 @@
 
   @media screen and (max-width: 749px) {
     #CollectionsPreview-{{ section.id }} {
-      padding: 2.5rem 1.25rem;
+      padding: var(--space-5) var(--space-3);
     }
 
     #CollectionsPreview-{{ section.id }} .cp__subheading {
-      margin-bottom: 2rem;
+      margin-bottom: var(--space-4);
     }
 
     #CollectionsPreview-{{ section.id }} .cp__grid {
@@ -183,34 +183,34 @@
             {%- case block.settings.icon -%}
               {%- when 'no-show' -%}
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 8 L18 8 L18 16 L26 16 Q28 16 28 20 Q28 26 24 26 L8 26 Q5 26 5 23 Q5 16 8 16 L12 16 Z" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M12 8 L18 8 L18 16 L26 16 Q28 16 28 20 Q28 26 24 26 L8 26 Q5 26 5 23 Q5 16 8 16 L12 16 Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               {%- when 'crew' -%}
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 4 L18 4 L18 16 L26 16 Q28 16 28 20 Q28 26 24 26 L8 26 Q5 26 5 23 Q5 16 8 16 L12 16 Z" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  <line x1="12" y1="8" x2="18" y2="8" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/>
+                  <path d="M12 4 L18 4 L18 16 L26 16 Q28 16 28 20 Q28 26 24 26 L8 26 Q5 26 5 23 Q5 16 8 16 L12 16 Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <line x1="12" y1="8" x2="18" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
               {%- when 'sport' -%}
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M20 4 L11 17 H17 L12 28 L22 15 H16 Z" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M20 4 L11 17 H17 L12 28 L22 15 H16 Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               {%- when 'hiking' -%}
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <polyline points="2,28 12,10 16,16 22,8 30,28" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  <line x1="2" y1="28" x2="30" y2="28" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/>
+                  <polyline points="2,28 12,10 16,16 22,8 30,28" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <line x1="2" y1="28" x2="30" y2="28" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
               {%- when 'formal' -%}
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M13 6 L16 5 L19 6 L18 10 L14 10 Z" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M14 10 L11 24 L16 28 L21 24 L18 10" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M13 6 L16 5 L19 6 L18 10 L14 10 Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M14 10 L11 24 L16 28 L21 24 L18 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               {%- when 'gift' -%}
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="5" y="14" width="22" height="13" rx="1" stroke="#C9A84C" stroke-width="1.5"/>
-                  <rect x="3" y="10" width="26" height="4" rx="1" stroke="#C9A84C" stroke-width="1.5"/>
-                  <line x1="16" y1="10" x2="16" y2="27" stroke="#C9A84C" stroke-width="1.5"/>
-                  <path d="M16 10 C12 8 9 5 12 4 C14 3 16 6 16 10" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/>
-                  <path d="M16 10 C20 8 23 5 20 4 C18 3 16 6 16 10" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/>
+                  <rect x="5" y="14" width="22" height="13" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                  <rect x="3" y="10" width="26" height="4" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                  <line x1="16" y1="10" x2="16" y2="27" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M16 10 C12 8 9 5 12 4 C14 3 16 6 16 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  <path d="M16 10 C20 8 23 5 20 4 C18 3 16 6 16 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
             {%- endcase -%}
           </div>

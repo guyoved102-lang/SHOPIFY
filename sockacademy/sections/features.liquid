@@ -1,21 +1,22 @@
 {%- style -%}
   #Features-{{ section.id }} {
-    background-color: #1A1A1A;
-    padding: 6.25rem 2rem;
+    background-color: var(--surface-base);
+    padding: var(--space-7) var(--space-4);
   }
 
   #Features-{{ section.id }} .features__heading {
     text-align: center;
     font-size: clamp(1.8rem, 4vw, 2.8rem);
     font-weight: 900;
-    color: #F0EDE6;
+    color: var(--cream);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     margin: 0 0 0.5rem;
   }
 
+  /* heading accent span: cream not gold — decorative fill is forbidden */
   #Features-{{ section.id }} .features__heading span {
-    color: #C9A84C;
+    color: var(--cream);
   }
 
   #Features-{{ section.id }} .features__subheading {
@@ -24,48 +25,53 @@
     font-size: 1rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    margin: 0 0 4rem;
+    margin: 0 0 var(--space-6);
   }
 
   #Features-{{ section.id }} .features__grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
+    gap: var(--grid-gap);
     max-width: 1100px;
     margin: 0 auto;
   }
 
   #Features-{{ section.id }} .features__card {
-    background-color: #222222;
-    border: 1px solid #1F1F1F;
-    border-top: 3px solid #222222;
+    background-color: var(--surface-raised);
+    border: 1px solid var(--surface-border);
+    border-top: 3px solid var(--surface-raised);
     padding: 2.5rem 2rem;
     text-align: center;
-    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.5s ease, box-shadow 0.5s ease;
+    transition:
+      transform      var(--duration-reveal) var(--ease-luxury),
+      border-color   var(--duration-reveal) var(--ease-luxury),
+      box-shadow     var(--duration-reveal) var(--ease-luxury);
     position: relative;
     overflow: hidden;
   }
 
+  /* Gold reveals on hover only — structural accent, PERMITTED */
   #Features-{{ section.id }} .features__card:hover {
     transform: translateY(-8px);
-    border-top-color: #C9A84C;
+    border-top-color: var(--gold);
     box-shadow: 0 12px 48px rgba(201, 168, 76, 0.18);
   }
 
   #Features-{{ section.id }} .features__card-inner {
-    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform var(--duration-reveal) var(--ease-luxury);
   }
 
   #Features-{{ section.id }} .features__card:hover .features__card-inner {
     transform: translateY(-4px);
   }
 
+  /* Feature icons: cream, not gold — decorative fills are forbidden */
   #Features-{{ section.id }} .features__icon {
     width: 56px;
     height: 56px;
     margin: 0 auto 1.5rem;
-    color: #C9A84C;
-    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    color: var(--cream);
+    transition: transform var(--duration-reveal) var(--ease-luxury);
   }
 
   #Features-{{ section.id }} .features__icon svg {
@@ -80,7 +86,7 @@
   #Features-{{ section.id }} .features__card-title {
     font-size: 1.1rem;
     font-weight: 800;
-    color: #F0EDE6;
+    color: var(--cream);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     margin: 0 0 0.75rem;
@@ -95,9 +101,9 @@
 
   .features__trust {
     max-width: 1100px;
-    margin: 5rem auto 0;
-    padding-top: 3rem;
-    border-top: 1px solid rgba(201, 168, 76, 0.12);
+    margin: var(--space-7) auto 0;
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--gold-glow);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -125,10 +131,11 @@
     background: rgba(201, 168, 76, 0.2);
   }
 
+  /* Trust icons: muted — secondary UI indicators, not authority badges */
   .features__trust-icon {
     width: 28px;
     height: 28px;
-    color: #C9A84C;
+    color: var(--muted);
     flex-shrink: 0;
   }
 
@@ -147,7 +154,7 @@
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: #F0EDE6;
+    color: var(--cream);
     margin: 0;
   }
 
@@ -160,20 +167,20 @@
 
   @media screen and (max-width: 749px) {
     #Features-{{ section.id }} {
-      padding: 2.5rem 1.25rem;
+      padding: var(--space-5) var(--space-3);
     }
 
     #Features-{{ section.id }} .features__grid {
       grid-template-columns: 1fr;
-      gap: 1.25rem;
+      gap: var(--space-3);
     }
 
     #Features-{{ section.id }} .features__subheading {
-      margin-bottom: 2rem;
+      margin-bottom: var(--space-4);
     }
 
     .features__trust {
-      margin-top: 3rem;
+      margin-top: var(--space-5);
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0;
@@ -189,12 +196,12 @@
 
     .features__trust-badge:nth-child(1),
     .features__trust-badge:nth-child(2) {
-      border-bottom: 1px solid rgba(201, 168, 76, 0.12);
+      border-bottom: 1px solid var(--gold-glow);
     }
 
     .features__trust-badge:nth-child(1),
     .features__trust-badge:nth-child(3) {
-      border-right: 1px solid rgba(201, 168, 76, 0.12);
+      border-right: 1px solid var(--gold-glow);
     }
   }
 {%- endstyle -%}
