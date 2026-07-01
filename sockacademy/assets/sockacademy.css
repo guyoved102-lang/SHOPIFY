@@ -2,7 +2,6 @@
 /* Tokens: --surface-* | --gold | --cream | --muted | --space-* | --text-* — see :root */
 /* Header + sections already styled inline — this file handles global components */
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap');
 
 /* ── Page background ─────────────────────────────────── */
 body {
@@ -71,7 +70,7 @@ body {
 }
 
 .card__heading a:hover {
-  color: #C9A84C !important;
+  color: var(--cream) !important;
 }
 
 /* ── Prices ──────────────────────────────────────────── */
@@ -81,7 +80,7 @@ body {
 }
 
 .price--sale .price-item--sale {
-  color: #C9A84C !important;
+  color: var(--cream) !important;
 }
 
 .price-item--regular.price-item--last {
@@ -147,7 +146,7 @@ menu-drawer,
 }
 
 .footer a:hover {
-  color: #C9A84C !important;
+  color: var(--cream) !important;
 }
 
 /* ── Forms ───────────────────────────────────────────── */
@@ -185,7 +184,7 @@ textarea:focus {
 
 /* ── Links (global fallback) ─────────────────────────── */
 .link:hover {
-  color: #C9A84C !important;
+  color: var(--cream) !important;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -399,7 +398,7 @@ h4, .h4 { font-size: var(--text-xl);  line-height: 1.25; }
     font-family: 'Playfair Display', sans-serif;
     font-size: 1.05rem;
     letter-spacing: 0.04em;
-    color: #C9A84C;
+    color: var(--cream);
     line-height: 1;
   }
 
