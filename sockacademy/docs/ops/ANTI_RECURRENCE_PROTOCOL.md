@@ -436,6 +436,26 @@ curl -X PUT .../products/XXX.json -d '{"product":{"id":XXX,"published":true}}'
 
 ---
 
+## 31. Strategy Document Drift — מסמך חדש סותר תוכנית "נעולה" קיימת
+
+**מה קרה (01/07/2026):** נוצר `PRIVATE_LABEL_ROADMAP.md` והוכרז "**Locked**: 01/07/2026. Authority: CTO + CEO." עם ההצהרה "no dropshipping, מעבר ל-Private Label **עכשיו**." זה סתר ישירות שני מסמכים בסיסיים שכבר היו קיימים:
+- `VISION.md`: *"SockAcademy begins as a curated dropshipping authority... Target: First private label SKU by **Year 2**"*
+- `PHASE_ARCHITECTURE_SKELETON.md`: Private Label = **Phase 4**, טריגר **$15,000 MRR × 2 חודשים רצופים** — לא "עכשיו"
+
+בנוסף: `A1_product_research` צומצם אותו יום ל-Merino בלבד, בזמן ש-Phase 1 הקיים (עדיין LIVE) תוכנן כקטלוג רחב עם A2.5 Quality Control Gatekeeper כבר בנוי כשכבת האיכות.
+
+**סיבה:** `/boot-sockacademy` שלב 1 (טעינת זיכרון מוסדי) מעולם לא כלל את `VISION.md` או `PHASE_ARCHITECTURE_SKELETON.md` — רק CLAUDE.md + memory files. מסמכי ה-"constitution" של הפרויקט לא נטענו באף session, כולל זה שיצר את הסתירה. הבעיה לא התגלתה על ידי CI (זו לא הפרה טכנית — שני המסמכים תקינים בפני עצמם), רק גיא תפס אותה ידנית אחרי שעות עבודה על בסיס המסמך השגוי.
+
+**מה מונע חזרה:**
+1. `boot-sockacademy` שלב 1 כולל כעת `VISION.md` + `PHASE_ARCHITECTURE_SKELETON.md` כ-constitution-tier — נטענים בכל session, לא רק בעת דיון אסטרטגי
+2. CLAUDE.md → "Strategy Document Supersession Check" (בתוך Consultative CTO Protocol) — כל מסמך חדש שמצהיר "Locked" חייב grep + קריאה בפועל של המסמכים הקיימים לפני נעילה
+3. מסמך שמחליף מסמך קודם חייב שורת "**Supersedes:** [שם] — [מה השתנה]" בפתיח — אין עוד "Locked" בלי לציין מה זה דורס
+4. Phase-numbering collision תועד במפורש: 3 מערכות "Phase N" נפרדות בפרויקט (SA-Cluster / Brand Architecture / Private Label Roadmap) — לעולם לא להניח שהן זהות
+
+**בדיקה:** `grep -rn "Locked\|Authority: CTO" sockacademy/docs/strategy/*.md` — אם יש יותר ממסמך אחד "Locked" באותו נושא (business model / phase sequencing) — עצור ובדוק סתירה לפני שממשיכים.
+
+---
+
 ## SESSION CONTINUITY CHECKLIST — בכל שיחה
 
 **פתיחה:**
@@ -445,6 +465,7 @@ curl -X PUT .../products/XXX.json -d '{"product":{"id":XXX,"published":true}}'
 **בתוך שיחה:**
 - [ ] כל milestone → PARANOIA MODE
 - [ ] כל קובץ חדש → 3 שאלות FILE CREATION PROTOCOL
+- [ ] כל מסמך אסטרטגי חדש/"Locked" → Strategy Document Supersession Check (CLAUDE.md, ANTI_RECURRENCE #31)
 - [ ] כל commit → security sweep (git diff --cached)
 - [ ] גיא אומר "עבד/הוספתי/בוצע" → ✅ ב-memory מיד
 - [ ] שגיאה תוקנה → פרוטוקול חדש ב-ANTI_RECURRENCE מיד

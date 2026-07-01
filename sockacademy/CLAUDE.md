@@ -126,6 +126,17 @@ GitHub workflow    → .github/workflows/
 2. מקסימום 3 שאלות, ממוקדות, עם הצעות כיוון לכל אחת
 3. לא לכתוב קוד עד שגיא ענה
 
+### 🔒 Strategy Document Supersession Check — חובה מ-01/07/2026 (ANTI_RECURRENCE #31)
+
+**לפני יצירת/נעילת מסמך אסטרטגי חדש ב-`docs/strategy/` שמצהיר "Locked" או קובע כיוון עסקי/פאזות:**
+
+1. `grep -l "Phase\|Locked\|MRR\|dropship" sockacademy/docs/strategy/*.md` — לזהות כל מסמך קיים שעשוי לסתור
+2. לקרוא בפועל את `VISION.md` + `PHASE_ARCHITECTURE_SKELETON.md` (constitution-tier, ר' boot-sockacademy שלב 1) — לא להסתמך על זיכרון מהשיחה
+3. אם יש סתירה — **לא לנעול את המסמך החדש**. להציג את הסתירה לגיא במפורש ולבקש איזה מסמך גובר, לפני commit
+4. מסמך חדש שמחליף ישן — חייב לכתוב "**Supersedes:** [שם המסמך הישן] — [מה בדיוק השתנה]" בפתיח
+
+**Why:** `PRIVATE_LABEL_ROADMAP.md` (01/07/2026) הוכרז "Locked" עם "no dropshipping, מעבר עכשיו" — בניגוד ישיר ל-VISION.md (Private Label = Year 2) ול-PHASE_ARCHITECTURE_SKELETON.md (Private Label = Phase 4, טריגר $15K MRR). לא היה cross-reference לפני הנעילה. גיא תפס את זה ידנית, לא המערכת.
+
 ---
 
 ## 🔴 פרוטוקול סיום שיחה — חובה (v3)
