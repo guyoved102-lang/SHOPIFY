@@ -1,12 +1,12 @@
 {%- style -%}
   #SaBento-{{ section.id }} {
-    background-color: #1A1A1A;
+    background-color: var(--surface-base);
     padding: 6rem 2rem;
   }
 
   #SaBento-{{ section.id }} .sa-bento__eyebrow {
     text-align: center;
-    color: #C9A84C;
+    color: var(--muted);
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.25em;
@@ -20,7 +20,7 @@
     font-size: clamp(1.75rem, 3.5vw, 2.75rem);
     font-weight: 400;
     font-style: italic;
-    color: #F0EDE6;
+    color: var(--cream);
     margin: 0 0 3rem;
     line-height: 1.15;
   }
@@ -35,8 +35,8 @@
   }
 
   #SaBento-{{ section.id }} .sa-bento__tile {
-    background: #1E1E1E;
-    border: 1px solid #252525;
+    background: var(--surface-raised);
+    border: 1px solid var(--surface-border);
     border-radius: 4px;
     overflow: hidden;
     position: relative;
@@ -92,7 +92,7 @@
     font-weight: 700;
     letter-spacing: 0.28em;
     text-transform: uppercase;
-    color: #C9A84C;
+    color: var(--muted);
     margin-bottom: 0.6rem;
   }
 
@@ -100,7 +100,7 @@
     font-family: 'Playfair Display', serif;
     font-size: clamp(1.4rem, 2.6vw, 2.1rem);
     font-weight: 400;
-    color: #F0EDE6;
+    color: var(--cream);
     line-height: 1.1;
     margin: 0 0 0.55rem;
   }
@@ -120,8 +120,8 @@
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #1A1A1A;
-    background: #C9A84C;
+    color: var(--surface-base);
+    background: var(--gold);
     padding: 0.7rem 1.35rem;
     text-decoration: none;
     border-radius: 2px;
@@ -142,7 +142,7 @@
     align-items: center;
     text-align: center;
     padding: 2rem;
-    background: #111111;
+    background: var(--surface-void);
     border-color: rgba(201, 168, 76, 0.14);
   }
 
@@ -151,7 +151,7 @@
     font-family: 'Playfair Display', serif;
     font-size: clamp(2.4rem, 4.5vw, 3.75rem);
     font-weight: 700;
-    color: #C9A84C;
+    color: var(--cream);
     line-height: 1;
     letter-spacing: -0.02em;
   }
@@ -201,7 +201,7 @@
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: #C9A84C;
+    color: var(--cream);
     transition: gap 0.22s ease;
   }
 
@@ -250,7 +250,7 @@
     font-family: 'Playfair Display', serif;
     font-size: clamp(0.95rem, 1.5vw, 1.15rem);
     font-style: italic;
-    color: #F0EDE6;
+    color: var(--cream);
     line-height: 1.6;
     margin: 0 0 1rem;
   }
@@ -273,14 +273,14 @@
     justify-content: center;
     align-items: flex-start;
     padding: 2rem;
-    background: #111111;
-    border-color: rgba(201, 168, 76, 0.1);
+    background: var(--surface-void);
+    border-color: var(--gold-glow);
   }
 
   #SaBento-{{ section.id }} .sa-bento__benefit-icon {
     width: 34px;
     height: 34px;
-    color: #C9A84C;
+    color: var(--gold);
     margin-bottom: 1rem;
     flex-shrink: 0;
   }
@@ -300,7 +300,7 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #F0EDE6;
+    color: var(--cream);
     margin: 0 0 0.35rem;
   }
 

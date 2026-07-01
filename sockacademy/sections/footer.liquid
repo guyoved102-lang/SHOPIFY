@@ -1,8 +1,8 @@
 {%- style -%}
   #sa-footer-{{ section.id }} {
-    background-color: #222222;
-    border-top: 3px solid #C9A84C;
-    color: #F0EDE6;
+    background-color: var(--surface-void);
+    border-top: 3px solid var(--gold);
+    color: var(--cream);
     font-family: 'DM Sans', sans-serif;
     padding: 6.25rem 2rem 0;
   }
@@ -18,7 +18,7 @@
     grid-template-columns: 1.4fr 1fr 1fr 1.6fr;
     gap: 3rem;
     padding-bottom: 4rem;
-    border-bottom: 1px solid #1E1E1E;
+    border-bottom: 1px solid var(--surface-border);
   }
 
   /* ── Brand column ── */
@@ -34,7 +34,7 @@
   #sa-footer-{{ section.id }} .sf__logo-s {
     font-family: 'Playfair Display', serif;
     font-size: 2.6rem;
-    color: #C9A84C;
+    color: var(--gold);
     letter-spacing: 0;
     line-height: 1;
   }
@@ -42,7 +42,7 @@
   #sa-footer-{{ section.id }} .sf__logo-ock {
     font-family: 'Playfair Display', serif;
     font-size: 2.6rem;
-    color: #F0EDE6;
+    color: var(--cream);
     letter-spacing: 0;
     line-height: 1;
   }
@@ -59,7 +59,7 @@
   #sa-footer-{{ section.id }} .sf__logo-academy {
     font-family: 'Playfair Display', serif;
     font-size: 1.5rem;
-    color: #C9A84C;
+    color: var(--gold);
     letter-spacing: 0.06em;
     line-height: 1;
   }
@@ -77,7 +77,7 @@
     font-family: 'Playfair Display', serif;
     font-size: 1.1rem;
     letter-spacing: 0.12em;
-    color: #F0EDE6;
+    color: var(--cream);
     margin: 0 0 1.1rem;
     text-transform: uppercase;
   }
@@ -99,7 +99,7 @@
   }
 
   #sa-footer-{{ section.id }} .sf__nav a:hover {
-    color: #C9A84C;
+    color: var(--cream);
   }
 
   /* ── Newsletter column ── */
@@ -117,10 +117,10 @@
 
   #sa-footer-{{ section.id }} .sf__email-input {
     flex: 1;
-    background: #1A1A1A;
-    border: 1px solid #2A2A2A;
+    background: var(--surface-base);
+    border: 1px solid var(--surface-border);
     border-right: none;
-    color: #F0EDE6;
+    color: var(--cream);
     font-family: 'DM Sans', sans-serif;
     font-size: 0.875rem;
     padding: 0.7rem 1rem;
@@ -134,12 +134,12 @@
   }
 
   #sa-footer-{{ section.id }} .sf__email-input:focus {
-    border-color: #C9A84C;
+    border-color: var(--gold);
   }
 
   #sa-footer-{{ section.id }} .sf__email-btn {
-    background: #C9A84C;
-    color: #FFFFFF;
+    background: var(--gold);
+    color: var(--surface-base);
     border: none;
     font-family: 'Playfair Display', serif;
     font-size: 1rem;
@@ -168,7 +168,7 @@
     flex-wrap: wrap;
     gap: 0.25rem 1.5rem;
     padding: 1.25rem 0;
-    border-bottom: 1px solid #1E1E1E;
+    border-bottom: 1px solid var(--surface-border);
   }
 
   #sa-footer-{{ section.id }} .sf__legal-bar a {
@@ -180,7 +180,7 @@
   }
 
   #sa-footer-{{ section.id }} .sf__legal-bar a:hover {
-    color: #C9A84C;
+    color: var(--cream);
   }
 
   #sa-footer-{{ section.id }} .sf__legal-bar span {
@@ -205,7 +205,7 @@
   }
 
   #sa-footer-{{ section.id }} .sf__copyright span {
-    color: #C9A84C;
+    color: var(--cream);
   }
 
   #sa-footer-{{ section.id }} .sf__socials {
@@ -228,7 +228,7 @@
   }
 
   #sa-footer-{{ section.id }} .sf__social-link:hover {
-    color: #C9A84C;
+    color: var(--cream);
   }
 
   #sa-footer-{{ section.id }} .sf__social-link svg {
@@ -265,7 +265,7 @@
     }
 
     #sa-footer-{{ section.id }} .sf__email-input {
-      border-right: 1px solid #2A2A2A;
+      border-right: 1px solid var(--surface-border);
     }
 
     #sa-footer-{{ section.id }} .sf__email-btn {

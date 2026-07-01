@@ -94,7 +94,7 @@
     font-weight: 700;
     letter-spacing: 0.35em;
     text-transform: uppercase;
-    color: #C9A84C;
+    color: var(--muted);
     margin-bottom: 1.25rem;
   }
 
@@ -103,7 +103,7 @@
     font-size: clamp(2.8rem, 7vw, 6.5rem);
     font-weight: 700;
     font-style: italic;
-    color: #F0EDE6;
+    color: var(--cream);
     line-height: 1.05;
     letter-spacing: -0.01em;
     margin: 0 0 0.5rem;
@@ -112,14 +112,14 @@
 
   .sa-hero__heading em {
     font-style: normal;
-    color: #C9A84C;
+    color: var(--cream);
   }
 
   .sa-hero__rule {
     display: block;
     width: 64px;
     height: 1px;
-    background: #C9A84C;
+    background: var(--gold);
     margin: 1.75rem 0;
     opacity: 0.7;
   }
@@ -147,15 +147,15 @@
     justify-content: center;
     min-height: 52px;
     padding: 0 2.25rem;
-    background-color: #C9A84C;
-    color: #0D0D0D;
+    background-color: var(--gold);
+    color: var(--surface-base);
     font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     text-decoration: none;
-    border: 1px solid #C9A84C;
+    border: 1px solid var(--gold);
     border-radius: 2px;
     transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
     white-space: nowrap;
@@ -163,19 +163,19 @@
 
   .sa-hero__cta:hover {
     background-color: transparent;
-    color: #C9A84C;
+    color: var(--gold);
     transform: translateY(-2px);
   }
 
   .sa-hero__cta--ghost {
     background-color: transparent;
-    color: #F0EDE6;
+    color: var(--cream);
     border-color: rgba(240, 237, 230, 0.3);
   }
 
   .sa-hero__cta--ghost:hover {
-    border-color: #C9A84C;
-    color: #C9A84C;
+    border-color: var(--gold);
+    color: var(--gold);
   }
 
   /* Corner badge */
@@ -194,7 +194,7 @@
   .sa-hero__badge-line {
     width: 1px;
     height: 48px;
-    background: #C9A84C;
+    background: var(--gold);
   }
 
   .sa-hero__badge-text {
@@ -205,7 +205,7 @@
     font-weight: 700;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: #C9A84C;
+    color: var(--gold);
   }
 
   /* Header padding for content inside hero */
