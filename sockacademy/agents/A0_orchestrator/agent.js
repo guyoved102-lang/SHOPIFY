@@ -10,7 +10,7 @@ require('dotenv').config({ path: '../../.env' });
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 const { runOrchestration, CLUSTERS } = require('../../corp/core/orchestration');
-const { sendTelegram } = require('../../corp/core/telegram.js');
+const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const FORCE_WEEKLY = process.env.FORCE_WEEKLY_REPORT === 'true';
@@ -163,21 +163,8 @@ async function sendEmail(subject, html) {
   console.log(`📧 Sent: "${subject}"`);
 }
 
-async function notifyTelegram(text, opts = {}) {
-  if (DRY_RUN) {
-    console.log(`[DRY_RUN] Would send Telegram: "${text.replace(/\n/g, ' ').slice(0, 80)}..."`);
-    return;
-  }
-  await sendTelegram(text, opts);
-}
-
-// Canonical Hebrew Telegram format (telegram_hebrew_standard memory):
-// <b>[AGENT_NAME] — [תאריך]</b>\n\n[גוף בעברית]\n\n<i>הופעל אוטומטית...</i>
-function heDate() {
-  return new Date().toLocaleDateString('he-IL', { timeZone: 'Asia/Jerusalem', weekday: 'long', day: 'numeric', month: 'long' });
-}
-function heTelegramMsg(title, body) {
-  return `<b>A0 Orchestrator — ${title} (${heDate()})</b>\n\n${body}\n\n<i>הופעל אוטומטית ב-A0 Orchestrator</i>`;
+function heMsg(title, body) {
+  return heTelegramMsg('A0 Orchestrator', title, body);
 }
 
 // ─── EMAIL TEMPLATES ─────────────────────────────────────────────────────────
@@ -655,7 +642,7 @@ async function main() {
       `🚨 A0 Alert: ${stuckRows.length} stuck product row(s) — action needed`,
       stuckAlertHtml(stuckRows)
     );
-    await notifyTelegram(heTelegramMsg('🚨 התראת מוצרים תקועים',
+    await notifyTelegram(heMsg('🚨 התראת מוצרים תקועים',
       `נמצאו <b>${stuckRows.length}</b> מוצר/ים תקועים בסטטוס "uploading" מעבר לזמן הצפוי.\nנדרשת פעולה שלך ב-Supabase לשחרור התקיעה. פירוט מלא נשלח במייל.`));
   }
 
@@ -671,7 +658,7 @@ async function main() {
         `🔴 SA-6 Alert: ${criticalCount} critical issue(s) detected`,
         orchestrationAlertHtml(decisions, clusterScores)
       );
-      await notifyTelegram(heTelegramMsg('🔴 התראת SA-6 קריטית',
+      await notifyTelegram(heMsg('🔴 התראת SA-6 קריטית',
         `מנוע ההחלטות זיהה <b>${criticalCount}</b> בעיה/ות קריטית/ות בצי הסוכנים.\nפירוט מלא בדוח שנשלח במייל.`));
     }
   } catch (e) {
@@ -706,7 +693,7 @@ async function main() {
       `🏗️ A0 Alert: ${structureViolations.length} workspace structure violation(s)`,
       workspaceAlertHtml(structureViolations)
     );
-    await notifyTelegram(heTelegramMsg('🏗️ הפרת מבנה תיקיות',
+    await notifyTelegram(heMsg('🏗️ הפרת מבנה תיקיות',
       `נמצאו <b>${structureViolations.length}</b> הפרות מבנה בארכיטקטורה (מול CLAUDE.md).\nרשימת הקבצים המלאה נשלחה במייל.`));
   }
 
@@ -726,7 +713,7 @@ async function main() {
         `🎯 SockAcademy Phase Readiness: ${readiness.total}/100 — Awaiting Your Approval`,
         readinessEmailHtml(readiness)
       );
-      await notifyTelegram(heTelegramMsg('🎯 המערכת מוכנה לפאזה הבאה!',
+      await notifyTelegram(heMsg('🎯 המערכת מוכנה לפאזה הבאה!',
         `ציון מוכנות: <b>${readiness.total}/100</b> — עבר את הסף (${READINESS_THRESHOLD}).\nהמערכת ממתינה לאישורך הידני להפעלת הפאזה הבאה. פירוט מלא במייל.`));
     } else {
       console.log(`⏳ Not ready (${readiness.total}/100) — ${READINESS_THRESHOLD - readiness.total} pts to threshold`);
@@ -751,7 +738,7 @@ async function main() {
             <hr><p style="color:#888;font-size:11px">SockAcademy A0 Orchestrator</p>
           </div>`
         );
-        await notifyTelegram(heTelegramMsg('⚠️ ירידה בציון המוכנות',
+        await notifyTelegram(heMsg('⚠️ ירידה בציון המוכנות',
           `הציון ירד מ-<b>${prevScore}</b> ל-<b>${readiness.total}</b> (ירידה של ${prevScore - readiness.total} נק').\nכדאי לבדוק אילו agents הפסיקו לדווח ב-Supabase.`));
       }
       await supabase.from('system_config').upsert(
@@ -783,7 +770,7 @@ async function main() {
       : Object.values(clusterScoresForTg).some(s => s.score < 50) ? '🔴 אשכול פגוע'
       : '⚠️ בעיות קלות';
     await notifyTelegram(
-      heTelegramMsg('📊 סיכום יומי',
+      heMsg('📊 סיכום יומי',
         `בריאות אשכולות: <b>${clusterStatusShort}</b>\n` +
         `ציון מוכנות: <b>${readiness ? readiness.total + '/100' : '—'}</b>\n` +
         `מוצרים תקועים: ${stuckRows.length} | הפרות מבנה: ${structureViolations.length}`),
@@ -812,7 +799,7 @@ main().catch(async err => {
       '🚨 A0 Orchestrator FAILED — action needed',
       `<div style="font-family:monospace"><h2>🚨 A0 Fatal Error</h2><p><strong>Time:</strong> ${new Date().toISOString()}</p><pre style="background:#f5f5f5;padding:12px">${err.message}</pre></div>`
     );
-    await notifyTelegram(heTelegramMsg('🚨 כשל קריטי!',
+    await notifyTelegram(heMsg('🚨 כשל קריטי!',
       `ה-Orchestrator נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
   } catch (_) {}
   process.exit(1);

@@ -47,4 +47,25 @@ async function sendTelegram(text, { silent = false } = {}) {
   }
 }
 
-module.exports = { sendTelegram };
+// DRY_RUN-safe wrapper — agents should call this instead of sendTelegram()
+// directly, so DRY_RUN=true never fires a real Telegram message (mirrors
+// the same guarantee sendEmail() already gives every agent).
+async function notifyTelegram(text, opts = {}) {
+  if (process.env.DRY_RUN === 'true') {
+    console.log(`[DRY_RUN] Would send Telegram: "${text.replace(/\n/g, ' ').slice(0, 80)}..."`);
+    return false;
+  }
+  return sendTelegram(text, opts);
+}
+
+// Canonical Hebrew format (telegram_hebrew_standard):
+// <b>[AGENT] — [כותרת] ([תאריך])</b>\n\n[גוף]\n\n<i>הופעל אוטומטית...</i>
+function heDate() {
+  return new Date().toLocaleDateString('he-IL', { timeZone: 'Asia/Jerusalem', weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+function heTelegramMsg(agentName, title, body) {
+  return `<b>${agentName} — ${title} (${heDate()})</b>\n\n${body}\n\n<i>הופעל אוטומטית ב-${agentName}</i>`;
+}
+
+module.exports = { sendTelegram, notifyTelegram, heDate, heTelegramMsg };
