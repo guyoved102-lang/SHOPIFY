@@ -1,7 +1,8 @@
 # MG-2: Anatomy of a Premium Sock
-**Status:** Draft complete — 5 of 5 sections. CTA pending (see outline — identical to MG-1 pattern).
+**Status:** FINAL — CTA appended. **NOT cleared for publication** — see Regulatory Hold below.
 **Brief:** MG-2-ANATOMY-OUTLINE.md
 **Depends on:** MG-1-FINAL.md
+**Word count:** ~1,900 (incl. CTA)
 
 ---
 
@@ -77,10 +78,30 @@ This connects directly to a claim from MG-1: dimensional stability, the ≤5% sh
 
 ---
 
-*Section word counts: Bridge ~280 | Toe ~350 | Heel ~330 | Arch ~340 | Cuff ~330 | Sourcing bridge ~90*
-*Total: ~1,720 words*
-*Voice check: zero marketing adjectives, zero named competitor references, "Structure not Therapy" language enforced in Arch section — passes BRAND_DNA.md Section II*
-*Sourcing bridge paragraph added 01/07/2026 per Guy's integration directive — connects customer-facing construction claims to internal manufacturer vetting criteria (SOURCING_BRIEF.md Section 2.2), without shifting article voice into internal ops documentation.*
-*Catalog scope note: this manufacturer-vetting criteria described applies at Phase 4 (private label, $15K MRR trigger) — the sourcing bridge paragraph describes future-state vetting standards, not a claim about how today's curated dropship catalog is sourced. See ANTI_RECURRENCE_PROTOCOL.md #31.*
-*Remaining: CTA block (identical Founding Cohort / Inaugural Semester pattern from MG-1-FINAL.md, ready to append)*
-*Regulatory flag carried forward: Arch Zone section requires attorney re-review before publishing, per MG-2-ANATOMY-OUTLINE.md*
+*Every claim in this guide can be verified by hand, on a sock you already own.*
+
+*That is deliberate. An Academy Grade sock is not an act of faith — it is a specification.*
+
+*The Founding Cohort receives first allocation from our inaugural production run, pricing locked for the life of their enrollment, and a handwritten note enclosed with their first pair.*
+
+*There are 100 places in the Founding Cohort. Enrollment closes when they are filled — not on a date.*
+
+**[Enroll in the Founding Cohort →]**
+
+---
+
+## Production Notes (internal — do not publish)
+
+- **Source outline:** MG-2-ANATOMY-OUTLINE.md
+- **Draft history:** MG-2-DRAFT.md (superseded by this file) — CTA appended verbatim from outline's "CTA — Founding Cohort Conversion" section, unmodified.
+- **Cross-references:** Extends SOURCING_BRIEF.md Section 2.2 (Construction Requirements). Depends on MG-1-FINAL.md — do not publish before MG-1 is live; internal links should point reader back to MG-1.
+- **Publishing channel:** Shopify blog / dedicated Material Guide page — pending Guy's placement decision (same as MG-1).
+- **Catalog scope note (carried from draft):** the manufacturer-vetting criteria described in the closing sourcing-bridge paragraph applies at Phase 4 (private label, $15K MRR trigger) — describes future-state vetting standards, not a claim about how today's curated dropship catalog is sourced. See ANTI_RECURRENCE_PROTOCOL.md #31.
+
+## 🔴 REGULATORY HOLD — Do Not Publish
+
+Per MG-2-ANATOMY-OUTLINE.md line 152: *"Do not publish until article passes Brand Voice review against BRAND_DNA.md Section II, and until Section 4 (Arch Zone) passes regulatory/compliance check."*
+
+- **Brand Voice review:** ✅ Passes — zero marketing adjectives, zero named competitors, "structure not therapy" language enforced.
+- **Section 4 (Arch Zone) regulatory/compliance check:** 🔴 **NOT DONE.** Depends on Attorney review of A9 Legal Templates, which is the project's standing pre-live blocker (unresolved as of 02/07/2026). The Arch Zone language is written to avoid medical-compression claims, but "written to avoid" is not the same as attorney-verified.
+- **Consequence:** MG-2 is content-complete but **must not go live** until this check clears. MG-1 has no equivalent flag and is not blocked by this.
