@@ -434,6 +434,7 @@ GitHub workflow    → .github/workflows/
 | `notion` | ACTIVE | Corporate Knowledge Base — decisions, audit trail, OKRs |
 | `granola` | ACTIVE | Strategy Session Documenter → Notion pipeline |
 | `zapier` | ON-HOLD | Accounting Integration — QuickBooks/Xero bridge (CFO Agent) |
+| `magic` (21st.dev) | NOT APPLICABLE (3/4 tools) | `builder`/`inspiration`/`refiner` פולטים React JSX/TSX בלבד — stack mismatch, SockAcademy frontend הוא Shopify Liquid (0 קבצי .jsx/.tsx ברפו). `logo_search` (SVG) — ON-HOLD, stack-agnostic, לוגואי חברות אמיתיות בלבד, לא עיצוב לוגו מותג. ורדיקט: 02/07/2026. |
 
 ### Slash Commands
 | פקודה | סטטוס |
@@ -657,11 +658,8 @@ Use WELCOME10 at checkout — and use it on something worth wearing.
 
 ## 📝 TODO — משימות עתידיות
 ### Klaviyo
-- [ ] **החלף תוכן Abandoned Cart emails** — subject lines + body לטקסטים מ-`KLAVIYO_ABANDONED_CART_FLOW.md`
-  - Email 1: Subject: "You left something behind" | תוכן מותאם SockAcademy
-  - Email 2: Subject: "What's still in your cart — and why it's worth it"
-  - כרגע: Klaviyo generic template. Sender: hello@sockacademy.store ✅
-- [ ] **Welcome Series ⚠️** — יש warning על ה-flow הLive, לבדוק מה הבעיה
+- [x] **Abandoned Cart emails** — ✅ אומת חי מול Klaviyo API (02/07/2026): 3 מיילים live, subjects תואמים בדיוק ל-`KLAVIYO_ABANDONED_CART_FLOW.md` ("You left something behind" / "What's still in your cart — and why it's worth it" / "Last reminder — your cart expires soon"). Sender: hello@sockacademy.store. תיעוד היה stale — העבודה בוצעה בשיחה קודמת ולא סומנה.
+- [x] **Welcome Series** — ✅ אומת חי מול Klaviyo API + UI (02/07/2026): 3 subjects תואמים בדיוק לתוכן המקצועי הסופי (ללא אמוג'י). ה-warning הישן מה-TODO **כבר לא קיים** — אומת ב-Flows list: 0 אייקוני ⚠️. הוא נבע מ-A/B test על המייל הראשון שהושלם ב-23/06/2026 (winner נבחר ידנית) — לא מ-bug. (Claude's initial API-based "orphaned AB_TEST action" diagnosis היה שגוי — אומת ותוקן מול ה-UI בפועל.)
 
 ### Meta & Analytics
 - [x] **Meta Pixel** — מחובר דרך Facebook & Instagram Shopify App ✅ (15/06/2026)
