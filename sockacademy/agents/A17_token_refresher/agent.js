@@ -3,6 +3,7 @@ require('dotenv').config({ path: '../../.env' });
 
 const https = require('https');
 const nodemailer = require('nodemailer');
+const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 
 const REQUIRED = [
   'META_APP_ID', 'META_APP_SECRET', 'META_ACCESS_TOKEN',
@@ -19,7 +20,7 @@ const {
   GMAIL_APP_PASSWORD,
 } = process.env;
 
-const ADMIN_EMAIL = 'guyoved102@gmail.com';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 const FROM_EMAIL  = 'sockacademy.store@gmail.com';
 const DRY_RUN     = process.env.DRY_RUN === 'true';
 
@@ -186,6 +187,8 @@ async function main() {
     } catch (mailErr) {
       console.error('[A17] Failed to send error email:', mailErr.message);
     }
+    await notifyTelegram(heTelegramMsg('A17 Token Refresher', '🚨 כשל קריטי!',
+      `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
     process.exit(1);
   }
 }

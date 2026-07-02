@@ -5,11 +5,12 @@ const Anthropic = require('@anthropic-ai/sdk');
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 const { withRetry } = require('../../corp/core/anthropic-retry.js');
+const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 
 // ── Environment ──────────────────────────────────────────────────────────────
 const DRY_RUN     = process.env.DRY_RUN === 'true';
 const REPORT_DATE = process.env.REPORT_DATE || new Date().toISOString().slice(0, 10);
-const ADMIN_EMAIL = 'guyoved102@gmail.com';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 const SMTP_USER   = 'sockacademy.store@gmail.com';
 
 const supabase = createClient(

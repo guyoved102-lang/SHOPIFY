@@ -3,9 +3,10 @@ const { createClient } = require('@supabase/supabase-js');
 const Anthropic        = require('@anthropic-ai/sdk');
 const nodemailer       = require('nodemailer');
 const { withRetry }    = require('../../corp/core/anthropic-retry.js');
+const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 
 const DRY_RUN     = process.env.DRY_RUN === 'true';
-const ADMIN_EMAIL = 'guyoved102@gmail.com';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 const REPORT_DATE = new Date().toISOString().split('T')[0];
 
 // ─── Supabase ─────────────────────────────────────────────────────────────────

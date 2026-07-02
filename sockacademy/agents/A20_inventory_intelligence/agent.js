@@ -19,9 +19,10 @@ const { createClient } = require('@supabase/supabase-js');
 const Anthropic        = require('@anthropic-ai/sdk');
 const nodemailer       = require('nodemailer');
 const { withRetry }    = require('../../corp/core/anthropic-retry.js');
+const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 
 const DRY_RUN              = process.env.DRY_RUN === 'true';
-const ADMIN_EMAIL          = 'guyoved102@gmail.com';
+const ADMIN_EMAIL          = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 const REPORT_DATE          = new Date().toISOString().split('T')[0];
 const DEFAULT_REORDER_PT   = parseInt(process.env.DEFAULT_REORDER_POINT || '10');
 const LEAD_TIME_DAYS       = parseInt(process.env.LEAD_TIME_DAYS || '14');
@@ -371,5 +372,7 @@ main().catch(async e => {
     const sb = getSupabase();
     await logHealth(sb, 'failure', { error: e.message });
   } catch (_) {}
+  await notifyTelegram(heTelegramMsg('A20 Inventory Intelligence', '🚨 כשל קריטי!',
+    `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${e.message}</code>`));
   process.exit(1);
 });

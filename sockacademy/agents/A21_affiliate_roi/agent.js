@@ -22,9 +22,10 @@ const { createClient } = require('@supabase/supabase-js');
 const Anthropic        = require('@anthropic-ai/sdk');
 const nodemailer       = require('nodemailer');
 const { withRetry }    = require('../../corp/core/anthropic-retry.js');
+const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 
 const DRY_RUN     = process.env.DRY_RUN === 'true';
-const ADMIN_EMAIL = 'guyoved102@gmail.com';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 const REPORT_DATE = new Date().toISOString().split('T')[0];
 
 const ELIGIBLE_STATUSES = new Set(['paid', 'partially_paid', 'partially_refunded']);
@@ -352,7 +353,9 @@ async function main() {
   console.log(`[A21] Complete — ${ranked.length} affiliates | ₪${totals.totalRevenue} revenue | ₪${totals.totalNetRoi} net ROI`);
 }
 
-main().catch(err => {
+main().catch(async err => {
   console.error('[A21] Fatal error:', err.message);
+  await notifyTelegram(heTelegramMsg('A21 Affiliate & Influencer ROI', '🚨 כשל קריטי!',
+    `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
   process.exit(1);
 });

@@ -8,6 +8,8 @@
 require('dotenv').config({ path: '../../.env' });
 const Anthropic = require('@anthropic-ai/sdk');
 const { createClient } = require('@supabase/supabase-js');
+const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
@@ -323,7 +325,7 @@ async function sendReport(adCopies, { lowRoas = [], zeroConversion = [] } = {}, 
 
   await transporter.sendMail({
     from: 'SockAcademy A4 Agent <sockacademy.store@gmail.com>',
-    to: 'guyoved102@gmail.com',
+    to: ADMIN_EMAIL,
     subject: `📢 A4 — קופי מודעות Meta | ${new Date().toLocaleDateString('he-IL')} ${mode === 'dry-run' ? '[DRY-RUN]' : '[LIVE]'}`,
     html,
   });
@@ -414,5 +416,7 @@ async function main() {
 main().catch(async e => {
   console.error('💥 Fatal:', e.message);
   await logHealth(getSupabase(), 'failure', e.message).catch(() => {});
+  await notifyTelegram(heTelegramMsg('A4 Meta Ads', '🚨 כשל קריטי!',
+    `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${e.message}</code>`));
   process.exit(1);
 });

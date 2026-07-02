@@ -16,8 +16,10 @@ const googleTrends   = require('google-trends-api');
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer     = require('nodemailer');
 const { withRetry }  = require('../../corp/core/anthropic-retry.js');
+const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY)
@@ -39,6 +41,8 @@ async function logHealth(supabase, status, errorMessage = '', metadata = {}) {
 }
 
 async function sendErrorAlert(errorMessage) {
+  await notifyTelegram(heTelegramMsg('A10 Trend Scout', '🚨 כשל קריטי!',
+    `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${errorMessage}</code>`));
   if (!process.env.GMAIL_APP_PASSWORD) return;
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -46,7 +50,7 @@ async function sendErrorAlert(errorMessage) {
   });
   await transporter.sendMail({
     from: '"SockAcademy Agents" <sockacademy.store@gmail.com>',
-    to: 'guyoved102@gmail.com',
+    to: ADMIN_EMAIL,
     subject: '🚨 A10 Trend Scout FAILED — action needed',
     html: `<div style="font-family:monospace"><h2>🚨 A10 Failed</h2><p><strong>Time:</strong> ${new Date().toISOString()}</p><pre style="background:#f5f5f5;padding:12px;border-radius:4px">${errorMessage}</pre></div>`,
   }).catch(e => console.error('Alert email failed:', e.message));
@@ -425,12 +429,12 @@ async function sendEmailDigest(trends) {
 
   await transporter.sendMail({
     from:    'SockAcademy A10 Agent <sockacademy.store@gmail.com>',
-    to:      'guyoved102@gmail.com',
+    to:      ADMIN_EMAIL,
     subject: `A10 — Weekly Trends: Top pick "${trends[0]?.trend_name || 'see report'}" ↗`,
     html,
   });
 
-  console.log('📧 Weekly digest sent to guyoved102@gmail.com');
+  console.log('📧 Weekly digest sent to', ADMIN_EMAIL);
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -492,7 +496,7 @@ async function main() {
   console.log('\n💾 Writing outputs...');
   if (DRY_RUN) {
     console.log(`[DRY_RUN] Would write ${trends.length} trends to Supabase`);
-    console.log('[DRY_RUN] Would send email digest to guyoved102@gmail.com');
+    console.log('[DRY_RUN] Would send email digest to', ADMIN_EMAIL);
   } else {
     await writeToSupabase(trends);
     await sendEmailDigest(trends);

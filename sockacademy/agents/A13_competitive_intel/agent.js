@@ -10,6 +10,7 @@ require('dotenv').config({ path: '../../.env' });
 const https   = require('https');
 const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
+const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 
 function getSupabase() {
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
@@ -48,10 +49,12 @@ async function sendErrorAlert(errorMessage) {
   });
   await transporter.sendMail({
     from: '"SockAcademy Agents" <sockacademy.store@gmail.com>',
-    to: 'guyoved102@gmail.com',
+    to: ADMIN_EMAIL,
     subject: '🚨 A13 Competitive Intel FAILED — action needed',
     html: `<div style="font-family:monospace"><h2>🚨 A13 Failed</h2><p><strong>Time:</strong> ${new Date().toISOString()}</p><pre style="background:#f5f5f5;padding:12px;border-radius:4px">${errorMessage}</pre></div>`,
   }).catch(e => console.error('Alert email failed:', e.message));
+  await notifyTelegram(heTelegramMsg('A13 Competitive Intel', '🚨 כשל קריטי!',
+    `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${errorMessage}</code>`));
 }
 
 // ─── LAUNCH_MODE Gate — protocol #27 ────────────────────────────────────────

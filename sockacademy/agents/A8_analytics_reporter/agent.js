@@ -8,9 +8,10 @@ require('dotenv').config({ path: '../../.env' });
 const { BetaAnalyticsDataClient } = require('@google-analytics/data');
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
+const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 
 const PROPERTY_ID = process.env.GA4_PROPERTY_ID;
-const ADMIN_EMAIL = 'guyoved102@gmail.com';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 const DRY_RUN = process.env.DRY_RUN === 'true';
 
 // ─── SUPABASE ────────────────────────────────────────────────────────────────
@@ -37,6 +38,8 @@ async function logHealth(supabase, status, errorMessage = '') {
 }
 
 async function sendErrorAlert(errorMessage) {
+  await notifyTelegram(heTelegramMsg('A8 Analytics Reporter', '🚨 כשל קריטי!',
+    `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${errorMessage}</code>`));
   if (!process.env.GMAIL_APP_PASSWORD) return;
   const transporter = nodemailer.createTransport({
     service: 'gmail',
