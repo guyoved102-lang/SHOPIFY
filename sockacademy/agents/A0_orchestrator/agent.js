@@ -513,67 +513,16 @@ function readinessEmailHtml(readiness) {
 }
 
 // ─── WORKSPACE HEALTH CHECK ──────────────────────────────────────────────────
-// Runs the same rules as scripts/ci/structure-lint.js but from inside A0.
-// Reports violations by email so Guy is alerted even without a CI run.
+// Imports the real structure-lint.js instead of keeping a local copy of its
+// rules. The local copy drifted out of sync (missing .claude/.vscode/.env/etc
+// from ALLOWED_SA_ROOT, missing skills-lock.json from ALLOWED_ROOT_ENTRIES) —
+// it was reporting 14 false-positive violations and dragging the Readiness
+// Score down. See ANTI_RECURRENCE_PROTOCOL.md for the incident.
 
-const path = require('path');
-const fsSync = require('fs');
+const { computeViolations } = require('../../scripts/ci/structure-lint.js');
 
 function runWorkspaceHealthCheck() {
-  const REPO_ROOT = path.resolve(__dirname, '../../..');
-  const SA_ROOT   = path.join(REPO_ROOT, 'sockacademy');
-
-  const violations = [];
-
-  function kids(dir) {
-    if (!fsSync.existsSync(dir)) return [];
-    return fsSync.readdirSync(dir).map((n) => ({
-      name: n,
-      full: path.join(dir, n),
-      isDir: fsSync.statSync(path.join(dir, n)).isDirectory(),
-    }));
-  }
-
-  // Root entries
-  const ALLOWED_ROOT = new Set(['.github', 'sockacademy', '.gitignore', '.gitattributes', 'README.md', '.editorconfig', '.agents', 'structure-violations.json']);
-  for (const { name, full } of kids(REPO_ROOT)) {
-    if (name === '.git') continue;
-    if (!ALLOWED_ROOT.has(name))
-      violations.push({ rule: 'ROOT_CONTAMINATION', file: path.relative(REPO_ROOT, full) });
-  }
-
-  // sockacademy/ root entries
-  const ALLOWED_SA = new Set([
-    'CLAUDE.md', '.env.example', 'pipeline-config.json',
-    'agents', 'corp', 'docs', 'schemas', 'scripts',
-    // Shopify theme directories (legitimate — co-located with agent fleet)
-    'assets', 'config', 'layout', 'locales', 'sections', 'snippets', 'templates',
-    '.gitignore',
-  ]);
-  for (const { name, full } of kids(SA_ROOT)) {
-    if (!ALLOWED_SA.has(name))
-      violations.push({ rule: 'SA_ROOT_CONTAMINATION', file: path.relative(REPO_ROOT, full) });
-  }
-
-  // docs/ subdirs
-  for (const { name, full } of kids(path.join(SA_ROOT, 'docs'))) {
-    if (!['strategy', 'ops', 'superpowers'].includes(name))
-      violations.push({ rule: 'DOCS_CONTAMINATION', file: path.relative(REPO_ROOT, full) });
-  }
-
-  // scripts/ subdirs
-  for (const { name, full } of kids(path.join(SA_ROOT, 'scripts'))) {
-    if (!['ci', 'setup'].includes(name))
-      violations.push({ rule: 'SCRIPTS_CONTAMINATION', file: path.relative(REPO_ROOT, full) });
-  }
-
-  // Agent naming convention
-  for (const { name, full, isDir } of kids(path.join(SA_ROOT, 'agents'))) {
-    if (isDir && !/^A\d+_[a-z0-9_]+$/.test(name))
-      violations.push({ rule: 'AGENT_NAMING', file: path.relative(REPO_ROOT, full) });
-  }
-
-  return violations;
+  return computeViolations();
 }
 
 function workspaceAlertHtml(violations) {

@@ -21,11 +21,16 @@ const path = require('path');
 const REPO_ROOT = path.resolve(__dirname, '../../..'); // Desktop/SHOPIFY
 const SA_ROOT   = path.join(REPO_ROOT, 'sockacademy');
 
-const violations = [];
+// Pure computation — no process.exit, no console output, no file writes.
+// A0 Orchestrator imports this directly instead of keeping its own copy of
+// the rules (that copy drifted out of sync with this file — see
+// ANTI_RECURRENCE_PROTOCOL.md for the incident).
+function computeViolations() {
+  const violations = [];
 
-function fail(rule, filePath, hint) {
-  violations.push({ rule, file: path.relative(REPO_ROOT, filePath), hint });
-}
+  function fail(rule, filePath, hint) {
+    violations.push({ rule, file: path.relative(REPO_ROOT, filePath), hint });
+  }
 
 // ── Helper: list immediate children (non-recursive) ──────────────────────────
 
@@ -177,26 +182,36 @@ for (const { name, full } of children(docsDir)) {
   }
 }
 
-// ── Report ────────────────────────────────────────────────────────────────────
-
-if (violations.length === 0) {
-  console.log('✅ Structure lint passed — directory architecture is clean.');
-  process.exit(0);
+  return violations;
 }
 
-console.error('\n❌ STRUCTURE VIOLATIONS DETECTED\n');
-console.error(`Found ${violations.length} violation(s):\n`);
+module.exports = { computeViolations, REPO_ROOT, SA_ROOT };
 
-for (const v of violations) {
-  console.error(`[${v.rule}]`);
-  console.error(`  File: ${v.file}`);
-  console.error(`  Fix:  ${v.hint}\n`);
+// ── CLI Report — only runs when invoked directly (node structure-lint.js) ────
+// A0 Orchestrator imports computeViolations() above without triggering any of this.
+
+if (require.main === module) {
+  const violations = computeViolations();
+
+  if (violations.length === 0) {
+    console.log('✅ Structure lint passed — directory architecture is clean.');
+    process.exit(0);
+  }
+
+  console.error('\n❌ STRUCTURE VIOLATIONS DETECTED\n');
+  console.error(`Found ${violations.length} violation(s):\n`);
+
+  for (const v of violations) {
+    console.error(`[${v.rule}]`);
+    console.error(`  File: ${v.file}`);
+    console.error(`  Fix:  ${v.hint}\n`);
+  }
+
+  fs.writeFileSync(
+    path.join(REPO_ROOT, 'structure-violations.json'),
+    JSON.stringify(violations, null, 2)
+  );
+
+  console.error('Full report saved to structure-violations.json');
+  process.exit(1);
 }
-
-fs.writeFileSync(
-  path.join(REPO_ROOT, 'structure-violations.json'),
-  JSON.stringify(violations, null, 2)
-);
-
-console.error('Full report saved to structure-violations.json');
-process.exit(1);
