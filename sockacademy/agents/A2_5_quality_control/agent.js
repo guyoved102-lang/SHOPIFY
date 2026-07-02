@@ -16,9 +16,23 @@ const DRY_RUN = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL = 'guyoved102@gmail.com';
 
 const PRICE_MIN = 18;
-const PRICE_MAX = 65;
 const MIN_A1_SCORE = 50;
 const BORDERLINE_SCORE = 45;
+
+// Mirrors A1_product_research/agent.js RETAIL_CEILING exactly — keep in sync.
+const RETAIL_CEILING = {
+  'Merino Wool': 75, 'Cashmere': 85, 'Egyptian Cotton': 75,
+  'Premium Materials': 70, 'Gift Sets': 90, 'Tactical & Outdoor': 65,
+  'Athletic': 55, 'Casual & No-Show': 45, 'General': 55,
+};
+const DEFAULT_CEILING = 65;
+
+function priceCeilingFor(product) {
+  const materials = (product.materials || '').split(',').map(m => m.trim());
+  const premiumMat = materials.find(m => RETAIL_CEILING[m]);
+  if (premiumMat) return RETAIL_CEILING[premiumMat];
+  return RETAIL_CEILING[product.category] ?? DEFAULT_CEILING;
+}
 
 // ─── SUPABASE ────────────────────────────────────────────────────────────────
 
@@ -71,7 +85,7 @@ async function logQcResult(supabase, product, passed, failures) {
       rejection_reason: failures.length > 0 ? failures.join('; ') : null,
       checks_passed: {
         has_name:       !!(product.product_name && product.product_name.trim().length >= 5),
-        price_in_range: !isNaN(price) && price >= PRICE_MIN && price <= PRICE_MAX,
+        price_in_range: !isNaN(price) && price >= PRICE_MIN && price <= priceCeilingFor(product),
         has_image:      !!(product.image_url && product.image_url.startsWith('http')),
         has_category:   !!(product.category && product.category.trim().length >= 2),
         has_materials:  !!(product.materials && product.materials.trim().length >= 3),
@@ -105,8 +119,9 @@ function validateProduct(product, uploadedCjPids) {
     failures.push('product_name too short or missing');
 
   const price = parseFloat(product.retail_price);
-  if (isNaN(price) || price < PRICE_MIN || price > PRICE_MAX)
-    failures.push(`price $${price} outside $${PRICE_MIN}–$${PRICE_MAX}`);
+  const ceiling = priceCeilingFor(product);
+  if (isNaN(price) || price < PRICE_MIN || price > ceiling)
+    failures.push(`price $${price} outside $${PRICE_MIN}–$${ceiling} (category: ${product.category || 'unknown'})`);
 
   if (!product.image_url || !product.image_url.startsWith('http'))
     failures.push('image_url missing or invalid');
