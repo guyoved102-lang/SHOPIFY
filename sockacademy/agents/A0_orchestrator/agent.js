@@ -10,6 +10,7 @@ require('dotenv').config({ path: '../../.env' });
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 const { runOrchestration, CLUSTERS } = require('../../corp/core/orchestration');
+const { sendTelegram } = require('../../corp/core/telegram.js');
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const FORCE_WEEKLY = process.env.FORCE_WEEKLY_REPORT === 'true';
@@ -160,6 +161,14 @@ async function sendEmail(subject, html) {
     html,
   });
   console.log(`📧 Sent: "${subject}"`);
+}
+
+async function notifyTelegram(text, opts = {}) {
+  if (DRY_RUN) {
+    console.log(`[DRY_RUN] Would send Telegram: "${text.replace(/\n/g, ' ').slice(0, 80)}..."`);
+    return;
+  }
+  await sendTelegram(text, opts);
 }
 
 // ─── EMAIL TEMPLATES ─────────────────────────────────────────────────────────
@@ -637,6 +646,7 @@ async function main() {
       `🚨 A0 Alert: ${stuckRows.length} stuck product row(s) — action needed`,
       stuckAlertHtml(stuckRows)
     );
+    await notifyTelegram(`🚨 <b>A0 Stuck Detection</b>\n${stuckRows.length} product row(s) stuck — action needed. Check email for details.`);
   }
 
   // Step 2 — SA-6 Decision Engine (every run)
@@ -651,6 +661,7 @@ async function main() {
         `🔴 SA-6 Alert: ${criticalCount} critical issue(s) detected`,
         orchestrationAlertHtml(decisions, clusterScores)
       );
+      await notifyTelegram(`🔴 <b>SA-6 Critical Alert</b>\n${criticalCount} critical issue(s) detected. Check email for full breakdown.`);
     }
   } catch (e) {
     console.error(`⚠️  SA-6 Decision Engine failed: ${e.message}`);
@@ -684,6 +695,7 @@ async function main() {
       `🏗️ A0 Alert: ${structureViolations.length} workspace structure violation(s)`,
       workspaceAlertHtml(structureViolations)
     );
+    await notifyTelegram(`🏗️ <b>A0 Workspace Violation</b>\n${structureViolations.length} structure violation(s) found. Check email for the file list.`);
   }
 
   // Step 5 — Phase Readiness Score (every run)
@@ -702,6 +714,7 @@ async function main() {
         `🎯 SockAcademy Phase Readiness: ${readiness.total}/100 — Awaiting Your Approval`,
         readinessEmailHtml(readiness)
       );
+      await notifyTelegram(`🎯 <b>Phase Ready!</b>\nReadiness Score: ${readiness.total}/100 — awaiting your approval to activate. Check email for the breakdown.`);
     } else {
       console.log(`⏳ Not ready (${readiness.total}/100) — ${READINESS_THRESHOLD - readiness.total} pts to threshold`);
     }
@@ -725,6 +738,7 @@ async function main() {
             <hr><p style="color:#888;font-size:11px">SockAcademy A0 Orchestrator</p>
           </div>`
         );
+        await notifyTelegram(`⚠️ <b>Readiness Score Dropped</b>\n${prevScore} → ${readiness.total} (−${prevScore - readiness.total} pts). Check which agents stopped reporting.`);
       }
       await supabase.from('system_config').upsert(
         { key: 'readiness_score_last', value: String(readiness.total) },
@@ -749,6 +763,18 @@ async function main() {
         structureViolations.length
       )
     );
+    const clusterScoresForTg = orchestrationResult?.clusterScores ?? null;
+    const clusterStatusShort = !clusterScoresForTg ? 'no data'
+      : Object.values(clusterScoresForTg).every(s => s.score === 100) ? '✅ all healthy'
+      : Object.values(clusterScoresForTg).some(s => s.score < 50) ? '🔴 degraded'
+      : '⚠️ minor issues';
+    await notifyTelegram(
+      `📊 <b>A0 Daily Ops — ${dayStr}</b>\n` +
+      `Cluster: ${clusterStatusShort}\n` +
+      `Readiness: ${readiness ? readiness.total + '/100' : '—'}\n` +
+      `Stuck: ${stuckRows.length} | Violations: ${structureViolations.length}`,
+      { silent: true }
+    );
   }
 
   // Step 6 — Update A0's own state in health log
@@ -772,6 +798,7 @@ main().catch(async err => {
       '🚨 A0 Orchestrator FAILED — action needed',
       `<div style="font-family:monospace"><h2>🚨 A0 Fatal Error</h2><p><strong>Time:</strong> ${new Date().toISOString()}</p><pre style="background:#f5f5f5;padding:12px">${err.message}</pre></div>`
     );
+    await notifyTelegram(`🚨 <b>A0 Orchestrator FAILED</b>\n<code>${err.message}</code>`);
   } catch (_) {}
   process.exit(1);
 });
