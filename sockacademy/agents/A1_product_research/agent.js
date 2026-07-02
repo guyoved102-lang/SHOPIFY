@@ -9,6 +9,7 @@ require('dotenv').config({ path: '../../.env' });
 const fs = require('fs');
 const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
+const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
@@ -1023,5 +1024,7 @@ async function run() {
 run().catch(async err => {
   console.error('❌ A1 Error:', err.message);
   await logHealth(getSupabase(), 'failure', err.message).catch(() => {});
+  await notifyTelegram(heTelegramMsg('A1 Product Research', '🚨 כשל קריטי!',
+    `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
   process.exit(1);
 });
