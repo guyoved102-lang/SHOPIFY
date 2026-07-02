@@ -11,6 +11,8 @@ const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 const { runOrchestration, CLUSTERS } = require('../../corp/core/orchestration');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { getCommandCenterSnapshot } = require('../../corp/core/command-center.js');
+const { getInboxSummary } = require('../../corp/core/inbox.js');
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const FORCE_WEEKLY = process.env.FORCE_WEEKLY_REPORT === 'true';
@@ -279,7 +281,85 @@ function clusterHealthHtml(clusterScores) {
   </table>`;
 }
 
-function dailyOpsSummaryHtml(stuckCount, clusterScores, readiness, violationCount) {
+// ─── COMMAND CENTER — unified KPI + inbox summary (Module 1) ─────────────────
+// Deterministic — zero AI calls (Iron Law 7 / Zero-Burn). Pulls from
+// corp/core/command-center.js (28-agent KPI snapshot) and corp/core/inbox.js
+// (business + personal inbox unread counts). Rendered into both the daily
+// ops summary and the weekly report so every brief carries the same picture.
+
+function commandCenterHtml(commandCenter) {
+  if (!commandCenter || commandCenter.isEmpty) {
+    return '<p style="color:#9ca3af;font-size:12px"><em>No KPIs written yet — agents populate this as they run.</em></p>';
+  }
+  const rows = Object.entries(commandCenter.byCluster).map(([cluster, metrics]) => {
+    const line = metrics.map(m => `${m.metricName}: <strong>${m.value}${m.unit && m.unit !== 'count' ? ' ' + m.unit : ''}</strong>`).join(' · ');
+    return `<tr>
+      <td style="padding:4px 8px;vertical-align:top;white-space:nowrap">${cluster}</td>
+      <td style="padding:4px 8px;color:#374151;font-size:12px">${line}</td>
+    </tr>`;
+  }).join('');
+
+  return `<table border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;margin:8px 0">
+    <tr style="background:#f2f2f2">
+      <th style="padding:4px 8px;text-align:left">Cluster</th>
+      <th style="padding:4px 8px;text-align:left">Latest KPIs</th>
+    </tr>
+    ${rows}
+  </table>`;
+}
+
+function inboxRowHtml(label, result) {
+  if (!result || result.skipped) {
+    return `<tr><td style="padding:4px 8px">${label}</td><td style="padding:4px 8px;color:#9ca3af">— not configured</td></tr>`;
+  }
+  if (result.error) {
+    return `<tr><td style="padding:4px 8px">${label}</td><td style="padding:4px 8px;color:#c0392b">⚠️ read failed: ${result.error}</td></tr>`;
+  }
+  const subjectsPreview = (result.subjects || []).slice(0, 5)
+    .map(s => `<div style="font-size:11px;color:#6b7280">• ${s.subject} <span style="color:#9ca3af">(${s.from})</span></div>`)
+    .join('');
+  return `<tr>
+    <td style="padding:4px 8px;vertical-align:top">${label}</td>
+    <td style="padding:4px 8px">
+      <strong>${result.unseenCount}</strong> unread
+      ${subjectsPreview ? `<div style="margin-top:4px">${subjectsPreview}</div>` : ''}
+    </td>
+  </tr>`;
+}
+
+function inboxHtml(inboxSummary) {
+  if (!inboxSummary) {
+    return '<p style="color:#9ca3af;font-size:12px"><em>Inbox data unavailable this run.</em></p>';
+  }
+  return `<table border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;margin:8px 0">
+    <tr style="background:#f2f2f2">
+      <th style="padding:4px 8px;text-align:left">Inbox</th>
+      <th style="padding:4px 8px;text-align:left">Status</th>
+    </tr>
+    ${inboxRowHtml('Business (sockacademy.store@)', inboxSummary.business)}
+    ${inboxRowHtml('Personal (guyoved102@)', inboxSummary.personal)}
+  </table>`;
+}
+
+// Short plain-text line for Telegram — keeps the daily push scannable.
+function inboxTelegramLine(inboxSummary) {
+  if (!inboxSummary) return 'תיבות: אין נתונים';
+  const line = (label, r) => {
+    if (!r || r.skipped) return `${label}: לא מוגדר`;
+    if (r.error) return `${label}: שגיאה`;
+    return `${label}: ${r.unseenCount} לא נקראו`;
+  };
+  return `📧 ${line('עסקי', inboxSummary.business)} | ${line('אישי', inboxSummary.personal)}`;
+}
+
+// Short plain-text line for Telegram — top-line KPI count, not the full table.
+function commandCenterTelegramLine(commandCenter) {
+  if (!commandCenter || commandCenter.isEmpty) return '📈 KPIs: אין נתונים עדיין';
+  const clusterCount = Object.keys(commandCenter.byCluster).length;
+  return `📈 KPIs: ${commandCenter.totalMetrics} מדדים מ-${clusterCount} אשכולות`;
+}
+
+function dailyOpsSummaryHtml(stuckCount, clusterScores, readiness, violationCount, commandCenter, inboxSummary) {
   const ts = new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' });
   const dateStr = new Date().toLocaleDateString('en-US', {
     weekday: 'long', month: 'short', day: 'numeric', timeZone: 'Asia/Jerusalem',
@@ -323,11 +403,15 @@ function dailyOpsSummaryHtml(stuckCount, clusterScores, readiness, violationCoun
       </tr>
       ${clusterRows}
     </table>
+    <h4 style="margin:12px 0 6px">📈 Command Center — Fleet KPIs</h4>
+    ${commandCenterHtml(commandCenter)}
+    <h4 style="margin:12px 0 6px">📧 Inboxes</h4>
+    ${inboxHtml(inboxSummary)}
     <p style="color:#888;font-size:11px">Full weekly report → every Sunday | SockAcademy A0 Orchestrator v2.0</p>
   </div>`;
 }
 
-function weeklyReportHtml(summary, ledger, stuckCount, clusterScores) {
+function weeklyReportHtml(summary, ledger, stuckCount, clusterScores, commandCenter, inboxSummary) {
   const ts = new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' });
   const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Jerusalem' });
 
@@ -377,6 +461,10 @@ function weeklyReportHtml(summary, ledger, stuckCount, clusterScores) {
     ${clusterSection}
     <h3>🏭 Product Pipeline (Supabase: products)</h3>
     ${pipelineSection}
+    <h3>📈 Command Center — Fleet KPIs</h3>
+    ${commandCenterHtml(commandCenter)}
+    <h3>📧 Inboxes</h3>
+    ${inboxHtml(inboxSummary)}
     <h3>📋 agent_health_log (latest per agent)</h3>
     ${ledgerSection}
     <h3>${stuckCount > 0 ? `🚨 Stuck Rows This Run: ${stuckCount}` : '✅ Stuck Detection: Clean'}</h3>
@@ -614,6 +702,26 @@ async function main() {
     console.error(`⚠️  SA-6 Decision Engine failed: ${e.message}`);
   }
 
+  // Step 2.5 — Command Center snapshot: fleet KPIs + two-inbox summary.
+  // Deterministic, zero AI calls (Iron Law 7). Feeds both the weekly report
+  // and the daily ops summary below. Never throws — a broken snapshot or
+  // inbox read must never take down the rest of A0's run.
+  console.log('\n[2.5/6] Command Center — KPI snapshot + inbox summary');
+  let commandCenter = null;
+  let inboxSummary = null;
+  try {
+    commandCenter = await getCommandCenterSnapshot(supabase);
+    console.log(`   📈 ${commandCenter.totalMetrics} KPI(s) across ${Object.keys(commandCenter.byCluster).length} cluster(s)`);
+  } catch (e) {
+    console.error(`⚠️  Command Center snapshot failed: ${e.message}`);
+  }
+  try {
+    inboxSummary = await getInboxSummary();
+    console.log(`   📧 business: ${inboxSummary.business.skipped ? 'not configured' : (inboxSummary.business.unseenCount ?? 'error')} | personal: ${inboxSummary.personal.skipped ? 'not configured' : (inboxSummary.personal.unseenCount ?? 'error')}`);
+  } catch (e) {
+    console.error(`⚠️  Inbox summary failed: ${e.message}`);
+  }
+
   // Step 3 — Weekly health report (Sundays or forced)
   const isSunday = new Date().getDay() === 0;
   if (isSunday || FORCE_WEEKLY) {
@@ -623,7 +731,7 @@ async function main() {
 
     await sendEmail(
       `📊 SockAcademy Weekly Health — ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'Asia/Jerusalem' })}`,
-      weeklyReportHtml(summary, ledger, stuckRows.length, orchestrationResult?.clusterScores ?? null)
+      weeklyReportHtml(summary, ledger, stuckRows.length, orchestrationResult?.clusterScores ?? null, commandCenter, inboxSummary)
     );
   } else {
     console.log('\n[3/6] Weekly Report — skipped (not Sunday; daily ops summary sends after readiness)');
@@ -710,7 +818,9 @@ async function main() {
         stuckRows.length,
         orchestrationResult?.clusterScores ?? null,
         readiness,
-        structureViolations.length
+        structureViolations.length,
+        commandCenter,
+        inboxSummary
       )
     );
     const clusterScoresForTg = orchestrationResult?.clusterScores ?? null;
@@ -722,7 +832,9 @@ async function main() {
       heMsg('📊 סיכום יומי',
         `בריאות אשכולות: <b>${clusterStatusShort}</b>\n` +
         `ציון מוכנות: <b>${readiness ? readiness.total + '/100' : '—'}</b>\n` +
-        `מוצרים תקועים: ${stuckRows.length} | הפרות מבנה: ${structureViolations.length}`),
+        `מוצרים תקועים: ${stuckRows.length} | הפרות מבנה: ${structureViolations.length}\n` +
+        `${commandCenterTelegramLine(commandCenter)}\n` +
+        `${inboxTelegramLine(inboxSummary)}`),
       { silent: true }
     );
   }

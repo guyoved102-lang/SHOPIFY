@@ -10,6 +10,7 @@ const Anthropic = require('@anthropic-ai/sdk');
 const nodemailer = require('nodemailer');
 const { withRetry } = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
@@ -342,6 +343,17 @@ async function main() {
   console.log(`✅ הסתיים — ${results.filter(r => r.success).length}/${results.length} הועלו`);
 
   await sendSummaryEmail(results);
+
+  // Command Center KPIs — feeds A0's unified daily brief (skip during DRY_RUN
+  // so simulated runs never pollute real KPI history)
+  if (!DRY_RUN) {
+    const metricDate = new Date().toISOString().split('T')[0];
+    await writeMetrics(supabase, 'A2', metricDate, [
+      { name: 'products_uploaded', value: results.filter(r => r.success).length,  unit: 'count' },
+      { name: 'upload_errors',     value: results.filter(r => !r.success).length, unit: 'count' },
+    ]);
+  }
+
   await logHealth(supabase, 'SUCCESS');
 }
 

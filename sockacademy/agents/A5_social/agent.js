@@ -12,6 +12,7 @@ const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 const { withRetry } = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 
 function getSupabase() {
@@ -490,6 +491,7 @@ async function main() {
   }
 
   // Publish to Instagram (LIVE mode)
+  let publishedCount = 0;
   if (!DRY_RUN) {
     console.log('\n📤 Publishing to Instagram...');
     for (const p of posts) {
@@ -498,6 +500,7 @@ async function main() {
         try {
           const id = await publishToInstagram(fullCaption, p.imageUrl, p.plan.type);
           console.log(`  ✅ ${p.plan.day} published — ID: ${id}`);
+          publishedCount++;
         } catch (e) {
           console.error(`  ❌ ${p.plan.day}: ${e.message}`);
         }
@@ -509,6 +512,16 @@ async function main() {
 
   console.log(`\n✅ A5 done — ${posts.length} posts generated`);
   await sendWeeklyCalendar(posts, weekNum, theme);
+
+  // Command Center KPIs — feeds A0's unified daily brief (deterministic, no AI)
+  if (supabase) {
+    const metricDate = new Date().toISOString().split('T')[0];
+    await writeMetrics(supabase, 'A5', metricDate, [
+      { name: 'social_posts_generated', value: posts.length,    unit: 'count' },
+      { name: 'social_posts_published', value: publishedCount,  unit: 'count' },
+    ]);
+  }
+
   await logHealth(supabase, 'success', '', { theme, posts: posts.length });
 }
 

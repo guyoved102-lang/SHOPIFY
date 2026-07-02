@@ -10,6 +10,7 @@ const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 const { withRetry } = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 
 function getSupabase() {
@@ -410,6 +411,17 @@ async function main() {
   console.log(`✅ A3 הושלם — ${published ? 'מתוזמן/פורסם' : 'נכשל'}`);
 
   await sendReport(topic, article || { body_html: validatedHtml, handle: '' }, published);
+
+  // Command Center KPIs — feeds A0's unified daily brief (deterministic, no AI;
+  // skip during DRY_RUN so simulated runs never pollute real KPI history)
+  if (!DRY_RUN && supabase) {
+    const metricDate = new Date().toISOString().split('T')[0];
+    await writeMetrics(supabase, 'A3', metricDate, [
+      { name: 'blog_published', value: published ? 1 : 0, unit: 'count' },
+      { name: 'blog_word_count', value: wordCount,         unit: 'count' },
+    ]);
+  }
+
   await logHealth(supabase, 'success');
 }
 

@@ -10,6 +10,7 @@ const fs = require('fs');
 const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 
@@ -1005,6 +1006,17 @@ async function run() {
         source:  'A1',
         payload: { count: upsertRows.length, runDate },
       });
+
+      // Command Center KPIs — feeds A0's unified daily brief (deterministic, no AI)
+      const avgTop10Score = top10.length
+        ? Math.round(top10.reduce((sum, p) => sum + p.score, 0) / top10.length)
+        : 0;
+      await writeMetrics(supabase, 'A1', runDate, [
+        { name: 'products_scanned',     value: allProducts.length, unit: 'count' },
+        { name: 'products_passed_qc',   value: unique.length,      unit: 'count' },
+        { name: 'products_shortlisted', value: top10.length,       unit: 'count' },
+        { name: 'avg_top10_score',      value: avgTop10Score,      unit: 'count' },
+      ]);
     } catch (e) {
       console.log(`⚠️  Supabase write: ${e.message}`);
     }

@@ -13,6 +13,7 @@
 require('dotenv').config({ path: '../../.env' });
 const { createClient } = require('@supabase/supabase-js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 
 function getSupabase() {
@@ -387,6 +388,18 @@ async function main() {
   console.log('\n' + '━'.repeat(40));
   console.log(`✅ Done — ${allChanges.length} change(s) across ${products.length} products`);
   if (allChanges.length) await sendAlert(allChanges);
+
+  // Command Center KPIs — feeds A0's unified daily brief (deterministic, no AI)
+  if (supabase) {
+    const metricDate = new Date().toISOString().split('T')[0];
+    const criticalCount = allChanges.filter(c => c.severity === 'critical').length;
+    await writeMetrics(supabase, 'A7', metricDate, [
+      { name: 'products_monitored',      value: products.length,   unit: 'count' },
+      { name: 'supplier_changes',        value: allChanges.length, unit: 'count' },
+      { name: 'supplier_critical_alerts', value: criticalCount,    unit: 'count' },
+    ]);
+  }
+
   await logHealth(supabase, 'success');
 }
 

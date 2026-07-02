@@ -22,6 +22,7 @@ const axios = require('axios');
 const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
@@ -367,6 +368,15 @@ async function main() {
 
     if (!DRY_RUN) {
       await sendAdminSummary(sent, failed, transporter);
+
+      // Command Center KPIs — feeds A0's unified daily brief (deterministic, no AI)
+      if (supabase) {
+        const metricDate = new Date().toISOString().split('T')[0];
+        await writeMetrics(supabase, 'A12', metricDate, [
+          { name: 'reviews_requested_sent',   value: sent.length,   unit: 'count' },
+          { name: 'reviews_requested_failed', value: failed.length, unit: 'count' },
+        ]);
+      }
     }
 
     console.log(`\n✅ A12 done — ${sent.length} sent, ${failed.length} failed`);

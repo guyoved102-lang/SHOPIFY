@@ -12,6 +12,7 @@ require('dotenv').config({ path: '../../.env' });
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
@@ -295,6 +296,18 @@ async function main() {
 
   if (rejectedList.length > 0) await sendRejectionEmail(rejectedList);
   if (borderlineList.length > 0) await sendBorderlineAlert(borderlineList);
+
+  // Command Center KPIs — feeds A0's unified daily brief (deterministic, no AI)
+  if (!DRY_RUN) {
+    const metricDate = new Date().toISOString().split('T')[0];
+    const passRate = products.length ? Math.round((approved / products.length) * 100) : 0;
+    await writeMetrics(supabase, 'A2.5', metricDate, [
+      { name: 'qc_approved',   value: approved,   unit: 'count' },
+      { name: 'qc_rejected',   value: rejected,   unit: 'count' },
+      { name: 'qc_borderline', value: borderline, unit: 'count' },
+      { name: 'qc_pass_rate',  value: passRate,   unit: 'pct' },
+    ]);
+  }
 
   await updateA25Health(supabase, 'success', { total: products.length, approved, borderline, rejected });
 

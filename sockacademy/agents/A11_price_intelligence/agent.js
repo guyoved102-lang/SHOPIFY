@@ -22,6 +22,7 @@ const cheerio = require('cheerio');
 const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const GMAIL_USER  = 'sockacademy.store@gmail.com';
@@ -616,6 +617,17 @@ async function main() {
     if (!DRY_RUN) {
       await writeToSupabase(results);
       await sendEmailDigest(results, summary, trends);
+
+      // Command Center KPIs — feeds A0's unified daily brief (deterministic, no AI)
+      const avgGap = summary.length
+        ? parseFloat((summary.reduce((s, c) => s + c.gap, 0) / summary.length).toFixed(2))
+        : 0;
+      const metricDate = new Date().toISOString().split('T')[0];
+      await writeMetrics(supabase, 'A11', metricDate, [
+        { name: 'competitors_tracked', value: Object.keys(COMPETITORS).length,          unit: 'count' },
+        { name: 'prices_collected',    value: results.filter(r => r.price_usd).length, unit: 'count' },
+        { name: 'avg_price_gap_usd',   value: avgGap,                                   unit: 'usd' },
+      ]);
     } else {
       console.log('\n🔬 DRY_RUN: skipping Sheets + email');
       console.log('Sample output:', JSON.stringify(results.slice(0, 2), null, 2));

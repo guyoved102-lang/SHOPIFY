@@ -30,10 +30,19 @@ jobs:
         with:
           node-version: '24'
           cache: 'npm'
-          cache-dependency-path: sockacademy/agents/A0_orchestrator/package-lock.json
+          cache-dependency-path: |
+            sockacademy/agents/A0_orchestrator/package-lock.json
+            sockacademy/corp/core/package-lock.json
 
       - name: Install dependencies
         working-directory: sockacademy/agents/A0_orchestrator
+        run: npm install
+
+      - name: Install corp/core dependencies
+        # corp/core/inbox.js requires 'imapflow' — corp/core is a sibling
+        # directory, not an ancestor of A0_orchestrator, so Node module
+        # resolution needs corp/core's OWN node_modules populated here.
+        working-directory: sockacademy/corp/core
         run: npm install
 
       - name: Run A0 Orchestrator
@@ -42,6 +51,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          GMAIL_PERSONAL_APP_PASSWORD: ${{ secrets.GMAIL_PERSONAL_APP_PASSWORD }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
