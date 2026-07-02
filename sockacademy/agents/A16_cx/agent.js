@@ -12,6 +12,7 @@ require('dotenv').config({ path: '../../.env' });
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 
 const DRY_RUN        = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL    = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
@@ -261,6 +262,17 @@ async function main() {
   await writeReport(supabase, kpis, alerts);
   const html = buildCxHtml(orderStats, klaviyo, weekLabel);
   await sendReport(html, weekLabel);
+
+  // Command Center KPIs — feeds A0's unified daily brief (deterministic, no AI)
+  if (!DRY_RUN) {
+    await writeMetrics(supabase, 'A16', REPORT_DATE, [
+      { name: 'orders_30d',           value: orderStats.total,           unit: 'count' },
+      { name: 'fulfillment_rate_pct', value: orderStats.fulfillmentRate, unit: 'pct' },
+      { name: 'repeat_rate_pct',      value: orderStats.repeatRate,      unit: 'pct' },
+      ...(klaviyo ? [{ name: 'klaviyo_subscribers', value: klaviyo.totalSubscribers, unit: 'count' }] : []),
+    ]);
+  }
+
   await logHealth(supabase, 'success', {
     orders30d:        orderStats.total,
     fulfillmentRate:  orderStats.fulfillmentRate,

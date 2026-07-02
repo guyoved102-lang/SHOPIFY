@@ -23,6 +23,7 @@ const Anthropic        = require('@anthropic-ai/sdk');
 const nodemailer       = require('nodemailer');
 const { withRetry }    = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 
 const DRY_RUN     = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
@@ -349,6 +350,15 @@ async function main() {
 
   const narrative = await buildNarrative(ranked, totals);
   await sendEmail(ranked, totals, narrative);
+
+  // Command Center KPIs — feeds A0's unified daily brief
+  if (!DRY_RUN) {
+    await writeMetrics(getSupabase(), 'A21', REPORT_DATE, [
+      { name: 'affiliates_active', value: ranked.length,           unit: 'count' },
+      { name: 'revenue_30d_ils',   value: totals.totalRevenue,     unit: 'ils' },
+      { name: 'net_roi_30d_ils',   value: totals.totalNetRoi,      unit: 'ils' },
+    ]);
+  }
 
   console.log(`[A21] Complete — ${ranked.length} affiliates | ₪${totals.totalRevenue} revenue | ₪${totals.totalNetRoi} net ROI`);
 }

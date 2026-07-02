@@ -4,6 +4,7 @@ const Anthropic        = require('@anthropic-ai/sdk');
 const nodemailer       = require('nodemailer');
 const { withRetry }    = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 
 const DRY_RUN           = process.env.DRY_RUN           === 'true';
 const INVITATIONS_ACTIVE = process.env.INVITATIONS_ACTIVE === 'true';
@@ -342,6 +343,15 @@ async function main() {
     // 5. Narrative + report
     const narrative = await generateNarrative(stats);
     await writeExecutiveReport(sb, stats, narrative);
+
+    // Command Center KPIs — feeds A0's unified daily brief
+    if (!DRY_RUN) {
+      await writeMetrics(sb, 'A28', REPORT_DATE, [
+        { name: 'club_active_members', value: stats.active_members,   unit: 'count' },
+        { name: 'club_invitations_sent', value: stats.invitations_sent, unit: 'count' },
+        { name: 'club_prospects_found', value: stats.prospects_found,  unit: 'count' },
+      ]);
+    }
 
     // 6. Health log
     await logHealth(sb, 'success', stats.members_upserted, stats);

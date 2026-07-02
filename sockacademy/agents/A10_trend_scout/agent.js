@@ -17,6 +17,7 @@ const { createClient } = require('@supabase/supabase-js');
 const nodemailer     = require('nodemailer');
 const { withRetry }  = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
@@ -500,6 +501,13 @@ async function main() {
   } else {
     await writeToSupabase(trends);
     await sendEmailDigest(trends);
+
+    // Command Center KPIs — feeds A0's unified daily brief (deterministic, no AI)
+    const metricDate = new Date().toISOString().split('T')[0];
+    await writeMetrics(supabase, 'A10', metricDate, [
+      { name: 'trends_scouted',  value: trends.length,      unit: 'count' },
+      { name: 'reddit_posts',    value: redditPosts.length, unit: 'count' },
+    ]);
   }
 
   console.log('\n' + '━'.repeat(44));

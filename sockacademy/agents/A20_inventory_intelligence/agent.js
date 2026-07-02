@@ -20,6 +20,7 @@ const Anthropic        = require('@anthropic-ai/sdk');
 const nodemailer       = require('nodemailer');
 const { withRetry }    = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 
 const DRY_RUN              = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL          = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
@@ -360,6 +361,16 @@ async function main() {
   await upsertInventoryAlerts(sb, records);
   await writeExecutiveReport(sb, summary, reportAlerts, narrative);
   await sendEmail(summary, records, narrative);
+
+  // Command Center KPIs — feeds A0's unified daily brief
+  if (!DRY_RUN) {
+    await writeMetrics(sb, 'A20', REPORT_DATE, [
+      { name: 'skus_checked',      value: summary.skus_checked,                      unit: 'count' },
+      { name: 'skus_low_stock',    value: summary.low + summary.critical,            unit: 'count' },
+      { name: 'skus_out_of_stock', value: summary.out_of_stock,                      unit: 'count' },
+    ]);
+  }
+
   await logHealth(sb, 'success', { skus_checked: records.length, critical: summary.critical, out_of_stock: summary.out_of_stock });
 
   console.log('\n' + '─'.repeat(52));

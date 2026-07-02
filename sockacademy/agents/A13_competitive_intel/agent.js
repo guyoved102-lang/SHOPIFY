@@ -11,6 +11,7 @@ const https   = require('https');
 const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 
 function getSupabase() {
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
@@ -467,6 +468,12 @@ async function run() {
     console.log(`  ✅ No new strikes — ${ongoingStrikes.length} ongoing already alerted this week.`);
     if (!DRY_RUN) {
       await logToSupabase(sheetRows);
+      const metricDate = new Date().toISOString().split('T')[0];
+      await writeMetrics(supabase, 'A13', metricDate, [
+        { name: 'competitors_scanned', value: results.length,      unit: 'count' },
+        { name: 'high_opportunities',  value: strikes.length,      unit: 'count' },
+        { name: 'new_strikes',         value: 0,                   unit: 'count' },
+      ]);
       await logHealth(supabase, 'SUCCESS', '', { mode, results: results.length, newStrikes: 0, ongoingStrikes: ongoingStrikes.length });
     }
     return;
@@ -477,6 +484,14 @@ async function run() {
   if (!DRY_RUN) {
     await logToSupabase(sheetRows);
     await sendEmail(html, mode, newStrikes.length);
+
+    // Command Center KPIs — feeds A0's unified daily brief (deterministic, no AI)
+    const metricDate = new Date().toISOString().split('T')[0];
+    await writeMetrics(supabase, 'A13', metricDate, [
+      { name: 'competitors_scanned', value: results.length,     unit: 'count' },
+      { name: 'high_opportunities',  value: strikes.length,     unit: 'count' },
+      { name: 'new_strikes',         value: newStrikes.length,  unit: 'count' },
+    ]);
   } else {
     console.log('  [DRY RUN] Would have logged', sheetRows.length, 'rows and sent email');
   }

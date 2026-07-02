@@ -1,11 +1,12 @@
 'use strict';
-require('dotenv').config();
+require('dotenv').config({ path: '../../.env' });
 
 const Anthropic = require('@anthropic-ai/sdk');
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 const { withRetry } = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 
 // ── Environment ──────────────────────────────────────────────────────────────
 const DRY_RUN     = process.env.DRY_RUN === 'true';
@@ -341,6 +342,16 @@ async function sendEmail(narrative, processedLeads) {
     await sendEmail(narrative, processedLeads);
   } catch (err) {
     console.error('[A25] Pillar 3 (Email Report) failed:', err.message);
+  }
+
+  // Command Center KPIs — feeds A0's unified daily brief
+  if (!DRY_RUN) {
+    const scores = processedLeads.filter(l => l.fit_score !== null && l.fit_score !== undefined).map(l => l.fit_score);
+    await writeMetrics(supabase, 'A25', REPORT_DATE, [
+      { name: 'leads_processed', value: processedLeads.length,                                        unit: 'count' },
+      { name: 'drafts_ready',    value: processedLeads.filter(l => l.fit_score >= 50).length,          unit: 'count' },
+      { name: 'avg_fit_score',   value: scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0, unit: 'count' },
+    ]);
   }
 
   console.log('[A25] Complete');

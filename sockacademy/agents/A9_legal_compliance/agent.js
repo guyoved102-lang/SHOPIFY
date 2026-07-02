@@ -13,6 +13,7 @@ const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 const { requestApproval } = require('../../corp/core/hitl');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 
 function getSupabase() {
@@ -554,6 +555,15 @@ async function main() {
     console.log(`\nApproval found (ID: ${approvedHitL.id}) — publishing legal pages now...`);
     const results = await executeHitLPublish(supabase, approvedHitL);
     if (results.length > 0) await sendConfirmation(results);
+
+    // Command Center KPIs — feeds A0's unified daily brief (deterministic, no AI)
+    if (supabase) {
+      const metricDate = new Date().toISOString().split('T')[0];
+      await writeMetrics(supabase, 'A9', metricDate, [
+        { name: 'legal_pages_synced', value: results.length, unit: 'count' },
+      ]);
+    }
+
     await logHealth(supabase, 'success');
     return;
   }

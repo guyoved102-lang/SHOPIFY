@@ -10,6 +10,7 @@ const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 const path = require('path');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 const DRY_RUN = process.env.DRY_RUN === 'true';
 
@@ -336,6 +337,17 @@ async function main() {
   console.log(`✅ Done — ${results.filter(r => r.action !== 'error').length}/${results.length} synced | A/B Variant: ${abVariant}`);
 
   await sendConfirmation(results, abVariant);
+
+  // Command Center KPIs — feeds A0's unified daily brief (deterministic, no AI;
+  // skip during DRY_RUN so simulated runs never pollute real KPI history)
+  if (!DRY_RUN && supabase) {
+    const metricDate = new Date().toISOString().split('T')[0];
+    await writeMetrics(supabase, 'A6', metricDate, [
+      { name: 'templates_synced', value: results.filter(r => r.action !== 'error').length, unit: 'count' },
+      { name: 'templates_errors', value: results.filter(r => r.action === 'error').length, unit: 'count' },
+    ]);
+  }
+
   await logHealth(supabase, 'success', '', { ab_variant: abVariant });
 }
 

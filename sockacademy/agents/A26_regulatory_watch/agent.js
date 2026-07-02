@@ -4,6 +4,7 @@ const Anthropic        = require('@anthropic-ai/sdk');
 const nodemailer       = require('nodemailer');
 const { withRetry }    = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 
 const DRY_RUN     = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
@@ -364,6 +365,16 @@ async function main() {
 
   await writeExecutiveReport(sb, summary, narrative);
   await sendEmail(summary, narrative);
+
+  // Command Center KPIs — feeds A0's unified daily brief
+  if (!DRY_RUN) {
+    await writeMetrics(sb, 'A26', REPORT_DATE, [
+      { name: 'regulatory_alerts_total', value: summary.total_alerts,    unit: 'count' },
+      { name: 'regulatory_critical',     value: summary.critical_count, unit: 'count' },
+      { name: 'top_severity',            text: summary.top_severity },
+    ]);
+  }
+
   await logHealth(sb, 'success', summary.total_alerts, {
     critical_count:  summary.critical_count,
     warning_count:   summary.warning_count,

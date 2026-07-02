@@ -9,6 +9,7 @@ require('dotenv').config({ path: '../../.env' });
 const Anthropic = require('@anthropic-ai/sdk');
 const { createClient } = require('@supabase/supabase-js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 
 function getSupabase() {
@@ -410,6 +411,17 @@ async function main() {
   console.log(`✅ A4 הושלם — ${adCopies.length} קופי נוצרו`);
 
   await sendReport(adCopies, { lowRoas: roasAlerts, zeroConversion: zeroAlerts }, DRY_RUN ? 'dry-run' : 'live');
+
+  // Command Center KPIs — feeds A0's unified daily brief (deterministic, no AI)
+  if (supabase) {
+    const metricDate = new Date().toISOString().split('T')[0];
+    await writeMetrics(supabase, 'A4', metricDate, [
+      { name: 'ad_copies_generated',         value: adCopies.length,     unit: 'count' },
+      { name: 'campaigns_zero_conversion',   value: zeroAlerts.length,   unit: 'count' },
+      { name: 'campaigns_low_roas',          value: roasAlerts.length,   unit: 'count' },
+    ]);
+  }
+
   await logHealth(supabase, 'success', '', { product_campaign_map: productCampaignMap });
 }
 

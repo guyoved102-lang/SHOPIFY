@@ -9,6 +9,7 @@ const { BetaAnalyticsDataClient } = require('@google-analytics/data');
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 
 const PROPERTY_ID = process.env.GA4_PROPERTY_ID;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
@@ -350,6 +351,17 @@ async function main() {
 
   const html = buildReportHtml(metrics, topPages, sources, prevMetrics);
   await sendReport(html);
+
+  // Command Center KPIs — feeds A0's unified daily brief (deterministic, no AI;
+  // skip during DRY_RUN so simulated runs never pollute real KPI history)
+  if (!DRY_RUN && metrics) {
+    const metricDate = new Date().toISOString().split('T')[0];
+    await writeMetrics(supabase, 'A8', metricDate, [
+      { name: 'sessions_7d',     value: metrics.sessions,    unit: 'count' },
+      { name: 'revenue_7d_usd',  value: metrics.revenue,     unit: 'usd' },
+      { name: 'conversions_7d',  value: metrics.conversions, unit: 'count' },
+    ]);
+  }
 
   await logHealth(supabase, 'SUCCESS');
   console.log('Done.');

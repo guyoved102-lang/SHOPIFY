@@ -22,6 +22,7 @@ const Anthropic        = require('@anthropic-ai/sdk');
 const nodemailer       = require('nodemailer');
 const { withRetry }    = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 
 const DRY_RUN     = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
@@ -329,6 +330,16 @@ async function main() {
   await writeFactoryReports(sb, allReports);
   await writeExecutiveReport(sb, summary, alerts, narrative);
   await sendEmail(allReports, summary, narrative);
+
+  // Command Center KPIs — feeds A0's unified daily brief
+  if (!DRY_RUN) {
+    await writeMetrics(sb, 'A23', REPORT_DATE, [
+      { name: 'factories_found',         value: summary.factories_found,               unit: 'count' },
+      { name: 'categories_researched',   value: summary.categories_researched,         unit: 'count' },
+      { name: 'avg_factory_quality',     value: summary.avg_quality_score ?? 0,        unit: 'count' },
+    ]);
+  }
+
   await logHealth(sb, 'success', { factories_found: allReports.length, categories_researched: categories.length });
 
   console.log('\n' + '─'.repeat(52));

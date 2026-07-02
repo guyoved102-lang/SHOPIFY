@@ -28,6 +28,7 @@ const nodemailer                 = require('nodemailer');
 const { BetaAnalyticsDataClient } = require('@google-analytics/data');
 const { withRetry }               = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 
 const DRY_RUN    = process.env.DRY_RUN    === 'true';
 const GA4_ACTIVE = process.env.GA4_ACTIVE === 'true';
@@ -497,6 +498,15 @@ async function main() {
 
   const narrative = await buildNarrative(funnel, rates, shopify, bottleneck, prev);
   await sendEmail(funnel, rates, shopify, bottleneck, narrative, prev);
+
+  // Command Center KPIs — feeds A0's unified daily brief
+  if (!DRY_RUN) {
+    await writeMetrics(getSupabase(), 'A24', REPORT_DATE, [
+      { name: 'sessions_7d',      value: funnel.sessions,       unit: 'count' },
+      { name: 'overall_cvr_pct',  value: rates.overallCvr,      unit: 'pct' },
+      { name: 'revenue_7d_usd',   value: shopify.totalRevenue,  unit: 'usd' },
+    ]);
+  }
 
   console.log(`[A24] Complete — ${funnel.sessions} sessions | CVR ${rates.overallCvr}% | $${shopify.totalRevenue} revenue`);
 }

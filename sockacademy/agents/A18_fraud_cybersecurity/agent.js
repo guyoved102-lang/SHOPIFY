@@ -26,6 +26,7 @@ const Anthropic        = require('@anthropic-ai/sdk');
 const nodemailer       = require('nodemailer');
 const { withRetry }    = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 
 const DRY_RUN           = process.env.DRY_RUN === 'true';
 const CLOUDFLARE_ACTIVE = process.env.CLOUDFLARE_ACTIVE === 'true';
@@ -607,6 +608,17 @@ async function main() {
 
   await writeExecutiveReport(sb, summary, narrative);
   await sendEmail(summary, narrative);
+
+  // Command Center KPIs — feeds A0's unified daily brief
+  if (!DRY_RUN) {
+    await writeMetrics(sb, 'A18', REPORT_DATE, [
+      { name: 'fraud_events_total',       value: summary.total_events,                              unit: 'count' },
+      { name: 'chargeback_rate_pct',      value: r1.kpis?.chargeback_rate_pct ?? 0,                  unit: 'pct' },
+      { name: 'gateway_decline_rate_pct', value: r3.kpis?.gateway_decline_rate_pct ?? 0,              unit: 'pct' },
+      { name: 'top_severity',             text: summary.top_severity },
+    ]);
+  }
+
   await logHealth(sb, 'success', {
     events_processed: r1.events.length + r2.events.length + r3.events.length,
     total_orders:     orders30d.length,

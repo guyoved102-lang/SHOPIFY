@@ -17,6 +17,7 @@ const Anthropic        = require('@anthropic-ai/sdk');
 const nodemailer       = require('nodemailer');
 const { withRetry }    = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { writeMetrics } = require('../../corp/core/metrics.js');
 
 const DRY_RUN     = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
@@ -316,6 +317,16 @@ async function main() {
   await upsertReturns(sb, refundRows);
   await writeExecutiveReport(sb, summary, alerts, narrative);
   await sendEmail(summary, alerts, narrative);
+
+  // Command Center KPIs — feeds A0's unified daily brief
+  if (!DRY_RUN) {
+    await writeMetrics(sb, 'A19', REPORT_DATE, [
+      { name: 'returns_30d',        value: summary.total_refunds_30d,   unit: 'count' },
+      { name: 'return_rate_pct',    value: summary.return_rate_pct,     unit: 'pct' },
+      { name: 'refund_amount_usd',  value: summary.total_refund_amount, unit: 'usd' },
+    ]);
+  }
+
   await logHealth(sb, 'success', { refunds_processed: refundRows.length, return_rate: summary.return_rate_pct });
 
   console.log('\n' + '─'.repeat(52));

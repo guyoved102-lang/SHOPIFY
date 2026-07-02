@@ -269,13 +269,15 @@ GitHub workflow    → .github/workflows/
 
 ### ⚡ GitHub Actions Pre-Deploy Gate — חובה לפני כל push של agent חדש
 
-**לפני שמגיע workflow YAML ל-main, חייבים לעבור 5 בדיקות:**
+**לפני שמגיע workflow YAML ל-main, חייבים לעבור 6 בדיקות:**
 
 1. **`package-lock.json` מחויב ב-git** — `git add <agent>/package-lock.json` אחרי `npm install`. בלי זה: `npm cache` נכשל ב-CI.
 2. **כל Secrets שמוזכרים ב-YAML קיימים ב-GitHub** — `gh secret list` לאימות. Secret חסר = שגיאה שקטה ב-runtime.
 3. **`cache-dependency-path` מצביע לנתיב שקיים ב-repo** — נתיב שגוי → `setup-node` נכשל ב-11 שניות.
 4. **DRY_RUN=true node agent.js עבר מקומית** — אם לא עבר מקומית, לא מגיע ל-GitHub.
 5. **Telegram push על כשל קריטי — חובה (נקבע 02/07/2026, Guy).** כל agent שיכול להיכשל בשקט (fatal error, לא מדווח) חייב `notifyTelegram()` מ-`corp/core/telegram.js` ב-`main().catch()` שלו, בעברית, לפי הפורמט הקנוני ב-`telegram_hebrew_standard` memory. `TELEGRAM_BOT_TOKEN`+`TELEGRAM_CHAT_ID` ב-YAML env. **Why:** מייל לבד מתחרה מול עשרות מיילים אחרים ומתפספס — Telegram push מבטיח שגיא יידע בזמן אמת. ראה A0 כ-reference implementation.
+6. **`writeMetrics()` ל-Command Center — חובה (נקבע 02/07/2026, Guy).** כל agent — חי או רדום — שמייצר תוצאה מדידה (ספירה, ציון, ₪/$) חייב לכתוב 1-3 KPIs דרך `writeMetrics()` מ-`corp/core/metrics.js` (`require`, ואז קריאה מיד לפני ה-`logHealth` הסופי של `main()`), מוגן ב-`if (!DRY_RUN)` כדי שריצות סימולציה לעולם לא יזהמו את היסטוריית ה-KPI האמיתית. **Why:** אותו עיקרון בדיוק כמו Telegram (סעיף 5) — אם מחווטים לפני הפעלה, ביום ה-LAUNCH_MODE=true אין עבודה נוספת נדרשת ואין "סוכן שקט" מול ה-Command Center. גיא תפס פער זה 02/07/2026 כשראה שרק 8 סוכנים חיים חוו pattern הזה — כל 28 הסוכנים חוברו יחד באותה שיחה. ראה `agents/A1_product_research/agent.js` ל-reference implementation ו-`corp/core/command-center.js` לצד הקריאה (A0 Orchestrator).
+   - **חריג מתועד:** A17 (Token Refresher) — אין לו תשתית Supabase כלל (לא ב-package.json, לא ב-YAML secrets). הוספת KPI בודד (ימי תוקף טוקן) לא הצדיקה את הרחבת ה-dependency footprint שלו; ממתין להחלטת גיא אם להוסיף.
 
 > **הפקה:** כישלון ב-11 שניות תמיד = setup נכשל (package-lock / secret / path). לא קוד.
 
