@@ -21,6 +21,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
+const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const GMAIL_USER  = 'sockacademy.store@gmail.com';
@@ -627,6 +628,8 @@ async function main() {
     console.error('❌ A11 fatal error:', err.message);
     await logHealth(supabase, 'ERROR', err.message);
     await sendErrorAlert(err.message);
+    await notifyTelegram(heTelegramMsg('A11 Price Intelligence', '🚨 כשל קריטי!',
+      `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
     process.exit(1);
   }
 }
