@@ -456,6 +456,36 @@ curl -X PUT .../products/XXX.json -d '{"product":{"id":XXX,"published":true}}'
 
 ---
 
+## 32. Logic Duplicated Instead of Shared — A0's structure-lint copy דרבן מהמקור
+
+**מה קרה (02/07/2026):** `A0_orchestrator/agent.js` הכיל `runWorkspaceHealthCheck()` — עותק ידני ("hand-copied") של הכללים מ-`scripts/ci/structure-lint.js`, עם קומנט "Runs the same rules as scripts/ci/structure-lint.js" — אבל בפועל לא רץ אותם קבצים, רק חיקה אותם. כש-`structure-lint.js` עודכן (01/07/2026, `ALLOWED_ROOT_ENTRIES` + `ALLOWED_SA_ROOT` הורחבו ל-`.claude`/`.vscode`/`.env`/`node_modules`/וכו') — העותק של A0 **לא עודכן**. תוצאה: A0 דיווח 14 workspace violations כוזבים בכל ריצה יומית, ומשך את Readiness Score מטה ב-5 נק' (infrastructure: 10/15 במקום 15/15) — בלי שאף אחד שם לב, כי CI (שרץ את הקובץ האמיתי) נשאר ירוק.
+
+**סיבה:** כשנכתב A0, במקום `require('../../scripts/ci/structure-lint.js')` — הועתק הקוד ידנית. שני מקורות אמת לאותו כלל = drift בלתי נמנע ברגע שאחד מהם משתנה.
+
+**מה מונע חזרה:**
+1. `structure-lint.js` מייצא כעת `computeViolations()` כפונקציה טהורה (ללא `process.exit`/`console`/כתיבת קובץ), מוגנת ב-`if (require.main === module)` כדי שההתנהגות ב-CI לא תשתנה
+2. A0 קורא ל-`computeViolations()` ישירות — מקור אמת יחיד, לא יכול לדרבן שוב
+3. **כלל כללי:** אם קוד/כלל נדרש בשני agents/scripts — **תמיד** `require()` את המקור, **לעולם לא** להעתיק-להדביק "בשביל שזה ירוץ עצמאי". זה בדיוק הפרה מס' 6 (DRY) אבל ברמת agent-to-agent, לא רק function-to-function.
+
+**בדיקה:** `grep -rn "Runs the same rules as\|same logic as\|mirrors A" sockacademy/agents/ sockacademy/corp/` — אם יש קומנט שמתאר "אותה לוגיקה כמו X" בלי `require(X)` בפועל — זה candidate לdrift, לבדוק אם אפשר לאחד למקור משותף.
+
+---
+
+## 33. Telegram Alerts שנשלחו באנגלית — הפרת Telegram Hebrew Standard
+
+**מה קרה (02/07/2026):** בבניית ה-Telegram integration הראשונה ל-A0, נכתבו 7 הודעות Telegram באנגלית פשוטה — למרות ש-`telegram_hebrew_standard` memory קיים ומגדיר במפורש: כל הודעת Telegram חייבת עברית מקצועית, פורמט קנוני `<b>[AGENT] — [תאריך]</b>`. ה-commit הראשון (`e8886c1`) נדחף לפני שהmemory נבדק. תוקן ב-commit הבא (`1b48a83`) אחרי שגיא הזכיר את הדרישה.
+
+**סיבה:** "How to apply" ב-memory אומר לבדוק את הדרישה *"לפני חיווט agent ל-sendTelegram"* — הבדיקה לא בוצעה כי זו הייתה הפעם הראשונה שAgent חי (לא A14/A15 הרדומים) חובר בפועל, ולא היה "trigger" מפורש שהזכיר לבדוק את ה-memory.
+
+**מה מונע חזרה:**
+1. `heTelegramMsg(agentName, title, body)` ב-`corp/core/telegram.js` הוא כעת ה-**אכיפה בקוד**, לא רק תיעוד — אם agent קורא ל-`notifyTelegram()` עם טקסט חופשי (לא דרך `heTelegramMsg`), זה red flag בקוד review
+2. Pre-Deploy Gate (CLAUDE.md, בדיקה 5) מזכיר עכשיו במפורש "בעברית, לפי הפורמט הקנוני"
+3. לפני כל `notifyTelegram()` חדש ב-agent: לוודא הקריאה עוברת דרך `heTelegramMsg()` מ-`corp/core/telegram.js`
+
+**בדיקה:** `grep -rn "notifyTelegram(" sockacademy/agents/*/agent.js` — כל תוצאה חייבת לעטוף `heTelegramMsg(` או משתנה שנבנה ממנה. אם יש `notifyTelegram(\`...\`)` עם טקסט אנגלי חופשי — זו הפרה.
+
+---
+
 ## SESSION CONTINUITY CHECKLIST — בכל שיחה
 
 **פתיחה:**

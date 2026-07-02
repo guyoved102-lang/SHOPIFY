@@ -269,12 +269,13 @@ GitHub workflow    → .github/workflows/
 
 ### ⚡ GitHub Actions Pre-Deploy Gate — חובה לפני כל push של agent חדש
 
-**לפני שמגיע workflow YAML ל-main, חייבים לעבור 4 בדיקות:**
+**לפני שמגיע workflow YAML ל-main, חייבים לעבור 5 בדיקות:**
 
 1. **`package-lock.json` מחויב ב-git** — `git add <agent>/package-lock.json` אחרי `npm install`. בלי זה: `npm cache` נכשל ב-CI.
 2. **כל Secrets שמוזכרים ב-YAML קיימים ב-GitHub** — `gh secret list` לאימות. Secret חסר = שגיאה שקטה ב-runtime.
 3. **`cache-dependency-path` מצביע לנתיב שקיים ב-repo** — נתיב שגוי → `setup-node` נכשל ב-11 שניות.
 4. **DRY_RUN=true node agent.js עבר מקומית** — אם לא עבר מקומית, לא מגיע ל-GitHub.
+5. **Telegram push על כשל קריטי — חובה (נקבע 02/07/2026, Guy).** כל agent שיכול להיכשל בשקט (fatal error, לא מדווח) חייב `notifyTelegram()` מ-`corp/core/telegram.js` ב-`main().catch()` שלו, בעברית, לפי הפורמט הקנוני ב-`telegram_hebrew_standard` memory. `TELEGRAM_BOT_TOKEN`+`TELEGRAM_CHAT_ID` ב-YAML env. **Why:** מייל לבד מתחרה מול עשרות מיילים אחרים ומתפספס — Telegram push מבטיח שגיא יידע בזמן אמת. ראה A0 כ-reference implementation.
 
 > **הפקה:** כישלון ב-11 שניות תמיד = setup נכשל (package-lock / secret / path). לא קוד.
 
