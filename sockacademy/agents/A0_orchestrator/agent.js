@@ -171,6 +171,15 @@ async function notifyTelegram(text, opts = {}) {
   await sendTelegram(text, opts);
 }
 
+// Canonical Hebrew Telegram format (telegram_hebrew_standard memory):
+// <b>[AGENT_NAME] — [תאריך]</b>\n\n[גוף בעברית]\n\n<i>הופעל אוטומטית...</i>
+function heDate() {
+  return new Date().toLocaleDateString('he-IL', { timeZone: 'Asia/Jerusalem', weekday: 'long', day: 'numeric', month: 'long' });
+}
+function heTelegramMsg(title, body) {
+  return `<b>A0 Orchestrator — ${title} (${heDate()})</b>\n\n${body}\n\n<i>הופעל אוטומטית ב-A0 Orchestrator</i>`;
+}
+
 // ─── EMAIL TEMPLATES ─────────────────────────────────────────────────────────
 
 function stuckAlertHtml(stuckRows) {
@@ -646,7 +655,8 @@ async function main() {
       `🚨 A0 Alert: ${stuckRows.length} stuck product row(s) — action needed`,
       stuckAlertHtml(stuckRows)
     );
-    await notifyTelegram(`🚨 <b>A0 Stuck Detection</b>\n${stuckRows.length} product row(s) stuck — action needed. Check email for details.`);
+    await notifyTelegram(heTelegramMsg('🚨 התראת מוצרים תקועים',
+      `נמצאו <b>${stuckRows.length}</b> מוצר/ים תקועים בסטטוס "uploading" מעבר לזמן הצפוי.\nנדרשת פעולה שלך ב-Supabase לשחרור התקיעה. פירוט מלא נשלח במייל.`));
   }
 
   // Step 2 — SA-6 Decision Engine (every run)
@@ -661,7 +671,8 @@ async function main() {
         `🔴 SA-6 Alert: ${criticalCount} critical issue(s) detected`,
         orchestrationAlertHtml(decisions, clusterScores)
       );
-      await notifyTelegram(`🔴 <b>SA-6 Critical Alert</b>\n${criticalCount} critical issue(s) detected. Check email for full breakdown.`);
+      await notifyTelegram(heTelegramMsg('🔴 התראת SA-6 קריטית',
+        `מנוע ההחלטות זיהה <b>${criticalCount}</b> בעיה/ות קריטית/ות בצי הסוכנים.\nפירוט מלא בדוח שנשלח במייל.`));
     }
   } catch (e) {
     console.error(`⚠️  SA-6 Decision Engine failed: ${e.message}`);
@@ -695,7 +706,8 @@ async function main() {
       `🏗️ A0 Alert: ${structureViolations.length} workspace structure violation(s)`,
       workspaceAlertHtml(structureViolations)
     );
-    await notifyTelegram(`🏗️ <b>A0 Workspace Violation</b>\n${structureViolations.length} structure violation(s) found. Check email for the file list.`);
+    await notifyTelegram(heTelegramMsg('🏗️ הפרת מבנה תיקיות',
+      `נמצאו <b>${structureViolations.length}</b> הפרות מבנה בארכיטקטורה (מול CLAUDE.md).\nרשימת הקבצים המלאה נשלחה במייל.`));
   }
 
   // Step 5 — Phase Readiness Score (every run)
@@ -714,7 +726,8 @@ async function main() {
         `🎯 SockAcademy Phase Readiness: ${readiness.total}/100 — Awaiting Your Approval`,
         readinessEmailHtml(readiness)
       );
-      await notifyTelegram(`🎯 <b>Phase Ready!</b>\nReadiness Score: ${readiness.total}/100 — awaiting your approval to activate. Check email for the breakdown.`);
+      await notifyTelegram(heTelegramMsg('🎯 המערכת מוכנה לפאזה הבאה!',
+        `ציון מוכנות: <b>${readiness.total}/100</b> — עבר את הסף (${READINESS_THRESHOLD}).\nהמערכת ממתינה לאישורך הידני להפעלת הפאזה הבאה. פירוט מלא במייל.`));
     } else {
       console.log(`⏳ Not ready (${readiness.total}/100) — ${READINESS_THRESHOLD - readiness.total} pts to threshold`);
     }
@@ -738,7 +751,8 @@ async function main() {
             <hr><p style="color:#888;font-size:11px">SockAcademy A0 Orchestrator</p>
           </div>`
         );
-        await notifyTelegram(`⚠️ <b>Readiness Score Dropped</b>\n${prevScore} → ${readiness.total} (−${prevScore - readiness.total} pts). Check which agents stopped reporting.`);
+        await notifyTelegram(heTelegramMsg('⚠️ ירידה בציון המוכנות',
+          `הציון ירד מ-<b>${prevScore}</b> ל-<b>${readiness.total}</b> (ירידה של ${prevScore - readiness.total} נק').\nכדאי לבדוק אילו agents הפסיקו לדווח ב-Supabase.`));
       }
       await supabase.from('system_config').upsert(
         { key: 'readiness_score_last', value: String(readiness.total) },
@@ -764,15 +778,15 @@ async function main() {
       )
     );
     const clusterScoresForTg = orchestrationResult?.clusterScores ?? null;
-    const clusterStatusShort = !clusterScoresForTg ? 'no data'
-      : Object.values(clusterScoresForTg).every(s => s.score === 100) ? '✅ all healthy'
-      : Object.values(clusterScoresForTg).some(s => s.score < 50) ? '🔴 degraded'
-      : '⚠️ minor issues';
+    const clusterStatusShort = !clusterScoresForTg ? 'אין נתונים'
+      : Object.values(clusterScoresForTg).every(s => s.score === 100) ? '✅ כל האשכולות תקינים'
+      : Object.values(clusterScoresForTg).some(s => s.score < 50) ? '🔴 אשכול פגוע'
+      : '⚠️ בעיות קלות';
     await notifyTelegram(
-      `📊 <b>A0 Daily Ops — ${dayStr}</b>\n` +
-      `Cluster: ${clusterStatusShort}\n` +
-      `Readiness: ${readiness ? readiness.total + '/100' : '—'}\n` +
-      `Stuck: ${stuckRows.length} | Violations: ${structureViolations.length}`,
+      heTelegramMsg('📊 סיכום יומי',
+        `בריאות אשכולות: <b>${clusterStatusShort}</b>\n` +
+        `ציון מוכנות: <b>${readiness ? readiness.total + '/100' : '—'}</b>\n` +
+        `מוצרים תקועים: ${stuckRows.length} | הפרות מבנה: ${structureViolations.length}`),
       { silent: true }
     );
   }
@@ -798,7 +812,8 @@ main().catch(async err => {
       '🚨 A0 Orchestrator FAILED — action needed',
       `<div style="font-family:monospace"><h2>🚨 A0 Fatal Error</h2><p><strong>Time:</strong> ${new Date().toISOString()}</p><pre style="background:#f5f5f5;padding:12px">${err.message}</pre></div>`
     );
-    await notifyTelegram(`🚨 <b>A0 Orchestrator FAILED</b>\n<code>${err.message}</code>`);
+    await notifyTelegram(heTelegramMsg('🚨 כשל קריטי!',
+      `ה-Orchestrator נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
   } catch (_) {}
   process.exit(1);
 });
