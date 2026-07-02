@@ -11,6 +11,7 @@
 require('dotenv').config({ path: '../../.env' });
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
+const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL = 'guyoved102@gmail.com';
@@ -307,5 +308,7 @@ main().catch(async err => {
     const sb = getSupabase();
     await updateA25Health(sb, 'failure', { error: err.message });
   } catch (_) {}
+  await notifyTelegram(heTelegramMsg('A2.5 Quality Control', '🚨 כשל קריטי!',
+    `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
   process.exit(1);
 });
