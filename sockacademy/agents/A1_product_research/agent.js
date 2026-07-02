@@ -1,6 +1,6 @@
 /**
  * A1 — Product Research Agent v2.0
- * פלטפורמות: CJ Dropshipping (API) + AliExpress + Alibaba + Spocket (כשמוגדר SPOCKET_API_KEY) + ניתוח טרנדים TikTok
+ * פלטפורמות: CJ Dropshipping (API) + AliExpress + Alibaba + Spocket + EPROLO + Modalyst + Syncee + AppScenic (כל אחד graceful no-op עד שמוגדר API key משלו) + ניתוח טרנדים TikTok
  * קטלוג רחב, curated dropship — per VISION.md + PHASE_ARCHITECTURE_SKELETON.md Phase 1.
  * הרצה: node agent.js | GitHub Actions: כל יום שני 10:00 ישראל
  */
@@ -399,6 +399,124 @@ async function searchSpocket(keyword) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PLATFORMS 6–9: EPROLO / MODALYST / SYNCEE / APPSCENIC — scaffolded, not
+// activated. Each is a graceful no-op until its own API key is set (mirrors
+// the Spocket pattern above). Guy has NOT yet manually verified hosiery
+// inventory relevance on any of these platforms (see PRIVATE_LABEL_ROADMAP.md
+// dropship shortlist, 01/07/2026) — endpoint/auth shapes below are best-guess
+// REST patterns, UNVERIFIED against live docs. Do not treat a 200 response as
+// proof of correctness; confirm against each platform's current API docs
+// before first real use.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function searchEprolo(keyword) {
+  const apiKey = process.env.EPROLO_API_KEY;
+  if (!apiKey) return []; // no account configured yet — silent skip, not an error
+  try {
+    const res = await fetch(`https://api.eprolo.com/v1/products/search?keyword=${encodeURIComponent(keyword)}`, {
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Accept': 'application/json' },
+    });
+    if (!res.ok) { console.log(`   ⚠️ EPROLO API ${res.status} — skipping this query`); return []; }
+    const data = await res.json();
+    const items = data.products || data.data || [];
+    return items.map(p => ({
+      name: p.title || p.name || '',
+      supplierPrice: parseFloat(p.price || p.cost || 0),
+      rating: parseFloat(p.rating || 0),
+      orders: parseInt(p.orders_count || 0, 10),
+      reviews: parseInt(p.reviews_count || 0, 10),
+      url: p.url || p.product_url || '',
+      source: 'EPROLO',
+      materials: extractMaterials(p.title || p.name || ''),
+      category: classifyStyle(p.title || p.name || ''),
+    })).filter(p => p.name);
+  } catch (e) {
+    console.log(`   ⚠️ EPROLO error: ${e.message}`);
+    return [];
+  }
+}
+
+async function searchModalyst(keyword) {
+  const apiKey = process.env.MODALYST_API_KEY;
+  if (!apiKey) return [];
+  try {
+    const res = await fetch(`https://api.modalyst.co/v1/products/search?q=${encodeURIComponent(keyword)}`, {
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Accept': 'application/json' },
+    });
+    if (!res.ok) { console.log(`   ⚠️ Modalyst API ${res.status} — skipping this query`); return []; }
+    const data = await res.json();
+    const items = data.products || data.data || [];
+    return items.map(p => ({
+      name: p.title || p.name || '',
+      supplierPrice: parseFloat(p.price || p.cost || 0),
+      rating: parseFloat(p.rating || 0),
+      orders: parseInt(p.orders_count || 0, 10),
+      reviews: parseInt(p.reviews_count || 0, 10),
+      url: p.url || p.product_url || '',
+      source: 'Modalyst',
+      materials: extractMaterials(p.title || p.name || ''),
+      category: classifyStyle(p.title || p.name || ''),
+    })).filter(p => p.name);
+  } catch (e) {
+    console.log(`   ⚠️ Modalyst error: ${e.message}`);
+    return [];
+  }
+}
+
+async function searchSyncee(keyword) {
+  const apiKey = process.env.SYNCEE_API_KEY;
+  if (!apiKey) return [];
+  try {
+    const res = await fetch(`https://api.syncee.com/v1/products/search?query=${encodeURIComponent(keyword)}`, {
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Accept': 'application/json' },
+    });
+    if (!res.ok) { console.log(`   ⚠️ Syncee API ${res.status} — skipping this query`); return []; }
+    const data = await res.json();
+    const items = data.products || data.data || [];
+    return items.map(p => ({
+      name: p.title || p.name || '',
+      supplierPrice: parseFloat(p.price || p.cost || 0),
+      rating: parseFloat(p.rating || 0),
+      orders: parseInt(p.orders_count || 0, 10),
+      reviews: parseInt(p.reviews_count || 0, 10),
+      url: p.url || p.product_url || '',
+      source: 'Syncee',
+      materials: extractMaterials(p.title || p.name || ''),
+      category: classifyStyle(p.title || p.name || ''),
+    })).filter(p => p.name);
+  } catch (e) {
+    console.log(`   ⚠️ Syncee error: ${e.message}`);
+    return [];
+  }
+}
+
+async function searchAppScenic(keyword) {
+  const apiKey = process.env.APPSCENIC_API_KEY;
+  if (!apiKey) return [];
+  try {
+    const res = await fetch(`https://api.appscenic.com/v1/products/search?keyword=${encodeURIComponent(keyword)}`, {
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Accept': 'application/json' },
+    });
+    if (!res.ok) { console.log(`   ⚠️ AppScenic API ${res.status} — skipping this query`); return []; }
+    const data = await res.json();
+    const items = data.products || data.data || [];
+    return items.map(p => ({
+      name: p.title || p.name || '',
+      supplierPrice: parseFloat(p.price || p.cost || 0),
+      rating: parseFloat(p.rating || 0),
+      orders: parseInt(p.orders_count || 0, 10),
+      reviews: parseInt(p.reviews_count || 0, 10),
+      url: p.url || p.product_url || '',
+      source: 'AppScenic',
+      materials: extractMaterials(p.title || p.name || ''),
+      category: classifyStyle(p.title || p.name || ''),
+    })).filter(p => p.name);
+  } catch (e) {
+    console.log(`   ⚠️ AppScenic error: ${e.message}`);
+    return [];
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // PLATFORM 5: TIKTOK TRENDS
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function getTikTokTrends() {
@@ -653,12 +771,20 @@ async function run() {
   const supabase = getSupabase();
   await logHealth(supabase, 'running');
   console.log('🚀 A1 Product Research Agent v2.0\n');
-  console.log('📡 פלטפורמות: CJ Dropshipping + AliExpress + Alibaba + Spocket + TikTok Trends\n');
+  console.log('📡 פלטפורמות: CJ Dropshipping + AliExpress + Alibaba + Spocket + EPROLO + Modalyst + Syncee + AppScenic + TikTok Trends\n');
 
   // CJ Auth
   const cjToken = await getCJToken();
   const spocketActive = !!process.env.SPOCKET_API_KEY;
-  if (!spocketActive) console.log('ℹ️ Spocket: SPOCKET_API_KEY לא מוגדר — פלטפורמה מדולגת (לא שגיאה)\n');
+  const eproloActive = !!process.env.EPROLO_API_KEY;
+  const modalystActive = !!process.env.MODALYST_API_KEY;
+  const synceeActive = !!process.env.SYNCEE_API_KEY;
+  const appscenicActive = !!process.env.APPSCENIC_API_KEY;
+  if (!spocketActive) console.log('ℹ️ Spocket: SPOCKET_API_KEY לא מוגדר — פלטפורמה מדולגת (לא שגיאה)');
+  if (!eproloActive) console.log('ℹ️ EPROLO: EPROLO_API_KEY לא מוגדר — פלטפורמה מדולגת (לא שגיאה)');
+  if (!modalystActive) console.log('ℹ️ Modalyst: MODALYST_API_KEY לא מוגדר — פלטפורמה מדולגת (לא שגיאה)');
+  if (!synceeActive) console.log('ℹ️ Syncee: SYNCEE_API_KEY לא מוגדר — פלטפורמה מדולגת (לא שגיאה)');
+  if (!appscenicActive) console.log('ℹ️ AppScenic: APPSCENIC_API_KEY לא מוגדר — פלטפורמה מדולגת (לא שגיאה)\n');
 
   // טרנדים
   console.log('📈 מנתח טרנדים TikTok 2025...');
@@ -666,7 +792,7 @@ async function run() {
   console.log('');
 
   const allProducts = [];
-  const platformStats = { CJ: 0, AliExpress: 0, Alibaba: 0, Spocket: 0 };
+  const platformStats = { CJ: 0, AliExpress: 0, Alibaba: 0, Spocket: 0, EPROLO: 0, Modalyst: 0, Syncee: 0, AppScenic: 0 };
 
   // סריקה עמוקה — כל שאילתה × עד 4 פלטפורמות
   for (let i = 0; i < SEARCH_QUERIES.length; i++) {
@@ -692,10 +818,30 @@ async function run() {
       if (spR.length) { console.log(`   Spocket: ${spR.length}`); platformStats.Spocket += spR.length; allProducts.push(...spR); }
     }
 
+    if (eproloActive) {
+      const epR = await searchEprolo(query);
+      if (epR.length) { console.log(`   EPROLO: ${epR.length}`); platformStats.EPROLO += epR.length; allProducts.push(...epR); }
+    }
+
+    if (modalystActive) {
+      const moR = await searchModalyst(query);
+      if (moR.length) { console.log(`   Modalyst: ${moR.length}`); platformStats.Modalyst += moR.length; allProducts.push(...moR); }
+    }
+
+    if (synceeActive) {
+      const syR = await searchSyncee(query);
+      if (syR.length) { console.log(`   Syncee: ${syR.length}`); platformStats.Syncee += syR.length; allProducts.push(...syR); }
+    }
+
+    if (appscenicActive) {
+      const asR = await searchAppScenic(query);
+      if (asR.length) { console.log(`   AppScenic: ${asR.length}`); platformStats.AppScenic += asR.length; allProducts.push(...asR); }
+    }
+
     await new Promise(r => setTimeout(r, 800));
   }
 
-  console.log(`\n📊 סה"כ נסרקו: ${allProducts.length} | CJ:${platformStats.CJ} AliExpress:${platformStats.AliExpress} Alibaba:${platformStats.Alibaba} Spocket:${platformStats.Spocket}\n`);
+  console.log(`\n📊 סה"כ נסרקו: ${allProducts.length} | CJ:${platformStats.CJ} AliExpress:${platformStats.AliExpress} Alibaba:${platformStats.Alibaba} Spocket:${platformStats.Spocket} EPROLO:${platformStats.EPROLO} Modalyst:${platformStats.Modalyst} Syncee:${platformStats.Syncee} AppScenic:${platformStats.AppScenic}\n`);
 
   // סינון ייחודיות
   const seen = new Set();
