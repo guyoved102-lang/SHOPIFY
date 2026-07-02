@@ -21,6 +21,7 @@ require('dotenv').config({ path: '../../.env' });
 const axios = require('axios');
 const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
+const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
@@ -373,6 +374,8 @@ async function main() {
   } catch (err) {
     console.error('❌ A12 fatal error:', err.message);
     await logHealth(supabase, 'failure', err.message).catch(() => {});
+    await notifyTelegram(heTelegramMsg('A12 Review Collector', '🚨 כשל קריטי!',
+      `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
     process.exit(1);
   }
 }
