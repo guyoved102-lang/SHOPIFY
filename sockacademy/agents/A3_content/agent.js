@@ -9,6 +9,7 @@ const Anthropic = require('@anthropic-ai/sdk');
 const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 const { withRetry } = require('../../corp/core/anthropic-retry.js');
+const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
@@ -414,5 +415,7 @@ async function main() {
 main().catch(async e => {
   console.error('💥 Fatal:', e.message);
   await logHealth(getSupabase(), 'failure', e.message).catch(() => {});
+  await notifyTelegram(heTelegramMsg('A3 Content', '🚨 כשל קריטי!',
+    `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${e.message}</code>`));
   process.exit(1);
 });
