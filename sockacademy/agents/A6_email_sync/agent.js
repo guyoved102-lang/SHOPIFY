@@ -11,6 +11,7 @@ const { createClient } = require('@supabase/supabase-js');
 const path = require('path');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
+const DRY_RUN = process.env.DRY_RUN === 'true';
 
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
@@ -198,6 +199,10 @@ async function updateTemplate(id, email) {
 async function syncTemplate(email, existingTemplates) {
   const existing = existingTemplates.find(t => t.attributes?.name === email.name);
 
+  if (DRY_RUN) {
+    return { action: existing ? 'would-update' : 'would-create', id: existing?.id || 'DRY_RUN', name: email.name };
+  }
+
   if (existing) {
     const updated = await updateTemplate(existing.id, email);
     return { action: 'updated', id: existing.id, name: email.name };
@@ -211,6 +216,7 @@ async function syncTemplate(email, existingTemplates) {
 // EMAIL CONFIRMATION
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function sendConfirmation(results, abVariant = 'A') {
+  if (DRY_RUN) { console.log('[DRY_RUN] Would send confirmation email, skipping'); return; }
   if (!process.env.GMAIL_APP_PASSWORD) return;
 
   const transporter = nodemailer.createTransport({

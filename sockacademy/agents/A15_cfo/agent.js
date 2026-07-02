@@ -13,11 +13,11 @@ require('dotenv').config({ path: '../../.env' });
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 
-const { sendTelegram } = require('../../corp/core/telegram.js');
+const { sendTelegram, notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
 
 const DRY_RUN        = process.env.DRY_RUN === 'true';
-const ADMIN_EMAIL    = 'guyoved102@gmail.com';
+const ADMIN_EMAIL    = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 const REPORT_DATE    = new Date().toISOString().split('T')[0];
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
 const SHOPIFY_TOKEN  = process.env.SHOPIFY_MASTER_TOKEN;
@@ -367,5 +367,7 @@ main().catch(async err => {
     const sb = getSupabase();
     await logHealth(sb, 'failure', { error: err.message });
   } catch (_) {}
+  await notifyTelegram(heTelegramMsg('A15 CFO', '🚨 כשל קריטי!',
+    `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
   process.exit(1);
 });
