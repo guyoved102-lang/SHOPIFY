@@ -9,6 +9,7 @@ const { createClient } = require('@supabase/supabase-js');
 const Anthropic = require('@anthropic-ai/sdk');
 const nodemailer = require('nodemailer');
 const { withRetry } = require('../../corp/core/anthropic-retry.js');
+const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
 const SHOPIFY_API_VERSION = '2025-01';
@@ -350,5 +351,7 @@ main().catch(async e => {
     await logHealth(sb, 'ERROR', e.message);
     await sendErrorAlert(e.message);
   } catch (_) {}
+  await notifyTelegram(heTelegramMsg('A2 Product Upload', '🚨 כשל קריטי!',
+    `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${e.message}</code>`));
   process.exit(1);
 });
