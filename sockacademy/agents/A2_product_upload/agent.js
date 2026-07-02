@@ -10,6 +10,7 @@ const Anthropic = require('@anthropic-ai/sdk');
 const nodemailer = require('nodemailer');
 const { withRetry } = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
 const SHOPIFY_API_VERSION = '2025-01';
@@ -220,7 +221,7 @@ async function sendSummaryEmail(results) {
 
   await transporter.sendMail({
     from: 'SockAcademy Agent <sockacademy.store@gmail.com>',
-    to: 'guyoved102@gmail.com',
+    to: ADMIN_EMAIL,
     subject: `A2 — ${success.length} מוצרים הועלו ל-Shopify${failed.length ? ` (${failed.length} שגיאות)` : ''}`,
     html,
   });
@@ -252,7 +253,7 @@ async function sendErrorAlert(errorMessage) {
   });
   await transporter.sendMail({
     from: '"SockAcademy Agents" <sockacademy.store@gmail.com>',
-    to: 'guyoved102@gmail.com',
+    to: ADMIN_EMAIL,
     subject: '🚨 A2 Product Upload FAILED — action needed',
     html: `<div style="font-family:monospace"><h2>🚨 A2 Failed</h2><p><strong>Time:</strong> ${new Date().toISOString()}</p><pre style="background:#f5f5f5;padding:12px;border-radius:4px">${errorMessage}</pre></div>`,
   }).catch(e => console.error('Alert email failed:', e.message));

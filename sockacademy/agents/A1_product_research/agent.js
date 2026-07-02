@@ -11,6 +11,8 @@ const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
+
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
@@ -905,7 +907,7 @@ async function run() {
       const html = buildHTMLEmail(top10, stats, date);
       await emailTransporter.sendMail({
         from: '"SockAcademy A1 Agent" <sockacademy.store@gmail.com>',
-        to: 'guyoved102@gmail.com',
+        to: ADMIN_EMAIL,
         subject: `🧦 SockAcademy — דוח שבועי ${date} | ${stats.totalScanned} מוצרים נסרקו`,
         html,
         text: `SockAcademy דוח שבועי ${date}\n\nTOP 10:\n` +

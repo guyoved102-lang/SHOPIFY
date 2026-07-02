@@ -25,7 +25,7 @@ const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js')
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const GMAIL_USER  = 'sockacademy.store@gmail.com';
-const ALERT_EMAIL = 'guyoved102@gmail.com';
+const ALERT_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY)

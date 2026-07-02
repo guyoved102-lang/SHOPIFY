@@ -10,6 +10,7 @@ const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 const { withRetry } = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
@@ -283,7 +284,7 @@ async function sendReport(topic, article, published) {
 
   await transporter.sendMail({
     from: 'SockAcademy A3 Agent <sockacademy.store@gmail.com>',
-    to: 'guyoved102@gmail.com',
+    to: ADMIN_EMAIL,
     subject: `📝 A3 — מאמר חדש: "${topic.title.substring(0, 50)}..." | ${new Date().toLocaleDateString('he-IL')}`,
     html,
   });

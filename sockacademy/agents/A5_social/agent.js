@@ -12,6 +12,7 @@ const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 const { withRetry } = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
@@ -423,7 +424,7 @@ async function sendWeeklyCalendar(posts, weekNum, theme) {
 
   await transporter.sendMail({
     from: 'SockAcademy A5 Agent <sockacademy.store@gmail.com>',
-    to: 'guyoved102@gmail.com',
+    to: ADMIN_EMAIL,
     subject: `A5 — Week ${weekNum}: "${theme.substring(0, 45)}${theme.length > 45 ? '...' : ''}"`,
     html,
   });

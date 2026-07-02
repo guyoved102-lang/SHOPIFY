@@ -14,7 +14,7 @@ const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js')
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const FORCE_WEEKLY = process.env.FORCE_WEEKLY_REPORT === 'true';
-const ADMIN_EMAIL = 'guyoved102@gmail.com';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 
 // ─── SUPABASE ────────────────────────────────────────────────────────────────
 

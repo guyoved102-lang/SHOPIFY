@@ -13,6 +13,7 @@ const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 const { requestApproval } = require('../../corp/core/hitl');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
@@ -483,7 +484,7 @@ async function sendConfirmation(results) {
 
   await transporter.sendMail({
     from: 'SockAcademy A9 Agent <sockacademy.store@gmail.com>',
-    to: 'guyoved102@gmail.com',
+    to: ADMIN_EMAIL,
     subject: `A9 — ${results.length} legal pages synced to Shopify ✓`,
     html,
   });

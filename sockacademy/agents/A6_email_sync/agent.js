@@ -10,6 +10,7 @@ const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 const path = require('path');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
@@ -281,7 +282,7 @@ async function sendConfirmation(results, abVariant = 'A') {
 
   await transporter.sendMail({
     from: 'SockAcademy A6 Agent <sockacademy.store@gmail.com>',
-    to: 'guyoved102@gmail.com',
+    to: ADMIN_EMAIL,
     subject: `A6 — ${results.length} Klaviyo templates ${results[0]?.action || 'synced'} ✓`,
     html,
   });
