@@ -486,6 +486,35 @@ curl -X PUT .../products/XXX.json -d '{"product":{"id":XXX,"published":true}}'
 
 ---
 
+## 34. A25 — dotenv.config() בלי path — agent קרס בכל הרצה, אף פעם לא רץ בהצלחה
+
+**מה קרה (02–03/07/2026):** בזמן חיווט `writeMetrics()` ל-A25 (Command Center KPIs), הרצה ישירה של `node agent.js` קרסה עם `Error: supabaseUrl is required` — לפני שהוא בכלל הגיע לבדיקת `LAUNCH_MODE`. הסיבה: שורה 2 בקובץ הייתה `require('dotenv').config();` (בלי `{ path: '../../.env' }`) — היחיד מבין 28 הסוכנים בלי ה-path המפורש. dotenv חיפש `.env` בתוך `A25_influencer/` עצמה, לא מצא, ו-`SUPABASE_URL` נשאר undefined. כיוון שיצירת ה-Supabase client קורית ב-**top-level module load** (לא בתוך `main()`), הקריסה קרתה לפני שה-`LAUNCH_MODE` gate אפילו נבדק — כלומר A25 קרס בכל ריצה, כולל בכל cron שאי-פעם רץ עליו מאז שנוצר.
+
+**סיבה:** copy-paste מקובץ אחר (או כתיבה מאפס) בלי להשוות מול התבנית המדויקת שכל שאר ה-agents משתמשים בה. syntax check (`node -c`) לא תופס את זה — זו שגיאת runtime, לא syntax.
+
+**מה מונע חזרה:**
+1. לפני שסוכן חדש נחשב "מוכן" — להריץ אותו בפועל פעם אחת (`node agent.js`, אפילו בלי LAUNCH_MODE) ולוודא שהוא **מגיע** ל-log line הרלוונטי (dormant gate / DRY_RUN notice), לא רק ש-`node -c` עובר.
+2. `grep -L "config({ path: '../../.env' })" sockacademy/agents/*/agent.js` — כל agent חדש/קיים חייב את השורה הזו במדויק; אם חסר, זו הפרה.
+
+**בדיקה:** `grep -rn "require('dotenv').config()" sockacademy/agents/*/agent.js` — כל שורה בלי `{ path: ... }` היא red flag.
+
+---
+
+## 35. DRY_RUN שכחה במהלך smoke-test — פעולות live אמיתיות בטעות (03/07/2026)
+
+**מה קרה:** בזמן בדיקת require-resolution לכל 18 הסוכנים שחוברו ל-Command Center, הורצו `node agent.js` בלולאה **בלי** `DRY_RUN=true`. רוב הסוכנים מוגני `LAUNCH_MODE` ויצאו בבטחה — אבל 5 שאין להם gate (`A6`, `A8`, `A9`, `A16`, וגם היו עלולים A24/A11/A12/A1/A2/A2.5/A3/A5/A7) **רצו live בפועל**: A6 סנכרן מחדש (idempotent, אותו תוכן) + שלח מייל אישור; A8 שלח דוח GA4 שבועי אמיתי; A9 **פתח בקשת אישור HITL חדשה** לפרסום 4 עמודים משפטיים ושלח מייל "REQUIRES YOUR APPROVAL" — ישירות לתוך תחום שגיא הגדיר כ"לא לגעת, ממתין ל-attorney review". תוקן: השורה ב-Supabase סומנה `status='rejected'` ידנית, גיא עודכן במלואו לפני שהמשכנו.
+
+**סיבה:** ה"סמיכות ביטחון" של agents עם `LAUNCH_MODE` (שרוב הפעם בטוחים) יצרה הרגל להריץ `node agent.js` בלי מחשבה שנייה — ולא כל agent מוגן באותה שכבה. אין no single command שמריץ "את כל הצי בבטחה" עם דגל ברירת מחדל.
+
+**מה מונע חזרה:**
+1. **חוק ברזל חדש:** כל הרצה ידנית של agent לבדיקה — `DRY_RUN=true node agent.js`, **תמיד**, בלי יוצא מן הכלל, גם אם ה-agent "כנראה" מוגן ב-LAUNCH_MODE. לבדוק את הדגל *לפני* ההרצה, לא אחריה.
+2. לפני בדיקת-מקבץ (loop על כמה agents) — לרשום מראש איזה agents *אין* להם LAUNCH_MODE gate (`grep -L "LAUNCH_MODE" sockacademy/agents/*/agent.js`) ולהתייחס אליהם כ-high-risk.
+3. A9 בפרט: אין לו שום מושג DRY_RUN בקוד בכלל (one-shot pre-launch tool) — **לעולם לא להריץ את A9 שוב אלא אם יש כוונה מפורשת לפרסם/לבדוק את ה-HITL flow בפועל**, ורק אחרי שנבדק שאין approval row קיים שעלול "להיתפס" בטעות.
+
+**בדיקה:** `grep -L "DRY_RUN" sockacademy/agents/*/agent.js` — agents שמופיעים ברשימה (כמו A1, A9) הם high-risk לריצה ידנית; יש להתייחס אליהם בזהירות מיוחדת.
+
+---
+
 ## SESSION CONTINUITY CHECKLIST — בכל שיחה
 
 **פתיחה:**
