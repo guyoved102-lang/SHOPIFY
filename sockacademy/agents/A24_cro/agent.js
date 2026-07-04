@@ -452,6 +452,11 @@ async function sendEmail(funnel, rates, shopify, bottleneck, narrative, prev) {
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
 async function main() {
+  if (process.env.LAUNCH_MODE !== 'true') {
+    console.log('[A24] DORMANT — set LAUNCH_MODE=true to activate. No API calls made.');
+    process.exit(0);
+  }
+
   console.log(`[A24] Starting CRO Agent — ${REPORT_DATE}`);
   if (DRY_RUN)    console.log('[A24] DRY_RUN=true — no writes, no emails');
   if (!GA4_ACTIVE) console.log('[A24] GA4_ACTIVE=false — funnel data from Shopify only');
