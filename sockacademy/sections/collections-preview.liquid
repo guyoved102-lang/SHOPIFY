@@ -27,7 +27,7 @@
 
   #CollectionsPreview-{{ section.id }} .cp__subheading {
     text-align: center;
-    color: #888888;
+    color: var(--muted);
     font-size: 1rem;
     margin: 0 0 var(--space-6);
   }
@@ -61,7 +61,7 @@
   #CollectionsPreview-{{ section.id }} .cp__card:hover {
     transform: translateY(-8px);
     background-color: var(--surface-border);
-    border-top-color: #E2C47A;
+    border-top-color: var(--gold);
     box-shadow: 0 12px 48px rgba(201, 168, 76, 0.15);
   }
 
@@ -79,7 +79,7 @@
 
   /* Accent cards: same rest state as base, distinct hover shadow */
   #CollectionsPreview-{{ section.id }} .cp__card--accent:hover {
-    border-top-color: #E2C47A;
+    border-top-color: var(--gold);
     box-shadow: 0 8px 32px rgba(201, 168, 76, 0.12);
   }
 
@@ -111,7 +111,7 @@
 
   #CollectionsPreview-{{ section.id }} .cp__card-text {
     font-size: 0.875rem;
-    color: #888888;
+    color: var(--muted);
     line-height: 1.55;
     margin: 0;
     flex-grow: 1;

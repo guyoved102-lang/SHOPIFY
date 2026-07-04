@@ -1,6 +1,6 @@
 {%- style -%}
   #SockFinder-{{ section.id }} {
-    background-color: #1A1A1A;
+    background-color: var(--surface-base);
     background-image:
       radial-gradient(ellipse 100% 65% at 50% 115%, rgba(201, 168, 76, 0.12) 0%, transparent 65%),
       radial-gradient(ellipse 55% 45% at 12% 25%, rgba(201, 168, 76, 0.06) 0%, transparent 55%),
@@ -30,7 +30,7 @@
     font-weight: 700;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: #C9A84C;
+    color: var(--muted);
     margin: 0 0 1rem;
   }
 
@@ -40,21 +40,21 @@
     font-size: clamp(1.8rem, 3vw, 2.8rem);
     line-height: 1;
     letter-spacing: 0.04em;
-    color: #F0EDE6;
+    color: var(--cream);
     text-align: center;
     text-transform: uppercase;
     margin: 0 0 0.6rem;
   }
 
   #SockFinder-{{ section.id }} .sfq__title span {
-    color: #C9A84C;
+    color: var(--cream);
   }
 
   /* ── Subtitle ── */
   #SockFinder-{{ section.id }} .sfq__subtitle {
     font-family: 'DM Sans', sans-serif;
     font-size: 0.85rem;
-    color: #888888;
+    color: var(--muted);
     text-align: center;
     margin: 0 0 3rem;
     letter-spacing: 0.2em;
@@ -98,17 +98,17 @@
     width: 5px;
     height: 5px;
     border-radius: 50%;
-    background: #222222;
+    background: var(--surface-raised);
     transition: background 0.3s ease, transform 0.3s ease;
   }
 
   #SockFinder-{{ section.id }} .sfq__dot--active {
-    background: #C9A84C;
+    background: var(--cream);
     transform: scale(1.4);
   }
 
   #SockFinder-{{ section.id }} .sfq__dot--done {
-    background: #C9A84C;
+    background: var(--cream);
   }
 
   /* ── Question ── */
@@ -117,7 +117,7 @@
     font-size: 0.9rem;
     font-weight: 400;
     letter-spacing: 0.1em;
-    color: #888888;
+    color: var(--muted);
     text-transform: uppercase;
     text-align: center;
     margin: 0 0 1.5rem;
@@ -138,7 +138,7 @@
 
   #SockFinder-{{ section.id }} .sfq__opt {
     background: transparent;
-    border: 1px solid #222222;
+    border: 1px solid var(--surface-raised);
     border-radius: 2px;
     padding: 0.5rem 1.2rem;
     display: inline-flex;
@@ -152,12 +152,12 @@
   }
 
   #SockFinder-{{ section.id }} .sfq__opt:hover {
-    border-color: #C9A84C;
-    color: #C9A84C;
+    border-color: var(--gold);
+    color: var(--cream);
   }
 
   #SockFinder-{{ section.id }} .sfq__opt--selected {
-    border-color: #C9A84C;
+    border-color: var(--gold);
     background: rgba(201, 168, 76, 0.06);
   }
 
@@ -165,21 +165,21 @@
     font-family: 'DM Sans', sans-serif;
     font-size: 0.8rem;
     font-weight: 600;
-    color: #F0EDE6;
+    color: var(--cream);
     letter-spacing: 0.15em;
     text-transform: uppercase;
   }
 
   #SockFinder-{{ section.id }} .sfq__opt:hover .sfq__opt-label,
   #SockFinder-{{ section.id }} .sfq__opt--selected .sfq__opt-label {
-    color: #C9A84C;
+    color: var(--cream);
   }
 
   /* ── Result card ── */
   #SockFinder-{{ section.id }} .sfq__result {
-    background: #222222;
-    border: 1px solid #1E1E1E;
-    border-top: 1px solid #C9A84C;
+    background: var(--surface-raised);
+    border: 1px solid var(--surface-raised);
+    border-top: 1px solid var(--surface-border);
     padding: 2.5rem 2rem;
     text-align: center;
   }
@@ -190,7 +190,7 @@
     font-weight: 700;
     letter-spacing: 0.25em;
     text-transform: uppercase;
-    color: #C9A84C;
+    color: var(--cream);
     margin: 0 0 0.5rem;
   }
 
@@ -198,7 +198,7 @@
     font-family: 'Playfair Display', serif;
     font-size: clamp(1.6rem, 4vw, 2.2rem);
     letter-spacing: 0.06em;
-    color: #F0EDE6;
+    color: var(--cream);
     text-transform: uppercase;
     margin: 0 0 0.75rem;
     line-height: 1;
@@ -220,7 +220,7 @@
     font-family: 'DM Sans', sans-serif;
     font-size: 0.7rem;
     font-weight: 600;
-    color: #C9A84C;
+    color: var(--gold);
     border: 1px solid rgba(201, 168, 76, 0.2);
     padding: 0.25rem 0.8rem;
     letter-spacing: 0.08em;
@@ -236,21 +236,21 @@
 
   #SockFinder-{{ section.id }} .sfq__shop-btn {
     display: inline-block;
-    background: #C9A84C;
-    color: #1A1A1A;
+    background: var(--gold);
+    color: var(--surface-base);
     font-family: 'Playfair Display', serif;
     font-size: 1rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     text-decoration: none;
     padding: 0.7rem 2.5rem;
-    border: 1px solid #C9A84C;
+    border: 1px solid var(--gold);
     transition: background 0.2s ease, color 0.2s ease;
   }
 
   #SockFinder-{{ section.id }} .sfq__shop-btn:hover {
     background: transparent;
-    color: #C9A84C;
+    color: var(--gold);
   }
 
   #SockFinder-{{ section.id }} .sfq__restart-btn {
@@ -268,20 +268,20 @@
   }
 
   #SockFinder-{{ section.id }} .sfq__restart-btn:hover {
-    color: #888888;
+    color: var(--muted);
   }
 
   /* ── Progress bar ── */
   #SockFinder-{{ section.id }} .sfq__progress-track {
     margin-top: 2.5rem;
     height: 1px;
-    background: #1A1A1A;
+    background: var(--surface-base);
     overflow: hidden;
   }
 
   #SockFinder-{{ section.id }} .sfq__progress-fill {
     height: 100%;
-    background: #C9A84C;
+    background: var(--cream);
     width: 0%;
     transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }

@@ -46,9 +46,10 @@
                   structural divider or keyline accent
      FORBIDDEN:   body text | headings | text hover states |
                   decorative fills | background washes */
-  --gold:      #C9A84C;
-  --gold-dim:  rgba(201, 168, 76, 0.25);  /* borders, dividers */
-  --gold-glow: rgba(201, 168, 76, 0.10);  /* shadows, ambient */
+  --gold:       #C9A84C;
+  --gold-hover: #A8843C;  /* documented darker hover variant (BRAND_DNA.md) — CTA hover states only */
+  --gold-dim:   rgba(201, 168, 76, 0.25);  /* borders, dividers */
+  --gold-glow:  rgba(201, 168, 76, 0.10);  /* shadows, ambient */
 
   /* ── TEXT COLORS ──────────────────────────────────────────────
      Never pure white — cream reads warmer on dark surfaces. */

@@ -25,6 +25,8 @@
      BANNER INIT
   ───────────────────────────────────────────── */
 
+  var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   function initBanner(banner) {
     if (banner.dataset.saAnimInit) return;
     banner.dataset.saAnimInit = '1';
@@ -133,6 +135,13 @@
 
     // ── Animation loop ──────────────────────────────────────────────────
     var startTime = null;
+
+    // prefers-reduced-motion: paint the static fallback once, skip Ken Burns/parallax/particle loop
+    if (prefersReducedMotion) {
+      bg.style.transform = 'none';
+      ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+      return;
+    }
 
     function tick(now) {
       if (document.hidden) { requestAnimationFrame(tick); return; }
@@ -276,7 +285,8 @@
   var FEATURED_SEL = '.featured-collection, [id*="FeaturedCollection"]';
 
   function initGSAPReveal() {
-    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
+    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined' || reducedMotion) {
       document.querySelectorAll('.shopify-section').forEach(function (el) {
         el.style.opacity   = '1';
         el.style.transform = 'none';
@@ -287,7 +297,10 @@
 
     gsap.registerPlugin(ScrollTrigger);
 
-    // Mobile 70% Rule: half intensity, no blur, no stagger
+    // Mobile 70% Rule: 70%+ of traffic is mobile (DESIGN_DECISIONS.md) — reduced
+    // travel distance (~46% of desktop) and duration (~57% of desktop), no blur,
+    // no stagger. Fixed 04/07/2026: comment previously said "half intensity" (50%)
+    // which didn't match these values — this describes the actual ratios.
     var mobile  = window.matchMedia('(max-width: 749px)').matches;
     var yOff    = mobile ? 22 : 48;
     var dur     = mobile ? 0.40 : 0.70;
@@ -404,6 +417,7 @@
 
   function initLenis() {
     if (typeof Lenis === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     var lenis = new Lenis({
       duration: 1.2,
       easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
@@ -432,10 +446,11 @@
 
   function initProductCRO() {
     var isMobile = window.matchMedia('(max-width: 749px)').matches;
+    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     /* ── Social proof: GSAP fade-in ─────────────────────────── */
     var social = document.querySelector('.sp__social-proof');
-    if (social && typeof gsap !== 'undefined') {
+    if (social && typeof gsap !== 'undefined' && !reducedMotion) {
       gsap.from(social, {
         opacity: 0, y: 6,
         duration: 0.55, ease: 'power2.out', delay: 0.30,
@@ -445,7 +460,7 @@
 
     /* ── Trust badges: GSAP fade-in ─────────────────────────── */
     var trust = document.querySelector('.sp__trust');
-    if (trust && typeof gsap !== 'undefined') {
+    if (trust && typeof gsap !== 'undefined' && !reducedMotion) {
       gsap.from(trust, {
         opacity: 0, y: 8,
         duration: 0.65, ease: 'power2.out', delay: 0.45,
@@ -523,11 +538,13 @@
       if (!nativeInView && !shown) {
         shown = true;
         bar.setAttribute('aria-hidden', 'false');
-        gsap.to(bar, { y: '0%', duration: 0.42, ease: 'power3.out' });
+        if (reducedMotion) { bar.style.transform = 'translateY(0%)'; }
+        else { gsap.to(bar, { y: '0%', duration: 0.42, ease: 'power3.out' }); }
       } else if (nativeInView && shown) {
         shown = false;
         bar.setAttribute('aria-hidden', 'true');
-        gsap.to(bar, { y: '100%', duration: 0.32, ease: 'power2.in' });
+        if (reducedMotion) { bar.style.transform = 'translateY(100%)'; }
+        else { gsap.to(bar, { y: '100%', duration: 0.32, ease: 'power2.in' }); }
       }
     }, { threshold: 0.1 }).observe(nativeBtn);
 
@@ -565,6 +582,7 @@
   function initMagneticATC() {
     if (!window.matchMedia('(pointer: fine)').matches) return;
     if (typeof gsap === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     var btns = document.querySelectorAll('.sp__atc-btn');
     if (!btns.length) return;
@@ -614,6 +632,11 @@
   function reveal() {
     const insights = document.querySelectorAll('[data-academy-insight]');
     if (!insights.length) return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      insights.forEach(function (el) { el.classList.add('is-visible'); });
+      return;
+    }
 
     if (window.gsap && window.ScrollTrigger) {
       insights.forEach(function (el) {
