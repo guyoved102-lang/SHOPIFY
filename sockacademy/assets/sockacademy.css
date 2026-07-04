@@ -182,7 +182,7 @@ body {
 }
 
 .price-item--regular.price-item--last {
-  color: #666666 !important;
+  color: var(--muted) !important; /* was #666666 (3.03:1) — fails WCAG AA */
   text-decoration: line-through !important;
 }
 
@@ -407,7 +407,7 @@ h4, .h4 { font-size: var(--text-xl);  line-height: 1.25; }
     font-weight: 500;
     letter-spacing: 0.11em;
     text-transform: uppercase;
-    color: #555;
+    color: var(--muted); /* was #555 (2.33:1) — fails WCAG AA */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -628,7 +628,7 @@ h4, .h4 { font-size: var(--text-xl);  line-height: 1.25; }
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  color: var(--ghost);
+  color: var(--muted); /* was --ghost (2.12:1) — fails WCAG AA; --muted clears 4.5:1 */
   font-weight: var(--weight-semibold);
 }
 

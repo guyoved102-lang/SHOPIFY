@@ -298,7 +298,9 @@
     var featuredSecs = [];
     var cardSecs     = [];
 
-    document.querySelectorAll('.shopify-section:not(:first-child)').forEach(function (sec) {
+    // CRO Arbiter: never animate cart total / checkout button on load —
+    // exempt cart-items and cart-footer sections (templates/cart.json) from reveal.
+    document.querySelectorAll('.shopify-section:not(:first-child):not([id*="cart-items"]):not([id*="cart-footer"])').forEach(function (sec) {
       if (sec.querySelector(FEATURED_SEL)) {
         featuredSecs.push(sec);
       } else if (sec.querySelector(CARD_SEL)) {
@@ -547,6 +549,15 @@
    MAGNETIC ATC HOVER — Desktop only
    Phase 4 Layer 5 — premium pull effect on .sp__atc-btn
    pointer: fine = mouse only (not touch/mobile)
+
+   CRO Arbiter documented exception (G-7, Fable 5 audit, 04/07/2026):
+   the letter of the CRO Arbiter law forbids "animation on the ATC
+   button." This hover-follow effect and the sticky-ATC shimmer are the
+   one approved exception — neither moves the button's position/opacity
+   in a way that delays visibility or clickability; they are pointer-
+   feedback micro-interactions, not the structural reveal/stagger
+   animations the law targets. No other ATC animation is permitted
+   without the same explicit carve-out.
 ───────────────────────────────────────────── */
 (function () {
   'use strict';

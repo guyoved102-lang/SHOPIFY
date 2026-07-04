@@ -95,4 +95,18 @@ All GSAP built-in eases — zero new dependencies.
 
 ---
 
-*Last updated: 28/06/2026 — Phase 4 Layer 5 complete and live*
+## CRO Arbiter — Documented Exception (G-7, Fable 5 audit, 04/07/2026)
+
+**Rule (unchanged):** no animation on price, ATC button, or cart total; stagger max 0.5s before the first card.
+
+**Exception:** Magnetic ATC Hover and the sticky-ATC shimmer both technically animate the ATC
+button, conflicting with the rule's letter. Guy ruled to keep both and carve out this
+exception rather than remove them, since neither moves the button's position/opacity in a way
+that delays visibility or clickability — they are pointer-feedback micro-interactions
+(hover-follow, a light sweep), not the structural reveal/stagger animation the rule targets.
+No other ATC animation is permitted without the same explicit sign-off. See the inline comment
+in `assets/sockacademy-animations.js` above `initMagneticATC()`.
+
+---
+
+*Last updated: 04/07/2026 — CRO Arbiter exception documented (Fable 5 audit G-7)*
