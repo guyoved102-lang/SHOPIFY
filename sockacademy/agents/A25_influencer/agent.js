@@ -7,6 +7,7 @@ const nodemailer = require('nodemailer');
 const { withRetry } = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
+const { handleFatalError } = require('../../corp/core/self-heal.js');
 
 // ── Environment ──────────────────────────────────────────────────────────────
 const DRY_RUN     = process.env.DRY_RUN === 'true';
@@ -360,5 +361,6 @@ async function sendEmail(narrative, processedLeads) {
   console.error('[A25] Fatal error:', err.message);
   await notifyTelegram(heTelegramMsg('A25 Influencer Outreach', '🚨 כשל קריטי!',
     `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
+  await handleFatalError({ agentId: 'A25', agentName: 'Influencer Outreach', err, supabase });
   process.exit(1);
 });
