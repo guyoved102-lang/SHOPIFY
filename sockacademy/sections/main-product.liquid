@@ -259,36 +259,6 @@
     text-decoration: line-through;
   }
 
-  /* ── Social proof ─────────────────────────────────────────────── */
-  #MainProduct-{{ section.id }} .sp__social-proof {
-    display: flex;
-    align-items: center;
-    gap: var(--space-1);
-    margin: 0 0 var(--space-3);
-  }
-
-  #MainProduct-{{ section.id }} .sp__stars {
-    display: flex;
-    gap: 2px;
-    align-items: center;
-  }
-
-  #MainProduct-{{ section.id }} .sp__star {
-    fill: var(--ghost);
-    flex-shrink: 0;
-  }
-
-  #MainProduct-{{ section.id }} .sp__social-text {
-    font-size: var(--text-xs);
-    color: var(--muted);
-    letter-spacing: 0.05em;
-    font-weight: var(--weight-regular);
-  }
-
-  #MainProduct-{{ section.id }} .sp__review-count {
-    color: var(--ghost);
-  }
-
   /* ── Form: quantity + ATC ──────────────────────────────────────── */
   #MainProduct-{{ section.id }} .sp__form-row {
     display: flex;
@@ -653,13 +623,6 @@
             </div>
           {%- endfor -%}
         {%- endunless -%}
-
-        {%- comment -%}
-          Social proof — Judge.me app-block handles real review display.
-          No fabricated rating is rendered here. Audit fix (2026-07-04):
-          removed hardcoded "4.9 · 127 reviews" — store has zero verified
-          reviews; a static placeholder is consumer-law/FTC exposure.
-        {%- endcomment -%}
 
         {%- comment -%} Form: qty + ATC {%- endcomment -%}
         {%- form 'product', product,
