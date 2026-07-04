@@ -14,6 +14,7 @@ const { createClient } = require('@supabase/supabase-js');
 const { requestApproval } = require('../../corp/core/hitl');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
+const { handleFatalError } = require('../../corp/core/self-heal.js');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 // Added 04/07/2026 (Fable 5 audit, Guy G-2/G-3) — A9 is the frozen legal domain;
 // the 03/07/2026 incident happened because a smoke test forgot DRY_RUN=true and
@@ -648,8 +649,13 @@ async function main() {
 
 main().catch(async e => {
   console.error('💥 Fatal:', e.message);
-  await logHealth(getSupabase(), 'failure', e.message).catch(() => {});
+  let sb = null;
+  try {
+    sb = getSupabase();
+    await logHealth(sb, 'failure', e.message);
+  } catch (_) {}
   await notifyTelegram(heTelegramMsg('A9 Legal Compliance', '🚨 כשל קריטי!',
     `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${e.message}</code>`));
+  await handleFatalError({ agentId: 'A9', agentName: 'Legal Compliance', err: e, supabase: sb });
   process.exit(1);
 });

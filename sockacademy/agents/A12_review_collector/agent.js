@@ -23,6 +23,7 @@ const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
+const { handleFatalError } = require('../../corp/core/self-heal.js');
 
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
@@ -386,6 +387,7 @@ async function main() {
     await logHealth(supabase, 'failure', err.message).catch(() => {});
     await notifyTelegram(heTelegramMsg('A12 Review Collector', '🚨 כשל קריטי!',
       `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
+    await handleFatalError({ agentId: 'A12', agentName: 'Review Collector', err, supabase });
     process.exit(1);
   }
 }
