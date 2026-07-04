@@ -986,7 +986,7 @@ Confirm to Guy:
 - Module 4 built and committed across 6 tasks/commits.
 - `RAG_SUPPORT_ACTIVE=false` everywhere — fully dormant, zero cost, zero risk until he flips it.
 - Guy's one required manual action: run `knowledge_chunks.sql` in the Supabase SQL Editor (Task 1, Step 2) — everything else required zero manual Supabase work.
-- Optional next step for Guy, once he wants to see it working: run `node corp/core/rag-ingest.js` once (populates the table from the real store), then set `RAG_SUPPORT_ACTIVE=true` in the A16 workflow to start getting real draft replies in his approval queue.
+- Optional next step for Guy, once he wants to see it working: run `node corp/core/rag-ingest.js` once (populates the table from the real store), then set **both** `LAUNCH_MODE=true` **and** `RAG_SUPPORT_ACTIVE=true` in the A16 workflow — `RAG_SUPPORT_ACTIVE` alone does nothing, since `main()` still exits immediately on the pre-existing `LAUNCH_MODE` gate (line ~231) before it ever reaches the RAG code. A16 would only ever have `RAG_SUPPORT_ACTIVE` flipped after `LAUNCH_MODE` is already `true` for the daily report itself, so this is a documentation completeness fix, not a behavior change (final whole-branch review, 04/07/2026).
 
 ---
 

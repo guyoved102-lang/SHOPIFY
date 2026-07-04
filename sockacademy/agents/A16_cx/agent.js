@@ -22,7 +22,6 @@ const { requestApproval } = require('../../corp/core/hitl.js');
 
 const DRY_RUN            = process.env.DRY_RUN === 'true';
 const RAG_SUPPORT_ACTIVE = process.env.RAG_SUPPORT_ACTIVE === 'true';
-const anthropic           = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const ADMIN_EMAIL    = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 const REPORT_DATE    = new Date().toISOString().split('T')[0];
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
@@ -182,6 +181,9 @@ async function draftSupportReply(supabase, email) {
   const contextChunks  = await queryKnowledge(supabase, questionText, 5);
   const prompt         = buildSupportReplyPrompt(questionText, contextChunks);
 
+  // Constructed lazily (not at module scope) so A16's plain daily report
+  // never depends on ANTHROPIC_API_KEY being set — only this RAG path does.
+  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const msg = await withRetry(() => anthropic.messages.create({
     model:      'claude-sonnet-4-6',
     max_tokens: 500,
