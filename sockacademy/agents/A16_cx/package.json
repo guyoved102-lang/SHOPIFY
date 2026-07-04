@@ -5,7 +5,7 @@
   "main": "agent.js",
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
-    "dotenv": "^17.0.0",
+    "dotenv": "^16.6.1",
     "nodemailer": "^9.0.0"
   }
 }
