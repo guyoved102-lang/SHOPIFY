@@ -4,6 +4,7 @@
   "description": "A16 CX — Daily Customer Experience Report for SockAcademy",
   "main": "agent.js",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0",
     "@supabase/supabase-js": "^2.45.0",
     "dotenv": "^16.6.1",
     "nodemailer": "^9.0.0"
