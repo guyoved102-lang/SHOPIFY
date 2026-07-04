@@ -176,13 +176,17 @@ async function logHealth(sb, status, meta = {}) {
 async function generateNarrative(summary) {
   if (!process.env.ANTHROPIC_API_KEY) return null;
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const prompt =
+    `אתה מנהל Factory Relations ב-SockAcademy — מותג גרביים פרמיום הבונה לקראת ` +
+    `ייצור Private Label.\n` +
+    `כתוב בעברית עסקית ומקצועית ברמה גבוהה סקירה חודשית קצרה (2 משפטים) למנכ"ל על ` +
+    `התקדמות איתור מפעלים. כלול צעד פעולה מומלץ אחד.\n\n` +
+    `נתונים:\n${JSON.stringify(summary)}`;
+
   const msg = await withRetry(() => client.messages.create({
-    model:      'claude-haiku-4-5-20251001',
+    model:      'claude-sonnet-4-6',
     max_tokens: 200,
-    messages: [{
-      role:    'user',
-      content: `You are the Factory Relations system for SockAcademy, a premium sock brand building toward private label manufacturing. Write a 2-sentence monthly briefing on factory sourcing progress for the CEO. Include actionable next step.\n\n${JSON.stringify(summary)}`,
-    }],
+    messages: [{ role: 'user', content: prompt }],
   }), 'A23');
   return msg.content[0].text.trim();
 }

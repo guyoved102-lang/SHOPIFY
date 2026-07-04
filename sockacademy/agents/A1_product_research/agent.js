@@ -11,8 +11,10 @@ const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
+const { RETAIL_CEILING, DEFAULT_CEILING } = require('../../corp/core/pricing.js');
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
+const DRY_RUN = process.env.DRY_RUN === 'true';
 
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
@@ -578,12 +580,6 @@ function classifyStyle(name = '') {
   return 'General';
 }
 
-const RETAIL_CEILING = {
-  'Merino Wool': 75, 'Cashmere': 85, 'Egyptian Cotton': 75,
-  'Premium Materials': 70, 'Gift Sets': 90, 'Tactical & Outdoor': 65,
-  'Athletic': 55, 'Casual & No-Show': 45, 'General': 55,
-};
-
 function suggestRetailPrice(product) {
   const { supplierPrice, category, materials } = product;
   if (!supplierPrice || supplierPrice <= 0) return { retail: 28, margin: '0', marginPct: 0 };
@@ -594,7 +590,7 @@ function suggestRetailPrice(product) {
   else if (category === 'Tactical & Outdoor') multiplier = 4.5;
   else if (category === 'Athletic') multiplier = 3.8;
   const premiumMat = materials.find(m => RETAIL_CEILING[m]);
-  const ceiling = premiumMat ? RETAIL_CEILING[premiumMat] : (RETAIL_CEILING[category] ?? 65);
+  const ceiling = premiumMat ? RETAIL_CEILING[premiumMat] : (RETAIL_CEILING[category] ?? DEFAULT_CEILING);
   const retail = Math.min(Math.round(supplierPrice * multiplier), ceiling);
   const margin = (retail - supplierPrice).toFixed(2);
   const marginPct = Math.round(((retail - supplierPrice) / retail) * 100);
@@ -904,24 +900,30 @@ async function run() {
 
   // מייל HTML
   if (process.env.GMAIL_APP_PASSWORD) {
-    try {
-      const html = buildHTMLEmail(top10, stats, date);
-      await emailTransporter.sendMail({
-        from: '"SockAcademy A1 Agent" <sockacademy.store@gmail.com>',
-        to: ADMIN_EMAIL,
-        subject: `🧦 SockAcademy — דוח שבועי ${date} | ${stats.totalScanned} מוצרים נסרקו`,
-        html,
-        text: `SockAcademy דוח שבועי ${date}\n\nTOP 10:\n` +
-          top10.map((p, i) => `${i+1}. [${p.score}/100] ${p.name} — ${p.url}`).join('\n'),
-      });
-      console.log('✅ מייל HTML נשלח לגיא');
-    } catch (e) {
-      console.log(`⚠️  שגיאת מייל: ${e.message}`);
+    if (DRY_RUN) {
+      console.log('[DRY_RUN] Would send weekly report email to', ADMIN_EMAIL);
+    } else {
+      try {
+        const html = buildHTMLEmail(top10, stats, date);
+        await emailTransporter.sendMail({
+          from: '"SockAcademy A1 Agent" <sockacademy.store@gmail.com>',
+          to: ADMIN_EMAIL,
+          subject: `🧦 SockAcademy — דוח שבועי ${date} | ${stats.totalScanned} מוצרים נסרקו`,
+          html,
+          text: `SockAcademy דוח שבועי ${date}\n\nTOP 10:\n` +
+            top10.map((p, i) => `${i+1}. [${p.score}/100] ${p.name} — ${p.url}`).join('\n'),
+        });
+        console.log('✅ מייל HTML נשלח לגיא');
+      } catch (e) {
+        console.log(`⚠️  שגיאת מייל: ${e.message}`);
+      }
     }
   }
 
   // Google Sheets — כתיבה ישירה ל-A1_Products
-  if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON && process.env.GOOGLE_SHEET_ID) {
+  if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON && process.env.GOOGLE_SHEET_ID && DRY_RUN) {
+    console.log('[DRY_RUN] Would write', top10.length, 'rows to Google Sheets (A1_Products)');
+  } else if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON && process.env.GOOGLE_SHEET_ID) {
     try {
       const { GoogleSpreadsheet } = require('google-spreadsheet');
       const { JWT } = require('google-auth-library');
@@ -967,7 +969,9 @@ async function run() {
   }
 
   // Supabase — כתיבת top10 לטבלת products
-  if (supabase) {
+  if (supabase && DRY_RUN) {
+    console.log(`[DRY_RUN] Would upsert ${top10.length} rows to Supabase (products), push to UPLOAD queue, and write Command Center metrics`);
+  } else if (supabase) {
     try {
       const runDate  = new Date().toISOString().split('T')[0];
 

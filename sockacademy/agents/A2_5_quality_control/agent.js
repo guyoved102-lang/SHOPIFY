@@ -13,6 +13,7 @@ const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
+const { RETAIL_CEILING, DEFAULT_CEILING } = require('../../corp/core/pricing.js');
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
@@ -20,14 +21,6 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 const PRICE_MIN = 18;
 const MIN_A1_SCORE = 50;
 const BORDERLINE_SCORE = 45;
-
-// Mirrors A1_product_research/agent.js RETAIL_CEILING exactly — keep in sync.
-const RETAIL_CEILING = {
-  'Merino Wool': 75, 'Cashmere': 85, 'Egyptian Cotton': 75,
-  'Premium Materials': 70, 'Gift Sets': 90, 'Tactical & Outdoor': 65,
-  'Athletic': 55, 'Casual & No-Show': 45, 'General': 55,
-};
-const DEFAULT_CEILING = 65;
 
 function priceCeilingFor(product) {
   const materials = (product.materials || '').split(',').map(m => m.trim());

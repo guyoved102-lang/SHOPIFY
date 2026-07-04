@@ -199,13 +199,16 @@ async function logHealth(sb, status, meta = {}) {
 async function generateNarrative(summary) {
   if (!process.env.ANTHROPIC_API_KEY) return null;
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const prompt =
+    `אתה מנהל Returns Intelligence ב-SockAcademy — מותג גרביים פרמיום.\n` +
+    `כתוב בעברית עסקית ומקצועית ברמה גבוהה סקירה קצרה (2 משפטים) למנכ"ל על מגמות ` +
+    `ההחזרות היום. היה ישיר. אם אין החזרות כלל — אשר רשומת החזרות נקייה ושהמערכת פעילה ומנטרת.\n\n` +
+    `נתונים:\n${JSON.stringify(summary)}`;
+
   const msg = await withRetry(() => client.messages.create({
-    model:      'claude-haiku-4-5-20251001',
+    model:      'claude-sonnet-4-6',
     max_tokens: 150,
-    messages: [{
-      role:    'user',
-      content: `You are the Returns Intelligence system for SockAcademy, a premium sock brand. Write a 2-sentence briefing on return trends for the CEO. Be direct. If 0 returns, confirm clean returns record and system monitoring status.\n\n${JSON.stringify(summary)}`,
-    }],
+    messages: [{ role: 'user', content: prompt }],
   }), 'A19');
   return msg.content[0].text.trim();
 }

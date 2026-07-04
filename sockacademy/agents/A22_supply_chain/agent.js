@@ -206,13 +206,16 @@ function buildAlerts(scoreData) {
 async function generateNarrative(scoreData) {
   if (!process.env.ANTHROPIC_API_KEY) return null;
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const prompt =
+    `אתה מנהל Supply Chain Intelligence ב-SockAcademy — מותג גרביים פרמיום.\n` +
+    `כתוב בעברית עסקית ומקצועית ברמה גבוהה סקירת שרשרת אספקה קצרה (2 משפטים) למנכ"ל. ` +
+    `היה ישיר וממוקד-פעולה.\n\n` +
+    `נתונים:\n${JSON.stringify(scoreData)}`;
+
   const msg = await withRetry(() => client.messages.create({
-    model:      'claude-haiku-4-5-20251001',
+    model:      'claude-sonnet-4-6',
     max_tokens: 150,
-    messages: [{
-      role:    'user',
-      content: `You are the Supply Chain Intelligence system for SockAcademy, a premium sock brand. Write a 2-sentence supply chain briefing for the CEO. Be direct and action-oriented.\n\n${JSON.stringify(scoreData)}`,
-    }],
+    messages: [{ role: 'user', content: prompt }],
   }), 'A22');
   return msg.content[0].text.trim();
 }

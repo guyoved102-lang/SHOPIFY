@@ -211,13 +211,16 @@ async function logHealth(sb, status, meta = {}) {
 async function generateNarrative(summary) {
   if (!process.env.ANTHROPIC_API_KEY) return null;
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const prompt =
+    `אתה מנהל Inventory Intelligence ב-SockAcademy — מותג גרביים פרמיום.\n` +
+    `כתוב בעברית עסקית ומקצועית ברמה גבוהה סקירת מלאי קצרה (2 משפטים) למנכ"ל לפי ` +
+    `הנתונים. היה ישיר ועובדתי. אם עדיין לפני הכנסות (0 הזמנות) — ציין שהמערכת מנטרת ומוכנה.\n\n` +
+    `נתונים:\n${JSON.stringify(summary)}`;
+
   const msg = await withRetry(() => client.messages.create({
-    model:      'claude-haiku-4-5-20251001',
+    model:      'claude-sonnet-4-6',
     max_tokens: 180,
-    messages: [{
-      role:    'user',
-      content: `You are the Inventory Intelligence system for SockAcademy, a premium sock brand. Write a 2-sentence inventory briefing for the CEO based on this data. Be direct and factual. If pre-revenue (0 orders), note the system is monitoring and ready.\n\n${JSON.stringify(summary)}`,
-    }],
+    messages: [{ role: 'user', content: prompt }],
   }), 'A20');
   return msg.content[0].text.trim();
 }
