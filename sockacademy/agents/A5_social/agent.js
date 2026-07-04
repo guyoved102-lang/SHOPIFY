@@ -14,6 +14,7 @@ const { withRetry } = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
 const { reviewContent } = require('../../corp/core/qa-gate.js');
+const { handleFatalError } = require('../../corp/core/self-heal.js');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 const MAX_QA_ROUNDS = 2;
 
@@ -578,8 +579,13 @@ async function main() {
 
 main().catch(async e => {
   console.error('💥 Fatal:', e.message);
-  await logHealth(getSupabase(), 'failure', e.message).catch(() => {});
+  let sb = null;
+  try {
+    sb = getSupabase();
+    await logHealth(sb, 'failure', e.message);
+  } catch (_) {}
   await notifyTelegram(heTelegramMsg('A5 Social', '🚨 כשל קריטי!',
     `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${e.message}</code>`));
+  await handleFatalError({ agentId: 'A5', agentName: 'Brand Marketing (Social)', err: e, supabase: sb });
   process.exit(1);
 });
