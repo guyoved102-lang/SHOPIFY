@@ -19,9 +19,6 @@ const fs = require('fs');
 const path = require('path');
 const { embedText } = require('./rag-query.js');
 
-const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
-const SHOPIFY_TOKEN  = process.env.SHOPIFY_MASTER_TOKEN;
-const SHOPIFY_API    = `https://${SHOPIFY_DOMAIN}/admin/api/2025-01`;
 const BRAND_DNA_PATH  = path.join(__dirname, '../../docs/strategy/BRAND_DNA.md');
 
 const MIN_CHUNK_CHARS = 40;
@@ -74,10 +71,13 @@ function chunkText(text) {
 // ─── SOURCES ──────────────────────────────────────────────────────────────
 
 async function fetchShopifyPageChunks() {
+  const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
+  const SHOPIFY_TOKEN  = process.env.SHOPIFY_MASTER_TOKEN;
   if (!SHOPIFY_DOMAIN || !SHOPIFY_TOKEN) {
     console.log('[skip] Shopify credentials not set');
     return [];
   }
+  const SHOPIFY_API = `https://${SHOPIFY_DOMAIN}/admin/api/2025-01`;
   const res = await fetch(`${SHOPIFY_API}/pages.json?limit=50`, {
     headers: { 'X-Shopify-Access-Token': SHOPIFY_TOKEN },
   });
