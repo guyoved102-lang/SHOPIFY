@@ -1031,7 +1031,7 @@ VAT_RATE:       env var — 0.17 (ישראל) | 0 (US ecommerce) | depends (EU)
    - `BLOG_ID` = `97332199622`
    - `GDRIVE_BACKUP_FOLDER_ID` = (ID של Google Drive folder ל-A5 images)
 2. **Klaviyo — לבטל ולחדש מפתח:**
-   - המפתח `pk_QSMqNV_10278b2159681589f1365ac70b04825dff` חשוף ב-git history
+   - המפתח (Klaviyo Private API Key הישן) חשוף ב-git history **וגם ב-HEAD הנוכחי של הרפו הזה — שהוא PUBLIC ב-GitHub** (אומת 04/07/2026). ערך המפתח הוסר מכאן במכוון — ר' `memory/project_sockacademy_state.md` PENDING #15 לפרטים. **סיבוב המפתח דחוף באמת, לא רק תיאורטי.**
    - כנס ל-Klaviyo → Settings → API Keys → Revoke → Create New
    - עדכן `.env` ו-`KLAVIYO_PRIVATE_API_KEY` GitHub Secret
 
