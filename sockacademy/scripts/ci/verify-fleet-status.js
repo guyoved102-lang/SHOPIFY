@@ -39,9 +39,9 @@ const EXPECTED_NO_LAUNCH_MODE = {
 };
 
 // Agents with NO literal `process.env.DRY_RUN` check in agent.js.
+// A9 removed 04/07/2026 (Guy G-2) — DRY_RUN + A9_ARM hard-guard added.
 const EXPECTED_NO_DRY_RUN = {
   A7: 'no DRY_RUN guard (low blast radius, documented F9) — not yet fixed',
-  A9: 'frozen legal domain, one-shot tool — no DRY_RUN by design, never run casually',
 };
 
 function agentDirs() {

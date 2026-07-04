@@ -15,6 +15,13 @@ const { requestApproval } = require('../../corp/core/hitl');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
+// Added 04/07/2026 (Fable 5 audit, Guy G-2/G-3) — A9 is the frozen legal domain;
+// the 03/07/2026 incident happened because a smoke test forgot DRY_RUN=true and
+// opened a real HITL approval request. DRY_RUN guards every write below.
+// A9_ARM is a second, independent confirmation required specifically before
+// requestApproval() can open a real (non-simulated) HITL request — see main().
+const DRY_RUN = process.env.DRY_RUN === 'true';
+const A9_ARM  = process.env.A9_ARM === 'true';
 
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
@@ -416,6 +423,10 @@ async function syncPage(pageTemplate) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 async function sendConfirmation(results) {
+  if (DRY_RUN) {
+    console.log('[DRY_RUN] Would send confirmation email to', ADMIN_EMAIL);
+    return;
+  }
   if (!process.env.GMAIL_APP_PASSWORD) {
     console.log('⚠️  GMAIL_APP_PASSWORD not set — skipping email confirmation');
     return;
@@ -490,7 +501,7 @@ async function sendConfirmation(results) {
     html,
   });
 
-  console.log('📧 Confirmation email sent to guyoved102@gmail.com');
+  console.log(`📧 Confirmation email sent to ${ADMIN_EMAIL}`);
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -516,6 +527,11 @@ async function executeHitLPublish(supabase, approval) {
   const rawPayload = approval.payload;
   const payload = typeof rawPayload === 'string' ? JSON.parse(rawPayload) : rawPayload;
   const pages   = payload?.pages || [];
+
+  if (DRY_RUN) {
+    console.log(`[DRY_RUN] Would publish ${pages.length} legal page(s) to Shopify and mark approval ${approval.id} as executed`);
+    return pages.map(p => ({ action: 'dry-run', title: p.title, handle: p.handle, url: '(dry-run)', shopify_admin: '(dry-run)' }));
+  }
 
   console.log(`Publishing ${pages.length} legal page(s) to Shopify...`);
   const results = [];
@@ -557,7 +573,7 @@ async function main() {
     if (results.length > 0) await sendConfirmation(results);
 
     // Command Center KPIs — feeds A0's unified daily brief (deterministic, no AI)
-    if (supabase) {
+    if (supabase && !DRY_RUN) {
       const metricDate = new Date().toISOString().split('T')[0];
       await writeMetrics(supabase, 'A9', metricDate, [
         { name: 'legal_pages_synced', value: results.length, unit: 'count' },
@@ -579,6 +595,8 @@ async function main() {
       if (cfgDate?.value) {
         EFFECTIVE_DATE = cfgDate.value;
         console.log(`Effective Date (frozen): ${EFFECTIVE_DATE}`);
+      } else if (DRY_RUN) {
+        console.log(`[DRY_RUN] Would freeze legal_effective_date = ${EFFECTIVE_DATE}`);
       } else {
         await supabase.from('system_config').insert({ key: 'legal_effective_date', value: EFFECTIVE_DATE });
         console.log(`Effective Date (set for first time): ${EFFECTIVE_DATE}`);
@@ -594,6 +612,25 @@ async function main() {
   const pagesSummary = LEGAL_PAGES.map(p => `• ${p.title} (/pages/${p.handle})`).join('\n');
   console.log('Submitting for approval:\n' + pagesSummary + '\n');
 
+  // A9_ARM hard-guard (Guy G-3, Fable 5 audit, 04/07/2026): requestApproval() opens
+  // a REAL HITL approval request — the exact action that fired unintentionally on
+  // 03/07/2026 when a smoke test forgot DRY_RUN=true. DRY_RUN alone is not enough
+  // for this one call: a second, independent flag (A9_ARM=true) is required before
+  // it can run live, on top of DRY_RUN=false.
+  if (DRY_RUN) {
+    console.log(`[DRY_RUN] Would request HITL approval for ${LEGAL_PAGES.length} legal page(s) — no request created.`);
+    await logHealth(supabase, 'success');
+    return;
+  }
+  if (!A9_ARM) {
+    console.error('\n🛑 BLOCKED: about to open a REAL HITL approval request (Shopify legal page publish),');
+    console.error('but A9_ARM is not set to \'true\'. This is the frozen legal domain — see the');
+    console.error('03/07/2026 incident (ANTI_RECURRENCE #35) before overriding this.');
+    console.error('If this is intentional: re-run with DRY_RUN=false and A9_ARM=true.');
+    await logHealth(supabase, 'failure', 'Blocked: A9_ARM not set for live requestApproval');
+    process.exit(1);
+  }
+
   const approvalId = await requestApproval({
     agentId:     'A9',
     actionType:  'legal_page_update',
@@ -604,7 +641,7 @@ async function main() {
   });
 
   console.log(`\nApproval submitted. ID: ${approvalId}`);
-  console.log('Check guyoved102@gmail.com for approval instructions.');
+  console.log(`Check ${ADMIN_EMAIL} for approval instructions.`);
   console.log('After approving in Supabase (status → "approved"), re-run A9 to publish.');
   await logHealth(supabase, 'success');
 }
