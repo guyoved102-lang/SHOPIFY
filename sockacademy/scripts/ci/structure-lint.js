@@ -65,6 +65,11 @@ const ALLOWED_ROOT_ENTRIES = new Set([
   '.github', 'sockacademy', '.gitignore', '.gitattributes', 'README.md', '.editorconfig',
   // Claude Code / Agent SDK infrastructure (managed by tooling — not manual files)
   '.claude', '.agents', 'skills-lock.json',
+  // superpowers:subagent-driven-development scratch workspace (task briefs,
+  // reports, review packages, progress ledger) — gitignored, never committed,
+  // so real CI never sees it; only relevant when running this script locally
+  // in a working tree that has used the skill (04/07/2026, first use in repo).
+  '.superpowers',
   // CI artifact (written by this script on failure — uploaded to GitHub Actions)
   'structure-violations.json',
 ]);

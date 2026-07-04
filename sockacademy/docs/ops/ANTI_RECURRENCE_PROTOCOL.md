@@ -577,18 +577,23 @@ curl -X PUT .../products/XXX.json -d '{"product":{"id":XXX,"published":true}}'
 
 ---
 
-## 40. `structure-lint.js` הכשיל CI על `.git` עצמו בתוך git worktree (04/07/2026)
+## 40. `structure-lint.js` הכשיל על תשתית worktree/superpowers שלא הייתה קיימת קודם (04/07/2026)
 
-**מה קרה:** בפעם הראשונה שהפרויקט השתמש ב-git worktree (`superpowers:using-git-worktrees`, לבניית Module 4), הרצת `node scripts/ci/structure-lint.js` בתוך ה-worktree נכשלה עם `ROOT_CONTAMINATION` על `.git` עצמו — קובץ שאמור להיות תמיד מותר.
+**מה קרה:** בפעם הראשונה שהפרויקט השתמש ב-git worktree + `superpowers:subagent-driven-development` (לבניית Module 4), הרצת `node scripts/ci/structure-lint.js` נכשלה **פעמיים** על תשתית לגיטימית שהסקריפט מעולם לא ראה קודם:
+1. `ROOT_CONTAMINATION` על `.git` עצמו — קובץ שאמור להיות תמיד מותר.
+2. `ROOT_CONTAMINATION` על `.superpowers/` — ספריית scratch של הסקיל (task briefs, reports, review packages, progress ledger).
 
-**סיבה:** השורה `if (name.startsWith('.git') && isDir && name === '.git') continue;` דילגה על `.git` **רק כשהוא ספרייה**. ב-checkout רגיל `.git` תמיד ספרייה — אבל בתוך git worktree, `.git` הוא **קובץ** (מצביע `gitdir: ...` לספריית ה-git המשותפת של הריפו הראשי). ה-`isDir` check מעולם לא נכשל קודם כי אף session לפני זה לא השתמש ב-worktree.
+**סיבה (שני ממצאים נפרדים, אותו root theme):**
+1. השורה `if (name.startsWith('.git') && isDir && name === '.git') continue;` דילגה על `.git` **רק כשהוא ספרייה**. ב-checkout רגיל `.git` תמיד ספרייה — אבל בתוך git worktree, `.git` הוא **קובץ** (מצביע `gitdir: ...` לספריית ה-git המשותפת של הריפו הראשי). ה-`isDir` check מעולם לא נכשל קודם כי אף session לפני זה לא השתמש ב-worktree.
+2. `.superpowers/` הוא gitignored לחלוטין (`sdd-workspace` script כותב `.superpowers/sdd/.gitignore` עם `*`) — אף פעם לא יגיע ל-CI אמיתי (checkout נקי מ-git לא מכיל אותו בכלל). אבל `structure-lint.js` סורק את הדיסק הפיזי (`fs.readdirSync`), לא את `git ls-files` — אז כשמריצים אותו **מקומית** בתוך worktree שבו הסקיל כבר רץ, הוא רואה את `.superpowers/` על הדיסק ומתריע על violation שלעולם לא היה קורה ב-CI האמיתי.
 
 **מה מונע חזרה:**
-1. תוקן: `if (name === '.git') continue;` — בלי תלות ב-`isDir`, כי `.git` תקין גם כספרייה וגם כקובץ (worktree).
-2. כל שינוי עתידי ל-`structure-lint.js` (או סקריפט CI אחר שמניח הנחות על מבנה `.git`) — לבדוק גם מול worktree, לא רק מול checkout רגיל.
-3. אם עובדים ב-worktree ו-CI/lint מקומי נכשל על משהו שקשור ל-`.git`/`.claude/worktrees/` — לבדוק קודם אם זו הנחת-יסוד שגויה על מבנה תיקיות, לא רק "קובץ במקום הלא נכון".
+1. תוקן #1: `if (name === '.git') continue;` — בלי תלות ב-`isDir`, כי `.git` תקין גם כספרייה וגם כקובץ (worktree).
+2. תוקן #2: `.superpowers` נוסף ל-`ALLOWED_ROOT_ENTRIES` תחת אותה קטגוריה כמו `.claude`/`.agents` — תשתית tooling, לא קובץ ידני.
+3. כל שינוי עתידי ל-`structure-lint.js` (או סקריפט CI אחר שמניח הנחות על מבנה הדיסק) — לבדוק גם מול worktree + סקילים שכותבים scratch state, לא רק מול checkout רגיל וריק.
+4. אם עובדים ב-worktree ו-CI/lint מקומי נכשל על משהו שקשור ל-`.git`/`.claude/worktrees/`/`.superpowers/` — לבדוק קודם אם זו הנחת-יסוד שגויה על מבנה תיקיות (הבדל בין דיסק מקומי לבין checkout נקי של CI), לא רק "קובץ במקום הלא נכון".
 
-**בדיקה:** `node scripts/ci/structure-lint.js` בתוך worktree חדש → חייב לעבור נקי (`✅ Structure lint passed`), לא רק בתוך checkout רגיל.
+**בדיקה:** `node scripts/ci/structure-lint.js` בתוך worktree חדש שבו הסקיל כבר כתב task briefs/reports → חייב לעבור נקי (`✅ Structure lint passed`), לא רק בתוך checkout ריק.
 
 ---
 
