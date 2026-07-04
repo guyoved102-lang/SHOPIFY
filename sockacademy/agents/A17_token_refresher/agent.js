@@ -4,6 +4,7 @@ require('dotenv').config({ path: '../../.env' });
 const https = require('https');
 const nodemailer = require('nodemailer');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
+const { handleFatalError } = require('../../corp/core/self-heal.js');
 
 const REQUIRED = [
   'META_APP_ID', 'META_APP_SECRET', 'META_ACCESS_TOKEN',
@@ -189,6 +190,7 @@ async function main() {
     }
     await notifyTelegram(heTelegramMsg('A17 Token Refresher', '🚨 כשל קריטי!',
       `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
+    await handleFatalError({ agentId: 'A17', agentName: 'Token Refresher', err, supabase: null });
     process.exit(1);
   }
 }
