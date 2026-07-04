@@ -169,17 +169,21 @@ Pure cashmere in socks is impractical — low durability, high pilling. Premium 
 ## TECHNICAL BLENDS — PERFORMANCE MATERIALS
 
 ### Bamboo (Lyocell/Viscose from Bamboo)
-- **Antibacterial:** Bamboo Kun — natural bio-agent inhibits bacterial growth.
 - **Moisture-wicking:** Micro-gaps in fiber structure wick 3× faster than cotton.
 - **Softness:** Comparable to cashmere at Grade B.
 - **Sustainability:** Bamboo regenerates in 3–5 years. No pesticides required.
 - **Note:** "Bamboo" must specify processing method — viscose vs. lyocell (closed-loop). Lyocell is superior environmental profile.
 
-### Copper-infused Fiber
-- **Mechanism:** Copper ions embedded in fiber inhibit 99.9% of bacteria and fungi.
-- **Clinical relevance:** Effective against MRSA and athlete's foot fungi.
-- **Durability:** Ion binding persists through 50+ wash cycles in premium constructions.
-- **Use case:** Medical-grade athletic and diabetic socks.
+> ⚠️ **REGULATORY HOLD — do not pull into A3/product copy/any customer-facing content.**
+> Same attorney-review gate as MG-2 and A9 (regulated medical/therapeutic claims — see standing pre-launch blocker). Held here for internal research reference only until cleared.
+>
+> - Bamboo "antibacterial" / Bamboo Kun bio-agent claim (unsubstantiated antimicrobial marketing claim)
+>
+> ### Copper-infused Fiber (quarantined in full)
+> - **Mechanism:** Copper ions embedded in fiber inhibit 99.9% of bacteria and fungi.
+> - **Clinical relevance:** Effective against MRSA and athlete's foot fungi.
+> - **Durability:** Ion binding persists through 50+ wash cycles in premium constructions.
+> - **Use case:** Medical-grade athletic and diabetic socks.
 
 ### Thermolite / Merino + Synthetic Hybrid
 - 55% Merino + 33% Thermolite + 12% Nylon

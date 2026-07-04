@@ -15,3 +15,10 @@ create table if not exists press_contacts (
   created_at    timestamptz default now(),
   unique (name, publication)
 );
+
+alter table press_contacts enable row level security;
+
+create policy "service role full access" on press_contacts
+  for all to service_role using (true) with check (true);
+
+grant all on public.press_contacts to service_role;

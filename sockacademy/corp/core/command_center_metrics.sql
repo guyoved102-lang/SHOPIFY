@@ -41,12 +41,16 @@ create index if not exists idx_ccm_created_at
   on command_center_metrics (created_at desc);
 
 grant all on public.command_center_metrics to service_role;
-grant all on public.command_center_metrics to anon;
-grant all on public.command_center_metrics to authenticated;
+revoke all on public.command_center_metrics from anon;
+revoke all on public.command_center_metrics from authenticated;
 
 -- ─── Convenience view: latest snapshot of every metric per agent ──────────────
 -- Usage: SELECT * FROM command_center_latest WHERE agent_id = 'A15';
-create or replace view command_center_latest as
+-- security_invoker=on: view enforces the querying role's RLS, not the view owner's —
+-- without it, RLS on the base table would not protect this view.
+create or replace view command_center_latest
+with (security_invoker = on)
+as
 select distinct on (agent_id, metric_name)
   agent_id,
   metric_name,
@@ -58,5 +62,5 @@ from command_center_metrics
 order by agent_id, metric_name, metric_date desc;
 
 grant select on public.command_center_latest to service_role;
-grant select on public.command_center_latest to anon;
-grant select on public.command_center_latest to authenticated;
+revoke all on public.command_center_latest from anon;
+revoke all on public.command_center_latest from authenticated;

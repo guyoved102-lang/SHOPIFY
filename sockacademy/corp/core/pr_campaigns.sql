@@ -11,3 +11,10 @@ create table if not exists pr_campaigns (
   product_context jsonb default '{}',
   created_at      timestamptz default now()
 );
+
+alter table pr_campaigns enable row level security;
+
+create policy "service role full access" on pr_campaigns
+  for all to service_role using (true) with check (true);
+
+grant all on public.pr_campaigns to service_role;

@@ -25,3 +25,15 @@ create table if not exists subscription_cycles (
   notes            text,
   created_at       timestamptz default now()
 );
+
+alter table club_members enable row level security;
+alter table subscription_cycles enable row level security;
+
+create policy "service role full access" on club_members
+  for all to service_role using (true) with check (true);
+
+create policy "service role full access" on subscription_cycles
+  for all to service_role using (true) with check (true);
+
+grant all on public.club_members to service_role;
+grant all on public.subscription_cycles to service_role;
