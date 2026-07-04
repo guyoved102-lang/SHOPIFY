@@ -532,6 +532,36 @@ curl -X PUT .../products/XXX.json -d '{"product":{"id":XXX,"published":true}}'
 
 ---
 
+## 37. corp/core CI Install חסר — require ישיר ל-npm package אף פעם לא רץ ב-CI אמיתי (04/07/2026)
+
+**מה קרה:** במהלך חיווט Module 3 (Self-Healing Loop) ל-A3/A5, התגלה ששני ה-workflows מעולם לא כללו שלב "Install corp/core dependencies" — למרות ש-`qa-gate.js` (Module 2, commits `118a931`/`d1a8884`) כבר דורש `@anthropic-ai/sdk` ישירות. כתוצאה מכך, ה-require הזה **מעולם לא רץ בפועל ב-CI אמיתי** — הריצות המוצלחות האחרונות של A3/A5 קדמו לקומיט של Module 2. ה-cron הבא של A5 (יום ראשון, היום שאחרי הגילוי) היה מתרסק עם `MODULE_NOT_FOUND`. אותה תבנית בדיוק חזרה על עצמה בעוד ~9 workflows נוספים (A1, A4, A6, A7, A8, A9, A10, A11, A12, A13) ברגע שגם הם נגעו ב-`corp/core/self-heal.js` (שדורש `@anthropic-ai/sdk` + `hitl.js`'s `@supabase/supabase-js`/`nodemailer`).
+
+**סיבה:** `corp/core/` הוא תיקייה **אחות**, לא אב, של תיקיית ה-agent (`sockacademy/agents/AX_.../`). Node מפענח `require()` יחסית למיקום הקובץ **הקורא**, לא ל-`process.cwd()` — כך ש-`corp/core/qa-gate.js`'s `require('@anthropic-ai/sdk')` תמיד מחפש ב-`corp/core/node_modules`, לא ב-node_modules של ה-agent שקרא לו. כשמפתחים מוסיפים require חדש ל-shared module ב-corp/core, קל לשכוח שכל workflow YAML שמריץ agent שדורש (ישירות או בעקיפין) את אותו קובץ צריך שלב `npm install` **נפרד** בתוך `sockacademy/corp/core/`. בדיקה מקומית לא הייתה תופסת את זה — כי לרוב יש כבר `node_modules` מקומי (לא tracked ב-git) שמסתיר את הבעיה עד ריצת CI אמיתית על checkout נקי.
+
+**מה מונע חזרה:**
+1. כל פעם שקובץ ב-`corp/core/` מקבל `require()` חדש לחבילת npm (לא built-in של Node) — לבדוק **את כל** ה-workflows של agents שקוראים לקובץ הזה (ישירות או דרך שרשרת requires) ולוודא ששלב "Install corp/core dependencies" קיים.
+2. `grep -L "corp/core" .github/workflows/a*.yml` על agents שבפועל כן דורשים משהו מ-corp/core — אם agent מופיע ברשימה בלי השלב, זו red flag.
+3. `git status` אחרי `git clean -fdx` (בזהירות, רק בסביבת בדיקה מבודדת) חושף את התלות הנסתרת ב-node_modules המקומי — מדמה checkout נקי בלי לגעת ב-CI האמיתי.
+
+**בדיקה:** לפני commit של require חדש ל-corp/core — `grep -rn "require(" sockacademy/corp/core/<file>.js` לזיהוי כל התלויות החדשות, ואז cross-reference מול כל workflow YAML שמריץ agent שנוגע בקובץ הזה.
+
+---
+
+## 38. workflow_dispatch dry_run Fallback שדולף ל-Schedule Triggers (04/07/2026)
+
+**מה קרה:** בזמן הוספת input `dry_run` ל-A9 ו-A12 (עם `default: 'true'` — ברירת מחדל בטוחה יותר, בשונה משאר הסוכנים שמשתמשים ב-`'false'`), טיוטה ראשונית כתבה `DRY_RUN: ${{ github.event.inputs.dry_run || 'true' }}` ב-env של ה-step. נתפס **לפני commit** בביקורת עצמית: `github.event.inputs` הוא ריק על **כל** trigger שאינו `workflow_dispatch` — כולל `schedule`. המשמעות: ה-fallback `|| 'true'` היה יורה גם על ה-cron האמיתי-חי של A12 (כל יום חמישי) ומשבית **לצמיתות ובשקט** את מיילי בקשת הביקורת השבועיים האמיתיים שלו, בלי שאף אחד ישים לב.
+
+**סיבה:** ה-pattern `${{ github.event.inputs.X || 'default' }}` נראה תמים ועקבי (זהה למה שכבר קיים בעשרות workflows אחרים עם `default: 'false'`), אבל **רק בגלל ש-'false' הוא גם ברירת המחדל הרצויה להרצות מתוזמנות** (schedule) הוא "עבד" שם במקרה — לא כי המנגנון עצמו נכון. כשמישהו בוחר ברירת מחדל **שונה** מ-'false' לסיבה לגיטימית (A9/A12, safety-first), אותו pattern בדיוק הופך לבאג אמיתי, כי הוא לא מבדיל בין "workflow_dispatch בלי ערך מפורש" (שם ה-input's own `default:` כבר מטפל בזה) לבין "trigger אחר לגמרי, שאין לו inputs בכלל".
+
+**מה מונע חזרה:**
+1. אף פעם לא לכתוב `${{ github.event.inputs.X || 'value' }}` כשה-`value` **שונה** מהברירת המחדל הרצויה עבור triggers שאינם workflow_dispatch. אם ה-input כבר מגדיר `default:` משלו — להשתמש ב-`${{ github.event.inputs.X }}` **בלי** fallback כלל; GitHub Actions כבר ממלא את ה-default של ה-input באופן אוטומטי עבור הרצות ידניות.
+2. לפני הוספת input חדש ל-workflow שיש לו גם `schedule:` trigger — לשאול במפורש: "מה קורה למשתנה הזה כש-`github.event.inputs` ריק (trigger מתוזמן)?" ולוודא שהתשובה תואמת את ההתנהגות הרצויה, לא רק את מה שקורה בהרצה ידנית.
+3. אחרי כל שינוי כזה — לבדוק בפועל ב-log של ריצת CI (ידנית **וגם** את הריצה המתוזמנת הבאה אם אפשר) שה-`DRY_RUN` בפועל הוא הערך הצפוי, לא רק לקרוא את ה-YAML ולהניח.
+
+**בדיקה:** `grep -B2 "inputs\..*||" .github/workflows/*.yml` — כל match שבו ה-fallback שונה מ-`'false'` דורש בדיקה ידנית שהוא לא "דולף" להרצות מתוזמנות.
+
+---
+
 ## SESSION CONTINUITY CHECKLIST — בכל שיחה
 
 **פתיחה:**
