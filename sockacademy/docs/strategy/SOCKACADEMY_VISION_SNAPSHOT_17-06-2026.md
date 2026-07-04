@@ -1,4 +1,14 @@
-# SOCKACADEMY — Vision & Strategy
+# SOCKACADEMY — Vision & Strategy (SNAPSHOT — 17/06/2026)
+
+> ⚠️ **SUPERSEDED — this file is a point-in-time snapshot, not a constitution-tier document.**
+> **Supersedes:** nothing — this document is itself superseded by `VISION.md` and
+> `PHASE_ARCHITECTURE_SKELETON.md` (the canonical, constitution-tier strategy docs, both
+> loaded at the start of every session per `/boot-sockacademy`). Where this snapshot's
+> agent statuses, Private Label trigger, or A13 role description conflict with those two
+> files, **the constitution-tier docs govern — always.** This file is kept as a historical
+> record of project state as of 17/06/2026 and should not be edited to reflect current
+> reality; corrections below (04/07/2026, Fable 5 audit H11/G-4) are numeric fixes only,
+> not a re-sync of the whole snapshot.
 
 ---
 
@@ -22,7 +32,7 @@
 | A10 | Trend Scout — Google Trends + Reddit → Claude → Sheets | ✅ Built (17/06/2026) | Sun 08:00 IL |
 | A11 | Price Intelligence — 5 competitors, Sheets A11_Prices | ✅ Built (17/06/2026) | Wed 08:00 IL |
 | A12 | Review Collector — Judge.me post-purchase emails | ✅ Built (17/06/2026) | Daily 09:00 IL |
-| A13 | Supplier Negotiator — private label | ⏳ Phase 2 ($5K×3mo) | On trigger |
+| A13 | Supplier Negotiator — private label *(role since reassigned — see note below)* | ⏳ SA-Cluster Phase 4 ($15K MRR × 2mo, canonical) | On trigger |
 
 ### Key Decisions Locked (17/06/2026)
 
@@ -32,7 +42,8 @@
 - **A10 data sources:** Google Trends (free) + Reddit public API → Claude analysis. Perplexity deferred to Phase 2.
 - **A11 competitors:** Bombas, Darn Tough, Stance, Smartwool, Feetures — single pair price only, no auto-repricing
 - **A12 idempotency:** Shopify order tag `review-requested` — never sends twice, no external state file
-- **Private Label trigger:** $5,000/month × 3 consecutive months
+- **Private Label trigger:** ~~$5,000/month × 3 consecutive months~~ → **$15,000/month × 2 consecutive months** (SA-Cluster Phase 4, canonical — corrected 04/07/2026, was contradicting `PHASE_ARCHITECTURE_SKELETON.md`)
+- **Note on A13:** this snapshot describes A13 as "Supplier Negotiator — private label." In the actual build, A13 was assigned to **Competitive Intelligence** (`A13_competitive_intel`); the Private Label sourcing role described here now belongs to **A23 — Factory Relations**.
 
 ### Pending to Unlock Traffic
 
@@ -233,8 +244,8 @@ Google Trends (12 keywords) + Reddit (7 subreddits) → Claude Haiku → Top 5 t
 #### A8 — Analytics Reporter ⏳
 מחכה ל-10 מכירות ראשונות. GA4 `G-YMG2N14HD4`.
 
-#### A13 — Supplier Negotiator ⏳
-Phase 2: Private Label. מופעל לאחר $5,000/month × 3 חודשים רצופים.
+#### A13 — Supplier Negotiator ⏳ *(תפקיד זה שויך בפועל ל-A23 — Factory Relations; A13 בפועל הוא Competitive Intelligence)*
+~~Phase 2: Private Label. מופעל לאחר $5,000/month × 3 חודשים רצופים.~~ → **SA-Cluster Phase 4: $15,000/month × 2 חודשים רצופים** (הקנוני, תוקן 04/07/2026)
 
 ---
 
@@ -248,4 +259,4 @@ Phase 2: Private Label. מופעל לאחר $5,000/month × 3 חודשים רצ�
 | Brand Blocks | ילדים / כלבים / נובלטי — BLOCKED לנצח |
 | Higgsfield Rule | אסור שימוש ב-Higgsfield ללא תמונת רפרנס מגיא |
 | Attorney Rule | A9 templates — סקירת עורך דין לפני go-live |
-| Private Label Trigger | $5,000/month × 3 חודשים רצופים |
+| Private Label Trigger | ~~$5,000/month × 3 חודשים רצופים~~ → **$15,000/month × 2 חודשים רצופים** (SA-Cluster Phase 4, הקנוני — תוקן 04/07/2026, ר' הבאנר בראש הקובץ) |

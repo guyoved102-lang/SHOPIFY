@@ -232,7 +232,15 @@ Klaviyo (email flows)
 חנות: sockacademy.store (Shopify)
 Klaviyo Key: ב-sockacademy/.env תחת KLAVIYO_PRIVATE_API_KEY
 
-Flows שצריך לבנות/לעדכן:
+> **⚠️ SUPERSEDED (04/07/2026, Fable 5 audit M12):** the example flows below are a stale
+> planning template — the real Welcome Series and Abandoned Cart flows are already live and
+> verified against the Klaviyo API/UI directly (source of truth = Klaviyo itself, not this
+> doc). See `docs/ops/KLAVIYO_ABANDONED_CART_FLOW.md` for the actual live abandoned-cart
+> content. Notably, "5% extra if needed" and "Last chance" + urgency below **violate Iron Law
+> 2 (Loro Piana Standard, no discount-heavy/urgency copy)** — the live flow does not use this
+> language. Treat this block as historical planning notes only, not current guidance.
+
+Flows שצריך לבנות/לעדכן (תבנית ישנה — ר' אזהרה למעלה):
 
 1. Welcome Series (3 מיילים):
    - מייל 1 (מיידי): "Welcome to SockAcademy" + קוד WELCOME10
@@ -241,8 +249,8 @@ Flows שצריך לבנות/לעדכן:
 
 2. Abandoned Cart (3 מיילים):
    - מייל 1 (שעה): "You left something premium behind"
-   - מייל 2 (יום 1): תזכורת + 5% extra if needed
-   - מייל 3 (יום 3): "Last chance" + urgency
+   - ~~מייל 2 (יום 1): תזכורת + 5% extra if needed~~ (violates Iron Law 2 — ר' live flow)
+   - ~~מייל 3 (יום 3): "Last chance" + urgency~~ (violates Iron Law 2 — ר' live flow)
 
 3. Post-Purchase (2 מיילים):
    - מייל 1 (יום 3 אחרי קנייה): "How to care for your socks"
@@ -264,7 +272,7 @@ Flows שצריך לבנות/לעדכן:
 
 חנות: 11eqwi-ji.myshopify.com
 Token: ב-sockacademy/.env תחת SHOPIFY_MASTER_TOKEN
-API Version: 2024-01
+API Version: 2025-01 (locked — see CLAUDE.md API versions section; was stale at 2024-01)
 
 משימה: עדכן את כל המוצרים בחנות:
 - הוסף SEO title ו-meta description לכל מוצר

@@ -77,7 +77,7 @@ sockacademy/
 │   └── A12_review_collector/
 ├── .env                    ← all credentials (never committed)
 ├── CLAUDE.md               ← AI assistant context
-├── SOCKACADEMY_VISION.md   ← full brand & system vision
+├── docs/strategy/VISION.md ← canonical brand & system vision (constitution-tier)
 └── README.md               ← this file
 
 .github/workflows/

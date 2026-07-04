@@ -166,11 +166,17 @@ Convert waitlist to Founding Members. Execute first subscription term with zero 
 - Allocation: 2 pairs (choice of colorway) + physical editorial letter + Founding Member card
 
 ### Subscription Structure
+**Pricing corrected 04/07/2026 (Fable 5 audit H12/G-5):** the original $65/$120/$220 tiers fell
+below the $30–45/pair floor (`SOURCING_BRIEF.md`) once the Lifetime 10% Founding Member
+discount was applied — as low as $24.75/pair. New prices hold $40/pair at list, $36/pair
+even after the 10% discount — above both the SOURCING_BRIEF floor and VISION.md's
+Merino/Tactical $35+ floor.
+
 | Tier | Cadence | Contents | Price |
 |---|---|---|---|
-| Standard Enrollment | Quarterly | 2 pairs + editorial letter | $65/term |
-| Extended Enrollment | Semi-annual | 4 pairs + extended editorial + care kit | $120/term |
-| Annual Fellowship | Annual | 8 pairs + annual lookbook | $220/year |
+| Standard Enrollment | Quarterly | 2 pairs + editorial letter | $80/term |
+| Extended Enrollment | Semi-annual | 4 pairs + extended editorial + care kit | $160/term |
+| Annual Fellowship | Annual | 8 pairs + annual lookbook | $320/year |
 
 **Language rules:** "Enroll" not "subscribe." "Term" not "month." "Defer" not "cancel."
 
@@ -234,13 +240,17 @@ Shorter (400–900 words), authoritative tone, no SEO keyword stuffing.
 
 ## Capital Clarity Table
 
-| Phase | Capital Required | Gate |
+**Relabeled 04/07/2026 (Fable 5 audit M9)** — this table used the old Phase 0–4 numbering
+while the rest of the document uses Sub-Phase A–E (a sub-breakdown of SA-Cluster Phase 4,
+not an independent timeline — see the header note above).
+
+| Sub-Phase | Capital Required | Gate |
 |---|---|---|
-| Phase 0 | $0 | None — infrastructure only |
-| Phase 1 | $500–2,000 | None — research budget |
-| Phase 2 | $15,000–28,000 | ⚠️ All 5 gates must be met |
-| Phase 3 | $2,000–5,000 | PO confirmed + in production |
-| Phase 4 (marketing) | $1,000–3,000 | Inventory landed + QC passed + 9 content pieces live |
+| A — Foundation | $0 | None — infrastructure only |
+| B — Supplier Discovery + Sampling | $500–2,000 | None — research budget |
+| C — MOQ Negotiation + Initial PO | $15,000–28,000 | ⚠️ All 5 gates must be met |
+| D — 3PL + Quality Control Infrastructure | $2,000–5,000 | PO confirmed + in production |
+| E — Waitlist Launch → First Cohort (marketing) | $1,000–3,000 | Inventory landed + QC passed + 9 content pieces live |
 
 **Total capital required to launch: $18,500–38,000**
 Realistic target with cost control: **$22,000–26,000**

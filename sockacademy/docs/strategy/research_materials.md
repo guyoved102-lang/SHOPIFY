@@ -24,7 +24,7 @@
 - **Patagonia (Argentina):** Rugged terrain, similar fiber profile to NZ. Growing premium segment.
 
 ### Construction Properties
-- **Moisture-wicking:** Merino absorbs up to 35% of its weight in moisture before feeling wet. Wicks away from skin via capillary action.
+- **Moisture management** *(house style: never "wicking" — MG-1-FINAL.md rejects the word as understating the fiber's performance; use "absorption," "phase-change," or "moisture management")*: Merino absorbs up to 35% of its weight in moisture before feeling wet, then releases it as vapor via phase-change rather than surface wicking.
 - **Temperature regulation:** Hollow fiber core traps air when cold; opens structure releases heat when warm. Active thermoregulation across 5–35°C.
 - **Odor resistance:** Lanolin content + protein structure inhibits bacterial growth. Wear multiple days without odor.
 - **Biodegradable:** 100% natural. Decomposes in soil within 1 year.
@@ -169,7 +169,7 @@ Pure cashmere in socks is impractical — low durability, high pilling. Premium 
 ## TECHNICAL BLENDS — PERFORMANCE MATERIALS
 
 ### Bamboo (Lyocell/Viscose from Bamboo)
-- **Moisture-wicking:** Micro-gaps in fiber structure wick 3× faster than cotton.
+- **Moisture management** *(house style: never "wicking" — see MERINO WOOL note above)*: Micro-gaps in fiber structure absorb and release moisture 3× faster than cotton.
 - **Softness:** Comparable to cashmere at Grade B.
 - **Sustainability:** Bamboo regenerates in 3–5 years. No pesticides required.
 - **Note:** "Bamboo" must specify processing method — viscose vs. lyocell (closed-loop). Lyocell is superior environmental profile.

@@ -926,7 +926,7 @@ sockacademy/
 │       └── logs/                    ← Runtime audit logs, agent health archives (Phase 2)
 │
 ├── docs/                            ← Strategy & Ops documentation
-│   ├── strategy/                    ← VISION.md, SOCKACADEMY_VISION.md, BRAND_STRATEGY.md, MASTER_STRATEGY.html
+│   ├── strategy/                    ← VISION.md, SOCKACADEMY_VISION_SNAPSHOT_17-06-2026.md (superseded, archival), BRAND_STRATEGY.md, MASTER_STRATEGY.html
 │   └── ops/                         ← KLAVIYO_ABANDONED_CART_FLOW.md, SKILLS_GUIDE.md/pdf, release-notes.md
 │
 ├── scripts/

@@ -1,6 +1,12 @@
 # SockAcademy — Design & Motion Architecture Decisions
 ## CTO Review: Advanced Motion & WebGL Design Dictionary (28/06/2026)
 
+> **Disambiguation added 04/07/2026 (Fable 5 audit M11):** every "Phase 4"/"Phase 5" below refers
+> to the **Brand Architecture Phase** (CSS/UI design rollout, Layers 1–5), *not* the canonical
+> **SA-Cluster Phase** (`PHASE_ARCHITECTURE_SKELETON.md`, MRR-triggered, where Phase 4 = Brand
+> Elevation & International at $15K MRR). Two independent numbering systems share the name — see
+> `feedback_enterprise_rules.md` → Phase-Numbering Disambiguation.
+
 ---
 
 ## Decision Log

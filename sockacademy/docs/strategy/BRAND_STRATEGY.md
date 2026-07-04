@@ -51,22 +51,28 @@ constraint. When A1 finds new products, old ones are rotated out.
 
 ---
 
-## Gender Strategy — Phase Map
+## Gender Strategy — Rollout Stages
 
-### Phase 1 (Now — Year 1): Men Primary
+**Relabeled 04/07/2026 (Fable 5 audit M10):** was "Gender Strategy — Phase Map" with its own
+unlabeled Phase 1/2/3 — a 4th, undocumented "Phase N" system on top of SA-Cluster Phase
+(canonical, PHASE_ARCHITECTURE_SKELETON.md), Brand Architecture Phase (CSS/UI), and Private
+Label Sub-Phase A–E. Renamed to "Stage" to stop the collision; the $5K trigger window is also
+corrected below to match the canonical ×2 consecutive months (was ×3).
+
+### Stage 1 (Now — Year 1): Men Primary
 - Primary persona: Men, 28–45, income $80K+, dress with intention
 - All copywriting, visuals, and product descriptions speak to men
 - Rationale: Men's luxury sock market is underserved. Women's is crowded.
   Brand authority requires precision. Precision requires focus.
 
-### Phase 2 (After traction): Women as Gift Buyers
+### Stage 2 (After traction): Women as Gift Buyers
 - Entry point: "The Perfect Gift for the Man Who Has Everything"
 - Same products. Different copy angle.
 - Women are the largest gift purchasers in luxury — they buy for men
   and they are the highest-value acquisition channel for male products.
 - No separate women's line yet. Same SKUs, gifting-angle landing page.
 
-### Phase 3 (After $5K MRR × 3 months): Women's Own Collection
+### Stage 3 (After $5,000 MRR × 2 consecutive months — aligned to SA-Cluster Phase 3A trigger): Women's Own Collection
 - Separate narrative: "The one detail that makes the whole outfit make sense"
 - Separate product line, separate voice
 - The center-stage frame holds — the trigger is different
