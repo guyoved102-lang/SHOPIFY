@@ -7,8 +7,11 @@
 // real incident and closed/rejected without concern.
 //
 // Usage: node scripts/ci/verify-self-heal.js --mode=code|infra
+//
+// Env vars come directly from the environment (GitHub Actions' own env:
+// block in CI). No dotenv — this script has no local .env use case since
+// its whole purpose is exercising the real secrets that only exist in CI.
 
-require('dotenv').config({ path: '../../.env' });
 const { handleFatalError } = require('../../corp/core/self-heal.js');
 
 const mode = (process.argv.find(a => a.startsWith('--mode=')) || '--mode=code').split('=')[1];
