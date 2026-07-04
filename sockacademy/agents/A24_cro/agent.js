@@ -29,6 +29,7 @@ const { BetaAnalyticsDataClient } = require('@google-analytics/data');
 const { withRetry }               = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
+const { handleFatalError } = require('../../corp/core/self-heal.js');
 
 const DRY_RUN    = process.env.DRY_RUN    === 'true';
 const GA4_ACTIVE = process.env.GA4_ACTIVE === 'true';
@@ -522,7 +523,10 @@ async function main() {
 
 main().catch(async err => {
   console.error('[A24] Fatal error:', err.message);
+  let sb = null;
+  try { sb = getSupabase(); } catch (_) {}
   await notifyTelegram(heTelegramMsg('A24 CRO', '🚨 כשל קריטי!',
     `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
+  await handleFatalError({ agentId: 'A24', agentName: 'CRO', err, supabase: sb });
   process.exit(1);
 });
