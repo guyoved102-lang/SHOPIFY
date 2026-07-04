@@ -65,12 +65,20 @@ const ALLOWED_ROOT_ENTRIES = new Set([
   '.github', 'sockacademy', '.gitignore', '.gitattributes', 'README.md', '.editorconfig',
   // Claude Code / Agent SDK infrastructure (managed by tooling — not manual files)
   '.claude', '.agents', 'skills-lock.json',
+  // superpowers:subagent-driven-development scratch workspace (task briefs,
+  // reports, review packages, progress ledger) — gitignored, never committed,
+  // so real CI never sees it; only relevant when running this script locally
+  // in a working tree that has used the skill (04/07/2026, first use in repo).
+  '.superpowers',
   // CI artifact (written by this script on failure — uploaded to GitHub Actions)
   'structure-violations.json',
 ]);
 
 for (const { name, full, isDir } of children(REPO_ROOT)) {
-  if (name.startsWith('.git') && isDir && name === '.git') continue; // skip .git dir
+  // Skip .git — it's a directory in a normal checkout, but a plain file
+  // (a "gitdir: ..." pointer) inside a git worktree, so isDir alone can't
+  // gate this (04/07/2026, first worktree ever used in this repo).
+  if (name === '.git') continue;
   if (!ALLOWED_ROOT_ENTRIES.has(name)) {
     fail(
       'ROOT_CONTAMINATION',

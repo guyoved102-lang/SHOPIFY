@@ -13,6 +13,12 @@
  *   plain counts/subjects — never passed to an LLM, never treated as instructions,
  *   never used to trigger any action. Read-only IMAP (no delete/send capability).
  *
+ * MODULE 4 ADDITION (RAG support drafts, 04/07/2026): fetchMessageBody(uid)
+ * below is the ONLY function in this file that reads a full message body,
+ * and it is only ever called from A16 when RAG_SUPPORT_ACTIVE=true. The
+ * default daily-brief path (getInboxSummary, used by A0) is unchanged —
+ * envelope-only, zero LLM exposure, exactly as documented above.
+ *
  * Zero-Burn: no AI calls. A plain IMAP read is the entire cost.
  *
  * Usage:
@@ -23,6 +29,7 @@
  */
 
 const { ImapFlow } = require('imapflow');
+const { simpleParser } = require('mailparser');
 
 const IMAP_HOST = 'imap.gmail.com';
 const IMAP_PORT = 993;
@@ -59,6 +66,7 @@ async function readInbox(label, user, pass) {
         const recentUids = uids.slice(-FETCH_LIMIT);
         for await (const msg of client.fetch(recentUids, { envelope: true }, { uid: true })) {
           subjects.push({
+            uid:     msg.uid,
             from:    msg.envelope?.from?.[0]?.address || 'unknown',
             subject: msg.envelope?.subject || '(no subject)',
             date:    msg.envelope?.date || null,
@@ -72,6 +80,41 @@ async function readInbox(label, user, pass) {
     }
   } catch (e) {
     return { skipped: false, error: e.message };
+  } finally {
+    try { await client.logout(); } catch (_) { /* connection may already be closed */ }
+  }
+}
+
+/**
+ * Fetches the full plain-text body of a single business-inbox message by
+ * UID. Only called when RAG_SUPPORT_ACTIVE=true (Module 4, A16
+ * draftSupportReply) — see MODULE 4 ADDITION note above.
+ */
+async function fetchMessageBody(uid) {
+  if (!process.env.GMAIL_APP_PASSWORD) return null;
+
+  const client = new ImapFlow({
+    host: IMAP_HOST,
+    port: IMAP_PORT,
+    secure: true,
+    auth: { user: 'sockacademy.store@gmail.com', pass: process.env.GMAIL_APP_PASSWORD },
+    logger: false,
+  });
+
+  try {
+    await client.connect();
+    const lock = await client.getMailboxLock('INBOX');
+    try {
+      const message = await client.fetchOne(String(uid), { source: true }, { uid: true });
+      if (!message || !message.source) return null;
+      const parsed = await simpleParser(message.source);
+      return (parsed.text || '').trim();
+    } finally {
+      lock.release();
+    }
+  } catch (e) {
+    console.error(`[inbox] fetchMessageBody(${uid}) failed: ${e.message}`);
+    return null;
   } finally {
     try { await client.logout(); } catch (_) { /* connection may already be closed */ }
   }
@@ -92,4 +135,4 @@ async function getInboxSummary() {
   return { business, personal };
 }
 
-module.exports = { getInboxSummary };
+module.exports = { getInboxSummary, fetchMessageBody };
