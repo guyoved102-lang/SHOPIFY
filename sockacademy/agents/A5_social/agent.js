@@ -13,7 +13,9 @@ const { createClient } = require('@supabase/supabase-js');
 const { withRetry } = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
+const { reviewContent } = require('../../corp/core/qa-gate.js');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
+const MAX_QA_ROUNDS = 2;
 
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
@@ -153,7 +155,11 @@ async function selectFreshTheme(supabase, weekNum) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // CLAUDE — Instagram caption
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function generateCaption(post, theme) {
+async function generateCaption(post, theme, revisionNotes = null) {
+  const revisionBlock = revisionNotes
+    ? `\n\nPREVIOUS DRAFT FEEDBACK — fix these issues before rewriting:\n${revisionNotes}\n`
+    : '';
+
   const msg = await withRetry(() => anthropic.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 300,
@@ -164,6 +170,7 @@ async function generateCaption(post, theme) {
 Weekly theme: ${theme}
 Post type: ${post.type} — ${post.description}
 Angle: ${post.angle}
+${revisionBlock}
 
 BRAND VOICE — non-negotiable:
 - No exclamation marks. Ever.
@@ -189,7 +196,7 @@ SOCIAL-MEDIA-SKILLS — Instagram-specific craft:
 - Hashtag strategy: 4 ultra-niche (#merinowoolcrewsocks), 4 mid-reach (#premiumsocks #menssocks), 3 broad (#mensstyle #mensware #qualitymatters) — exactly 11 total, one line
 - Never hashtag the brand name — let it earn organic mentions
 
-Write the caption in this exact JSON format:
+Respond with ONLY raw JSON in this exact format — no markdown code fences (no \`\`\`), no text before or after, single quotes inside string values, never unescaped double quotes:
 {
   "hook": "First line only. Complete thought. Max 9 words. Specific claim or quiet authority — stops the scroll without begging.",
   "body": "2-3 short paragraphs. Varied rhythm. 80-110 words total. Separated by blank lines.",
@@ -201,7 +208,9 @@ Write the caption in this exact JSON format:
   }), 'A5');
 
   try {
-    const json = msg.content[0].text.trim().match(/\{[\s\S]*\}/)?.[0];
+    const raw = msg.content[0].text.trim();
+    const stripped = raw.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
+    const json = stripped.match(/\{[\s\S]*\}/)?.[0];
     return JSON.parse(json);
   } catch {
     return {
@@ -374,6 +383,7 @@ async function sendWeeklyCalendar(posts, weekNum, theme) {
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
         <span style="background:#C9A84C;color:#0A0A0A;font-size:10px;font-weight:800;letter-spacing:1.5px;padding:4px 10px;border-radius:2px;text-transform:uppercase">${p.plan.type}</span>
         <span style="color:#888;font-size:12px;letter-spacing:0.5px">${p.plan.day}</span>
+        ${p.qaHeld ? `<span style="background:#3a2a0a;color:#fbbf24;font-size:10px;font-weight:700;padding:3px 8px;border-radius:2px">⚠️ QA HELD</span>` : ''}
         ${p.imageUrl ? `<span style="background:#1a3a1a;color:#4ade80;font-size:10px;font-weight:700;padding:3px 8px;border-radius:2px">IMAGE ✓</span>` : `<span style="background:#3a1a1a;color:#f87171;font-size:10px;font-weight:700;padding:3px 8px;border-radius:2px">NO IMAGE</span>`}
         ${p.driveBackup ? `<a href="${p.driveBackup.webViewLink}" style="background:#1a2a3a;color:#60a5fa;font-size:10px;font-weight:700;padding:3px 8px;border-radius:2px;text-decoration:none">☁ DRIVE</a>` : ''}
       </div>
@@ -388,6 +398,11 @@ async function sendWeeklyCalendar(posts, weekNum, theme) {
         <span style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:1px">Visual Direction: </span>
         <span style="font-size:11px;color:#9ca3af">${p.caption.visual_direction}</span>
       </div>
+      ${p.qaHeld ? `
+      <div style="background:#2a1a0a;border:1px solid #92400e;border-radius:4px;padding:10px;margin-top:10px">
+        <span style="font-size:10px;color:#fbbf24;font-weight:700;text-transform:uppercase;letter-spacing:1px">QA Issues — this post was NOT published:</span>
+        <ul style="font-size:11px;color:#d1a35c;margin:6px 0 0;padding-right:16px">${p.qaIssues.map(i => `<li style="margin-bottom:3px">${i}</li>`).join('')}</ul>
+      </div>` : ''}
     </div>
   `).join('');
 
@@ -455,11 +470,44 @@ async function main() {
   console.log('\n✍️  Writing captions with Claude...');
 
   const posts = [];
+  let qaHeldCount = 0;
 
   for (const plan of WEEKLY_CONTENT_PLAN) {
     process.stdout.write(`  ${plan.day} (${plan.type})... `);
 
-    const caption = await generateCaption(plan, theme);
+    let caption = await generateCaption(plan, theme);
+
+    // ── QA Gate — Sonnet second-pass review against Iron Law 2 before image/publish ──
+    // Up to MAX_QA_ROUNDS revise rounds. If still not approved, this post alone
+    // is held (not the whole week) — image generation and publishing are skipped for it.
+    let qaApproved   = false;
+    let qaIssues     = [];
+    let qaRoundsUsed = 0;
+
+    for (let round = 0; round <= MAX_QA_ROUNDS; round++) {
+      const qaResult = await reviewContent({ kind: 'caption', caption, theme });
+      qaRoundsUsed = round + 1;
+
+      if (qaResult.approved) {
+        qaApproved = true;
+        break;
+      }
+
+      qaIssues = qaResult.issues;
+
+      if (round < MAX_QA_ROUNDS) {
+        caption = await generateCaption(plan, theme, qaIssues.join('; '));
+      }
+    }
+
+    if (!qaApproved) {
+      console.log(`⚠ QA held after ${qaRoundsUsed} round(s): ${qaIssues.join('; ')}`);
+      qaHeldCount++;
+      posts.push({ plan, caption, imageUrl: null, driveBackup: null, qaHeld: true, qaIssues });
+      await new Promise(r => setTimeout(r, 800));
+      continue;
+    }
+
     let imageUrl = null;
 
     // Generate image with gpt-image-1 if API key present
@@ -505,7 +553,7 @@ async function main() {
           console.error(`  ❌ ${p.plan.day}: ${e.message}`);
         }
       } else {
-        console.log(`  ⚠  ${p.plan.day}: no image, skipped`);
+        console.log(`  ⚠  ${p.plan.day}: ${p.qaHeld ? 'QA held' : 'no image'}, skipped`);
       }
     }
   }
@@ -513,16 +561,19 @@ async function main() {
   console.log(`\n✅ A5 done — ${posts.length} posts generated`);
   await sendWeeklyCalendar(posts, weekNum, theme);
 
-  // Command Center KPIs — feeds A0's unified daily brief (deterministic, no AI)
-  if (supabase) {
+  // Command Center KPIs — feeds A0's unified daily brief (deterministic, no AI;
+  // skip during DRY_RUN so simulated/test runs never pollute real KPI history —
+  // matches A3's guard; found missing here 04/07/2026 while verifying Module 2)
+  if (!DRY_RUN && supabase) {
     const metricDate = new Date().toISOString().split('T')[0];
     await writeMetrics(supabase, 'A5', metricDate, [
       { name: 'social_posts_generated', value: posts.length,    unit: 'count' },
       { name: 'social_posts_published', value: publishedCount,  unit: 'count' },
+      { name: 'social_qa_held_count',   value: qaHeldCount,     unit: 'count' },
     ]);
   }
 
-  await logHealth(supabase, 'success', '', { theme, posts: posts.length });
+  await logHealth(supabase, 'success', '', { theme, posts: posts.length, qaHeldCount });
 }
 
 main().catch(async e => {

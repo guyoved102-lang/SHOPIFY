@@ -34,7 +34,7 @@ RULES (all mandatory — flag any violation):
 ARTICLE HTML TO REVIEW:
 ${html}
 
-Respond with ONLY this JSON, no other text:
+Respond with ONLY raw JSON on a single logical structure — no markdown code fences (no \`\`\`), no text before or after. Use single quotes inside string values, never unescaped double quotes:
 {"approved": true|false, "issues": ["specific, actionable issue 1", "specific, actionable issue 2"]}
 If fully compliant, return {"approved": true, "issues": []}.`;
 }
@@ -58,7 +58,7 @@ RULES (all mandatory — flag any violation):
 CAPTION JSON TO REVIEW:
 ${JSON.stringify(caption, null, 2)}
 
-Respond with ONLY this JSON, no other text:
+Respond with ONLY raw JSON on a single logical structure — no markdown code fences (no \`\`\`), no text before or after. Use single quotes inside string values, never unescaped double quotes:
 {"approved": true|false, "issues": ["specific, actionable issue 1", "specific, actionable issue 2"]}
 If fully compliant, return {"approved": true, "issues": []}.`;
 }
@@ -72,7 +72,8 @@ async function callQAModel(prompt, label) {
 
   const raw = msg.content[0].text.trim();
   try {
-    const json = raw.match(/\{[\s\S]*\}/)?.[0];
+    const stripped = raw.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
+    const json = stripped.match(/\{[\s\S]*\}/)?.[0];
     const parsed = JSON.parse(json);
     return {
       approved: parsed.approved === true,
