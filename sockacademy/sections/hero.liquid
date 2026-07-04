@@ -269,16 +269,13 @@
           alt: section.settings.image.alt | default: section.settings.heading -}}
     </div>
   {%- else -%}
-    <div class="sa-hero__bg">
-      <img
-        src="{{ 'sa-hero-banner.png' | asset_url }}"
-        alt="{{ section.settings.heading | escape }}"
-        loading="eager"
-        fetchpriority="high"
-        width="1536"
-        height="1024"
-      >
-    </div>
+    {%- comment -%}
+      No hero image set. Audit fix (2026-07-04): previously referenced a
+      non-existent asset (sa-hero-banner.png), causing a broken <img> + 404
+      on every homepage load. Falls back to the abstract gold graphic layer
+      (defined below, was dead CSS never rendered) instead of any image.
+    {%- endcomment -%}
+    <div class="sa-hero__abstract" aria-hidden="true"></div>
   {%- endif -%}
 
   <div class="sa-hero__overlay" aria-hidden="true"></div>

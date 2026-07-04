@@ -654,17 +654,12 @@
           {%- endfor -%}
         {%- endunless -%}
 
-        {%- comment -%} Social proof — static placeholder; replace with Judge.me widget post-install {%- endcomment -%}
-        <div class="sp__social-proof">
-          <div class="sp__stars" aria-label="Rated 4.9 out of 5">
-            {%- for i in (1..5) -%}
-              <svg class="sp__star" viewBox="0 0 12 12" width="11" height="11" aria-hidden="true">
-                <polygon points="6,0.5 7.55,4.1 11.5,4.6 8.75,7.25 9.5,11.2 6,9.2 2.5,11.2 3.25,7.25 0.5,4.6 4.45,4.1"/>
-              </svg>
-            {%- endfor -%}
-          </div>
-          <span class="sp__social-text">4.9 <span class="sp__review-count">· 127 reviews</span></span>
-        </div>
+        {%- comment -%}
+          Social proof — Judge.me app-block handles real review display.
+          No fabricated rating is rendered here. Audit fix (2026-07-04):
+          removed hardcoded "4.9 · 127 reviews" — store has zero verified
+          reviews; a static placeholder is consumer-law/FTC exposure.
+        {%- endcomment -%}
 
         {%- comment -%} Form: qty + ATC {%- endcomment -%}
         {%- form 'product', product,

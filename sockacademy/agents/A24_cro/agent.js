@@ -496,7 +496,11 @@ async function main() {
     upsertReport(funnel, rates, shopify, bottleneck, null),
   ]);
 
-  const narrative = await buildNarrative(funnel, rates, shopify, bottleneck, prev);
+  // Audit fix (2026-07-04): buildNarrative() calls Anthropic unconditionally —
+  // skip the real API call under DRY_RUN so dry-run tests never spend budget.
+  const narrative = DRY_RUN
+    ? '[DRY_RUN] נרטיב לא נוצר — אין קריאת Anthropic במצב בדיקה.'
+    : await buildNarrative(funnel, rates, shopify, bottleneck, prev);
   await sendEmail(funnel, rates, shopify, bottleneck, narrative, prev);
 
   // Command Center KPIs — feeds A0's unified daily brief
@@ -511,7 +515,9 @@ async function main() {
   console.log(`[A24] Complete — ${funnel.sessions} sessions | CVR ${rates.overallCvr}% | $${shopify.totalRevenue} revenue`);
 }
 
-main().catch(err => {
+main().catch(async err => {
   console.error('[A24] Fatal error:', err.message);
+  await notifyTelegram(heTelegramMsg('A24 CRO', '🚨 כשל קריטי!',
+    `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
   process.exit(1);
 });

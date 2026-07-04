@@ -13,10 +13,6 @@
           "type": "shop_link",
           "settings": { "label": "New Arrivals", "link": "/collections/new-arrivals" }
         },
-        "shop-3": {
-          "type": "shop_link",
-          "settings": { "label": "Sale",         "link": "/collections/sale" }
-        },
         "help-1": {
           "type": "help_link",
           "settings": { "label": "FAQ",             "link": "/pages/faq" }
@@ -38,13 +34,13 @@
           "settings": { "label": "Terms of Service","link": "/pages/terms-of-service" }
         }
       },
-      "block_order": ["shop-1", "shop-2", "shop-3", "help-1", "help-2", "help-3", "help-4", "help-5"],
+      "block_order": ["shop-1", "shop-2", "help-1", "help-2", "help-3", "help-4", "help-5"],
       "settings": {
-        "tagline": "The World's Most Interesting Socks.",
+        "tagline": "The World's First Sock Authority",
         "shop_heading": "Shop",
         "help_heading": "Help",
-        "newsletter_heading": "Stay in the loop",
-        "newsletter_text": "New drops, exclusive deals, and sock culture — straight to your inbox.",
+        "newsletter_heading": "Stay Informed",
+        "newsletter_text": "Material insight, care guidance, and new arrivals — for those who take their wardrobe seriously.",
         "email_placeholder": "your@email.com",
         "newsletter_fine": "No spam. Unsubscribe anytime.",
         "copyright_suffix": "All rights reserved.",
