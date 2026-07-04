@@ -158,7 +158,13 @@ async function ingestAll(supabase) {
 
   let inserted = 0;
   for (const chunk of allChunks) {
-    const embedding = await embedText(chunk.content);
+    let embedding;
+    try {
+      embedding = await embedText(chunk.content);
+    } catch (e) {
+      console.error(`[rag-ingest] embed failed for "${chunk.title}": ${e.message}`);
+      continue;
+    }
     const { error } = await supabase.from('knowledge_chunks').insert({
       source:  chunk.source,
       title:   chunk.title || null,
