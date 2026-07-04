@@ -12,6 +12,7 @@ const { createClient } = require('@supabase/supabase-js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
 const { RETAIL_CEILING, DEFAULT_CEILING } = require('../../corp/core/pricing.js');
+const { handleFatalError } = require('../../corp/core/self-heal.js');
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 const DRY_RUN = process.env.DRY_RUN === 'true';
@@ -1041,8 +1042,13 @@ async function run() {
 
 run().catch(async err => {
   console.error('❌ A1 Error:', err.message);
-  await logHealth(getSupabase(), 'failure', err.message).catch(() => {});
+  let sb = null;
+  try {
+    sb = getSupabase();
+    await logHealth(sb, 'failure', err.message);
+  } catch (_) {}
   await notifyTelegram(heTelegramMsg('A1 Product Research', '🚨 כשל קריטי!',
     `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
+  await handleFatalError({ agentId: 'A1', agentName: 'Product Research', err, supabase: sb });
   process.exit(1);
 });

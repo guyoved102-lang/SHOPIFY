@@ -18,6 +18,7 @@ const nodemailer     = require('nodemailer');
 const { withRetry }  = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
+const { handleFatalError } = require('../../corp/core/self-heal.js');
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
@@ -522,10 +523,12 @@ async function main() {
 
 main().catch(async e => {
   console.error('💥 Fatal:', e.message);
+  let sb = null;
   try {
-    const sb = getSupabase();
+    sb = getSupabase();
     await logHealth(sb, 'ERROR', e.message);
     await sendErrorAlert(e.message);
   } catch (_) {}
+  await handleFatalError({ agentId: 'A10', agentName: 'Trend Scout', err: e, supabase: sb });
   process.exit(1);
 });

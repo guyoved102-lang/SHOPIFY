@@ -12,6 +12,7 @@ const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
+const { handleFatalError } = require('../../corp/core/self-heal.js');
 
 function getSupabase() {
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
@@ -502,10 +503,12 @@ async function run() {
 
 run().catch(async err => {
   console.error('❌ A13 fatal:', err);
+  let sb = null;
   try {
-    const sb = getSupabase();
+    sb = getSupabase();
     await logHealth(sb, 'ERROR', err.message);
     await sendErrorAlert(err.message);
   } catch (_) {}
+  await handleFatalError({ agentId: 'A13', agentName: 'Competitive Intelligence', err, supabase: sb });
   process.exit(1);
 });

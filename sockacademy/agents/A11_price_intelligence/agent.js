@@ -23,6 +23,7 @@ const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
+const { handleFatalError } = require('../../corp/core/self-heal.js');
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const GMAIL_USER  = 'sockacademy.store@gmail.com';
@@ -642,6 +643,7 @@ async function main() {
     await sendErrorAlert(err.message);
     await notifyTelegram(heTelegramMsg('A11 Price Intelligence', '🚨 כשל קריטי!',
       `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
+    await handleFatalError({ agentId: 'A11', agentName: 'Price Intelligence', err, supabase });
     process.exit(1);
   }
 }
