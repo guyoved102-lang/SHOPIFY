@@ -562,6 +562,21 @@ curl -X PUT .../products/XXX.json -d '{"product":{"id":XXX,"published":true}}'
 
 ---
 
+## 39. תיקון Dependency ב-package.json של ה-root לא הגיע ל-CI האמיתי — 18/19 סוכנים המשיכו לרוץ על הגרסה הישנה (04/07/2026)
+
+**מה קרה:** ב-27/06/2026 (commit `4206587`) תועד "downgrade dotenv 17.4.2 → 16.6.1 — remove advertising tips" כ-**בוצע**. בפועל, ה-commit עדכן רק את `sockacademy/package.json` (root). בזמן חיווט Module 3 ל-A2, ריצת `DRY_RUN=true node agent.js` הראתה שוב את ה-tip הפרסומי (`vestauth.com`) — התברר ש-**19 מתוך 30 סוכנים** מחזיקים `package.json` נפרד משלהם עם `"dotenv": "^17.0.0"`, וזה מה ש-**CI בפועל מתקין**, כי כל workflow עושה `npm install`/`npm ci` בתוך `working-directory: sockacademy/agents/AX_.../`, ולא נוגע ב-root package.json בכלל. כלומר התיקון שתועד כ-"בוצע" מעולם לא הגיע בפועל ל-63% מהסוכנים.
+
+**סיבה:** ארכיטקטורת הפרויקט היא **monorepo-with-independent-installs** — לכל agent יש `package.json`+`package-lock.json` נפרדים, וה-root `package.json` הוא רק נוחות מקומית ל-dev, לא מקור אמת ל-CI. תיקון dependency שנעשה רק ב-root (כי שם "בודקים" תחילה, או כי `npm install` בשורש נראה כמו "התיקון") לא מתפשט אוטומטית ל-agents — בדיוק כמו ש-LAUNCH_MODE/DRY_RUN בתיעוד לא תמיד תואם את הקוד בפועל (ר' "Dormant בתיעוד ≠ Dormant בקוד" ב-`feedback_enterprise_rules.md`). זו אותה משפחת בעיה בדיוק, רק בציר "dependency version" במקום "runtime flag".
+
+**מה מונע חזרה:**
+1. כל תיקון `npm install`/גרסת dependency — **אף פעם לא רק ב-root `sockacademy/package.json`**. לבדוק תמיד: `grep -rl "\"<package>\":" sockacademy/agents/*/package.json` ולתקן את **כל** ההתאמות, לא רק את ה-root.
+2. אחרי תיקון dependency — `npm install` מחדש בכל תיקיית agent שהושפעה, ולוודא `node_modules/<package>/package.json`'s `version` בפועל, לא רק לקרוא את ה-`^range` ב-package.json (semver range לא מבטיח שה-lockfile/node_modules המקומי כבר עודכן).
+3. root `package.json` הוא **לא** מקור אמת ל-CI בפרויקט הזה — כל agent הוא unit עצמאי לחלוטין מבחינת dependencies. תיקון "גלובלי" חייב loop מפורש על כל 30 תיקיות ה-agent, לא edit יחיד.
+
+**בדיקה:** `for d in sockacademy/agents/*/; do node -p "require('$d/node_modules/<package>/package.json').version" 2>/dev/null; done | sort -u` — יותר מגרסה אחת בפלט = drift בין agents.
+
+---
+
 ## SESSION CONTINUITY CHECKLIST — בכל שיחה
 
 **פתיחה:**
