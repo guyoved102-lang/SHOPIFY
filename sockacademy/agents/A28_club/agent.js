@@ -5,6 +5,7 @@ const nodemailer       = require('nodemailer');
 const { withRetry }    = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
+const { handleFatalError } = require('../../corp/core/self-heal.js');
 
 const DRY_RUN           = process.env.DRY_RUN           === 'true';
 const INVITATIONS_ACTIVE = process.env.INVITATIONS_ACTIVE === 'true';
@@ -366,6 +367,7 @@ async function main() {
     await logHealth(sb, 'error', 0, { error: err.message }).catch(() => {});
     await notifyTelegram(heTelegramMsg('A28 SockAcademy Club', '🚨 כשל קריטי!',
       `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
+    await handleFatalError({ agentId: 'A28', agentName: 'SockAcademy Club', err, supabase: sb });
     process.exit(1);
   }
 }
