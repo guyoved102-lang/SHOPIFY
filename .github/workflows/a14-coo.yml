@@ -29,6 +29,14 @@ jobs:
         working-directory: sockacademy/agents/A14_coo
         run: npm install
 
+      - name: Install corp/core dependencies
+        # self-heal.js (Module 3) requires @anthropic-ai/sdk directly, and
+        # hitl.js requires @supabase/supabase-js + nodemailer — corp/core is
+        # a sibling directory, not an ancestor of A14, so Node module
+        # resolution needs corp/core's OWN node_modules populated here.
+        working-directory: sockacademy/corp/core
+        run: npm install
+
       - name: Run A14 COO Agent
         working-directory: sockacademy/agents/A14_coo
         env:
@@ -41,4 +49,7 @@ jobs:
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
           DRY_RUN:           ${{ github.event.inputs.dry_run || 'false' }}
           LAUNCH_MODE:       'false'
+          GH_PAT_SECRETS_WRITE: ${{ secrets.GH_PAT_SECRETS_WRITE }}
+          GH_REPO_OWNER: ${{ github.repository_owner }}
+          GH_REPO_NAME: ${{ github.event.repository.name }}
         run: node agent.js

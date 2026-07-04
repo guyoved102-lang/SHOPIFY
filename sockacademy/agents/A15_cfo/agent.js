@@ -15,6 +15,7 @@ const nodemailer = require('nodemailer');
 
 const { sendTelegram, notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
+const { handleFatalError } = require('../../corp/core/self-heal.js');
 
 const DRY_RUN        = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL    = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
@@ -363,11 +364,13 @@ async function main() {
 
 main().catch(async err => {
   console.error('\nA15 fatal:', err.message);
+  let sb = null;
   try {
-    const sb = getSupabase();
+    sb = getSupabase();
     await logHealth(sb, 'failure', { error: err.message });
   } catch (_) {}
   await notifyTelegram(heTelegramMsg('A15 CFO', '🚨 כשל קריטי!',
     `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
+  await handleFatalError({ agentId: 'A15', agentName: 'CFO', err, supabase: sb });
   process.exit(1);
 });
