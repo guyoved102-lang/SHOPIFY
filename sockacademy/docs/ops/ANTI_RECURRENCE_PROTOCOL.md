@@ -577,6 +577,21 @@ curl -X PUT .../products/XXX.json -d '{"product":{"id":XXX,"published":true}}'
 
 ---
 
+## 40. `structure-lint.js` הכשיל CI על `.git` עצמו בתוך git worktree (04/07/2026)
+
+**מה קרה:** בפעם הראשונה שהפרויקט השתמש ב-git worktree (`superpowers:using-git-worktrees`, לבניית Module 4), הרצת `node scripts/ci/structure-lint.js` בתוך ה-worktree נכשלה עם `ROOT_CONTAMINATION` על `.git` עצמו — קובץ שאמור להיות תמיד מותר.
+
+**סיבה:** השורה `if (name.startsWith('.git') && isDir && name === '.git') continue;` דילגה על `.git` **רק כשהוא ספרייה**. ב-checkout רגיל `.git` תמיד ספרייה — אבל בתוך git worktree, `.git` הוא **קובץ** (מצביע `gitdir: ...` לספריית ה-git המשותפת של הריפו הראשי). ה-`isDir` check מעולם לא נכשל קודם כי אף session לפני זה לא השתמש ב-worktree.
+
+**מה מונע חזרה:**
+1. תוקן: `if (name === '.git') continue;` — בלי תלות ב-`isDir`, כי `.git` תקין גם כספרייה וגם כקובץ (worktree).
+2. כל שינוי עתידי ל-`structure-lint.js` (או סקריפט CI אחר שמניח הנחות על מבנה `.git`) — לבדוק גם מול worktree, לא רק מול checkout רגיל.
+3. אם עובדים ב-worktree ו-CI/lint מקומי נכשל על משהו שקשור ל-`.git`/`.claude/worktrees/` — לבדוק קודם אם זו הנחת-יסוד שגויה על מבנה תיקיות, לא רק "קובץ במקום הלא נכון".
+
+**בדיקה:** `node scripts/ci/structure-lint.js` בתוך worktree חדש → חייב לעבור נקי (`✅ Structure lint passed`), לא רק בתוך checkout רגיל.
+
+---
+
 ## SESSION CONTINUITY CHECKLIST — בכל שיחה
 
 **פתיחה:**

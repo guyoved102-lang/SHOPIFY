@@ -70,7 +70,10 @@ const ALLOWED_ROOT_ENTRIES = new Set([
 ]);
 
 for (const { name, full, isDir } of children(REPO_ROOT)) {
-  if (name.startsWith('.git') && isDir && name === '.git') continue; // skip .git dir
+  // Skip .git — it's a directory in a normal checkout, but a plain file
+  // (a "gitdir: ..." pointer) inside a git worktree, so isDir alone can't
+  // gate this (04/07/2026, first worktree ever used in this repo).
+  if (name === '.git') continue;
   if (!ALLOWED_ROOT_ENTRIES.has(name)) {
     fail(
       'ROOT_CONTAMINATION',
