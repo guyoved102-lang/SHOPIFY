@@ -22,6 +22,9 @@ jobs:
       - name: Run structure linter
         run: node sockacademy/scripts/ci/structure-lint.js
 
+      - name: Verify fleet LAUNCH_MODE/DRY_RUN status (PROCESS-1)
+        run: node sockacademy/scripts/ci/verify-fleet-status.js
+
       - name: Upload violation report (on failure)
         if: failure()
         uses: actions/upload-artifact@v4

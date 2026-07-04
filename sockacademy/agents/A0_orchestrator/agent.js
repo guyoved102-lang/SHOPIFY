@@ -613,6 +613,11 @@ function runWorkspaceHealthCheck() {
   return computeViolations();
 }
 
+// PROCESS-1 (Fable 5 audit, 04/07/2026) — same DRY reuse pattern as structure-lint
+// above. Every past LAUNCH_MODE/DRY_RUN drift (A15, then A16+A24) was only ever
+// caught by a human re-reading code by hand. This makes it a real, automated gate.
+const { verify: verifyFleetStatus } = require('../../scripts/ci/verify-fleet-status.js');
+
 function workspaceAlertHtml(violations) {
   const ts = new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' });
   const rows = violations.map((v) =>
@@ -752,6 +757,18 @@ async function main() {
     );
     await notifyTelegram(heMsg('🏗️ הפרת מבנה תיקיות',
       `נמצאו <b>${structureViolations.length}</b> הפרות מבנה בארכיטקטורה (מול CLAUDE.md).\nרשימת הקבצים המלאה נשלחה במייל.`));
+  }
+
+  // Step 4b — Fleet LAUNCH_MODE/DRY_RUN drift check (PROCESS-1, every run)
+  const { mismatches: fleetMismatches } = verifyFleetStatus();
+  if (fleetMismatches.length === 0) {
+    console.log('✅ Fleet LAUNCH_MODE/DRY_RUN status matches documented baseline — no drift');
+  } else {
+    console.error(`⚠️  ${fleetMismatches.length} fleet status drift(s) found:`);
+    fleetMismatches.forEach((m) => console.error(`   ${m}`));
+    await notifyTelegram(heMsg('⚠️ סטייה במצב LAUNCH_MODE/DRY_RUN של הצי',
+      `נמצאו <b>${fleetMismatches.length}</b> סטיות מהבייסליין המתועד ב-scripts/ci/verify-fleet-status.js — ` +
+      `סוכן שינה מצב gating בלי עדכון הטבלה. זה בדיוק הדפוס שגרם לתקריות A15/A16/A24. בדוק בפועל לפני שממשיכים.`));
   }
 
   // Step 5 — Phase Readiness Score (every run)
