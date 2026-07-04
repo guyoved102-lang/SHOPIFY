@@ -11,6 +11,7 @@ const nodemailer = require('nodemailer');
 const { withRetry } = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
+const { handleFatalError } = require('../../corp/core/self-heal.js');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
@@ -359,12 +360,14 @@ async function main() {
 
 main().catch(async e => {
   console.error('💥 Fatal:', e.message);
+  let sb = null;
   try {
-    const sb = getSupabase();
+    sb = getSupabase();
     await logHealth(sb, 'ERROR', e.message);
     await sendErrorAlert(e.message);
   } catch (_) {}
   await notifyTelegram(heTelegramMsg('A2 Product Upload', '🚨 כשל קריטי!',
     `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${e.message}</code>`));
+  await handleFatalError({ agentId: 'A2', agentName: 'Product Upload', err: e, supabase: sb });
   process.exit(1);
 });

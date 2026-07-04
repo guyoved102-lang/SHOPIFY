@@ -32,8 +32,18 @@ const NO_DRY_RUN_SUPPORT = {
 };
 
 function resolveAgentDir(agentId) {
+  // Directory names replace "." with "_" (A2.5 -> A2_5_quality_control), so a
+  // naive startsWith(agentId + '_') on "A2" also matches "A2_5_quality_control".
+  // Normalize dots to underscores and require the char after the prefix to be
+  // non-numeric, so "A2" cannot match "A2_5_..." and "A2.5" resolves correctly.
+  const normalized = agentId.replace(/\./g, '_');
+  const prefix = normalized + '_';
   const entries = fs.readdirSync(AGENTS_DIR, { withFileTypes: true });
-  const match = entries.find((e) => e.isDirectory() && e.name.startsWith(agentId + '_'));
+  const match = entries.find((e) => {
+    if (!e.isDirectory() || !e.name.startsWith(prefix)) return false;
+    const rest = e.name.slice(prefix.length);
+    return !/^\d/.test(rest);
+  });
   return match ? path.join(AGENTS_DIR, match.name) : null;
 }
 
