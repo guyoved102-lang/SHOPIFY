@@ -13,6 +13,7 @@ const { runOrchestration, CLUSTERS } = require('../../corp/core/orchestration');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { getCommandCenterSnapshot } = require('../../corp/core/command-center.js');
 const { getInboxSummary } = require('../../corp/core/inbox.js');
+const { handleFatalError } = require('../../corp/core/self-heal.js');
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const FORCE_WEEKLY = process.env.FORCE_WEEKLY_REPORT === 'true';
@@ -870,8 +871,9 @@ async function main() {
 
 main().catch(async err => {
   console.error('\n❌ A0 fatal:', err.message);
+  let sb = null;
   try {
-    const sb = getSupabase();
+    sb = getSupabase();
     await updateA0State(sb, 'ERROR', err.message);
     await sendEmail(
       '🚨 A0 Orchestrator FAILED — action needed',
@@ -880,5 +882,6 @@ main().catch(async err => {
     await notifyTelegram(heMsg('🚨 כשל קריטי!',
       `ה-Orchestrator נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
   } catch (_) {}
+  await handleFatalError({ agentId: 'A0', agentName: 'Orchestrator', err, supabase: sb });
   process.exit(1);
 });
