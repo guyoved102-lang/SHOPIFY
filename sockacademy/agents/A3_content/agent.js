@@ -11,7 +11,9 @@ const { createClient } = require('@supabase/supabase-js');
 const { withRetry } = require('../../corp/core/anthropic-retry.js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
+const { reviewContent } = require('../../corp/core/qa-gate.js');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
+const MAX_QA_ROUNDS = 2;
 
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
@@ -109,8 +111,12 @@ async function articleExists(handle) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // CLAUDE — כתיבת מאמר 1,500+ מילים
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function writeArticle(topic) {
+async function writeArticle(topic, revisionNotes = null) {
   console.log(`  ✍️  כותב: "${topic.title}"...`);
+
+  const revisionBlock = revisionNotes
+    ? `\n\nPREVIOUS DRAFT FEEDBACK — fix these issues before rewriting:\n${revisionNotes}\n`
+    : '';
 
   const msg = await withRetry(() => anthropic.messages.create({
     model: 'claude-sonnet-4-6',
@@ -124,7 +130,7 @@ Write a comprehensive, authoritative blog post on the following topic:
 TITLE: ${topic.title}
 TARGET KEYWORDS: ${topic.keywords}
 CATEGORY: ${topic.category}
-
+${revisionBlock}
 Requirements:
 - 1,500 to 2,000 words
 - Written in American English, authoritative tone — no hype, no exclamation marks
@@ -294,6 +300,63 @@ async function sendReport(topic, article, published) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// QA WITHHELD REPORT — sent when the article still fails QA after
+// MAX_QA_ROUNDS revisions. Not a system error (logHealth stays 'success' —
+// the agent correctly refused to publish weak content) so this is a
+// distinct, honestly-worded alert, not the generic error email.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async function sendQAWithheldReport(topic, html, issues, roundsUsed) {
+  const issuesList = issues.map(i => `<li style="margin-bottom:6px">${i}</li>`).join('');
+  const preview = html.replace(/<[^>]+>/g, ' ').substring(0, 400) + '...';
+
+  await notifyTelegram(heTelegramMsg('A3 Content', '⏸️ מאמר נעצר ע"י QA — לא פורסם',
+    `נושא: "${topic.title}"\nלאחר ${roundsUsed} סבבי QA עדיין לא עבר את הרובריקה.\nבעיות: ${issues.join(' | ')}`));
+
+  if (!process.env.GMAIL_APP_PASSWORD) return;
+
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com', port: 465, secure: true,
+    auth: { user: 'sockacademy.store@gmail.com', pass: process.env.GMAIL_APP_PASSWORD },
+  });
+
+  const html_email = `
+<div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto">
+  <div style="background:#111827;padding:24px;text-align:center;border-radius:12px 12px 0 0">
+    <div style="color:#fff;font-size:22px;font-weight:800">🧦 SockAcademy</div>
+    <div style="color:#9ca3af;font-size:13px;margin-top:4px">A3 Blog Agent — ${new Date().toLocaleDateString('he-IL')}</div>
+  </div>
+  <div style="padding:20px;border:1px solid #e5e7eb;border-top:0;border-radius:0 0 12px 12px">
+    <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:16px;margin-bottom:16px">
+      <div style="font-weight:700;color:#92400e;margin-bottom:4px">⏸️ מאמר נעצר ע"י QA — לא פורסם</div>
+      <div style="font-size:13px;color:#92400e">לאחר ${roundsUsed} סבבי כתיבה+QA עדיין לא עבר את הרובריקה. זו לא תקלת מערכת — הסוכן נמנע במכוון מפרסום תוכן חלש.</div>
+    </div>
+
+    <div style="background:#f9fafb;border-radius:8px;padding:16px;margin-bottom:16px">
+      <div style="font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">מאמר שנעצר</div>
+      <div style="font-size:18px;font-weight:700;color:#111;margin-bottom:8px">${topic.title}</div>
+      <div style="font-size:13px;color:#374151;line-height:1.6">${preview}</div>
+    </div>
+
+    <div style="background:#fef2f2;border-radius:8px;padding:16px">
+      <div style="font-size:11px;color:#991b1b;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">בעיות QA שדווחו</div>
+      <ul style="font-size:13px;color:#374151;line-height:1.6;padding-right:18px;margin:0">${issuesList}</ul>
+    </div>
+
+    <p style="color:#9ca3af;font-size:11px;margin-top:20px;text-align:center">A3 Content Agent v1.1 — SockAcademy</p>
+  </div>
+</div>`;
+
+  await transporter.sendMail({
+    from: 'SockAcademy A3 Agent <sockacademy.store@gmail.com>',
+    to: ADMIN_EMAIL,
+    subject: `⏸️ A3 — מאמר נעצר ע"י QA: "${topic.title.substring(0, 50)}..." | ${new Date().toLocaleDateString('he-IL')}`,
+    html: html_email,
+  });
+
+  console.log('📧 דוח QA-withheld נשלח');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // A1 CONTEXT — topic selection aligned with weekly product research
 // When running via A0 Orchestrator, these env vars are injected automatically.
 // Standalone runs fall back to week-rotation.
@@ -358,10 +421,60 @@ async function main() {
 
   // כתוב מאמר עם Claude
   console.log('\n✍️  כותב מאמר עם Claude...');
-  const bodyHtml = await writeArticle(topic);
-
-  const wordCount = bodyHtml.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).length;
+  let bodyHtml = await writeArticle(topic);
+  let wordCount = bodyHtml.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).length;
   console.log(`  ✅ ${wordCount} מילים נכתבו`);
+
+  // ── QA Gate — Sonnet second-pass review against Iron Law 2 before publish ──
+  // Up to MAX_QA_ROUNDS revise rounds. If still not approved — do not publish.
+  let qaApproved   = false;
+  let qaIssues     = [];
+  let qaRoundsUsed = 0;
+
+  for (let round = 0; round <= MAX_QA_ROUNDS; round++) {
+    console.log(`  🔍 QA round ${round + 1}/${MAX_QA_ROUNDS + 1}...`);
+    const qaResult = await reviewContent({ kind: 'article', html: bodyHtml, topic, wordCount });
+    qaRoundsUsed = round + 1;
+
+    if (qaResult.approved) {
+      qaApproved = true;
+      console.log('  ✅ QA approved');
+      break;
+    }
+
+    qaIssues = qaResult.issues;
+    console.log(`  ⚠️  QA revise requested: ${qaIssues.join('; ')}`);
+
+    if (round < MAX_QA_ROUNDS) {
+      bodyHtml = await writeArticle(topic, qaIssues.join('; '));
+      wordCount = bodyHtml.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).length;
+      console.log(`  ✍️  Rewritten (${wordCount} words) — re-checking...`);
+    }
+  }
+
+  if (!qaApproved) {
+    console.log(`  ❌ QA failed after ${qaRoundsUsed} round(s) — withholding publication`);
+
+    console.log('\n━'.repeat(40));
+    console.log('⏸️  A3 הושלם — מאמר נעצר ע"י QA (לא פורסם)');
+
+    await sendQAWithheldReport(topic, bodyHtml, qaIssues, qaRoundsUsed);
+
+    if (!DRY_RUN && supabase) {
+      const metricDate = new Date().toISOString().split('T')[0];
+      await writeMetrics(supabase, 'A3', metricDate, [
+        { name: 'blog_published',   value: 0,            unit: 'count' },
+        { name: 'blog_word_count',  value: wordCount,    unit: 'count' },
+        { name: 'qa_passed',        value: 0,            unit: 'count' },
+        { name: 'qa_rounds_used',   value: qaRoundsUsed, unit: 'count' },
+      ]);
+    }
+
+    // The agent behaved correctly — it refused to publish weak content.
+    // This is a successful run, not a system failure.
+    await logHealth(supabase, 'success');
+    return;
+  }
 
   // Validate internal links — strip broken URLs before publishing
   console.log('  🔍 Validating internal links...');
@@ -419,6 +532,8 @@ async function main() {
     await writeMetrics(supabase, 'A3', metricDate, [
       { name: 'blog_published', value: published ? 1 : 0, unit: 'count' },
       { name: 'blog_word_count', value: wordCount,         unit: 'count' },
+      { name: 'qa_passed',      value: 1,                  unit: 'count' },
+      { name: 'qa_rounds_used', value: qaRoundsUsed,        unit: 'count' },
     ]);
   }
 
