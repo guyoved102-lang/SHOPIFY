@@ -10,6 +10,7 @@ const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
+const { handleFatalError } = require('../../corp/core/self-heal.js');
 
 const PROPERTY_ID = process.env.GA4_PROPERTY_ID;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
@@ -369,10 +370,12 @@ async function main() {
 
 main().catch(async e => {
   console.error('Fatal:', e.message);
+  let sb = null;
   try {
-    const sb = getSupabase();
+    sb = getSupabase();
     await logHealth(sb, 'ERROR', e.message);
     await sendErrorAlert(e.message);
   } catch (_) {}
+  await handleFatalError({ agentId: 'A8', agentName: 'Analytics Reporter', err: e, supabase: sb });
   process.exit(1);
 });
