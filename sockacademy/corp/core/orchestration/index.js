@@ -12,6 +12,8 @@
  *   SA-3 Revenue:      A4, A6
  *   SA-4 Operations:   A7, A12, A9
  *   SA-5 Analytics:    A8
+ *   SA-9 Risk & Security:  A18, A21 (added 04/07/2026, Fable 5 audit H4/Task 11)
+ *   SA-10 Revenue Growth:  A24, A25, A26, A27, A28 (added 04/07/2026, Fable 5 audit H4/Task 11)
  *
  * No dependencies — accepts supabase client via parameter (dependency injection).
  * Graceful: will not throw if individual agents are missing from health log.
@@ -25,6 +27,8 @@ const CLUSTERS = {
   'SA-5 Analytics':     ['A8'],
   'SA-7 C-Suite':       ['A14', 'A15', 'A16'],
   'SA-8 Supply Chain':  ['A19', 'A20', 'A22', 'A23'],
+  'SA-9 Risk & Security':  ['A18', 'A21'],
+  'SA-10 Revenue Growth':  ['A24', 'A25', 'A26', 'A27', 'A28'],
 };
 
 // Max hours since last successful run before agent is considered stale.
@@ -53,6 +57,13 @@ const STALENESS_HOURS = {
   A20:   36,    // daily
   A22:   36,    // daily
   A23:   null,  // monthly, no strict threshold
+  A18:   36,    // daily
+  A21:   36,    // daily
+  A24:   36,    // daily
+  A25:   36,    // daily
+  A26:   200,   // weekly
+  A27:   200,   // weekly
+  A28:   200,   // weekly
 };
 
 // ─── HEALTH DATA ─────────────────────────────────────────────────────────────

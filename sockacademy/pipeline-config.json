@@ -3,11 +3,10 @@
     "version": "3.0.0",
     "last_updated": "2026-06-24",
     "owner": "A0 Orchestrator",
-    "description": "Declarative dependency graph + trigger matrix for all 28 SockAcademy agents. A0 reads this file — no hardcoded logic in A0 agent.js.",
+    "description": "Declarative dependency graph + trigger matrix for all 30 SockAcademy agents (A0-A28 + A2.5). A0 reads this file — no hardcoded logic in A0 agent.js.",
     "data_layer": {
       "supabase_migrated_primary": ["A0", "A1", "A2", "A10", "A11", "A13"],
       "supabase_health_log": ["A0", "A1", "A2", "A2.5", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10", "A11", "A12", "A13", "A14", "A15", "A16", "A17", "A19", "A20", "A22", "A23"],
-      "google_sheets_legacy": ["A7"],
       "supabase_tables": {
         "products":           "A1 write (research) + A2 write (upload) — primary product table",
         "trends":             "A10 output — trend intelligence",
@@ -221,11 +220,10 @@
           "agent": "A7",
           "workflow": "a7-supplier-monitor.yml",
           "timeout_minutes": 20,
-          "note": "Blocked on real product data — currently uses MOCK_PRODUCTS. See schemas/A7_input.schema.json migration_note.",
           "data_input": {
-            "via": "google_sheets",
-            "tab": "A1_Products",
-            "filter": "UploadStatus starts with 'uploaded:'",
+            "via": "supabase",
+            "table": "products",
+            "filter": "upload_status LIKE 'uploaded:%' AND cj_pid IS NOT NULL",
             "schema": "schemas/A7_input.schema.json"
           },
           "retry": { "max_attempts": 2, "backoff_minutes": 5 },
@@ -255,14 +253,11 @@
 
   "future_agents": {
     "already_built": {
-      "sa7_c_suite":    ["A8_Analytics", "A14_COO", "A15_CFO", "A16_CX"],
-      "sa8_supply_chain": ["A17_TokenRefresher", "A19_Returns", "A20_Inventory", "A22_SupplyChain", "A23_FactoryRelations"],
-      "status": "BUILT — commits 70f31a3 (SA-7) + 4a81060 (SA-8). Awaiting LAUNCH_MODE=true to activate."
-    },
-    "pending_phase_3": {
-      "risk": ["A18_Fraud", "A21_Affiliate"],
-      "growth": ["A24_CRO", "A25_Influencer", "A26_Regulatory", "A27_PR", "A28_SubscriptionClub"],
-      "status": "NOT YET BUILT — Phase 3 trigger: $5K MRR × 2 consecutive months"
+      "sa7_c_suite":        ["A8_Analytics", "A14_COO", "A15_CFO", "A16_CX"],
+      "sa8_supply_chain":   ["A17_TokenRefresher", "A19_Returns", "A20_Inventory", "A22_SupplyChain", "A23_FactoryRelations"],
+      "sa9_risk_security":  ["A18_Fraud", "A21_Affiliate"],
+      "sa10_revenue_growth": ["A24_CRO", "A25_Influencer", "A26_Regulatory", "A27_PR", "A28_SubscriptionClub"],
+      "status": "BUILT — commits 70f31a3 (SA-7), 4a81060 (SA-8), e90cdff (A18), 260dfb8 (A21), 33386f0 (A24), f279d0d (A25), 03d92ce (A26), 9a8a185 (A27), b272bf6 (A28). Gated behind LAUNCH_MODE=true — A16 and A24 are exceptions still awaiting a real gate (Guy decision G-1, Fable 5 audit 04/07/2026)."
     }
   },
 

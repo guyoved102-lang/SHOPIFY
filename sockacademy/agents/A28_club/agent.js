@@ -364,6 +364,8 @@ async function main() {
   } catch (err) {
     console.error('[A28] Fatal error:', err.message);
     await logHealth(sb, 'error', 0, { error: err.message }).catch(() => {});
+    await notifyTelegram(heTelegramMsg('A28 SockAcademy Club', '🚨 כשל קריטי!',
+      `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
     process.exit(1);
   }
 }

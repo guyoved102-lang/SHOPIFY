@@ -32,5 +32,7 @@ jobs:
           GH_REPO_OWNER:     ${{ github.repository_owner }}
           GH_REPO_NAME:      ${{ github.event.repository.name }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: node agent.js
         working-directory: sockacademy/agents/A17_token_refresher

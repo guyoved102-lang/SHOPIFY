@@ -417,5 +417,7 @@ async function main() {
 main().catch(async (err) => {
   console.error('[A27] Fatal error:', err.message);
   try { await logHealth(getSupabase(), 'failure', 0, { error: err.message }); } catch (_) {}
+  await notifyTelegram(heTelegramMsg('A27 PR Agent', '🚨 כשל קריטי!',
+    `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
   process.exit(1);
 });

@@ -356,4 +356,9 @@ async function sendEmail(narrative, processedLeads) {
 
   console.log('[A25] Complete');
   process.exit(0);
-})();
+})().catch(async err => {
+  console.error('[A25] Fatal error:', err.message);
+  await notifyTelegram(heTelegramMsg('A25 Influencer Outreach', '🚨 כשל קריטי!',
+    `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
+  process.exit(1);
+});
