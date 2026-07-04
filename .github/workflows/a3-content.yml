@@ -4,6 +4,13 @@ on:
   schedule:
     - cron: '0 9 * * 1'
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (writes article + runs QA, skips Shopify publish + Supabase writes)'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['true', 'false']
 
 jobs:
   write-blog:
@@ -44,4 +51,5 @@ jobs:
           GH_PAT_SECRETS_WRITE: ${{ secrets.GH_PAT_SECRETS_WRITE }}
           GH_REPO_OWNER: ${{ github.repository_owner }}
           GH_REPO_NAME: ${{ github.event.repository.name }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
         run: node agent.js
