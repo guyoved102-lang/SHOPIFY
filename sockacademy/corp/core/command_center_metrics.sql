@@ -22,12 +22,13 @@ create table if not exists command_center_metrics (
 
 alter table command_center_metrics enable row level security;
 
-create policy "service role full access"
-  on command_center_metrics
-  for all
-  to service_role
-  using (true)
-  with check (true);
+DO $$
+BEGIN
+  CREATE POLICY "service role full access" ON command_center_metrics
+    FOR ALL TO service_role USING (true) WITH CHECK (true);
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Fast lookup: all metrics for a given agent over time
 create index if not exists idx_ccm_agent_date
