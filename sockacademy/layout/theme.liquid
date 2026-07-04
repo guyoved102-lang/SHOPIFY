@@ -68,6 +68,12 @@
         .shopify-section { opacity: 1 !important; transform: none !important; }
       }
     </style>
+    <noscript>
+      <style>
+        /* JS disabled: no GSAP reveal will ever run — force all sections visible */
+        .shopify-section { opacity: 1 !important; transform: none !important; filter: none !important; }
+      </style>
+    </noscript>
 
     {{ content_for_header }}
 

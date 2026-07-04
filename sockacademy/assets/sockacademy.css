@@ -396,7 +396,7 @@ h4, .h4 { font-size: var(--text-xl);  line-height: 1.25; }
   }
 
   .sa-sticky-atc__price {
-    font-family: 'Playfair Display', sans-serif;
+    font-family: 'Playfair Display', Georgia, serif;
     font-size: 1.05rem;
     letter-spacing: 0.04em;
     color: var(--cream);
