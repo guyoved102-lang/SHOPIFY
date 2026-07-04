@@ -528,6 +528,8 @@ curl -X PUT .../products/XXX.json -d '{"product":{"id":XXX,"published":true}}'
 
 **בדיקה:** בסיום כל שיחה, לפני כתיבת ה-Primer הסופי — לשאול במפורש: "מה היה ה-Primer שקראתי ב-boot של השיחה הזו, והאם כל סעיף בו מטופל ברשימה החדשה שאני כותב עכשיו?"
 
+**עדכון (04/07/2026 — מומש בפועל, לא רק תועד):** גיא ביקש מנגנון טכני, לא רק כלל כתוב — "אסור שזה יקרה, תמצא פתרון". נבנה PreToolUse hook אמיתי (`~/.claude/settings.json` → matcher `Edit|Write`, script `~/.claude/hooks/archive-primer-hook.js`): לפני **כל** עריכה של `project_sockacademy_state.md`, ה-hook קורא את הקובץ כפי שהוא **עכשיו** (לפני העריכה), שולף את סקשן "Next Session Primer" הנוכחי, ומצרף אותו (append, timestamped) ל-`memory/PRIMER_HISTORY.log`. נבדק בפועל (pipe-test + הרצה חיה עם sentinel — ה-hook אכן ירה על Edit/Write אמיתי בשיחה) ועובד. זו רשת ביטחון **בנוסף** לצ'ק-ליסט הפרוצדורלי למעלה, לא תחליף לו — גם אם הצ'ק-ליסט יישכח, שום Primer לא באמת נעלם, רק צריך לבדוק את הלוג.
+
 ---
 
 ## SESSION CONTINUITY CHECKLIST — בכל שיחה
