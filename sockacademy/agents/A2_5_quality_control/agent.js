@@ -14,6 +14,7 @@ const nodemailer = require('nodemailer');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
 const { RETAIL_CEILING, DEFAULT_CEILING } = require('../../corp/core/pricing.js');
+const { handleFatalError } = require('../../corp/core/self-heal.js');
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
@@ -310,11 +311,13 @@ async function main() {
 
 main().catch(async err => {
   console.error('\n❌ A2.5 fatal:', err.message);
+  let sb = null;
   try {
-    const sb = getSupabase();
+    sb = getSupabase();
     await updateA25Health(sb, 'failure', { error: err.message });
   } catch (_) {}
   await notifyTelegram(heTelegramMsg('A2.5 Quality Control', '🚨 כשל קריטי!',
     `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${err.message}</code>`));
+  await handleFatalError({ agentId: 'A2.5', agentName: 'Quality Control', err, supabase: sb });
   process.exit(1);
 });
