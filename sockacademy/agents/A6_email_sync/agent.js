@@ -11,6 +11,7 @@ const { createClient } = require('@supabase/supabase-js');
 const path = require('path');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
+const { handleFatalError } = require('../../corp/core/self-heal.js');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 const DRY_RUN = process.env.DRY_RUN === 'true';
 
@@ -353,8 +354,13 @@ async function main() {
 
 main().catch(async e => {
   console.error('💥 Fatal:', e.message);
-  await logHealth(getSupabase(), 'failure', e.message).catch(() => {});
+  let sb = null;
+  try {
+    sb = getSupabase();
+    await logHealth(sb, 'failure', e.message);
+  } catch (_) {}
   await notifyTelegram(heTelegramMsg('A6 Email Sync', '🚨 כשל קריטי!',
     `ה-agent נכשל בהרצה. נדרשת בדיקה דחופה.\nשגיאה: <code>${e.message}</code>`));
+  await handleFatalError({ agentId: 'A6', agentName: 'Email Sync', err: e, supabase: sb });
   process.exit(1);
 });
