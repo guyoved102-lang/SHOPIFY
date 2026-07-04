@@ -16,6 +16,7 @@ const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js')
 const { writeMetrics } = require('../../corp/core/metrics.js');
 const { handleFatalError } = require('../../corp/core/self-heal.js');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
+const DRY_RUN = process.env.DRY_RUN === 'true';
 
 function getSupabase() {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) return null;
@@ -23,6 +24,7 @@ function getSupabase() {
 }
 
 async function logHealth(supabase, status, errorMsg = '') {
+  if (DRY_RUN) return;
   if (!supabase) return;
   try {
     const run_status = status === 'failed' ? 'failure' : status;
@@ -101,6 +103,10 @@ async function loadStateFromSupabase(supabase) {
 }
 
 async function saveStateToSupabase(supabase, cjPid, stateData) {
+  if (DRY_RUN) {
+    console.log(`   [DRY_RUN] Would save state for ${cjPid}: stock=${stateData.stock}, price=${stateData.price}, status=${stateData.status}`);
+    return;
+  }
   if (!supabase) return;
   try {
     await supabase.from('supplier_state').upsert(
@@ -235,12 +241,14 @@ async function shopifyPut(endpoint, body) {
 
 async function draftProduct(shopifyId, productName) {
   if (!shopifyId) { console.log(`    ⚠️  No Shopify ID — skipping auto-draft`); return; }
+  if (DRY_RUN) { console.log(`    [DRY_RUN] Would auto-draft Shopify product ${shopifyId} (${productName})`); return; }
   await shopifyPut(`products/${shopifyId}.json`, { product: { id: shopifyId, status: 'draft' } });
   console.log(`    🔒 Auto-drafted on Shopify`);
 }
 
 async function updateShopifyPrice(shopifyId, variantId, newPrice, productName) {
   if (!shopifyId || !variantId) { console.log(`    ⚠️  No Shopify IDs — skipping price update`); return; }
+  if (DRY_RUN) { console.log(`    [DRY_RUN] Would update Shopify variant ${variantId} price → $${newPrice.toFixed(2)} (${productName})`); return; }
   await shopifyPut(`variants/${variantId}.json`, { variant: { id: variantId, price: newPrice.toFixed(2) } });
   console.log(`    💲 Shopify price → $${newPrice.toFixed(2)}`);
 }
@@ -268,6 +276,10 @@ async function handleChange(product, change, current) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function sendAlert(allChanges) {
   if (!process.env.GMAIL_APP_PASSWORD || allChanges.length === 0) return;
+  if (DRY_RUN) {
+    console.log(`[DRY_RUN] Would send alert email for ${allChanges.length} change(s)`);
+    return;
+  }
 
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com', port: 465, secure: true,
@@ -333,6 +345,7 @@ async function main() {
   await logHealth(supabase, 'running');
   console.log('🚀 A7 — Supplier Monitor Agent v1.0');
   console.log('━'.repeat(40));
+  console.log(`⚙️  DRY_RUN=${DRY_RUN}`);
   console.log(`⚙️  stock_threshold=${CONFIG.STOCK_LOW_THRESHOLD ?? 'TBD'} | price_warn=${CONFIG.PRICE_CHANGE_WARN_PCT ?? 'TBD'}% | price_critical=${CONFIG.PRICE_CHANGE_CRITICAL_PCT ?? 'TBD'}%`);
   console.log(`⚙️  markup=${CONFIG.MARKUP_MULTIPLIER}x | auto_draft=${CONFIG.STOCK_ZERO_AUTO_DRAFT} | auto_price=${CONFIG.AUTO_UPDATE_SHOPIFY_PRICE}`);
 
@@ -391,7 +404,7 @@ async function main() {
   if (allChanges.length) await sendAlert(allChanges);
 
   // Command Center KPIs — feeds A0's unified daily brief (deterministic, no AI)
-  if (supabase) {
+  if (supabase && !DRY_RUN) {
     const metricDate = new Date().toISOString().split('T')[0];
     const criticalCount = allChanges.filter(c => c.severity === 'critical').length;
     await writeMetrics(supabase, 'A7', metricDate, [

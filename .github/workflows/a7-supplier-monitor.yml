@@ -4,6 +4,13 @@ on:
   schedule:
     - cron: '0 6 * * *'
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (reads/detects changes, skips Shopify writes + Supabase state + email)'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['true', 'false']
 
 jobs:
   monitor:
@@ -32,6 +39,7 @@ jobs:
 
       - name: Run A7 Supplier Monitor
         env:
+          DRY_RUN: ${{ github.event.inputs.dry_run }}
           SHOPIFY_SHOP_DOMAIN: ${{ secrets.SHOPIFY_SHOP_DOMAIN }}
           SHOPIFY_MASTER_TOKEN: ${{ secrets.SHOPIFY_MASTER_TOKEN }}
           CJ_API_KEY: ${{ secrets.CJ_API_KEY }}
