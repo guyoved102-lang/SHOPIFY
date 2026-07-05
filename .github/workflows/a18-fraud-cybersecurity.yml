@@ -2,7 +2,7 @@ name: A18 — Fraud & Cybersecurity
 
 on:
   schedule:
-    - cron: '0 9 * * *'    # 09:00 UTC daily — 30 min after A19 (08:30 UTC)
+    - cron: '0 9 * * 2'    # Tuesday 09:00 UTC — dormant until LAUNCH_MODE; weekly stagger per FABLE5_CRON_EFFICIENCY.md
   workflow_dispatch:
 
 jobs:

@@ -1,8 +1,8 @@
-name: A22 — Supply Chain Intelligence (Daily)
+name: A22 — Supply Chain Intelligence (Weekly)
 
 on:
   schedule:
-    - cron: '15 6 * * *'
+    - cron: '15 6 * * 2'  # Tuesday 06:15 UTC — dormant until LAUNCH_MODE; weekly stagger per FABLE5_CRON_EFFICIENCY.md
   workflow_dispatch:
     inputs:
       dry_run:

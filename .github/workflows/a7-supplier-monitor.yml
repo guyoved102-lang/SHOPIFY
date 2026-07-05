@@ -2,7 +2,7 @@ name: A7 — Supplier Monitor
 
 on:
   schedule:
-    - cron: '0 6 * * *'
+    - cron: '30 5 * * *'  # 05:30 UTC daily — moved from 06:00 to avoid A0/A7 same-minute Supabase collision (FABLE5_CRON_EFFICIENCY.md issue 3)
   workflow_dispatch:
     inputs:
       dry_run:

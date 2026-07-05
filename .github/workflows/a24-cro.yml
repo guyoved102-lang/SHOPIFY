@@ -2,7 +2,7 @@ name: A24 — CRO Agent
 
 on:
   schedule:
-    - cron: '0 11 * * *'    # 11:00 UTC daily — 1h after A21 (10:00 UTC)
+    - cron: '0 11 * * 2'    # Tuesday 11:00 UTC — dormant until LAUNCH_MODE; weekly stagger per FABLE5_CRON_EFFICIENCY.md
   workflow_dispatch:
 
 jobs:

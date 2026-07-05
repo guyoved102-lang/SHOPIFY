@@ -2,7 +2,7 @@ name: A14 — COO Daily Operations Report
 
 on:
   schedule:
-    - cron: '0 21 * * *'
+    - cron: '0 21 * * 1'    # Monday 21:00 UTC — dormant until LAUNCH_MODE; weekly stagger per FABLE5_CRON_EFFICIENCY.md
   workflow_dispatch:
     inputs:
       dry_run:

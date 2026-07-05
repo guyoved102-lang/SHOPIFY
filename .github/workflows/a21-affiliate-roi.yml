@@ -2,7 +2,7 @@ name: A21 — Affiliate & Influencer ROI
 
 on:
   schedule:
-    - cron: '0 10 * * *'    # 10:00 UTC daily — 1h after A19 (08:30), 1h after A18 (09:00)
+    - cron: '0 10 * * 2'    # Tuesday 10:00 UTC — dormant until LAUNCH_MODE; weekly stagger per FABLE5_CRON_EFFICIENCY.md
   workflow_dispatch:
 
 jobs:

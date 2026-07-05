@@ -53,14 +53,14 @@ const STALENESS_HOURS = {
   A15:   36,    // daily
   A16:   200,   // weekly
   A17:   null,  // bimonthly, no strict threshold
-  A19:   36,    // daily
-  A20:   36,    // daily
-  A22:   36,    // daily
+  A19:   200,   // weekly (Tue) — Fable 5 CRON_EFFICIENCY fix 06/07/2026, paired with cron reschedule
+  A20:   200,   // weekly (Tue) — Fable 5 CRON_EFFICIENCY fix 06/07/2026, paired with cron reschedule
+  A22:   200,   // weekly (Tue) — Fable 5 CRON_EFFICIENCY fix 06/07/2026, paired with cron reschedule
   A23:   null,  // monthly, no strict threshold
-  A18:   36,    // daily
-  A21:   36,    // daily
-  A24:   36,    // daily
-  A25:   36,    // daily
+  A18:   200,   // weekly (Tue) — Fable 5 CRON_EFFICIENCY fix 06/07/2026, paired with cron reschedule
+  A21:   200,   // weekly (Tue) — Fable 5 CRON_EFFICIENCY fix 06/07/2026, paired with cron reschedule
+  A24:   200,   // weekly (Tue) — Fable 5 CRON_EFFICIENCY fix 06/07/2026, paired with cron reschedule
+  A25:   200,   // weekly (Wed) — Fable 5 CRON_EFFICIENCY fix 06/07/2026, paired with cron reschedule
   A26:   200,   // weekly
   A27:   200,   // weekly
   A28:   200,   // weekly

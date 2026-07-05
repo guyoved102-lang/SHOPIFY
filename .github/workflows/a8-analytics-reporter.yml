@@ -2,7 +2,7 @@ name: A8 — Analytics Reporter (Weekly)
 
 on:
   schedule:
-    - cron: '0 7 * * 0'
+    - cron: '0 12 * * 0'  # Sunday 12:00 UTC — moved from 07:00 to avoid A5/A8 same-minute Supabase collision (FABLE5_CRON_EFFICIENCY.md issue 4)
   workflow_dispatch:
     inputs:
       dry_run:

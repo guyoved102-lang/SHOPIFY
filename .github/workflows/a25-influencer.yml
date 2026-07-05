@@ -2,7 +2,7 @@ name: A25 — Influencer Outreach
 
 on:
   schedule:
-    - cron: '0 9 * * *'    # 09:00 UTC daily — 1h before A21 (10:00 UTC)
+    - cron: '0 9 * * 3'    # Wednesday 09:00 UTC — dormant until LAUNCH_MODE; weekly stagger per FABLE5_CRON_EFFICIENCY.md
   workflow_dispatch:
 
 jobs:

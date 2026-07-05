@@ -1,8 +1,8 @@
-name: A20 — Inventory Intelligence (Daily)
+name: A20 — Inventory Intelligence (Weekly)
 
 on:
   schedule:
-    - cron: '0 7 * * *'
+    - cron: '0 7 * * 2'  # Tuesday 07:00 UTC — dormant until LAUNCH_MODE; weekly stagger per FABLE5_CRON_EFFICIENCY.md
   workflow_dispatch:
     inputs:
       dry_run:
