@@ -21,12 +21,17 @@ create table if not exists executive_reports (
 
 alter table executive_reports enable row level security;
 
-create policy "service role full access"
-  on executive_reports
-  for all
-  to service_role
-  using (true)
-  with check (true);
+DO $$
+BEGIN
+  create policy "service role full access"
+    on executive_reports
+    for all
+    to service_role
+    using (true)
+    with check (true);
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 create index if not exists idx_exec_reports_agent_date
   on executive_reports (agent_id, report_date desc);
@@ -35,5 +40,5 @@ create index if not exists idx_exec_reports_created_at
   on executive_reports (created_at desc);
 
 grant all on public.executive_reports to service_role;
-grant all on public.executive_reports to anon;
-grant all on public.executive_reports to authenticated;
+revoke all on public.executive_reports from anon;
+revoke all on public.executive_reports from authenticated;

@@ -27,17 +27,22 @@ create table if not exists agent_health_log (
 
 alter table agent_health_log enable row level security;
 
-create policy "service role full access"
-  on agent_health_log
-  for all
-  to service_role
-  using (true)
-  with check (true);
+DO $$
+BEGIN
+  create policy "service role full access"
+    on agent_health_log
+    for all
+    to service_role
+    using (true)
+    with check (true);
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 create index if not exists idx_agent_health_agent_id   on agent_health_log (agent_id);
 create index if not exists idx_agent_health_run_status on agent_health_log (run_status);
 create index if not exists idx_agent_health_created_at on agent_health_log (created_at desc);
 
 grant all on public.agent_health_log to service_role;
-grant all on public.agent_health_log to anon;
-grant all on public.agent_health_log to authenticated;
+revoke all on public.agent_health_log from anon;
+revoke all on public.agent_health_log from authenticated;

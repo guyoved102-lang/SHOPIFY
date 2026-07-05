@@ -18,7 +18,12 @@ create table if not exists press_contacts (
 
 alter table press_contacts enable row level security;
 
-create policy "service role full access" on press_contacts
-  for all to service_role using (true) with check (true);
+DO $$
+BEGIN
+  create policy "service role full access" on press_contacts
+    for all to service_role using (true) with check (true);
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 grant all on public.press_contacts to service_role;

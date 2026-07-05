@@ -14,7 +14,12 @@ create table if not exists pr_campaigns (
 
 alter table pr_campaigns enable row level security;
 
-create policy "service role full access" on pr_campaigns
-  for all to service_role using (true) with check (true);
+DO $$
+BEGIN
+  create policy "service role full access" on pr_campaigns
+    for all to service_role using (true) with check (true);
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 grant all on public.pr_campaigns to service_role;

@@ -15,15 +15,20 @@ create table if not exists pending_approvals (
 
 alter table pending_approvals enable row level security;
 
-create policy "service role full access"
-  on pending_approvals
-  for all
-  to service_role
-  using (true)
-  with check (true);
+DO $$
+BEGIN
+  create policy "service role full access"
+    on pending_approvals
+    for all
+    to service_role
+    using (true)
+    with check (true);
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 create index if not exists pending_approvals_status_idx on pending_approvals (status, created_at);
 
 grant all on public.pending_approvals to service_role;
-grant all on public.pending_approvals to anon;
-grant all on public.pending_approvals to authenticated;
+revoke all on public.pending_approvals from anon;
+revoke all on public.pending_approvals from authenticated;

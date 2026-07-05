@@ -22,7 +22,7 @@ status changes. New Fable dispatches append new items here rather than starting 
 
 | # | Item | Owner | Status | Notes |
 |---|------|-------|--------|-------|
-| A | Ship the existing launch plan (steps 1-12) — no new plan | 🤖 | Not started | B-H below slot into this plan's flow |
+| A | Ship the existing launch plan (steps 1-12) — no new plan | 🤖 | In progress | Step 2.1 (SQL/RLS batch) done 05/07 — see below. Steps 2.2-2.4, 2.6-2.7 still queued. |
 | B | Keystone decision week (6 sitting decisions) | 🧑 | Not started | See breakdown below — highest leverage, unblocks ~10 downstream items |
 | C | Partial Design Freeze lift — 3-item batch (#1 sale-grammar, #14 homepage copy, #8 Sock Finder v2) | 🧑 approves → 🤖 executes | Not started | Freeze stays in force for all other design items |
 | D | Backend feature freeze until 25 orders (Iron Law 1 completion clause) | 🧑 sign-off → 🤖 amends CLAUDE.md | ✅ **Done 05/07** | Guy approved bundle; clause added to Iron Law 1 in CLAUDE.md, commit pending |
@@ -35,7 +35,7 @@ status changes. New Fable dispatches append new items here rather than starting 
 
 | # | Decision | Blocks | Status |
 |---|----------|--------|--------|
-| 3.1 | Brand positioning: premium-performance-now vs. luxury-claim-now | Homepage rewrite, article retirement, discount question, design batch (C) | Not started |
+| 3.1 | Brand positioning: premium-performance-now vs. luxury-claim-now | Homepage rewrite, article retirement, discount question, design batch (C) | **Deferred (Guy, 05/07/2026)** — leaning toward eventual luxury/"Rolex" framing, but explicitly does not want to lock copy language before real products are chosen/curated. Item I (homepage copy) stays untouched until this resolves — do not proceed on brand-voice copy without re-checking here first. |
 | 3.2 | Discount mechanics resolution | Product page copy (item C, #1) | Not started |
 | 3.3 | Single-pair price floor | Pricing pages, positioning (3.1) | Not started |
 | 3.5 | VISION.md A-numbering cleanup | Documentation consistency | Not started |
@@ -82,6 +82,15 @@ status changes. New Fable dispatches append new items here rather than starting 
 | S | Add 3 superpowers QA skills (systematic-debugging, verification-before-completion, test-driven-development) to CLAUDE.md Skills table as ACTIVE | 🤖 | Not started | Gap, not disagreement — already installed/used, just undocumented |
 
 **🔴 Security incident from this stage (self-contained, already fixed):** the Stage 17 subagent printed a fragment of the real `magic` MCP server's API key into its own output doc — a direct S2 violation. Caught and redacted by Claude before the file was ever staged (`git status` confirmed untracked — no exposure to git history or the public GitHub repo). Logged as **ANTI_RECURRENCE #42** with a rule extending S2 explicitly to subagents that read real config files. Item P (key rotation) stands regardless, per Fable's own original recommendation.
+
+## Launch Plan Step 2.1 — SQL/RLS batch (✅ Done 05/07/2026)
+Per `FABLE5_RLS_SANITY_PASS.md`. `products_table.sql` was already fixed in an earlier session.
+This pass fixed the rest:
+- Added missing service_role policies: `fraud_events`, `affiliates`, `affiliate_performance`, `regulatory_events` (4 tables, 0 policies before)
+- Wrapped 8 non-idempotent `CREATE POLICY` statements in `DO $$ ... EXCEPTION WHEN duplicate_object` (or verified 3 more already used an equivalent `IF NOT EXISTS (SELECT ... pg_policies)` pattern): `pending_approvals`, `queue_log` (+ de-duped its bare indexes), `agent_health_log`, `executive_reports`, `club_members` (both tables), `press_contacts`, `pr_campaigns`, `pr_coverage`
+- Hardened least-privilege on the 7 files touched: `GRANT ALL TO anon/authenticated` → `GRANT service_role` + explicit `REVOKE ... FROM anon/authenticated`
+- **Deferred (low urgency per Fable):** same grants hardening on `trends`, `competitor_prices`, `competitor_intel`, `product_qc_log`, `system_config`, `cro_snapshots`, `knowledge_chunks` — currently inert (RLS denies anon/authenticated regardless), not a correctness bug, queued for a future pass.
+- **Guy-only follow-up:** re-run the corrected SQL files in Supabase SQL Editor for any table already created with the old broken/non-idempotent version.
 
 ## Standing rule (resolved 05/07/2026 — see `feedback_fable5_brain_executor_model` memory)
 Fable produces plans/analysis; Sonnet/Opus always execute the downstream drafting/code. Do not

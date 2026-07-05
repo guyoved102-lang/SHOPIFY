@@ -12,7 +12,12 @@ create table if not exists pr_coverage (
 
 alter table pr_coverage enable row level security;
 
-create policy "service role full access" on pr_coverage
-  for all to service_role using (true) with check (true);
+DO $$
+BEGIN
+  create policy "service role full access" on pr_coverage
+    for all to service_role using (true) with check (true);
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 grant all on public.pr_coverage to service_role;

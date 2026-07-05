@@ -17,14 +17,19 @@ create table if not exists queue_log (
 
 alter table queue_log enable row level security;
 
-create policy "service role full access"
-  on queue_log for all to service_role
-  using (true) with check (true);
+DO $$
+BEGIN
+  create policy "service role full access"
+    on queue_log for all to service_role
+    using (true) with check (true);
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
-create index queue_log_status_idx  on queue_log (status, created_at);
-create index queue_log_type_idx    on queue_log (event_type);
-create index if not exists queue_log_source_idx  on queue_log (source);
+create index if not exists queue_log_status_idx on queue_log (status, created_at);
+create index if not exists queue_log_type_idx   on queue_log (event_type);
+create index if not exists queue_log_source_idx on queue_log (source);
 
 grant all on public.queue_log to service_role;
-grant all on public.queue_log to anon;
-grant all on public.queue_log to authenticated;
+revoke all on public.queue_log from anon;
+revoke all on public.queue_log from authenticated;

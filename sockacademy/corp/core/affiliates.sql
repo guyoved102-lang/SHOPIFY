@@ -25,6 +25,14 @@ CREATE TABLE IF NOT EXISTS affiliates (
 
 ALTER TABLE affiliates ENABLE ROW LEVEL SECURITY;
 
+DO $$
+BEGIN
+  CREATE POLICY "service role full access" ON affiliates
+    FOR ALL TO service_role USING (true) WITH CHECK (true);
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
 CREATE INDEX IF NOT EXISTS idx_affiliates_code   ON affiliates (discount_code);
 CREATE INDEX IF NOT EXISTS idx_affiliates_active ON affiliates (active);
 
@@ -47,12 +55,28 @@ CREATE TABLE IF NOT EXISTS affiliate_performance (
 
 ALTER TABLE affiliate_performance ENABLE ROW LEVEL SECURITY;
 
+DO $$
+BEGIN
+  CREATE POLICY "service role full access" ON affiliate_performance
+    FOR ALL TO service_role USING (true) WITH CHECK (true);
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
 CREATE INDEX IF NOT EXISTS idx_affiliate_perf_date ON affiliate_performance (report_date DESC);
 CREATE INDEX IF NOT EXISTS idx_affiliate_perf_aff  ON affiliate_performance (affiliate_id);
 
--- ─── GRANTS — service_role must have explicit access ─────────────────────────
+-- ─── GRANTS — service_role only, least-privilege (Fable 5 Stage 15 §2.1) ─────
 
-GRANT ALL ON TABLE affiliates           TO service_role, anon, authenticated;
-GRANT ALL ON TABLE affiliate_performance TO service_role, anon, authenticated;
-GRANT USAGE, SELECT ON SEQUENCE affiliates_id_seq            TO service_role, anon, authenticated;
-GRANT USAGE, SELECT ON SEQUENCE affiliate_performance_id_seq TO service_role, anon, authenticated;
+GRANT ALL ON TABLE affiliates TO service_role;
+REVOKE ALL ON TABLE affiliates FROM anon;
+REVOKE ALL ON TABLE affiliates FROM authenticated;
+GRANT ALL ON TABLE affiliate_performance TO service_role;
+REVOKE ALL ON TABLE affiliate_performance FROM anon;
+REVOKE ALL ON TABLE affiliate_performance FROM authenticated;
+GRANT USAGE, SELECT ON SEQUENCE affiliates_id_seq TO service_role;
+REVOKE ALL ON SEQUENCE affiliates_id_seq FROM anon;
+REVOKE ALL ON SEQUENCE affiliates_id_seq FROM authenticated;
+GRANT USAGE, SELECT ON SEQUENCE affiliate_performance_id_seq TO service_role;
+REVOKE ALL ON SEQUENCE affiliate_performance_id_seq FROM anon;
+REVOKE ALL ON SEQUENCE affiliate_performance_id_seq FROM authenticated;
