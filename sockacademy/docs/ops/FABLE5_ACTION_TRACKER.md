@@ -12,12 +12,47 @@ status changes. New Fable dispatches append new items here rather than starting 
 ---
 
 ## Queued for next Fable dispatch (Stage 18 candidate — not yet dispatched)
-**Added 05/07/2026, Guy's request:** have Fable 5 actively go looking for (a) external skills/MCP
-servers/tools worth adding that nobody has proposed yet, and (b) blind spots across the project Guy
-isn't aware of — genuinely open-ended discovery, not a checklist review. This is distinct from Stage
-15's "Missed Leverage" (which covered project strategy/ops) — this round is specifically about
-**tooling Guy doesn't know exists yet** that could help SockAcademy or his Claude Code workflow.
-Dispatch when Guy is ready (uses Fable quota — his call on timing).
+**Added 05/07/2026, expanded 06/07/2026, Guy's request:** Fable actively researches; Sonnet/Opus
+execute after. Guy explicitly wants topics he wouldn't know to ask about himself — "blind spots I'm
+not aware of and don't know how to phrase." This is distinct from Stage 15's "Missed Leverage" (which
+covered project strategy/ops) — these are categories a first-time solo founder typically never thinks
+to check until something goes wrong. Dispatch when Guy is ready (uses Fable quota — his call on timing).
+Claude (not Fable) identified and drafted this list, per the standing brain/executor split — Fable's
+job next is to actually investigate each one against this specific project, not to discover that these
+categories exist.
+
+**A. External tooling (original ask):** skills/MCP servers/tools worth adding that nobody has proposed yet.
+
+**B. Legal exposure beyond the attorney packet (1.3 only covers ToS/privacy/medical-claims):**
+- Personal liability: no legal entity exists yet (`memory`: "אין ישות משפטית עדיין") while already
+  taking international payments — what personal financial exposure does Guy carry today, and at what
+  revenue/risk point does forming an entity stop being optional?
+- ADA/WCAG web-accessibility risk — US e-commerce sites (even pre-revenue ones with live checkout)
+  are a known target for demand-letter mills; nobody has audited the theme for this at all.
+- Sales tax / VAT nexus — at what order volume/geography does Guy owe tax registration somewhere,
+  and is Shopify's tax settings actually configured for it.
+
+**C. Business continuity / bus-factor:** the entire company is one person + AI agents holding all
+credentials. What happens if Guy is unreachable for a week (illness, travel)? Is there any documented
+recovery path (2FA backup codes, an emergency access list, who else could even log in)? This has never
+been asked anywhere in the project's 42 anti-recurrence protocols.
+
+**D. Infrastructure single points of failure Guy hasn't priced in:**
+- Free-tier cliffs: Supabase, Upstash, GitHub Actions minutes — what happens to the *business* if one
+  is exhausted unexpectedly (e.g. during a real traffic spike, the one moment it matters most)?
+- Data backup: if the Supabase project were deleted or corrupted tomorrow, is there any backup of the
+  actual data (not just the SQL schema in git)?
+- Domain/registrar account security — is 2FA on at GoDaddy; what's the actual hijack/lockout risk for
+  the one domain the whole business runs on?
+- Email deliverability — SPF/DKIM/DMARC on the sending domains (Klaviyo, Gmail); a misconfiguration
+  here silently sends every customer email to spam with zero alert to Guy.
+
+**E. Insurance and brand-name risk:**
+- General/product liability insurance for a business that ships physical goods to customers — likely
+  never considered, genuinely relevant the moment there's a real order.
+- Trademark clearance in the *other* direction: is "SockAcademy" actually free to use, or does it risk
+  infringing an existing mark somewhere Guy would sell into? (Different question from A17's own-mark
+  protection, which only watches for copycats *of* SockAcademy.)
 
 ---
 
