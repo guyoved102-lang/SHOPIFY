@@ -124,6 +124,55 @@ No phase transitions without explicit Guy sign-off. Zero exceptions.
 
 ---
 
+#### A2.7 — Order Fulfillment (Transactional Core)
+**Supersedes: —. Adds: two Phase 2 agents (A2.7, A16.5). No reordering of existing phases.**
+**Role:** The missing transactional organ — customer pays → supplier order placed at CJ → tracking synced back → Shopify fulfillment status updated → customer notified. Until this agent exists, every order is fulfilled by Guy by hand via the CJ dashboard (deliberately so for orders ~1–25: the founder learns the failure modes firsthand before automating them).
+- **Input:**
+  - Shopify `orders/paid` webhook (plumbing half-exists: `shopify-webhook-handler.yml` + Make.com order watch as fallback)
+  - Product ↔ CJ variant/SKU mapping from A1/A2 Supabase records (must be real CJ IDs — A7 currently monitors MOCK products; blocking dependency)
+  - CJ order-creation API (`/shopping/order/createOrder` family) + CJ tracking endpoints
+- **Output:**
+  - CJ purchase order placed per paid Shopify order (idempotent — one CJ order per Shopify order ID, ever)
+  - New Supabase table `fulfillments` (RLS ON): shopify_order_id, cj_order_id, status, tracking_number, timestamps, audit JSONB
+  - Tracking number + fulfillment status written back to Shopify (Fulfillment API) → customer receives Shopify-native shipping notification
+  - Telegram alert (Hebrew canonical format) on ANY placement/tracking failure — a silently unfulfilled paid order is the single worst failure in the company
+  - Daily reconciliation report: paid orders ↔ placed CJ orders must match at 0% discrepancy (same standard the Phase 2 Gate already applies to Make.com ↔ Shopify)
+- **Trigger:** Event-driven (webhook → Upstash queue → worker), NOT cron — transactional work needs retry semantics, not daily sweeps. One daily reconciliation cron as the safety net. (Editorial/intel agents stay on cron; this is the first agent on the queue substrate `corp/core/queue.js` was built for.)
+- **Tech Stack:** CJ API, Shopify Admin API `2025-01` (Fulfillment endpoints), Upstash Redis queue, Supabase `fulfillments`, `corp/core/telegram.js`, `corp/core/metrics.js` (KPIs: orders placed, mean pay→placement latency, failures)
+- **Dependencies:**
+  - Real, verified CJ product IDs + variant mapping (replaces A7's MOCK set)
+  - HITL ramp: first 10 automated orders require Guy approval via the `pending_approvals` pattern (Control Center Phase B) before CJ placement; auto-placement only after 10/10 clean
+  - Payment-cleared check before placement (no CJ order on pending/high-risk payments — coordinate with A18's future fraud flags)
+  - **Build order: FIRST among Phase 2 agents — before A14/A15.** A COO report about orders the founder fulfills by hand is a diary, not an operating system.
+
+#### A16.5 — Customer Service Desk (the fleet's mouth)
+**Role:** Answer inbound customer contact — "where is my order," sizing, exchange/refund initiation — as drafted-by-Claude, approved-and-sent-by-Guy (HITL). Distinct from A16, which is churn/NPS *analytics*: A16 measures the customer relationship; A16.5 conducts it. Re-homes the old roster's "A10 — שירות לקוחות" concept that died in renumbering and was never replaced.
+- **Input:**
+  - Inbound messages: Shopify Inbox + hello@sockacademy.store
+  - Order + tracking state from A2.7's `fulfillments` table (a CS desk without fulfillment data can only apologize — hard dependency)
+  - Approved policy corpus: FAQ, shipping/returns policy **as attorney-approved** (post packet 1.3), size guide
+- **Output:**
+  - Drafted replies in the brand register — **Iron Law 2 applies to CS replies**; the support inbox is a brand surface, and at this tier arguably the most-read one
+  - Escalation queue to Guy (Telegram): refunds, exceptions, anything with money or anger in it — Claude never sends autonomously
+  - Weekly contact-reason digest → feeds A16 (CX analytics) and, at Phase 3, A19 (returns intelligence)
+  - Supabase `cs_tickets` (RLS ON): message, draft, resolution, response-time KPIs via `writeMetrics()`
+- **Trigger:** Event-driven on inbound message (target: draft ready for Guy within 1 hour); weekly digest cron
+- **Tech Stack:** Shopify Inbox API / Gmail API, Claude, Supabase, `corp/core/telegram.js`
+- **Dependencies:**
+  - A2.7 live (tracking data is most of CS volume)
+  - Attorney-approved returns/refund policy (replies cite policy; policy must be final)
+  - Returns-economics decision by Guy: at premium register + CJ dropship, physically returning a $28 pair to a China warehouse is uneconomical — the correct policy is almost certainly replace-or-refund-without-return, which is *both* the premium move ("we make it right, keep the pair") and the profitable one. Decide before the first ticket, not during it.
+
+**Phase 2 Gate additions (append under Functionality Testing):**
+- [ ] A2.7: DRY_RUN full chain on 3 mock paid orders → CJ payload correct, idempotency holds on replay, `fulfillments` rows written, zero live CJ calls
+- [ ] A2.7: 1 REAL end-to-end test order (Guy's own address, cheapest SKU) → CJ placement, tracking writeback, customer email all verified — this doubles as the first live validation of supplier lead time and packaging
+- [ ] A16.5: 5 mock tickets (WISMO, size, refund, angry, out-of-scope) → drafts on-register, escalation fires on refund/angry, zero autonomous sends
+- [ ] Reconciliation: mock discrepancy injected → Telegram alert fires
+
+*(Added 05/07/2026 — Fable 5 Stage 16, approved by Guy same session. Design-doc only; no code until Phase 2 activates per the backend freeze below.)*
+
+---
+
 ## PHASE 3A — RISK & SECURITY
 **Activation Trigger:** $5,000 MRR × 2 consecutive months (rolling window)
 

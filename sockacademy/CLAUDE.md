@@ -222,6 +222,8 @@ GitHub workflow    → .github/workflows/
 - כל agent: נבנה → נבדק → נ-commit → נ-push → ואז עוברים הלאה.
 - **אסור בכל מצב:** לשגר מוצר לפני שהתשתית בנויה | לדלג על INFRA OVERHAUL | להתחיל קמפיין פרסומי לפני ש-pipeline שלם.
 
+**🔒 Backend Feature Freeze — נוסף 05/07/2026 (Fable 5 Stage 15, אושר ע"י גיא):** Phase 1 build הוכרז **COMPLETE** (30/30 agents בנויים, 77-ממצא audit בוצע, orchestration מסונכרן). עד `PHASE_2_ACTIVATE_BY_GUY`: רק תיקוני bugs, פריטי launch-plan, ותפעול תוכן. **אפס agents/modules/tables/workflows חדשים.** זה לא סותר את חוק ברזל 1 — זה אוכף אותו: התנאי של החוק ("הבסיס 100% בנוי") כבר התקיים, וההמשך הטבעי הוא לעצור לבנות ולהתחיל לשגר, לא להמשיך "לשפר" מכונה שאין לה עדיין לקוח אחד.
+
 #### חוק ברזל 2 — BRAND & DESIGN (Center Stage — Loro Piana Standard)
 - **Center Stage Narrative:** SockAcademy עומד במרכז הבמה כ-authority בלתי-מעורער. לא מוכר — מוביל.
 - **טון:** סמכותי, קצר, בוגר. **אפס אמוג'י** בכל תוכן פרסומי — מיילים, meta, social, product descriptions.

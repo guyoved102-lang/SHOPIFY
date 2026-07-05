@@ -72,7 +72,8 @@ async function fetchHealthMap(supabase) {
   const { data: rows, error } = await supabase
     .from('agent_health_log')
     .select('agent_id, agent_name, run_status, error_message, created_at')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(500); // ~16 days x 30 agents headroom — keeps this the latest-per-agent read bounded (Fable 5 Stage 15 §3.3)
 
   if (error) throw new Error(`SA-6: agent_health_log read failed: ${error.message}`);
 

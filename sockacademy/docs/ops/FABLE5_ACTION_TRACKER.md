@@ -25,9 +25,9 @@ status changes. New Fable dispatches append new items here rather than starting 
 | A | Ship the existing launch plan (steps 1-12) — no new plan | 🤖 | Not started | B-H below slot into this plan's flow |
 | B | Keystone decision week (6 sitting decisions) | 🧑 | Not started | See breakdown below — highest leverage, unblocks ~10 downstream items |
 | C | Partial Design Freeze lift — 3-item batch (#1 sale-grammar, #14 homepage copy, #8 Sock Finder v2) | 🧑 approves → 🤖 executes | Not started | Freeze stays in force for all other design items |
-| D | Backend feature freeze until 25 orders (Iron Law 1 completion clause) | 🧑 sign-off → 🤖 amends CLAUDE.md | Not started | Constitutional — flagged, not self-applied |
-| E | Constitution amendment: add A2.7 Order Fulfillment + CS function to Phase 2 skeleton | 🧑 approves → 🤖 drafts amendment | Not started | Design-doc only, no code yet |
-| F | Bound `orchestration/index.js:71-77` health query (`.limit(500)`) | 🤖 | Not started | 3-line fix, verified live by Claude 05/07 |
+| D | Backend feature freeze until 25 orders (Iron Law 1 completion clause) | 🧑 sign-off → 🤖 amends CLAUDE.md | ✅ **Done 05/07** | Guy approved bundle; clause added to Iron Law 1 in CLAUDE.md, commit pending |
+| E | Constitution amendment: add A2.7 Order Fulfillment + CS function to Phase 2 skeleton | 🧑 approves → 🤖 drafts amendment | ✅ **Done 05/07** | Guy approved bundle; pasted verbatim into PHASE_ARCHITECTURE_SKELETON.md after A20, commit pending |
+| F | Bound `orchestration/index.js:71-77` health query (`.limit(500)`) | 🤖 | ✅ **Done 05/07** | `.limit(500)` added, commit pending |
 | G | Doc retirement pass (banner superseded FABLE5 docs + skill de-stating) | 🤖 | Not started | Skill deliverables below (Part III) are the skill half of this |
 | H | YAML Reality Audit → deterministic script (`scripts/ci/yaml-reality-audit.js`) | 🤖 | Not started | Can also wait until post-launch — Guy's call |
 
@@ -48,9 +48,9 @@ status changes. New Fable dispatches append new items here rather than starting 
 
 | Skill | Action | Status |
 |-------|--------|--------|
-| `ship-approved-batch` (new) | Create `.claude/skills/ship-approved-batch/SKILL.md` per Stage 15 spec | Not started |
-| `run-sockacademy-agents` (rewrite) | Replace with de-stated version (no agent-status tables) | Not started |
-| `workflow-navigator` | Retire (delete) or reduce to trigger-phrase table only | Not started — Guy's call on delete vs. reduce |
+| `ship-approved-batch` (new) | Create `.claude/skills/ship-approved-batch/SKILL.md` per Stage 15 spec | ✅ **Done 05/07** — local only, `.claude/` is gitignored by design |
+| `run-sockacademy-agents` (rewrite) | Replace with de-stated version (no agent-status tables) | ✅ **Done 05/07** — local only |
+| `workflow-navigator` | Retire (delete) or reduce to trigger-phrase table only | ✅ **Done 05/07** — deleted per Fable's recommendation, local only |
 
 ---
 
@@ -63,7 +63,7 @@ status changes. New Fable dispatches append new items here rather than starting 
 | J | Constitution amendment: A2.7 Order Fulfillment + A16.5 Customer Service Desk → Phase 2 skeleton | 🧑 approves → 🤖 pastes verbatim | Not started | Text ready in `FABLE5_STAGE16_DELIVERABLES.md` Deliverable 2. Insert after A20 entry, before Phase 3A heading, in `PHASE_ARCHITECTURE_SKELETON.md`. Includes Phase 2 Gate checklist additions. Design-doc only — no code until Phase 2 activates (backend freeze, item D). Build order: A2.7 before A14/A15. |
 | K | GTM plan: sample order of 3-5 SKUs (~$50-80) — Guy-only, unblocks photography + curation claims + CJ path test | 🧑 | Not started | Highest-ROI/cheapest action available; gates D1's [VERIFY] rows and the Founding Cohort launch (Gate A in the GTM sequence). |
 | L | GTM plan: Founding Cohort capture band (design item #13) — prioritize once 3.1 lands | 🧑 approves → 🤖 builds | Not started | The one channel that can deliver the first 25 orders alone (150-500 signups × 5-8% conversion). Register rule: allocation, never discount. |
-| M | Sock Finder constitutional violations — remove "Funny" quiz path + BLOCKED novelty results; re-bracket budget question off sub-$18 | 🧑 approves → 🤖 fixes | Not started | Verified this pass: `sections/sock-finder.liquid` lines ~369-414 recommend BLOCKED novelty products at a below-floor price bracket. Minimal fix can ride in batch C alongside design item #8; full v2 rewrite is #8 itself. |
+| M | Sock Finder constitutional violations — remove "Funny" quiz path + BLOCKED novelty results; re-bracket budget question off sub-$18 | 🧑 approves → 🤖 fixes | ✅ **Done 05/07** | Guy approved bundle; "funny" vibe + all 4 novelty result rows removed, budget re-bracketed to $18-28/$28-45/$45+. Verified clean via grep. Full v2 result-screen rewrite (item #8) still separate/pending. |
 | N | Homepage facts micro-audit — "Est. 2024" (false founding date) + "50+ Sock Categories" (actual: 9 collections/5 products) | 🧑 confirms true founding year → 🤖 sweeps remaining pages | Not started | Both live fabrications caught this pass, fixed in D1's copy table (rows 6, 36). One-pass "every number/date is true or gone" sweep still owed for product pages, About, FAQ, size guide. |
 
 ## Stage 16 — Additional flag (no tracker row, Guy-only judgment)

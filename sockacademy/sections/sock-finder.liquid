@@ -380,7 +380,6 @@
       options: [
         { value: 'minimal', label: 'Minimal'     },
         { value: 'bold',    label: 'Bold & Loud' },
-        { value: 'funny',   label: 'Funny'       },
         { value: 'artsy',   label: 'Artsy'       },
       ]
     },
@@ -388,9 +387,9 @@
       key: 'budget',
       question: "What's your budget?",
       options: [
-        { value: 'b1', label: 'Under $15' },
-        { value: 'b2', label: '$15 – $30' },
-        { value: 'b3', label: '$30+'      },
+        { value: 'b1', label: '$18 – $28' },
+        { value: 'b2', label: '$28 – $45' },
+        { value: 'b3', label: '$45+'      },
       ]
     }
   ];
@@ -398,19 +397,15 @@
   var RESULTS = {
     'everyday:minimal': { title: 'The Daily Essential',     desc: 'Clean no-show ankle socks you\'ll forget you\'re wearing. Form meets function, every single day.',       tags: { b1: 'No-Show 3-Pack Essentials', b2: 'Premium Cotton Ankle Crew', b3: 'Merino Wool Everyday' }, link: '/collections/all' },
     'everyday:bold':    { title: 'The Statement Maker',     desc: 'Bold patterns, loud colors, zero apologies. Your socks are doing the talking before you say a word.',    tags: { b1: 'Color Pop Crew Pack', b2: 'Patterned Fashion Crew', b3: 'Designer Statement Set' },         link: '/collections/all' },
-    'everyday:funny':   { title: 'The Conversation Starter',desc: 'Novelty socks with serious personality. Warning: expect compliments — and questions — from strangers.',  tags: { b1: 'Novelty Crew 2-Pack', b2: 'Premium Novelty Set', b3: 'Collector\'s Funny Edition' },       link: '/collections/all' },
     'everyday:artsy':   { title: 'The Wearable Canvas',     desc: 'Artistic patterns that double as foot art. Crew socks you\'ll actually want to show off.',              tags: { b1: 'Artsy Crew Single', b2: 'Designer Pattern Pack', b3: 'Limited Artist Collab' },             link: '/collections/all' },
     'sport:minimal':    { title: 'The Performance Purist',  desc: 'No-frills sport socks engineered for speed. Moisture-wicking, arch support, zero drag. Just performance.', tags: { b1: 'Sport Crew Pack', b2: 'Coolmax Performance Crew', b3: 'Elite Compression Pro' },          link: '/collections/all' },
     'sport:bold':       { title: 'The Athletic Powerhouse', desc: 'Train hard, look harder. Bold compression socks that mean business on every lap and every rep.',         tags: { b1: 'Bold Sport Crew', b2: 'Compression Training Set', b3: 'Pro Athlete Series' },             link: '/collections/all' },
-    'sport:funny':      { title: 'The Fun Runner',          desc: 'Keep it light — quirky sport socks that make your gym crew smile between sets and sprints.',            tags: { b1: 'Fun Gym Crew', b2: 'Novelty Sport 3-Pack', b3: 'Premium Fun Sport Set' },                  link: '/collections/all' },
     'sport:artsy':      { title: 'The Style Athlete',       desc: 'Because performance and art aren\'t mutually exclusive. Graphic sport socks for the bold mover.',       tags: { b1: 'Graphic Sport Crew', b2: 'Artist Sport Pack', b3: 'Designer Athletic Series' },           link: '/collections/all' },
     'formal:minimal':   { title: 'The Classic Gentleman',   desc: 'Slim-knit dress socks in timeless solids. The kind that never upstage your suit — but always elevate it.', tags: { b1: 'Classic Dress 3-Pack', b2: 'Fine Knit Dress Set', b3: 'Merino Dress Collection' },       link: '/collections/all' },
     'formal:bold':      { title: 'The Power Move',          desc: 'Make a statement in every boardroom. Bold dress socks for people who own the room before they speak.',   tags: { b1: 'Patterned Dress Pair', b2: 'Statement Dress Set', b3: 'Premium Bold Dress' },             link: '/collections/all' },
-    'formal:funny':     { title: 'The Secret Rebel',        desc: 'Business on the outside, personality at the ankles. Your colleagues will never suspect a thing.',       tags: { b1: 'Subtle Novelty Dress', b2: 'Fun Formal 2-Pack', b3: 'Premium Funny Formal Set' },         link: '/collections/all' },
     'formal:artsy':     { title: 'The Sophisticated Patron',desc: 'Artistic patterns elevated for formal wear. The most interesting ankles in every room you enter.',       tags: { b1: 'Art Deco Dress Pair', b2: 'Gallery Formal Set', b3: 'Artisan Formal Collection' },       link: '/collections/all' },
     'gift:minimal':     { title: 'The Timeless Gift',       desc: 'A clean, classic sock set they\'ll reach for every single day. Simple, useful, and genuinely thoughtful.', tags: { b1: 'Essential Gift 4-Pack', b2: 'Premium Everyday Gift Box', b3: 'Curated Merino Gift Set' }, link: '/collections/all' },
     'gift:bold':        { title: 'The Showstopper Gift',    desc: 'Bold, vibrant socks that make the wrapping paper jealous. A gift worth photographing.',                 tags: { b1: 'Bold Color 4-Pack', b2: 'Statement Gift Box', b3: 'Premium Bold Gift Collection' },       link: '/collections/all' },
-    'gift:funny':       { title: 'The Guaranteed Laugh',    desc: 'Novelty sock gift sets that break the ice at any occasion. There has never been a bad reaction.',       tags: { b1: 'Funny 3-Pack Gift Bag', b2: 'Premium Novelty Gift Box', b3: 'Collector\'s Funny Gift Set' }, link: '/collections/all' },
     'gift:artsy':       { title: 'The Thoughtful Gift',     desc: 'Artistic sock sets for the person who appreciates beauty in everything — including footwear.',          tags: { b1: 'Artsy 2-Pack Gift', b2: 'Designer Gift Box', b3: 'Limited Edition Art Gift' },           link: '/collections/all' },
   };
 
