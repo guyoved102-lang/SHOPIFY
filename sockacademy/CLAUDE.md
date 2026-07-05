@@ -425,19 +425,24 @@ GitHub workflow    → .github/workflows/
 | `notebooklm-skill` | ON-HOLD | Legal + CFO Document Processing — A9/A15 |
 | `doc-skills` | ACTIVE | CFO/COO Report Engine — PDF P&L, Tax docs, Audit reports |
 | `caveman` | BANNED | אפס שימוש מאומת — אסור לנצח |
+| `systematic-debugging` | ACTIVE | superpowers plugin — QA/debugging בכל תיקון bug (Iron Law 4) |
+| `verification-before-completion` | ACTIVE | superpowers plugin — אכיפת "evidence before assertions" לפני "הושלם" |
+| `test-driven-development` | ACTIVE | superpowers plugin — TDD בכל agent/feature חדש. שלושתם מותקנים ובשימוש בפועל מ-superpowers plugin (`enabledPlugins` ב-`~/.claude/settings.json`) — נוספו לטבלה 05/07/2026 (Fable 5 Stage 17) כדי לסגור פער תיעודי, לא שינוי החלטה. |
 
 ### MCP Servers — Corporate Function Map
 | MCP | ורדיקט CTO | מחלקה קורפורטיבית |
 |---|---|---|
-| `context7` | ACTIVE | Dev Sessions — docs לספריות |
-| `agent-browser` | ACTIVE | Intelligence Cluster — A10/A11/A13/A17/A18 |
+| `context7` | PLANNED (לא מותקן בפועל) | Dev Sessions — docs לספריות |
+| `agent-browser` | PLANNED (לא מותקן בפועל) | Intelligence Cluster — A10/A11/A13/A17/A18 |
 | `higgsfield` | ON-HOLD | Creative Studio — מחכה לתמונת רפרנס מגיא |
 | `perplexity` | ON-HOLD | Intelligence Cluster — להפעיל עם A10/A13 |
-| `supermetrics` | ACTIVE | CFO Data Aggregation — GA4+Meta+Shopify+Klaviyo unified |
-| `notion` | ACTIVE | Corporate Knowledge Base — decisions, audit trail, OKRs |
-| `granola` | ACTIVE | Strategy Session Documenter → Notion pipeline |
+| `supermetrics` | PLANNED (לא מותקן בפועל) | CFO Data Aggregation — GA4+Meta+Shopify+Klaviyo unified |
+| `notion` | PLANNED (לא מותקן בפועל) | Corporate Knowledge Base — decisions, audit trail, OKRs |
+| `granola` | PLANNED (לא מותקן בפועל) | Strategy Session Documenter → Notion pipeline |
 | `zapier` | ON-HOLD | Accounting Integration — QuickBooks/Xero bridge (CFO Agent) |
-| `magic` (21st.dev) | NOT APPLICABLE (3/4 tools) | `builder`/`inspiration`/`refiner` פולטים React JSX/TSX בלבד — stack mismatch, SockAcademy frontend הוא Shopify Liquid (0 קבצי .jsx/.tsx ברפו). `logo_search` (SVG) — ON-HOLD, stack-agnostic, לוגואי חברות אמיתיות בלבד, לא עיצוב לוגו מותג. ורדיקט: 02/07/2026. |
+| `magic` (21st.dev) | REMOVED 05/07/2026 | היה מותקן בפועל ב-`~/.claude.json` (עם API key חשוף ב-plain text — סובב ע"י גיא) למרות ורדיקט NOT APPLICABLE (02/07/2026: `builder`/`inspiration`/`refiner` פולטים React JSX/TSX, SockAcademy הוא Shopify Liquid). הוסר מה-config המקומי 05/07/2026 (Fable 5 Stage 17 audit). |
+
+**⚠️ עדכון 05/07/2026 (Fable 5 Stage 17, ANTI_RECURRENCE #42 context):** 5 השורות שסומנו PLANNED היו מתויגות ACTIVE — אבל אף אחד מהן לא נמצא מותקן בפועל ב-`~/.claude.json` או בכל config מקומי אחר שנבדק. אם מישהו מהם *כן* בשימוש (למשל דרך Desktop-app extension store שלא נבדק), לתקן בחזרה ל-ACTIVE ולציין את המקור. עד אז — הטבלה משקפת מה שבאמת מותקן, לא כוונה.
 
 ### Slash Commands
 | פקודה | סטטוס |

@@ -616,6 +616,21 @@ curl -X PUT .../products/XXX.json -d '{"product":{"id":XXX,"published":true}}'
 
 ---
 
+## 42. Fable 5 subagent הדפיס שבריר מפתח API אמיתי לתוך קובץ תיעוד (05/07/2026)
+
+**מה קרה:** Stage 17 של יוזמת Fable 5 (audit על הגדרות Claude Code/Desktop) קרא את `~/.claude.json` וגילה מפתח API אמיתי בפורמט plain-text עבור שרת MCP בשם `magic`. בכתיבת ה-doc, ה-subagent צירף קטע מהמפתח בפועל (`"26c34f9f04a7…"`) לתוך `FABLE5_STAGE17_CLAUDE_SETTINGS_AUDIT.md` — הפרה ישירה של חוק S2 ("לעולם לא להדפיס סודות שנזכרים מהזיכרון — אפילו חלקיים, אפילו 'ישנים'"). נתפס ותוקן מיד ע"י Claude לפני שהקובץ הגיע ל-`git add` — אומת ש-`git status` הראה את הקובץ כ-`??` (untracked) לגמרי, כך שלא הייתה חשיפה בפועל להיסטוריית git או ל-GitHub הפומבי.
+
+**סיבה:** חוק S2 מנוסח כהנחיה לגיא/Claude בצ'אט ("לעולם לא לבקש מגיא להדביק... לעולם לא להדפיס"), אבל מעולם לא הורחב במפורש ל**subagents (כולל Fable 5)** שכותבים ישירות ל-file system בלי לעבור דרך הצ'אט. Subagent שקורא קובץ config אמיתי (כמו `~/.claude.json`) ומצטט ממנו "לצורך תיעוד המצב" עלול, בלי כוונה רעה, להעתיק גם את הערך הרגיש עצמו — לא רק את קיומו.
+
+**מה מונע חזרה:**
+1. בכל dispatch עתידי ל-Fable 5 (או subagent אחר) שקורא config files אמיתיים (`~/.claude.json`, `.env`, `settings.local.json`, secrets) — להוסיף במפורש בפרומפט: "אם תמצא ערך רגיש (API key, token, password) — דווח על **קיומו והמיקום שלו בלבד**, אף פעם לא את הערך עצמו, גם לא חלקית/מקוצר."
+2. אחרי כל dispatch של subagent שכתב קובץ `.md` חדש (Fable 5 או אחר) — **לפני** commit, סריקת security sweep סטנדרטית (`grep -iE "(api_key|secret|password|token|sk-|pk_|shpat_)"`) חלה גם על מסמכי Fable 5, לא רק על diff קוד. הקובץ הזה עצמו לא נבדק מיידית — Claude קרא אותו ידנית וזיהה את השבריר בעין, לא ע"י grep אוטומטי. זה מזל, לא תהליך.
+3. **פעולה נדרשת (Guy):** לסובב את מפתח ה-`magic`/21st-dev MCP server ב-`~/.claude.json` בכל מקרה — הוא חשוף בקובץ מקומי plain-text, ולפי הביקורת עצמה השרת ממילא DEPRECATED/NOT APPLICABLE לפרויקט (Liquid, לא React). ההמלצה המקורית של Fable 5 (להסיר את השרת + לסובב את המפתח) עומדת בעינה, ללא קשר לתקרית התיעוד.
+
+**בדיקה:** `grep -rn "API_KEY\"\s*:\s*\"[A-Za-z0-9]" sockacademy/docs/` — כל תוצאה עם ערך שנראה כמו מפתח אמיתי (לא `[REDACTED]`/placeholder) בתוך `docs/` היא red flag מיידי.
+
+---
+
 ## SESSION CONTINUITY CHECKLIST — בכל שיחה
 
 **פתיחה:**
