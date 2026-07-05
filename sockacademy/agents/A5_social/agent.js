@@ -115,7 +115,6 @@ const WEEKLY_THEMES = [
   'The capsule sock wardrobe — 5 pairs for every occasion',
   'Cycling kit and socks: the last frontier of performance gear',
   'Weekend dress code: smart casual done right, from the ground up',
-  'Antimicrobial fibers — copper-infused socks decoded',
   'Business travel packing: one pair that does everything',
   'The psychology of small luxuries — why premium socks matter',
   'Sock length guide: ankle, crew, over-the-calf — when to wear what',

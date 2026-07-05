@@ -437,31 +437,6 @@ const POSTS = [
     `.trim(),
   },
 
-  // ── 16 ─────────────────────────────────────────────────────────────────────
-  {
-    title: 'The Best Socks for People with Diabetes: What to Look For',
-    handle: 'best-socks-for-diabetes',
-    tags: 'diabetes, foot health, diabetic socks, health, circulation',
-    seo_description: 'Diabetic socks explained — what features matter for people with diabetes, why standard socks can be harmful, and what to look for when buying.',
-    body_html: `
-<p>For people with diabetes, socks are not a fashion item — they're a health device. Diabetic peripheral neuropathy, which affects up to 50% of people with long-term diabetes, reduces sensation in the feet, meaning small injuries can go unnoticed and worsen before they're detected. A well-chosen sock reduces risk. A poor choice creates it.</p>
-
-<h2>What Makes a Sock Diabetic-Safe</h2>
-<p>The primary concerns for diabetic feet are: pressure points (which can develop into ulcers), moisture accumulation (which promotes infection), restricted circulation, and undetected trauma from poorly fitting socks. Diabetic socks address these concerns through specific construction choices. Non-binding tops: the cuff of a standard sock can restrict venous return if too tight — diabetic socks use an extra-soft, non-constricting top that stays up without compressing. Seamless or flat-seam construction: standard toe seams create pressure ridges that, over a full day's wear, can cause tissue damage in neuropathic feet. White fabric: many diabetic socks use white fabric so that any wound drainage or bleeding is visible — an early warning system for foot injuries that reduced sensation might otherwise mask.</p>
-
-<h2>Moisture Management Is Critical</h2>
-<p>Diabetic feet are more vulnerable to fungal and bacterial infection. A sock that holds moisture against the skin — cotton in high-activity situations — creates the ideal environment for infection. Moisture-wicking fibers (merino wool, CoolMax, Drymax) are preferable for anyone with diabetes, especially during activity or in warm weather. The goal is keeping feet as dry as possible throughout the day.</p>
-
-<h2>Cushioning</h2>
-<p>Extra cushioning at the heel, ball of the foot, and toe box distributes pressure more evenly, reducing the localized stress that can cause pressure sores. Look for socks with extra padded zones specifically in these high-pressure areas. The cushioning should be consistent — if it compresses unevenly or creates ridges, it can cause the pressure problems it's intended to prevent.</p>
-
-<h2>Fit Precision</h2>
-<p>For diabetic feet, fit precision matters more than for any other population. A sock that's slightly too large bunches and creates localized pressure. A sock that's too small constricts. Socks sized in narrow increments — individual shoe sizes rather than wide ranges — are worth the additional investment. Replace socks that have thinned at the heel or toe, even if they appear intact — thin areas concentrate pressure.</p>
-
-<p>Always consult a podiatrist or physician for specific recommendations based on your individual health situation. This guide is informational, not medical advice.</p>
-    `.trim(),
-  },
-
   // ── 17 ─────────────────────────────────────────────────────────────────────
   {
     title: 'Sustainable Socks: The Environmental Cost of Your Sock Drawer',

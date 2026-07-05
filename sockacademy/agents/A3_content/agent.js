@@ -53,7 +53,6 @@ const BLOG_TOPICS = [
   { title: "Egyptian Cotton Socks: What Makes Them Different (And Better)", keywords: 'egyptian cotton socks, premium cotton socks, dress socks material', category: 'Premium Materials' },
   { title: "Bamboo vs Merino Socks: Which Should You Choose?", keywords: 'bamboo socks vs merino, best eco socks, sustainable socks comparison', category: 'Premium Materials' },
   { title: "Cashmere Socks: The Luxury Sock That's Actually Practical", keywords: 'cashmere socks, luxury socks men, soft socks premium', category: 'Premium Materials' },
-  { title: "Copper-Infused Socks: The Science Behind the Hype", keywords: 'copper socks benefits, antimicrobial socks, copper fiber socks', category: 'Premium Materials' },
 
   // Dress & Formal
   { title: "The Men's Dress Sock Guide: Length, Material, and Pattern Rules", keywords: 'mens dress socks guide, formal socks, dress socks length', category: 'Dress & Formal' },
