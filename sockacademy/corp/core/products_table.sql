@@ -40,9 +40,13 @@ create table if not exists products (
 -- RLS
 alter table products enable row level security;
 
-create policy if not exists "service role full access"
-  on products for all to service_role
-  using (true) with check (true);
+DO $$
+BEGIN
+  CREATE POLICY "service role full access" ON products
+    FOR ALL TO service_role USING (true) WITH CHECK (true);
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Drop stale trigger created by old schema (had updated_at column that doesn't exist)
 drop trigger if exists products_updated_at on products;

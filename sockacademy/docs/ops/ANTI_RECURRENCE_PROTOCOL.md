@@ -597,6 +597,25 @@ curl -X PUT .../products/XXX.json -d '{"product":{"id":XXX,"published":true}}'
 
 ---
 
+## 41. SHOPIFY_MASTER_TOKEN rotation — Custom App UI sunset + JSON-vs-form-urlencoded token exchange (05/07/2026)
+
+**מה קרה:** אחרי שהמפתח הישן דלף וגיא ביטל אותו, ניסיון להשיג טוקן חדש נתקע על כמה שעות: ה-Custom App UI הקלאסי (Shopify Admin → Develop apps) כבר לא זמין כמו שהיה, אפליקציות Dev Dashboard חדשות משתמשות כברירת מחדל ב-"Shopify Managed Installation" (מחזיר `hmac`/`host`, לא `code`), ו-`shopify app dev` דורש dev store (החנות שלנו production). גם אחרי שנמצא הפתרון (checkbox "Use legacy install flow" + authorize URL ישיר), חילוף הקוד לטוקן נכשל שוב ושוב עם `400 Oauth error invalid_request`.
+
+**סיבה (שלושה ממצאים נפרדים, אותו theme — הפלטפורמה השתנתה מאז הפעם הקודמת שזה נעשה):**
+1. לחיצה על אייקון האפליקציה מתוך רשימת האפליקציות המותקנות ב-Admin טוענת אותה כ-embedded app (URL pattern עם `hmac`/`host`) — **לא** עוברת דרך מסך ה-OAuth consent, גם כש-"Use legacy install flow" מסומן. צריך לפנות ישירות ל-`/admin/oauth/authorize` בדפדפן.
+2. `exchange_token.js` שלח את בקשת חילוף הקוד כ-`application/x-www-form-urlencoded` (הפורמט שהיה תקין בעבר) — Shopify's `/admin/oauth/access_token` דחה את זה עם `400 invalid_request` גם עם קוד תקין וסיקרט נכון. הפתרון: לשלוח JSON (`Content-Type: application/json`, גוף `JSON.stringify({...})`) — זה מה שה-endpoint בפועל דורש כרגע.
+3. אותה אפליקציה יכולה להפיק שני פורמטים שונים של טוקן — `shpat_` (חילוף OAuth קלאסי) ו-`atkn_` (כפתור "Create automation token" נפרד) — לא ניתן להניח שאחד מהם "תמיד תקין"; ב-05/07/2026 ה-`atkn_` החזיר `401` (כנראה נוצר לפני שההתקנה בפועל הושלמה) בעוד ה-`shpat_` עבד מיד.
+
+**מה מונע חזרה:**
+1. הנוהל המלא, כולל כל שלבי ה-workaround, מתועד ב-`sockacademy/docs/ops/SHOPIFY_TOKEN_RUNBOOK.md` — לקרוא אותו **קודם** כל ניסיון עתידי לחדש/לסובב את הטוקן, לא לנסות לשחזר מהזיכרון.
+2. `exchange_token.js` תוקן לשלוח JSON — אם מישהו יחזיר אותו ל-form-urlencoded ("כי זה מה שהיה פעם"), זו נסיגה לבאג הזה בדיוק.
+3. אחרי כל חילוף טוקן חדש — **תמיד** לאמת עם קריאת GET אמיתית ל-Admin API (`shop.json`) לפני שמשתמשים בטוקן ב-`.env`/GitHub Secrets, ולא להניח שפורמט מסוים (shpat_/atkn_) תקף רק כי הוא "נראה נכון".
+4. `gh secret set <NAME>` — הערך תמיד רק בפרומפט האינטראקטיבי, אף פעם לא כ-argument בפקודה עצמה (טעות שקרתה גם בשיחה הזו וגרמה ל-secret עם שם שגוי).
+
+**בדיקה:** אם ניצור/נסובב `SHOPIFY_MASTER_TOKEN` שוב — לעקוב אחרי `SHOPIFY_TOKEN_RUNBOOK.md` צעד-אחר-צעד ולוודא שהתהליך לוקח דקות, לא שעות.
+
+---
+
 ## SESSION CONTINUITY CHECKLIST — בכל שיחה
 
 **פתיחה:**
