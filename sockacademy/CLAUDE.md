@@ -240,6 +240,7 @@ GitHub workflow    → .github/workflows/
 - **Zero-Waste cron** — agent שרץ יומי ללא output אמיתי → weekly. אפס ריצות בזבזניות.
 - **API versions נעולות:** Shopify `2025-01` | Klaviyo `2024-10-15` — לא לרדת בשום agent חדש.
 - **Security sweep:** חובה לפני **כל** commit — לא רק בסיום שיחה. NEVER commit `.env` לgit.
+- **Hash-pinning לסקילים חיצוניים** — נוסף 05/07/2026 (Fable 5 Stage 15/17): כל סקיל חיצוני חדש (לא internal, לא superpowers plugin) → חובה `computedHash` ב-`skills-lock.json`, בדיוק כמו 4 סקילי Higgsfield הקיימים. לא להעתיק סקיל חיצוני בלי לנעול hash — זה מה שמונע tampering שקט במקור upstream.
 
 #### חוק ברזל 4 — MENTOR MODE & CONTINUOUS QA (לאתגר, לא לאשר)
 - **Double-check pipeline** — לאחר כל agent שנבנה: לוודא שה-workflow, ה-secrets, ה-cron, וה-DRY_RUN עובדים יחד.

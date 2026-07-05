@@ -11,6 +11,16 @@ status changes. New Fable dispatches append new items here rather than starting 
 
 ---
 
+## Queued for next Fable dispatch (Stage 18 candidate — not yet dispatched)
+**Added 05/07/2026, Guy's request:** have Fable 5 actively go looking for (a) external skills/MCP
+servers/tools worth adding that nobody has proposed yet, and (b) blind spots across the project Guy
+isn't aware of — genuinely open-ended discovery, not a checklist review. This is distinct from Stage
+15's "Missed Leverage" (which covered project strategy/ops) — this round is specifically about
+**tooling Guy doesn't know exists yet** that could help SockAcademy or his Claude Code workflow.
+Dispatch when Guy is ready (uses Fable quota — his call on timing).
+
+---
+
 ## Source documents (read in this order for full context)
 1. `FABLE5_LAUNCH_READINESS_PLAN.md` — Stage 14 master synthesis, Tier 1-3, steps 1-12 (the original launch plan).
 2. `FABLE5_ARCHITECT_FULL_REVIEW.md` — Stage 15 full-project review (this tracker's action items A-H below).
