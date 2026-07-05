@@ -11,7 +11,14 @@ status changes. New Fable dispatches append new items here rather than starting 
 
 ---
 
-## Queued for next Fable dispatch (Stage 18 candidate — not yet dispatched)
+## Stage 18 — dispatched 06/07/2026: Target-state orchestration architecture
+**Ask:** design how A0 becomes an actual conductor (can re-dispatch/quarantine, not just report),
+which agents move to the existing-but-unused event-driven queue substrate (`corp/core/queue.js`)
+first vs. which stay on cron, and a phased migration plan compatible with the backend freeze
+(design-only, no code until Phase 2). Separate from the discovery queue below per Guy's explicit
+choice (06/07/2026). Output pending.
+
+## Queued for next Fable dispatch (Stage 19 candidate — not yet dispatched)
 **Added 05/07/2026, expanded 06/07/2026, Guy's request:** Fable actively researches; Sonnet/Opus
 execute after. Guy explicitly wants topics he wouldn't know to ask about himself — "blind spots I'm
 not aware of and don't know how to phrase." This is distinct from Stage 15's "Missed Leverage" (which
