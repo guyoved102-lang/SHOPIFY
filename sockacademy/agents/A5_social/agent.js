@@ -162,7 +162,7 @@ async function generateCaption(post, theme, revisionNotes = null) {
 
   const msg = await withRetry(() => anthropic.messages.create({
     model: 'claude-sonnet-4-6',
-    max_tokens: 300,
+    max_tokens: 700, // was 300 — too tight for hook+80-110w body+CTA+11 hashtags+visual_direction JSON (~280-320 tok), caused silent truncation → parse failure (Fable 5 QA_GATE_ANALYSIS.md finding 1, 06/07/2026)
     messages: [{
       role: 'user',
       content: `You write Instagram captions for SockAcademy — the world's first dedicated sock authority. Premium socks for men. Think: Monocle's precision meets a trusted friend's directness. The account is @sockacademy.store.
@@ -186,7 +186,7 @@ HUMANIZER RULES — every caption must feel written, not generated:
 - Never start two consecutive sentences with the same word
 - Use em dashes (—) once per caption for a natural pause
 - The hook must be a complete, standalone thought — not a teaser, not a cliffhanger
-- One paragraph max 20 words. One word or two-word closing line before the CTA.
+- The one-word or two-word closing line lives INSIDE paragraph 3 as its final line — it is not a separate 4th paragraph, and it does not shrink the 80-110 word body total below.
 - Occasionally begin a sentence with "And" or "But" — it sounds human, not robotic
 
 SOCIAL-MEDIA-SKILLS — Instagram-specific craft:
@@ -213,13 +213,12 @@ Respond with ONLY raw JSON in this exact format — no markdown code fences (no 
     const json = stripped.match(/\{[\s\S]*\}/)?.[0];
     return JSON.parse(json);
   } catch {
-    return {
-      hook: theme,
-      body: msg.content[0].text,
-      cta: '→ sockacademy.store',
-      hashtags: '#sockacademy #premiumsocks #mensstyle',
-      visual_direction: post.imageStyle,
-    };
+    // Was: a fabricated fallback caption (3 hashtags + #sockacademy) that failed
+    // QA rules 5+9 by construction, guaranteeing a hold. Return null instead so
+    // the caller treats this as a generation failure to retry/hold — never a
+    // caption the QA gate is asked to review (Fable 5 QA_GATE_ANALYSIS.md finding 1).
+    console.log('  ⚠ Caption JSON parse failed — treating as generation failure, not a caption');
+    return null;
   }
 }
 
@@ -390,6 +389,7 @@ async function sendWeeklyCalendar(posts, weekNum, theme) {
 
       ${p.imageUrl ? `<img src="${p.imageUrl}" style="width:100%;border-radius:6px;margin-bottom:14px;max-height:400px;object-fit:cover" alt="${p.plan.type}">` : ''}
 
+      ${p.caption ? `
       <div style="font-size:16px;font-weight:700;color:#F0EDE6;margin-bottom:8px;font-family:Georgia,serif">"${p.caption.hook}"</div>
       <div style="font-size:13px;color:#9ca3af;line-height:1.7;white-space:pre-line;margin-bottom:10px">${p.caption.body}</div>
       <div style="font-size:12px;color:#C9A84C;margin-bottom:6px">${p.caption.cta}</div>
@@ -397,7 +397,8 @@ async function sendWeeklyCalendar(posts, weekNum, theme) {
       <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:4px;padding:10px">
         <span style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:1px">Visual Direction: </span>
         <span style="font-size:11px;color:#9ca3af">${p.caption.visual_direction}</span>
-      </div>
+      </div>` : `
+      <div style="font-size:13px;color:#f87171;margin-bottom:10px">Caption generation failed to parse — no content produced (check ANTHROPIC_API_KEY / model response).</div>`}
       ${p.qaHeld ? `
       <div style="background:#2a1a0a;border:1px solid #92400e;border-radius:4px;padding:10px;margin-top:10px">
         <span style="font-size:10px;color:#fbbf24;font-weight:700;text-transform:uppercase;letter-spacing:1px">QA Issues — this post was NOT published:</span>
@@ -477,6 +478,17 @@ async function main() {
 
     let caption = await generateCaption(plan, theme);
 
+    if (!caption) {
+      // Generation itself failed (unparseable JSON, likely truncation) — hold
+      // immediately. Never hand a fabricated placeholder caption to the QA
+      // gate (Fable 5 QA_GATE_ANALYSIS.md finding 1, 06/07/2026).
+      console.log('⚠ Caption generation failed — held (no QA review, nothing to review)');
+      qaHeldCount++;
+      posts.push({ plan, caption: null, imageUrl: null, driveBackup: null, qaHeld: true, qaIssues: ['caption generation failed to parse'] });
+      await new Promise(r => setTimeout(r, 800));
+      continue;
+    }
+
     // ── QA Gate — Sonnet second-pass review against Iron Law 2 before image/publish ──
     // Up to MAX_QA_ROUNDS revise rounds. If still not approved, this post alone
     // is held (not the whole week) — image generation and publishing are skipped for it.
@@ -496,7 +508,11 @@ async function main() {
       qaIssues = qaResult.issues;
 
       if (round < MAX_QA_ROUNDS) {
-        caption = await generateCaption(plan, theme, qaIssues.join('; '));
+        const regenerated = await generateCaption(plan, theme, qaIssues.join('; '));
+        // If the revision attempt fails to parse, keep the last real caption
+        // rather than discarding it for nothing — it still gets one more QA
+        // round on merit instead of guaranteed-failing on a fabricated one.
+        if (regenerated) caption = regenerated;
       }
     }
 

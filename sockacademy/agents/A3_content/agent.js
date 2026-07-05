@@ -120,7 +120,7 @@ async function writeArticle(topic, revisionNotes = null) {
 
   const msg = await withRetry(() => anthropic.messages.create({
     model: 'claude-sonnet-4-6',
-    max_tokens: 4000,
+    max_tokens: 6000, // was 4000 — tight for 2,000 words of HTML (~3,000+ tokens); undershooting caused the QA word-count rule to fail predictably (Fable 5 QA_GATE_ANALYSIS.md finding 4, 06/07/2026)
     messages: [{
       role: 'user',
       content: `You are a senior content writer for SockAcademy — the world's first dedicated sock authority. We are the authoritative voice on premium socks for men. Think: The Strategist meets GQ, but focused entirely on socks.
@@ -132,8 +132,10 @@ TARGET KEYWORDS: ${topic.keywords}
 CATEGORY: ${topic.category}
 ${revisionBlock}
 Requirements:
-- 1,500 to 2,000 words
+- Aim for 1,700-1,800 words; drafts under 1,500 words will be rejected by QA (hard floor 1,500, hard ceiling 2,000)
 - Written in American English, authoritative tone — no hype, no exclamation marks
+- Open with a strong, declarative, authoritative statement. Never open with a rhetorical question or generic scene-setting.
+- No generic superlatives or adjective stacking — never use "amazing", "perfect", "best-in-class", "game-changer", or stacked adjectives like "incredible, luxurious, must-have"
 - Deep expertise: materials science, construction methods, use cases — not fluffy lifestyle content
 - Structure: intro → 4-6 subheadings with real substance → expert conclusion
 - Naturally include keywords without stuffing
