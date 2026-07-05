@@ -43,9 +43,9 @@ const STALENESS_HOURS = {
   A5:    200,   // weekly
   A6:    200,   // weekly
   A7:    200,   // weekly
-  A8:    36,    // daily
+  A8:    200,   // weekly
   A9:    null,  // manual only
-  A10:   36,    // daily
+  A10:   200,   // weekly
   A11:   200,   // weekly
   A12:   200,   // weekly
   A13:   200,   // weekly
