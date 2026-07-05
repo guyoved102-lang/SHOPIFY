@@ -16,7 +16,25 @@ status changes. New Fable dispatches append new items here rather than starting 
 which agents move to the existing-but-unused event-driven queue substrate (`corp/core/queue.js`)
 first vs. which stay on cron, and a phased migration plan compatible with the backend freeze
 (design-only, no code until Phase 2). Separate from the discovery queue below per Guy's explicit
-choice (06/07/2026). Output pending.
+choice (06/07/2026).
+
+**Status: ✅ Done 06/07/2026.** Output: `FABLE5_STAGE18_ORCHESTRATION_ARCHITECTURE.md`. **Verdict:
+build none of it now** — cron + monitoring + Guy-as-exception-handler is the correct architecture at
+0 orders, not a compromise. A0 already has a proven actuation mechanism in-repo
+(`shopify-webhook-handler.yml:95`) — growing it into a conductor is a policy choice, not a build
+gap. `queue.js` needs "Q-HARDEN" (ack-on-pop, `queue_log` lifecycle, retry+dead-letter) as A2.7's
+own first task. Full phased plan with named triggers in the doc (O-0 now / O-1 at
+`PHASE_2_ACTIVATE_BY_GUY` / O-2 after 1mo clean / O-3 at Phase 3 $5K MRR×2mo). No execution items
+open from this stage until Phase 2 activates — nothing to do right now except Guy reading/approving
+the blueprint.
+
+| # | Item | Owner | Status | Notes |
+|---|------|-------|--------|-------|
+| S18-a | Approve Stage 18 as the Phase 2 orchestration blueprint (or amend) | 🧑 | Not started | Zero code either way — pure sign-off, no urgency until Phase 2 trigger nears |
+| S18-b | O-1 build (Q-HARDEN + queue-drainer.yml + A2.7 shadow→auto mode) | 🤖 (at trigger) | Blocked on `PHASE_2_ACTIVATE_BY_GUY` | Do not start early — explicit anti-over-engineering finding |
+| S18-c | O-2 build (A16.5 + A0 Rung 1 propose mode) | 🤖 (at trigger) | Blocked on A2.7 live+clean 1mo or 50 orders | — |
+| S18-d | O-3 build (A0 Rung 2 quarantine + consumer runtime reassessment) | 🤖 (at trigger) | Blocked on Phase 3 ($5K MRR×2mo) | — |
+| S18-e | Rung 3 (DAG scheduling/reordering/LLM-orchestration/migrate editorial off cron) | — | **DO NOT BUILD** | Only revisit if a named recurring incident proves Rungs 1-2 insufficient |
 
 ## Queued for next Fable dispatch (Stage 19 candidate — not yet dispatched)
 **Added 05/07/2026, expanded 06/07/2026, Guy's request:** Fable actively researches; Sonnet/Opus
