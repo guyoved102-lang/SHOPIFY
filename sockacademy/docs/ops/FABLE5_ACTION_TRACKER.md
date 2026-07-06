@@ -99,6 +99,15 @@ contrast/landmark defect found — see doc Addendum) and item 10 (Shopify Dev MC
 verified). Item 10b (Supabase MCP) genuinely blocked — needs a Supabase account PAT only Guy can
 generate. Item H (separate, Stage 15 origin) also done same session — see its row above.
 
+## Stage 20 — dispatched 06/07/2026: True unit economics + Day-1 manual fulfillment runbook
+**Ask:** (1) Claude found tonight that every margin number in the codebase (A1's pricing,
+A15 CFO's reports) is `retail_price - supplier_price` only — zero Shopify fee, payment fee,
+shipping cost, or CJ per-order handling fee anywhere. Fable to build a true contribution-margin
+model and give a direct price-floor recommendation, timed specifically to land before Guy makes the
+pending 3.1/3.3 Keystone decisions. (2) A Day-1 manual fulfillment runbook — Stage 18 concluded Guy
+fulfills the first orders by hand, but no document walks through that process step by step. Output
+pending — `FABLE5_STAGE20_UNIT_ECONOMICS_AND_FULFILLMENT.md`.
+
 ## Queued candidates from earlier drafting (superseded by the completed Stage 19 above — kept for record)
 **Added 05/07/2026, expanded 06/07/2026, Guy's request:** Fable actively researches; Sonnet/Opus
 execute after. Guy explicitly wants topics he wouldn't know to ask about himself — "blind spots I'm
