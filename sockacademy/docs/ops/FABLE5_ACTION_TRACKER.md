@@ -60,6 +60,12 @@ the attorney packet before sending it + do the free 30-min self-search tonight/t
 Shopify sender-domain authentication + SPF + DMARC redirect (~15 min), (3) the rest of the 12-item
 list at his own pace — none of the rest is time-sensitive.**
 
+**Phase 1 execution — done 06/07/2026 (all 🤖-only items with zero decision-blocker, per the newly
+adopted [[feedback_fable5_execution_protocol]]):** item 9 (axe-core scan, 3 pages, real footer
+contrast/landmark defect found — see doc Addendum) and item 10 (Shopify Dev MCP installed and
+verified). Item 10b (Supabase MCP) genuinely blocked — needs a Supabase account PAT only Guy can
+generate. Item H (separate, Stage 15 origin) also done same session — see its row above.
+
 ## Queued candidates from earlier drafting (superseded by the completed Stage 19 above — kept for record)
 **Added 05/07/2026, expanded 06/07/2026, Guy's request:** Fable actively researches; Sonnet/Opus
 execute after. Guy explicitly wants topics he wouldn't know to ask about himself — "blind spots I'm
@@ -121,7 +127,7 @@ been asked anywhere in the project's 42 anti-recurrence protocols.
 | E | Constitution amendment: add A2.7 Order Fulfillment + CS function to Phase 2 skeleton | 🧑 approves → 🤖 drafts amendment | ✅ **Done 05/07** | Guy approved bundle; pasted verbatim into PHASE_ARCHITECTURE_SKELETON.md after A20, commit pending |
 | F | Bound `orchestration/index.js:71-77` health query (`.limit(500)`) | 🤖 | ✅ **Done 05/07** | `.limit(500)` added, commit pending |
 | G | Doc retirement pass (banner superseded FABLE5 docs + skill de-stating) | 🤖 | ✅ **Done 06/07** | Skill de-stating was already done (Stage 15). Banners added to all 14 completed-stage FABLE5_*.md docs pointing to this tracker + the launch plan as current-status source; `FABLE5_ACTION_TRACKER.md`/`FABLE5_INITIATIVE_LEDGER.md`/`FABLE5_LAUNCH_READINESS_PLAN.md` themselves and the brand-new `FABLE5_STAGE18_*.md` left unbannered (they ARE the current-status docs). |
-| H | YAML Reality Audit → deterministic script (`scripts/ci/yaml-reality-audit.js`) | 🤖 | Not started | Can also wait until post-launch — Guy's call |
+| H | YAML Reality Audit → deterministic script (`scripts/ci/yaml-reality-audit.js`) | 🤖 | ✅ **Done 06/07** | `c896907`. Not wired into CI (would be a new workflow, reserved for Guy's sign-off under the freeze) — run on demand. First real run found 3 pre-existing config gaps for Guy to triage (not fixed — values/priority are his call): A0's optional Gmail-personal-inbox read is silently inert (`GMAIL_PERSONAL_APP_PASSWORD` never configured); A7's low-stock/price-change alerting gracefully degrades to disabled (`STOCK_LOW_THRESHOLD`/`PRICE_WARN_PCT`/`PRICE_CRITICAL_PCT` never configured, code null-guards it); A1's `MAKE_A1_WEBHOOK` flag is a false-positive at CRITICAL severity — code calls it "legacy, אופציונלי" and guards on presence. |
 
 ## B — Keystone Decision Week (breakdown, all 🧑 Guy-only, ≤1hr each)
 

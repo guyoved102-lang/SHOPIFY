@@ -214,7 +214,8 @@ Guy approving the Design Freeze partial-lift batch (tracker item C) — no code 
 | 7 | Israeli tax file via accountant (before first sale) | 🧑 | ~1 hr, before launch |
 | 8 | Monthly manual Supabase dump | 🧑 | 10 min/month starting now |
 | 9 | ✅ **Done 06/07/2026** — axe scan of live store (3 pages) ran; found a site-wide footer contrast/landmark defect + 1 heading-order + 1 third-party-widget issue (see Addendum above). Sock Finder ARIA/focus/noscript fixes (§B2, unconfirmed/unrefuted by this scan) + the new footer fix both fold into item #8 | 🤖 (scan done) → 🤖 (fix, gated on C) | Fix waits on Design Freeze partial-lift approval (item C) |
-| 10 | Shopify Dev MCP (+ optionally read-only Supabase MCP) install | 🧑 approves → 🤖 | Optional, any time |
+| 10 | Shopify Dev MCP install | ✅ **Done 06/07/2026** — `@shopify/dev-mcp` installed (`--scope user`, local config only, no credentials). First attempt hit a corrupted npx cache entry, fixed via `npm cache verify`; re-verified `claude mcp list` → Connected. | — |
+| 10b | Supabase MCP (read-only) install | 🧑 blocked — needs Guy to generate a Supabase account-level Personal Access Token from his Dashboard (Account Settings → Access Tokens) himself; the existing `SUPABASE_SERVICE_KEY` is deliberately not substituted (too high-privilege for a read-only tool). Exact install command documented in `CLAUDE.md`'s MCP table. | Whenever Guy has 2 minutes to generate the token |
 | 11 | UptimeRobot on the storefront | 🧑 | At launch (or now, 10 min) |
 | 12 | Scheduled Supabase backup workflow + entity go/no-go + insurance + IOSS decision | ⏳ | Phase 2 gate (`PHASE_2_ACTIVATE_BY_GUY`) — add all four to the activation checklist |
 
