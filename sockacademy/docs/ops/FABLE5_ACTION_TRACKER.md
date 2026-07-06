@@ -105,8 +105,55 @@ A15 CFO's reports) is `retail_price - supplier_price` only — zero Shopify fee,
 shipping cost, or CJ per-order handling fee anywhere. Fable to build a true contribution-margin
 model and give a direct price-floor recommendation, timed specifically to land before Guy makes the
 pending 3.1/3.3 Keystone decisions. (2) A Day-1 manual fulfillment runbook — Stage 18 concluded Guy
-fulfills the first orders by hand, but no document walks through that process step by step. Output
-pending — `FABLE5_STAGE20_UNIT_ECONOMICS_AND_FULFILLMENT.md`.
+fulfills the first orders by hand, but no document walks through that process step by step.
+
+**Status: ✅ Done 06/07/2026.** Output: `FABLE5_STAGE20_UNIT_ECONOMICS_AND_FULFILLMENT.md` (+ ledger
+entry). **Part 1 verdict:** confirmed — the only margin math in the repo is `retail − supplier_price`
+(A1 `agent.js:596-597`, A15 `agent.js:97`; no fee/shipping columns exist in `products_table.sql`).
+True contribution model (payment fees + shipping + CJ costs + 5% refund allowance; supplier costs are
+documented examples, not a live Supabase query — MCP still blocked on item 6 above): **naive margins
+are overstated by ~20-40 points.** $18 floor → true CM ~$6.30/unit (34.9%; ~$4.70 on a WELCOME10
+first order); $24 → ~$11.80 (49.2%). Honest calibration: break-even is ~$11-12, so nothing is
+underwater — the finding is overstated *reporting* plus a thin floor, not a hole. **Unhedged
+recommendation: single-pair floor $24** (top of memo 3.3's own $22-24 band) — independently confirms
+memo 3.3-A on economics grounds; **explicitly neutral on 3.1** (changes the floor within either
+positioning, not which positioning is viable; does not override Guy's deferred luxury lean). Biggest
+unverifiable-from-repo variable: which payment gateway is live (Shopify Payments ~2.9%+$0.30 vs.
+third-party ~5.5%+$0.49 on Basic) — one screen in Shopify Admin decides it. Adjacent live-code find:
+A7's `MARKUP_MULTIPLIER=2.5×` auto-reprice can set retail below the $18 floor; inert today (price
+thresholds null per item H's audit) but arms itself if `PRICE_WARN_PCT` is ever set. **Part 2:**
+first Day-1 runbook exists — verified NO code notifies Guy of an order today (the webhook→queue chain
+has zero consumers; real trigger = Shopify staff email + mobile-app push, external defaults); 7-item
+pre-flight, 7-step per-order procedure (payment check → 1h cancellation window → `products.cj_pid`
+lookup → CJ dashboard order → tracking → Shopify Fulfill-items → Google Sheet log that seeds A2.7's
+future `fulfillments` reconciliation), 3 in-register customer templates, printable 11pm checklist.
+Scale ceiling named: **~3 orders/day sustained (or 25 cumulative — converges with the Phase 2 trigger
+by itself) = activate Phase 2 and build A2.7 first**, per Stage 18 O-1. Fully freeze-compliant — all
+code corrections queued, none implemented.
+
+| # | Item | Owner | Status | Notes |
+|---|------|-------|--------|-------|
+| S20-a | Read Part 1 before deciding 3.3 (and 3.1) — floor recommendation $24 | 🧑 | Not started | New decision-relevant input for the Keystone memos; supports memo 3.3-A, neutral on 3.1 |
+| S20-b | Runbook pre-flight (~30 min): Shopify app push ON, Settings→Payments gateway check, Settings→Shipping <$50 rate check, CJ login/wallet, CJ-Shopify-app connection check, real-`cj_pid` check, D4 email-auth fix | 🧑 | Not started | Everything needed so order #1 is a 15-min non-event; D4 + cj_pid items already tracked elsewhere — no duplication, this is the bundle |
+| S20-c | Sample order (item K) also captures: CJ invoice lines (item/shipping/any fee), real payout fees, delivery days → replace every [EST] in the Part 1 model | 🧑 | Not started | Rides the already-tracked item K, zero extra effort |
+| S20-d | Fix margin math: A15 `getCatalogMargins` + A1 `suggestRetailPrice` → true-contribution formula via shared constants in `corp/core/pricing.js`; recalibrate A15's `<40%` alert | 🤖 (with Guy's go-ahead) | Queued | Bug-fix-class under the freeze but touches financial reporting — Guy approves timing; natural slot: A15's Phase 2 activation, earlier if Guy wants honest pre-revenue reports |
+| S20-e | Guard A7's 2.5× auto-reprice (floor/ceiling clamp) BEFORE `PRICE_WARN_PCT`/`PRICE_CRITICAL_PCT` are ever configured | 🤖 (with Guy's go-ahead) | Queued | Inert today; standing rule until fixed: do not set those env vars |
+| S20-f | Manual fulfillment log (Google Sheet, columns per runbook §2.2 step 6) | 🧑 (2 min, at first order) | Not started | Deliberately NOT a Supabase table (freeze); becomes A2.7's seed/reconciliation data |
+
+**Controller-verified same night:** all repo-citable claims checked directly and matched exactly —
+A1/A15 margin formulas, `products_table.sql` schema (`cj_pid` + `product_url` exist; only
+`supplier_price`/`retail_price` are money columns, no fee/shipping column), FAQ's "within 1 hour"
+cancellation text, "Free Shipping Over $50" header copy. **One [EXT] claim upgraded from hedge to
+near-certain:** web search confirms Shopify Payments is **not available in Israel** — so the
+higher-fee scenario (~5.5%+$0.49, not the optimistic 2.9%+$0.30) is very likely Guy's actual reality,
+strengthening the $24-floor case further. **One inaccuracy caught and flagged (not corrected in the
+doc — Guy should know the doc has this flaw):** Part 2 repeatedly treats "the site promises 48h
+dispatch" as an existing live commitment (steps 1, 4, the 11pm checklist). The actual live FAQ
+(`scripts/setup/create_faq_and_redirects.js:36`) only promises "7–14 business days" shipping with
+**no dispatch-time commitment at all** — the "48-hour dispatch" language is Stage 16's *proposed*
+future copy (`FABLE5_STAGE16_DELIVERABLES.md:230`), still gated on the unapproved homepage/copy batch
+(item I), not live. The runbook's operational logic (batch each morning, day-3 ticket trigger) is
+still sound practice regardless — just don't tell a customer "we promised 48h" until item I ships.
 
 ## Queued candidates from earlier drafting (superseded by the completed Stage 19 above — kept for record)
 **Added 05/07/2026, expanded 06/07/2026, Guy's request:** Fable actively researches; Sonnet/Opus
