@@ -155,6 +155,52 @@ This stage ran a surface web check (labeled: *a surface check, not a legal clear
 
 ---
 
+## Addendum — automated axe-core scan of the live storefront (06/07/2026, Claude, tracker item 9)
+
+Read-only diagnostic per `FABLE5_ACTION_TRACKER.md` item 9 ("axe/Lighthouse scan of live store").
+Ran `@axe-core/cli` (headless Chrome) against three live URLs — homepage, `/collections/all`, and a
+product page (`/products/egyptian-cotton-dress-socks`). No theme file was touched by this scan.
+
+**Result: 42 / 27 / 35 issues respectively, and one clear pattern emerges — a site-wide footer defect,
+plus a refinement (not a contradiction) of §B2's manual contrast check.**
+
+1. **Site-wide, every page: `color-contrast` + `region` violations concentrated in the footer**
+   (`sections/footer.liquid`, `.sf__*` classes — 9 identical `region` violations and 15-17 identical
+   `color-contrast` violations on all 3 pages). Root cause traced: the footer uses `--muted`
+   (`rgba(240,237,230,.55)`) and `--ghost` (`rgba(240,237,230,.25)`) on `--surface-void` (`#111111` —
+   `assets/sockacademy.css:38,56-58`), a **darker background than `--surface-base` (`#1A1A1A`)**, which
+   is the pair §B2 manually computed as AA-passing. Different background token, different (real,
+   browser-measured) result — this refines §B2's finding rather than contradicting it: the palette's
+   *primary* surface pairing is fine, but `--surface-void` (footer, deep overlays per its own CSS
+   comment) pushes `--muted`/`--ghost` text below AA in the browser's actual rendering. The `region`
+   violations mean several footer sub-blocks (`.sf__col--brand`, `.sf__legal-bar`, `.sf__bottom`,
+   newsletter block) render outside any landmark despite the outer `<footer id="sa-footer-...">` tag
+   existing (`sections/footer.liquid:289`) — exact nesting cause not root-caused here (diagnostic
+   scope only).
+2. **Homepage-specific:** the same `--muted`-on-dark pattern recurs in `.features__card-text`,
+   `.features__trust-sub`, `.sa-bento__stat-label`, `.sa-bento__benefit-sub`, and category-preview
+   card captions — i.e. this is a **recurring token-pairing pattern**, not one isolated footer bug.
+3. **Collection page:** one `heading-order` violation — a product card's `<h3>` (`a[aria-label="Egyptian
+   Cotton Dress Socks"] > .ac-card__info > h3`) skips a heading level.
+4. **Product page:** one `aria-prohibited-attr` on `.sp__stars` — **not found in this repo's own
+   `.liquid`/`.css` source** (searched `sections/`, `snippets/`); this class is not defined anywhere in
+   our theme files, meaning it's rendered by the third-party review-app widget (Judge.me, per the
+   tracker's existing install-pending note) — flag to the app's support/settings, not a theme fix.
+
+**How this relates to §B2 and item #8 (Sock Finder v2):** none of the above 4 findings are inside
+`sections/sock-finder.liquid` itself — §B2's manual findings there (missing `aria-live`, focus loss on
+`innerHTML` swap, JS-only render with no noscript fallback) stand unchanged and unconfirmed/
+unrefuted by this automated pass (axe's static scan can't exercise the quiz's multi-step JS
+interaction). **New scope for the same already-queued fix batch:** the footer's contrast-token pairing
+and landmark structure should be fixed alongside item #8, since both are Design-Freeze-gated theme
+edits and bundling avoids opening the freeze twice. Severity: same as §B2 — cheap to fix, not urgent
+at zero traffic, correctly deferred to the Freeze-lift batch (tracker item C).
+
+**Next action:** 🤖, bundled into item #8 (Sock Finder v2 + footer contrast/landmark fix), gated on
+Guy approving the Design Freeze partial-lift batch (tracker item C) — no code touched by this scan.
+
+---
+
 ## Consolidated action list
 
 | # | Action | Owner | When |
@@ -167,7 +213,7 @@ This stage ran a surface web check (labeled: *a surface check, not a legal clear
 | 6 | Continuity note (accounts + 2FA backup codes + 3-line instruction) + Google Inactive Account Manager | 🧑 | ~2 hours, once |
 | 7 | Israeli tax file via accountant (before first sale) | 🧑 | ~1 hr, before launch |
 | 8 | Monthly manual Supabase dump | 🧑 | 10 min/month starting now |
-| 9 | axe/Lighthouse scan of live store; fold Sock Finder ARIA/focus/noscript fixes into item #8 (Sock Finder v2) | 🤖 | With the already-queued v2 pass |
+| 9 | ✅ **Done 06/07/2026** — axe scan of live store (3 pages) ran; found a site-wide footer contrast/landmark defect + 1 heading-order + 1 third-party-widget issue (see Addendum above). Sock Finder ARIA/focus/noscript fixes (§B2, unconfirmed/unrefuted by this scan) + the new footer fix both fold into item #8 | 🤖 (scan done) → 🤖 (fix, gated on C) | Fix waits on Design Freeze partial-lift approval (item C) |
 | 10 | Shopify Dev MCP (+ optionally read-only Supabase MCP) install | 🧑 approves → 🤖 | Optional, any time |
 | 11 | UptimeRobot on the storefront | 🧑 | At launch (or now, 10 min) |
 | 12 | Scheduled Supabase backup workflow + entity go/no-go + insurance + IOSS decision | ⏳ | Phase 2 gate (`PHASE_2_ACTIVATE_BY_GUY`) — add all four to the activation checklist |
