@@ -1,4 +1,7 @@
 # FABLE5 ARCHITECT FULL REVIEW — Unconstrained Top-Down Pass
+
+> 📌 **Status tracked live in `FABLE5_ACTION_TRACKER.md`** (Stage 15 Action Plan A-H). This file remains the detailed source for the findings and reasoning behind each item — read it for depth, not for current status.
+
 **Written 05/07/2026 (Fable 5, Lead Strategic Architect dispatch). Read-only on all project code — no code, theme, or config was touched. Outputs of this pass: this file + one appended ledger line.**
 
 **Basis (read in full):** `FABLE5_INITIATIVE_LEDGER.md`, `FABLE5_LAUNCH_READINESS_PLAN.md`, `docs/strategy/VISION.md`, `docs/strategy/PHASE_ARCHITECTURE_SKELETON.md`, `sockacademy/CLAUDE.md`, `docs/superpowers/specs/2026-07-04-design-recommendations.md`, `docs/ops/ANTI_RECURRENCE_PROTOCOL.md` (all 41 incidents), `corp/core/orchestration/index.js`, all five skill files (`.claude/skills/boot-sockacademy`, `close-sockacademy`, `run-sockacademy-agents`, `workflow-navigator`, `sockacademy/.claude/skills/run-sockacademy`), plus a breadth sweep of `sockacademy/agents/*/agent.js` (30 agents), `corp/core/*.js` (14 shared modules), and `.github/workflows/` (34 workflows). Two claims below were newly verified by direct grep this pass and are marked **[verified this pass]**.

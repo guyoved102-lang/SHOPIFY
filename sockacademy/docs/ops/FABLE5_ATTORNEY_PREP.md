@@ -1,5 +1,7 @@
 # Attorney Review Packet — SockAcademy Legal Templates
 
+> 📌 **Consolidated 06/07/2026:** this doc's findings feed into `FABLE5_LAUNCH_READINESS_PLAN.md` (current execution order) and are tracked live in `FABLE5_ACTION_TRACKER.md`. This file remains the detailed source — read it for depth, not for current status.
+
 **Prepared:** 05/07/2026 (Fable 5, read-only pass) | **Status of everything below:** verified against code/docs on this date, not against live Shopify state.
 
 ---

@@ -1,4 +1,7 @@
 # FABLE5 PHASE RECONCILIATION — Phase-Numbering Collision Audit
+
+> 📌 **Consolidated 06/07/2026:** this doc's findings feed into `FABLE5_LAUNCH_READINESS_PLAN.md` (current execution order) and are tracked live in `FABLE5_ACTION_TRACKER.md`. This file remains the detailed source — read it for depth, not for current status.
+
 **Written 05/07/2026 (Fable 5, read-only pass). No file was edited. Every fix below awaits Guy's individual approval.**
 **Scope:** ANTI_RECURRENCE #31 follow-up — verify H11/M9/M10/M11 fixes, sweep all of `docs/strategy/` for any remaining "Phase" collision against the canonical numbering.
 

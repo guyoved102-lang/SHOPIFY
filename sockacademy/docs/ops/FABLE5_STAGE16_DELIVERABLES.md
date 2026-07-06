@@ -1,6 +1,8 @@
 # FABLE5 STAGE 16 — Deliverables: Homepage Copy Re-Cut · A2.7/A16.5 Constitutional Amendment · Go-to-Market Plan
 **Written 05/07/2026 (Fable 5, Lead Strategic Architect dispatch, Stage 16 — continuation of Stage 15). Read-only on all code/theme/config; outputs of this pass: this file + appended tracker rows + one ledger line.**
 
+> 📌 **Status tracked live in `FABLE5_ACTION_TRACKER.md`** (items I-N). This file remains the detailed source — read it for depth, not for current status.
+
 **Basis (read in full this pass):** `FABLE5_INITIATIVE_LEDGER.md`, `FABLE5_ARCHITECT_FULL_REVIEW.md` (my own Stage 15 output — built on, not repeated), `FABLE5_ACTION_TRACKER.md`, `FABLE5_KEYSTONE_DECISION_MEMOS.md`, `VISION.md`, `PHASE_ARCHITECTURE_SKELETON.md` (Phase 2 format studied closely), `sockacademy/CLAUDE.md`, `2026-07-04-design-recommendations.md`, `FABLE5_BRAND_VOICE_AUDIT.md`, `templates/index.json`, and the live Liquid of `hero.liquid`, `ticker` settings, `features.liquid`, `collections-preview.liquid`, `about.liquid`, `blog-preview.liquid`, `sock-finder.liquid`. Fulfillment-gap re-verified by fresh grep this pass: zero `createOrder`/order-placement code in any agent — the "fulfillment" strings in A2/A12/A16 are read-only status filters.
 
 **Positioning assumption:** all copy below assumes Keystone Memo 1's recommendation (premium-performance now, luxury register as ceiling not claim, true luxury at Phase 4). Rows whose wording would change if Guy chooses the other direction are marked **[3.1-sensitive]**. Per my own Stage 15 categorization, #14 does not *wait* for 3.1 — but those marked rows should be re-read for one minute if 3.1 lands the other way.

@@ -1,4 +1,7 @@
 # FABLE5 CLAUDE.md CONSOLIDATION PLAN
+
+> 📌 **Consolidated 06/07/2026:** this doc's findings feed into `FABLE5_LAUNCH_READINESS_PLAN.md` (current execution order) and are tracked live in `FABLE5_ACTION_TRACKER.md`. This file remains the detailed source — read it for depth, not for current status.
+
 **Status: PROPOSAL — read-only analysis. Nothing in `CLAUDE.md` was changed. No edit happens until Guy approves.**
 Written 04/07/2026 (Fable 5). Sources of current truth used: `docs/ops/FABLE5_PROJECT_MAP.md` (verified primer), `docs/strategy/PHASE_ARCHITECTURE_SKELETON.md` (canonical phase triggers), `corp/core/orchestration/index.js` `CLUSTERS` (canonical cluster map, per the project map — not re-derived here).
 

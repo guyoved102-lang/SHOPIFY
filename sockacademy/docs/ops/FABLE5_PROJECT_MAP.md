@@ -1,4 +1,7 @@
 # FABLE5 PROJECT MAP — SockAcademy
+
+> 📌 **Consolidated 06/07/2026:** this doc's findings feed into `FABLE5_LAUNCH_READINESS_PLAN.md` (current execution order) and are tracked live in `FABLE5_ACTION_TRACKER.md`. This file remains the detailed source — read it for depth, not for current status.
+
 **Purpose:** compact context primer for future zero-memory model dispatches. Read this before re-deriving anything. Written 04/07/2026 (Fable 5, read-only pass over: CLAUDE.md, VISION.md, PHASE_ARCHITECTURE_SKELETON.md, ANTI_RECURRENCE_PROTOCOL.md, memory/project_sockacademy_state.md, plans/clever-skipping-hamster.md, directory listings only of agents/ + corp/core/).
 
 **What this is:** SockAcademy = premium sock e-commerce (Shopify + Node.js), solo founder Guy (CEO, Hebrew-speaking, technically fluent non-engineer). Monorepo of **30 independent agents** (A0–A28 + A2.5), each with its own package.json + GitHub Actions cron workflow, sharing `corp/core/` utilities. Zero sales yet — deliberate: "build the entire machine before selling one product."

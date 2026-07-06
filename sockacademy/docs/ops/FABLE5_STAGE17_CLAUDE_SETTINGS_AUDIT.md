@@ -1,5 +1,7 @@
 # Fable 5 Stage 17 — Claude Code / Claude Desktop Settings Audit
 
+> 📌 **Status:** the safe in-repo fixes from this audit (CLAUDE.md MCP/Skills table corrections, removal of the unused `magic` MCP server) were executed 05/07/2026. See `FABLE5_ACTION_TRACKER.md` for what remains. This file remains the detailed source.
+
 **Author:** Fable 5 (Lead Strategic Architect) · **Date:** 2026-07-05 · **Mode:** read-only audit, no config changed
 **Subject:** Guy's *tooling* configuration — the Claude Code / Claude Desktop setup he runs SockAcademy through. NOT the SockAcademy project itself (that was Stages 1–16).
 

@@ -1,5 +1,7 @@
 # FABLE5 RLS Sanity Pass — 05/07/2026
 
+> 📌 **Consolidated 06/07/2026:** the RLS/grants fixes recommended here were executed across the 11 affected `.sql` files on 05/07/2026 (see `FABLE5_ACTION_TRACKER.md` item 2.1 for status). This file remains the detailed source.
+
 Fresh, independent read of every `.sql` file in the repo. **Not clean.** 1 broken file, 4 tables with no policy at all, 10 tables with the exact non-idempotent `CREATE POLICY` class that caused yesterday's production error, and a widespread `GRANT ALL TO anon/authenticated` least-privilege violation (currently inert, see below).
 
 ## Files checked (25 — all in `sockacademy/corp/core/`, none elsewhere in repo)

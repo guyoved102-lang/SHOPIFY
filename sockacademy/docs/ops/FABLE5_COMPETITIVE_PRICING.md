@@ -1,4 +1,7 @@
 # FABLE5 Competitive Pricing Check — Real Market Data vs. Stated Floors
+
+> 📌 **Consolidated 06/07/2026:** this doc's findings feed into `FABLE5_LAUNCH_READINESS_PLAN.md` (current execution order) and are tracked live in `FABLE5_ACTION_TRACKER.md`. This file remains the detailed source — read it for depth, not for current status.
+
 **Written 05/07/2026 (Fable 5, live web search). Companion to `FABLE5_BRAND_VOICE_AUDIT.md`. Not the A13 automated scan — a manual deep-dive with current retail prices, searched today.**
 
 ## Real competitor data (searched 05/07/2026)

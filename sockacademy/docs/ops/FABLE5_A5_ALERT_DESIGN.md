@@ -1,5 +1,7 @@
 # A5 Instagram Publish-Failure Telegram Alert — Design (not implemented)
 
+> 📌 **Consolidated 06/07/2026:** this doc's findings feed into `FABLE5_LAUNCH_READINESS_PLAN.md` (current execution order, item 2.3) and are tracked live in `FABLE5_ACTION_TRACKER.md`. This file remains the detailed source — read it for depth, not for current status.
+
 **Written 05/07/2026 (Fable 5, read-only design pass).** Closes the gap that let A5's 100% Instagram
 publish failure run silently for 10+ days: `publishToInstagram()` errors are caught per-post inside
 `main()`, logged to console only, and the run still ends in `logHealth('success')` — so the fatal-error

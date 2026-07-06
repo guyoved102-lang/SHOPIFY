@@ -1,4 +1,7 @@
 # FABLE5 CRON EFFICIENCY REVIEW
+
+> 📌 **Consolidated 06/07/2026:** the cron reschedule + staleness-threshold pairing + collision fixes recommended here were executed on 06/07/2026 (see `FABLE5_ACTION_TRACKER.md` item 2.4 for status). This file remains the detailed source.
+
 **Date:** 05/07/2026 · Read-only pass over all 34 files in `.github/workflows/` + `corp/core/orchestration/index.js` (STALENESS_HOURS) + CLAUDE.md scheduling notes. Pre-launch context respected (LAUNCH_MODE dormancy is intentional; judged on CI waste/noise only, not traffic).
 
 ## Full schedule table

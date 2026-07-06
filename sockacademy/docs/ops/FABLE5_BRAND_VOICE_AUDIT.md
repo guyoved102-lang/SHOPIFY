@@ -1,4 +1,7 @@
 # FABLE5 Brand Voice Audit — Human-Quality Read Against Iron Law 2
+
+> 📌 **Consolidated 06/07/2026:** this doc's findings feed into `FABLE5_LAUNCH_READINESS_PLAN.md` (current execution order) and are tracked live in `FABLE5_ACTION_TRACKER.md`. This file remains the detailed source — read it for depth, not for current status.
+
 **Written 05/07/2026 (Fable 5, read-only pass). Standard held against: Loro Piana / Sunspel / Falke register per CLAUDE.md Iron Law 2 ("Center Stage", $250+ tier, authoritative, zero gimmick). Complement to `FABLE5_QA_GATE_ANALYSIS.md` — this is the tone read the mechanical gate cannot do.**
 
 ## What was actually available to audit

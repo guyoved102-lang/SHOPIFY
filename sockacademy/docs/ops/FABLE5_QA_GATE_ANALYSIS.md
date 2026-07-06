@@ -1,5 +1,7 @@
 # QA Gate 100% Rejection — Root-Cause Analysis (Fable 5, 2026-07-05)
 
+> 📌 **Consolidated 06/07/2026:** the 5 writer-side fixes recommended in §5 were executed in `agents/A3_content/agent.js` and `agents/A5_social/agent.js` this date (see `FABLE5_ACTION_TRACKER.md` item 2.2 for status). The deterministic-count-checks-out-of-the-LLM-judge follow-on was deferred. This file remains the detailed root-cause source.
+
 Scope: `corp/core/qa-gate.js` vs. the writer prompts in `agents/A3_content/agent.js` and
 `agents/A5_social/agent.js`, plus real run data from Supabase (`agent_health_log`,
 `command_center_metrics`).
