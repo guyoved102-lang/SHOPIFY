@@ -11,6 +11,39 @@ status changes. New Fable dispatches append new items here rather than starting 
 
 ---
 
+## 📍 Waiting on Guy — prioritized, updated 06/07/2026
+
+Every 🤖-only item with zero decision-blocker has now been executed (see the Log at the bottom for
+the full 06/07/2026 overnight + Phase-1 batch). **Everything below requires Guy personally** — reading
+this list top-to-bottom is the fastest way back into the project. Nothing here is time-critical in the
+sense of "the business breaks tomorrow" — but items 1-2 have the worst cost-of-delay asymmetry in the
+whole tracker (cheap now, potentially catastrophic later), so they're listed first on purpose, not by
+document order.
+
+1. **🔴 Trademark check** (`FABLE5_STAGE19_BLIND_SPOTS.md` §E2) — a real UK company "Sock Academy
+   Ltd" (Companies House 05743003, since 2006, owns `sockacademy.com`) shares this brand's exact name.
+   Add Q8 to the attorney packet *before* sending it (already drafted in `FABLE5_ATTORNEY_PREP.md`),
+   and do the free 30-min USPTO/UKIPO/EUIPO/ILPO self-search. Highest cost-asymmetry item in the project.
+2. **🔴 Shopify email authentication** (§D4) — `sockacademy.store` can't authenticate order-confirmation
+   emails today (no SPF, DKIM CNAMEs missing, DMARC reports vanish into GoDaddy). ~15 min: Shopify
+   Admin → Notifications → Sender email → Authenticate domain, then a root SPF TXT + redirect the
+   DMARC `rua=`. Best done before the first real order.
+3. **Send the attorney packet** (tracker item 1.3 / Keystone B) — the single true external pre-launch
+   blocker. Now includes Q8 (item 1 above).
+4. **Keystone Decision Week** (item B below — 3.1 positioning, 3.2 discounts, 3.3 price floor, 3.5
+   VISION numbering) — memos already drafted in `FABLE5_KEYSTONE_DECISION_MEMOS.md`, ≤1hr total. 3.1
+   unblocks the homepage rewrite (2.7) and the Design Freeze partial-lift batch (item C, which also
+   unblocks Sock Finder v2 + the new footer contrast fix found tonight).
+5. **Remaining Stage 19 quick checks**, no particular order, ~5-30 min each: Shopify tax settings (no
+   US collection enabled), GoDaddy 2FA/auto-renew/transfer-lock, continuity note + Google Inactive
+   Account Manager, monthly manual Supabase dump, Israeli tax file via accountant.
+6. **Optional, whenever convenient:** generate a Supabase read-only Personal Access Token (Dashboard →
+   Account Settings → Access Tokens) so Claude can install the read-only Supabase MCP server (exact
+   command already in `CLAUDE.md`'s MCP table) — lets future sessions verify the live DB schema
+   directly instead of asking you to relay it.
+
+---
+
 ## Stage 18 — dispatched 06/07/2026: Target-state orchestration architecture
 **Ask:** design how A0 becomes an actual conductor (can re-dispatch/quarantine, not just report),
 which agents move to the existing-but-unused event-driven queue substrate (`corp/core/queue.js`)
