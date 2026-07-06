@@ -335,6 +335,14 @@ GitHub workflow    → .github/workflows/
 - אם יש match — **עצור מיד**, אל תדחוף, חקור.
 - `.env` לעולם לא ב-git. `.gitignore` נבדק לפני כל push ראשון של ספריה חדשה.
 
+### חוק S5 — Git-Commit Discipline (Micro-Task Cadence, נוסף 07/07/2026)
+כל מחזור Micro-Task (בפרוטוקול Micro-Execution) מסתיים ברצף git-commit מובנה:
+- **Rule 1 (Explicit Staging):** `git add` רק לקבצים שנבדקו בפועל של ה-domain הנוכחי, בשמות מפורשים — **לעולם לא** wildcard (`git add .` / `git add -A`). מציגים `git diff --stat`, וממתינים ל-"Approved" של גיא לפני `git commit`.
+- **Rule 2 (Domain Isolation):** לא לערבב domains שונים (למשל Backend מול Email) בקומיט אחד. אם ה-working tree מכיל כמה domains בו-זמנית — staging מוגבל אך ורק לקבצי ה-domain הנוכחי; שאר הdomains ממתינים לסבב commit נפרד.
+- **Rule 3 (Pre-Flight Net):** לפני פעולה מורכבת/מסוכנת (שדרוג package, שינוי core logic) — להציע מיוזמה "Pre-Flight Commit" של המצב היציב הנוכחי, כנקודת rollback.
+**Why:** Rule 1 סוגר פרצה אמיתית — `git add .`/`-A` יכול לסחוף בטעות `.env`/secrets/קבצים לא-קשורים (משלים את חוק S4, לא מחליף אותו). Rule 2 בלי Explicit Staging הייתה רק שאיפה — staging מפורש הוא מה שהופך אותה לאכיפה. גיא קבע כ-Iron Law ב-07/07/2026, אחרי סבב חידוד עם Claude על ה-Micro-Execution Protocol.
+**How to apply:** בכל סיום Micro-Task מוצלח — להריץ את הרצף הזה לפני מעבר למשימה הבאה. לעולם לא auto-commit.
+
 ---
 
 ## 🏛️ ARCHITECTURAL OVERHAUL — החלטות נעולות (20/06/2026)
