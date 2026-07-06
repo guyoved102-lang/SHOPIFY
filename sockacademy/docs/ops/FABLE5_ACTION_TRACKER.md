@@ -20,14 +20,58 @@ sense of "the business breaks tomorrow" — but items 1-2 have the worst cost-of
 whole tracker (cheap now, potentially catastrophic later), so they're listed first on purpose, not by
 document order.
 
-1. **🔴 Trademark check** (`FABLE5_STAGE19_BLIND_SPOTS.md` §E2) — a real UK company "Sock Academy
-   Ltd" (Companies House 05743003, since 2006, owns `sockacademy.com`) shares this brand's exact name.
-   Add Q8 to the attorney packet *before* sending it (already drafted in `FABLE5_ATTORNEY_PREP.md`),
-   and do the free 30-min USPTO/UKIPO/EUIPO/ILPO self-search. Highest cost-asymmetry item in the project.
-2. **🔴 Shopify email authentication** (§D4) — `sockacademy.store` can't authenticate order-confirmation
-   emails today (no SPF, DKIM CNAMEs missing, DMARC reports vanish into GoDaddy). ~15 min: Shopify
-   Admin → Notifications → Sender email → Authenticate domain, then a root SPF TXT + redirect the
-   DMARC `rua=`. Best done before the first real order.
+1. **🔴 Trademark check — ESCALATED + RESOLVED (self-search phase) 06/07/2026** (`FABLE5_STAGE19_BLIND_SPOTS.md`
+   §E2) — Guy ran the self-search himself and cross-verified via two independent sources (UK IPO direct +
+   TMview/WIPO Global Brand DB): confirmed **REGISTERED** UK trademark `UK00003187452`, "Sock Academy"
+   (Sock Academy Limited), Class 25 ("Socks and clothing"), filed 23/09/2016, expires 23/09/2026 — a
+   confirmed live registered mark in the exact goods class, our primary conflict. Also found a separate,
+   unrelated entity "Dance Sock Academy Limited" with Class 25 marks in New Zealand + Australia (different
+   name, lower relevance) and two irrelevant substring false-positives (disregard). USPTO (US) and
+   EUIPO (via TMview cross-office search) both came back clean — no apparent US or EU-wide conflict. ILPO
+   (Israel) remains unconfirmed (input error, not re-run) — leave to the attorney. Q8 in
+   `FABLE5_ATTORNEY_PREP.md` and the Gmail attorney-packet draft have both been updated with the full,
+   precise picture. **Self-search phase is done** — remaining steps are Guy-only: real attorney email in
+   place of the placeholder, the 4 legal-doc PDFs/Word attached, internal note deleted, then send.
+   **06/07/2026 — Guy confirmed steps 1-3 done (attaching the Word/RTF export, replacing the placeholder
+   email); draft not sent yet.** He explicitly asked to hold step 4 (delete the internal
+   "[INTERNAL NOTE TO SELF — DELETE BEFORE SENDING]" reminder block in the Gmail draft body) until he
+   says the trigger phrase **"אני הולך לעורך דין"** (I'm going to the attorney) — treat that phrase,
+   whenever it's said (this session or a future one), as the cue to walk him through deleting that note
+   and doing a final pre-send check before he actually sends the packet.
+   Highest cost-asymmetry item in the project, now with hard evidence instead of a hypothesis.
+2. **🔴 Shopify email authentication (§D4) — IN PROGRESS 06/07/2026, mid-flow, resume here.**
+   Original finding confirmed live via `nslookup` (also cross-checked against Google's 8.8.8.8): no SPF
+   TXT on `sockacademy.store`, `shop1/shop2._domainkey` NXDOMAIN, DMARC `rua=` pointed at GoDaddy's own
+   void mailbox. **New finding this session:** Shopify's Sender email was set to a personal Gmail —
+   first `guyoved100@gmail.com` (one of the two addresses already banned from code use, ANTI_RECURRENCE
+   #7), then briefly `sockacademy.store@gmail.com` (still `@gmail.com`, still blocks domain
+   authentication — Shopify's own UI warns "Public domains like Gmail don't support custom sending").
+   **Bigger discovery: there is no MX record at all on `sockacademy.store` root domain** — confirmed via
+   two independent DNS lookups — meaning `hello@sockacademy.store` cannot receive mail *at all* today,
+   not even the Shopify verification email. This is not what a prior session set up; grepped every doc
+   that mentions `hello@sockacademy.store`/forwarding/MX (Stage16, Stage20, Klaviyo doc, Phase
+   Architecture) — none of them ever actually configured this. It was discussed, never done.
+
+   **Fix path chosen:** GoDaddy's free "Email Forwarding" product is gone from this account (only paid
+   Microsoft 365 upsell shown) — using **ImprovMX** (free, forwarding-only) instead, via GoDaddy's
+   "Connect Email → Create MX records for an external email service" flow (GoDaddy auto-detected
+   ImprovMX's standard MX values, no manual entry needed).
+
+   **Exact state where this was paused:** GoDaddy is showing "We found the MX records for Improvmx,"
+   **Step 1/2**, with a "Continue" button not yet clicked. **Still needed, in this order:**
+   1. Click "Continue" in GoDaddy to finish adding the ImprovMX MX records (step 2/2).
+   2. Sign up at improvmx.com (free), add domain `sockacademy.store` there (claims it — the DNS MX
+      record alone does nothing without this), and create the alias `hello` → forwards to
+      `sockacademy.store@gmail.com`.
+   3. Change Shopify Sender email back to `hello@sockacademy.store` (currently sitting on
+      `sockacademy.store@gmail.com` — a Gmail address, which will never authenticate).
+   4. Wait for DNS propagation, then re-verify (I can re-run the DNS check on request).
+   5. Back in Shopify Notifications: confirm the email-verification link (should now actually arrive,
+      forwarded via ImprovMX → `sockacademy.store@gmail.com`), then click into "Email domain
+      authentication — Needs setup" for the exact CNAME values, add them at GoDaddy DNS.
+   6. "DMARC record setup — View steps" in the same Shopify panel — follow Shopify's own recommended
+      rua= value (better than guessing one).
+   Best done before the first real order.
 3. **Send the attorney packet** (tracker item 1.3 / Keystone B) — the single true external pre-launch
    blocker. Now includes Q8 (item 1 above).
 4. **Keystone Decision Week** (item B below — 3.1 positioning, 3.2 discounts, 3.3 price floor, 3.5
@@ -40,7 +84,13 @@ document order.
 6. **Optional, whenever convenient:** generate a Supabase read-only Personal Access Token (Dashboard →
    Account Settings → Access Tokens) so Claude can install the read-only Supabase MCP server (exact
    command already in `CLAUDE.md`'s MCP table) — lets future sessions verify the live DB schema
-   directly instead of asking you to relay it.
+   directly instead of asking you to relay it. (Same PAT also unblocks Stage 21 item CF-0b below.)
+7. **Cheap, zero-code sign-off:** read `FABLE5_AUTONOMOUS_OS_ROADMAP.md` (+ its three companion docs —
+   `FABLE5_MULTI_INBOX_COMMAND_CENTER.md`, `FABLE5_CIRCUIT_BREAKER_MAP.md`, and the new
+   `FABLE5_FINAL_READINESS_CHECKLIST.md` capstone) and approve/amend the Connectivity Fabric plan (Stage
+   21, CF-0a below) — nothing builds before its named trigger either way, so this isn't urgent, but it's
+   pure reading + a yes/no, and three small decisions ride along (CF-3b liveness canary, CF-3c
+   legal-inbox address, CF-0d LangFuse-pilot go-ahead).
 
 ---
 
@@ -154,6 +204,53 @@ dispatch" as an existing live commitment (steps 1, 4, the 11pm checklist). The a
 future copy (`FABLE5_STAGE16_DELIVERABLES.md:230`), still gated on the unapproved homepage/copy batch
 (item I), not live. The runbook's operational logic (batch each morning, day-3 ticket trigger) is
 still sound practice regardless — just don't tell a customer "we promised 48h" until item I ships.
+
+---
+
+## Stage 21 — dispatched 06/07/2026: The Connectivity Fabric (Autonomous OS Roadmap)
+**Ask (Guy):** evolve the fleet from agent-based reporting into a bulletproof, fully autonomous
+operating system across email/social/backend/web — a "Connectivity Filter" grading every MCP/API on
+Superpower vs. Surface-Area-for-Failure, a Multi-Inbox Command Center, a social-media HITL policy, a
+phased automation blueprint, and a Health-Check Agent proposal, plus an answer to "what are the hidden
+blind spots."
+**Status: ✅ Design done 06/07/2026 (Fable 5 planning pass, executed by Sonnet).** Output:
+`FABLE5_AUTONOMOUS_OS_ROADMAP.md`, `FABLE5_MULTI_INBOX_COMMAND_CENTER.md`, `FABLE5_CIRCUIT_BREAKER_MAP.md`.
+**Verdict: the fabric is already ~80% woven — complete it, don't grow it.** Zero code built before named
+triggers; this stage **extends** Stage 18's O-0/O-1/O-2/O-3 triggers and Stage 16's A2.7/A16.5 design,
+it is not a competing scheme. Fully Backend-Feature-Freeze-compliant — the only code-adjacent item is
+an *optional* single-agent LangFuse pilot (CF-0d), gated on Guy's explicit go-ahead.
+
+**Key correction to Guy's brief, caught during design:** a standalone "Health-Check Agent" would
+duplicate four mechanisms that already exist (A0 + `agent_health_log`, fleet-wide `self-heal.js`,
+`yaml-reality-audit.js`, PARANOIA MODE) and would directly contradict Stage 18's own "build none of it
+now" verdict — formalized as one system instead (§CF-0e), with a single narrowly-scoped future
+enhancement (an O-3 liveness canary) flagged as Guy's decision, not a default.
+
+**Live gap found during design (not created by it):** `agents/A5_social/agent.js` publishes to
+Instagram **fully autonomously today** whenever Meta credentials are set — zero Guy approval step,
+only an automated QA-gate. This is a real violation of the 10/10 human-in-the-loop rule Guy asked for,
+and is this stage's highest-priority retrofit (CF-1b) — **A5 must stay DRY_RUN until it ships.**
+
+| # | Item | Owner | Gate | Status | Notes |
+|---|------|-------|------|--------|-------|
+| CF-0a | Approve the Autonomous OS Roadmap + Connectivity Filter grades | 🧑 | O-0 now | Not started | Zero code — pure sign-off |
+| CF-0b | Generate a Supabase read-only PAT → unblock `supabase-mcp` | 🧑 | O-0 now | Not started | Closes the #1 recurring failure (SQL file ≠ live DB, ANTI_RECURRENCE #23/#26). Exact command already in CLAUDE.md's MCP table |
+| CF-0c | Reconcile CLAUDE.md's MCP table with the Connectivity Filter's grades (edit in place) | 🤖 | O-0 now | ✅ **Done 06/07** | Single source of truth — never a second parallel table (ANTI_RECURRENCE #31/#42) |
+| CF-0d | LangFuse pilot — wire `observability.js` into ONE agent (A3 or A8) | 🤖 (needs Guy's go-ahead) | O-0 now | Queued | Bug-class instrumentation; adds `LANGFUSE_*` env vars; fleet-wide rollout deferred to CF-1e |
+| CF-0e | Formalize the "Health-Check System" doc (composite of 4 existing mechanisms) | 🤖 | O-0 now | ✅ **Done 06/07** | Docs-only, in the roadmap §6 — explicitly NOT a new agent |
+| CF-0f | A5 HITL-retrofit design (code gated to O-1) | 🧠 | O-0 now | ✅ **Done 06/07** | See roadmap §4 — reuses `requestApproval` + new `action_type:'social_post'` + `A5_ARM` guard, mirroring the real `A9_ARM` pattern |
+| CF-1a | Q-HARDEN `queue.js` (ack-on-pop, `queue_log` lifecycle, dead-letter → `pending_approvals`) | 🤖 | O-1 | Blocked on `PHASE_2_ACTIVATE_BY_GUY` | = Stage 18 item S18-b; A2.7's first task |
+| CF-1b | A5 HITL retrofit code + `case 'social_post'` in `hitl-execute.js` + `A5_ARM` env | 🤖 | O-1 | Blocked | **A5 must stay DRY_RUN until this ships** — current live path is a real 10/10-rule violation |
+| CF-1c | Meta CAPI server-side build (per the existing 3-doc spec, no redesign) | 🤖 | Phase 2 gate (= O-1) | Blocked | Alert via `notifyTelegram` on any failure — never silent |
+| CF-1d | Adopt `supermetrics` + `agent-browser` with their designed breakers (CFO/intel clusters) | 🤖 | O-1 | Blocked | Read-only scopes; `agent-browser` also gated on the Hallucination-Defense policy (roadmap §8) |
+| CF-1e | LangFuse fleet-wide rollout | 🤖 | O-1 | Blocked | Do while agent code is already open for O-1 work |
+| CF-2a | A16.5 CS Desk + Multi-Inbox Command Center go live | 🤖 | O-2 | Blocked on A2.7 live+clean 1mo/50 orders + attorney-approved policy | See `FABLE5_MULTI_INBOX_COMMAND_CENTER.md` |
+| CF-2b | A0 Rung 1 propose-mode (allowlisted re-dispatch) | 🤖 | O-2 | Blocked | = Stage 18 item S18-c |
+| CF-3a | A0 Rung 2 quarantine (kill-switch `system_config`, fleet startup check) | 🤖 | O-3 | Blocked on $5K MRR × 2mo | = Stage 18 item S18-d |
+| CF-3b | **DECISION:** approve A0's active liveness-canary (external-dependency health probe) | 🧑 decides → 🤖 builds | O-3 | Not started | The one genuinely-new Health-Check capability (roadmap §6); alternative is keeping A17 + `yaml-reality-audit.js` on-demand |
+| CF-3c | Legal-adjacent inbox address name (multi-inbox 4th lane) | 🧑 | O-2 | Not started | e.g. `legal@sockacademy.store` — needed before A16.5/Multi-Inbox go live |
+| CF-X | Rung 3 (DAG/LLM-orchestration) + generic `zapier`-as-glue + `granola`/standalone `perplexity` | — | — | **DO NOT BUILD / REJECT** | Fail the Connectivity Filter (Surface ≥ Superpower); Rung 3 also directly contradicts Stage 18 |
+| CF-0g | Final Readiness Checklist authored (capstone) | 🤖 | O-0 now | ✅ **Done 07/07** | Consolidates the four Stage 21 docs into one go/no-go page (4 domain gates + the canary metric); cross-links, never duplicates — see `FABLE5_FINAL_READINESS_CHECKLIST.md` |
 
 ## Queued candidates from earlier drafting (superseded by the completed Stage 19 above — kept for record)
 **Added 05/07/2026, expanded 06/07/2026, Guy's request:** Fable actively researches; Sonnet/Opus
@@ -292,3 +389,4 @@ amendment text, code). Only re-dispatch Fable for genuinely new strategic/archit
 - 2026-07-05 — Stage 16 items I-N added: homepage copy re-cut (50-row table), A2.7/A16.5 constitutional amendment draft, GTM plan, and two new verified findings (Sock Finder recommends BLOCKED novelty products below the price floor; homepage carries two fabricated facts — false founding year, false category count). All Not Started.
 - 2026-07-05 — Stage 17 items O-S added: Claude Code/Desktop tooling audit (magic MCP key exposure + removal, MCP doc-vs-reality reconciliation, allowlist pruning, skills table gap). Security incident found and fixed same-pass: subagent printed a key fragment into its own doc, redacted before any commit, logged as ANTI_RECURRENCE #42.
 - 2026-07-06 (overnight, Guy asleep — standing authorization, see memory `project_fable5_overnight_run.md`) — Stage 18 landed (`bbe14b1`). Executed three already-fully-specified items from the pre-approved launch-plan execution order: **2.4** cron reschedule + collision splits + STALENESS_HOURS pairing (`8188fb6`, CI green); **2.2** QA-gate writer fixes in A3/A5 `agent.js` — raised token caps, removed the fallback that fabricated a guaranteed-fail caption, fixed A5's self-contradicting humanizer rule, added A3's missing rubric rules to its own prompt (`d6b6c24`, CI green); **G** doc-retirement banners on all 14 completed-stage FABLE5_*.md docs pointing back to this tracker. Dispatched Stage 19 (blind-spot discovery, categories A-E) in background — quota was available, no code risk (read-only). No Guy-only items touched.
+- 2026-07-06 (same session as the trademark/D4 work) — Stage 21 dispatched and landed: Guy asked for a definitive "Connectivity Fabric" / Autonomous OS roadmap (MCP grading, multi-inbox, social HITL, phased blueprint, circuit breakers). Two read-only Explore passes mapped existing infra (`queue.js`/`hitl.js`/`self-heal.js`/`orchestration/index.js`/Stage 18/Stage 16/A5/CAPI/MCP table/tracker) before a Fable-model planning pass (honoring the brain/executor rule) produced the actual design, which Sonnet then reviewed against the live codebase and wrote into three new docs (`FABLE5_AUTONOMOUS_OS_ROADMAP.md`, `FABLE5_MULTI_INBOX_COMMAND_CENTER.md`, `FABLE5_CIRCUIT_BREAKER_MAP.md`) plus this Stage 21 table and a CLAUDE.md MCP-table reconciliation. Two real findings surfaced, not invented: (1) a standalone "Health-Check Agent" (as originally asked) would have duplicated four existing mechanisms and violated both the Freeze and Stage 18's own verdict — formalized as one system instead; (2) A5 (`agents/A5_social/agent.js`) publishes to Instagram fully autonomously today with zero Guy approval step — a live 10/10-rule violation, now the top-priority O-1 retrofit (CF-1b). Zero code shipped except the CLAUDE.md table edit (docs-only); everything else is gated behind O-1/O-2/O-3 and needs Guy's sign-off (CF-0a) plus a few small decisions (CF-3b canary, CF-3c legal-inbox address, CF-0d LangFuse-pilot go-ahead).

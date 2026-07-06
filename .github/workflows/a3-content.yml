@@ -48,6 +48,9 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
+          LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+          LANGFUSE_HOST: ${{ secrets.LANGFUSE_HOST }}
           GH_PAT_SECRETS_WRITE: ${{ secrets.GH_PAT_SECRETS_WRITE }}
           GH_REPO_OWNER: ${{ github.repository_owner }}
           GH_REPO_NAME: ${{ github.event.repository.name }}

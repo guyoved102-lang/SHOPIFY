@@ -433,19 +433,21 @@ GitHub workflow    → .github/workflows/
 | `test-driven-development` | ACTIVE | superpowers plugin — TDD בכל agent/feature חדש. שלושתם מותקנים ובשימוש בפועל מ-superpowers plugin (`enabledPlugins` ב-`~/.claude/settings.json`) — נוספו לטבלה 05/07/2026 (Fable 5 Stage 17) כדי לסגור פער תיעודי, לא שינוי החלטה. |
 
 ### MCP Servers — Corporate Function Map
-| MCP | ורדיקט CTO | מחלקה קורפורטיבית |
-|---|---|---|
-| `context7` | PLANNED (לא מותקן בפועל) | Dev Sessions — docs לספריות |
-| `agent-browser` | PLANNED (לא מותקן בפועל) | Intelligence Cluster — A10/A11/A13/A17/A18 |
-| `higgsfield` | ON-HOLD | Creative Studio — מחכה לתמונת רפרנס מגיא |
-| `perplexity` | ON-HOLD | Intelligence Cluster — להפעיל עם A10/A13 |
-| `supermetrics` | PLANNED (לא מותקן בפועל) | CFO Data Aggregation — GA4+Meta+Shopify+Klaviyo unified |
-| `notion` | PLANNED (לא מותקן בפועל) | Corporate Knowledge Base — decisions, audit trail, OKRs |
-| `granola` | PLANNED (לא מותקן בפועל) | Strategy Session Documenter → Notion pipeline |
-| `zapier` | ON-HOLD | Accounting Integration — QuickBooks/Xero bridge (CFO Agent) |
-| `magic` (21st.dev) | REMOVED 05/07/2026 | היה מותקן בפועל ב-`~/.claude.json` (עם API key חשוף ב-plain text — סובב ע"י גיא) למרות ורדיקט NOT APPLICABLE (02/07/2026: `builder`/`inspiration`/`refiner` פולטים React JSX/TSX, SockAcademy הוא Shopify Liquid). הוסר מה-config המקומי 05/07/2026 (Fable 5 Stage 17 audit). |
-| `shopify-dev-mcp` | **ACTIVE — הותקן ואומת 06/07/2026** | Dev Sessions — Shopify Admin/Storefront API schema + docs חיים, ללא credentials (Fable 5 Stage 19 tooling proposal A1). מותקן `--scope user` (מקומי, לא ב-repo). תוקף: 6+ agents כותבים Shopify API calls ידנית מוצמדים ל-`2025-01`, ANTI_RECURRENCE #41 (Shopify OAuth drift) — lookup חי תוקף ישירות את הכשל הזה. (התקנה ראשונה נכשלה על npx cache פגום — תוקן ב-`npm cache verify` + ניקוי; מאומת `claude mcp list` → Connected.) |
-| `supabase-mcp` (read-only) | **PLANNED — חסום, ממתין לגיא** | DB verification — הכשל החוזר #1 של הפרויקט הוא "קובץ SQL ≠ DB אמיתי" (פרוטוקולים #23, #26). דורש Personal Access Token בדרגת חשבון מ-Supabase Dashboard (Account Settings → Access Tokens) — **לא** ה-`SUPABASE_SERVICE_KEY` הקיים (הרשאה גבוהה מדי לצורך verification בלבד). גיא צריך ליצור את הטוקן בעצמו; Claude לא יכול (אין גישה ל-Supabase Dashboard). כשיש טוקן: `claude mcp add --scope user supabase-mcp -e SUPABASE_ACCESS_TOKEN=xxx -- npx -y @supabase/mcp-server-supabase@latest --project-ref=<ref> --read-only`. |
+**Connectivity Filter column (added 06/07/2026, Fable 5 Stage 21):** grade + gate from the Superpower-vs-Surface-for-Failure filter. Full grading rationale + circuit-breaker note for each row lives in `docs/ops/FABLE5_AUTONOMOUS_OS_ROADMAP.md` §1 — **this table is the single source of truth for the verdict; the roadmap doc explains it, never a second table.**
+
+| MCP | ורדיקט CTO | מחלקה קורפורטיבית | Connectivity Filter (Stage 21) |
+|---|---|---|---|
+| `context7` | PLANNED (לא מותקן בפועל) | Dev Sessions — docs לספריות | ADOPT (config) — O-0, optional |
+| `agent-browser` | PLANNED (לא מותקן בפועל) | Intelligence Cluster — A10/A11/A13/A17/A18 | ADOPT-WITH-BREAKER — O-1 (gated on the Hallucination-Defense policy) |
+| `higgsfield` | ON-HOLD | Creative Studio — מחכה לתמונת רפרנס מגיא | ADOPT (gated) — O-1, tied to the A5 HITL retrofit |
+| `perplexity` | ON-HOLD | Intelligence Cluster — להפעיל עם A10/A13 | HOLD — overlaps `agent-browser`; adopt only if a specific gap is named |
+| `supermetrics` | PLANNED (לא מותקן בפועל) | CFO Data Aggregation — GA4+Meta+Shopify+Klaviyo unified | ADOPT-WITH-BREAKER — O-1, with A15 activation |
+| `notion` | PLANNED (לא מותקן בפועל) | Corporate Knowledge Base — decisions, audit trail, OKRs | HOLD — O-2+, only once a second human needs read access |
+| `granola` | PLANNED (לא מותקן בפועל) | Strategy Session Documenter → Notion pipeline | HOLD — solo founder, no meetings; reject until there's a team |
+| `zapier` | ON-HOLD | Accounting Integration — QuickBooks/Xero bridge (CFO Agent) | REJECT (for autonomy) — keep strictly for the accounting bridge at $20K MRR, nothing else |
+| `magic` (21st.dev) | REMOVED 05/07/2026 | היה מותקן בפועל ב-`~/.claude.json` (עם API key חשוף ב-plain text — סובב ע"י גיא) למרות ורדיקט NOT APPLICABLE (02/07/2026: `builder`/`inspiration`/`refiner` פולטים React JSX/TSX, SockAcademy הוא Shopify Liquid). הוסר מה-config המקומי 05/07/2026 (Fable 5 Stage 17 audit). | REJECT — permanent |
+| `shopify-dev-mcp` | **ACTIVE — הותקן ואומת 06/07/2026** | Dev Sessions — Shopify Admin/Storefront API schema + docs חיים, ללא credentials (Fable 5 Stage 19 tooling proposal A1). מותקן `--scope user` (מקומי, לא ב-repo). תוקף: 6+ agents כותבים Shopify API calls ידנית מוצמדים ל-`2025-01`, ANTI_RECURRENCE #41 (Shopify OAuth drift) — lookup חי תוקף ישירות את הכשל הזה. (התקנה ראשונה נכשלה על npx cache פגום — תוקן ב-`npm cache verify` + ניקוי; מאומת `claude mcp list` → Connected.) | ADOPT ✅ done |
+| `supabase-mcp` (read-only) | **PLANNED — חסום, ממתין לגיא** | DB verification — הכשל החוזר #1 של הפרויקט הוא "קובץ SQL ≠ DB אמיתי" (פרוטוקולים #23, #26). דורש Personal Access Token בדרגת חשבון מ-Supabase Dashboard (Account Settings → Access Tokens) — **לא** ה-`SUPABASE_SERVICE_KEY` הקיים (הרשאה גבוהה מדי לצורך verification בלבד). גיא צריך ליצור את הטוקן בעצמו; Claude לא יכול (אין גישה ל-Supabase Dashboard). כשיש טוקן: `claude mcp add --scope user supabase-mcp -e SUPABASE_ACCESS_TOKEN=xxx -- npx -y @supabase/mcp-server-supabase@latest --project-ref=<ref> --read-only`. | ADOPT (blocked on Guy) — O-0 |
 
 **⚠️ עדכון 05/07/2026 (Fable 5 Stage 17, ANTI_RECURRENCE #42 context):** 5 השורות שסומנו PLANNED היו מתויגות ACTIVE — אבל אף אחד מהן לא נמצא מותקן בפועל ב-`~/.claude.json` או בכל config מקומי אחר שנבדק. אם מישהו מהם *כן* בשימוש (למשל דרך Desktop-app extension store שלא נבדק), לתקן בחזרה ל-ACTIVE ולציין את המקור. עד אז — הטבלה משקפת מה שבאמת מותקן, לא כוונה.
 

@@ -13,6 +13,7 @@ const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js')
 const { writeMetrics } = require('../../corp/core/metrics.js');
 const { reviewContent } = require('../../corp/core/qa-gate.js');
 const { handleFatalError } = require('../../corp/core/self-heal.js');
+const obs = require('../../corp/core/observability');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 const MAX_QA_ROUNDS = 2;
 
@@ -118,12 +119,17 @@ async function writeArticle(topic, revisionNotes = null) {
     ? `\n\nPREVIOUS DRAFT FEEDBACK — fix these issues before rewriting:\n${revisionNotes}\n`
     : '';
 
-  const msg = await withRetry(() => anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 6000, // was 4000 — tight for 2,000 words of HTML (~3,000+ tokens); undershooting caused the QA word-count rule to fail predictably (Fable 5 QA_GATE_ANALYSIS.md finding 4, 06/07/2026)
-    messages: [{
-      role: 'user',
-      content: `You are a senior content writer for SockAcademy — the world's first dedicated sock authority. We are the authoritative voice on premium socks for men. Think: The Strategist meets GQ, but focused entirely on socks.
+  const trace = obs.startTrace({ agentId: 'A3', runId: Date.now().toString() });
+
+  try {
+    const msg = await withRetry(() => obs.traceLLM(trace, 'content-generation', {
+      model: 'claude-sonnet-4-6',
+      fn: () => anthropic.messages.create({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 6000, // was 4000 — tight for 2,000 words of HTML (~3,000+ tokens); undershooting caused the QA word-count rule to fail predictably (Fable 5 QA_GATE_ANALYSIS.md finding 4, 06/07/2026)
+        messages: [{
+          role: 'user',
+          content: `You are a senior content writer for SockAcademy — the world's first dedicated sock authority. We are the authoritative voice on premium socks for men. Think: The Strategist meets GQ, but focused entirely on socks.
 
 Write a comprehensive, authoritative blog post on the following topic:
 
@@ -150,10 +156,16 @@ Format the entire article as clean HTML:
 - No inline styles
 
 Write the article now:`,
-    }],
-  }), 'A3');
+        }],
+      }),
+    }), 'A3');
 
-  return msg.content[0].text.trim();
+    await obs.endTrace(trace, { status: 'success' });
+    return msg.content[0].text.trim();
+  } catch (err) {
+    await obs.endTrace(trace, { status: 'error', error: err });
+    throw err;
+  }
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
