@@ -11,7 +11,7 @@
 This is the one document to hand the attorney. Everything below the divider is written for them. The legal templates live in code (`agents/A9_legal_compliance/agent.js`) — export the four `body_html` blocks to a Word/PDF file (or run A9 with `DRY_RUN=true` and copy the output) before sending; a lawyer should not read JavaScript. The attorney review is the project's **single remaining pre-launch blocker**; MG-2's publish is chained behind it. The specific answers this packet is designed to obtain:
 
 1. Approve/redline the 4 templates (ToS, Privacy, Shipping, Refund).
-2. Answer Q1–Q7 below (jurisdiction, arbitration, GDPR/CCPA, MG-2 arch language, medical-claims boundary, entity timing, consumer-protection conflicts).
+2. Answer Q1–Q8 below (jurisdiction, arbitration, GDPR/CCPA, MG-2 arch language, medical-claims boundary, entity timing, consumer-protection conflicts, trademark clearance).
 3. Give a written "cleared" or "not cleared" on MG-2 Section 4 so the Regulatory Hold can be lifted or kept.
 
 **One caution before you send:** the medical-claims quarantine is contained inside `research_materials.md`, but it is **not fully contained fleet-wide** — see Q5. Decide whether to fix that first (cheap: delete two topic-list entries) or ask the attorney where the exact line is and then fix.
@@ -65,6 +65,8 @@ The internal hold note (MG-2-FINAL.md lines 101–107) states the language was *
 **Q6 — MG-2 clearance.** Reviewing the Arch Zone excerpt above and the full section (MG-2-FINAL.md lines 49–59): is the "structure not therapy" framing sufficient to avoid the regulated compression-garment category, or does it need edits? A written yes/no lifts or keeps the publish hold.
 
 **Q7 — Entity & tax timing.** Given a US-facing store run by an Israeli sole proprietor: (a) is it acceptable to launch and take first revenue before forming an entity, and at what point does that flip; (b) any immediate Israeli consumer-protection or VAT registration obligations triggered by first USD sales; (c) what should the ENTITY placeholder legally read until formation (e.g., "SockAcademy, a sole proprietorship of [name]")?
+
+**Q8 — Trademark clearance (added 06/07/2026, Fable 5 Stage 19 finding, independently confirmed by Claude via UK Companies House + web search before this packet was sent).** A UK company "Sock Academy Ltd" (Companies House 05743003, active, incorporated 15/03/2006, formerly "United Oddsocks Limited") predates us, operates `sockacademy.com`, and sells novelty socks in a claimed 18 countries — same name, same Nice Class 25 goods category, senior by nearly two decades. We could not verify whether they hold a *registered* trademark for "SOCK ACADEMY" in any jurisdiction (no trademark-database access from this review). Please run or commission a knock-out clearance search for SOCK ACADEMY / SOCKACADEMY in Class 25 for the US, UK, EU, and Israel, and advise: (a) risk of continued use of the name, (b) whether our own trademark registration (already planned for Phase 3A per the roadmap) is likely to succeed or likely to be blocked/opposed, (c) if there is meaningful risk, how urgently a rebrand conversation should happen — cost of checking now is near-zero; cost of a forced rebrand after real traction would be the most expensive event in this project's history.
 
 ---
 

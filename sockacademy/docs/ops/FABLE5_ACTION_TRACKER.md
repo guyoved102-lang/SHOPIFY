@@ -36,15 +36,37 @@ the blueprint.
 | S18-d | O-3 build (A0 Rung 2 quarantine + consumer runtime reassessment) | 🤖 (at trigger) | Blocked on Phase 3 ($5K MRR×2mo) | — |
 | S18-e | Rung 3 (DAG scheduling/reordering/LLM-orchestration/migrate editorial off cron) | — | **DO NOT BUILD** | Only revisit if a named recurring incident proves Rungs 1-2 insufficient |
 
-## Queued for next Fable dispatch (Stage 19 candidate — not yet dispatched)
+## Stage 19 — done 06/07/2026 (overnight, dispatched while Guy asleep — quota was available, 100% read-only)
+**Ask:** blind-spot discovery across categories A-E below. **Output:** `FABLE5_STAGE19_BLIND_SPOTS.md`
+(+ ledger entry, controller-verified). **Two real findings, both independently confirmed by Claude
+via live DNS query + web search, not just taken on Fable's word:**
+
+- 🔴 **E2 — a same-name UK sock company exists.** "Sock Academy Ltd", UK Companies House **05743003**,
+  active, incorporated 15/03/2006, owns `sockacademy.com`, formerly "United Oddsocks Limited"
+  (2006-2017), 12 employees, sells novelty socks in 18 countries. Registered-*mark* status
+  unverified (no DB access) — but the company itself is 100% real, confirmed independently.
+  **This is the single highest-consequence open item in the whole tracker** — cost to check now is
+  free, cost to discover after traction would be the most expensive event in the project's history.
+- 🔴 **D4 — Shopify transactional email cannot authenticate as the brand domain today**, confirmed
+  via direct DNS query: no SPF TXT on `sockacademy.store` root, `shop1/shop2._domainkey` both
+  NXDOMAIN, DMARC live at `p=quarantine` reporting to GoDaddy's default mailbox (silent failure by
+  construction). Klaviyo marketing email is fine (properly delegated). ~15 min fix, before first order.
+
+12-item consolidated action list is in the doc itself — nearly all 🧑-only (settings/DNS/self-search/
+accountant tasks), a few config-only 🤖-pending-approval (MCP servers), one bundled into the already-
+queued Sock Finder v2 pass. Nothing here needs a new agent/table/workflow before Phase 2 — fully
+freeze-compliant. **Top 3 for Guy to do first, in order of cost-asymmetry: (1) add trademark Q8 to
+the attorney packet before sending it + do the free 30-min self-search tonight/this week, (2)
+Shopify sender-domain authentication + SPF + DMARC redirect (~15 min), (3) the rest of the 12-item
+list at his own pace — none of the rest is time-sensitive.**
+
+## Queued candidates from earlier drafting (superseded by the completed Stage 19 above — kept for record)
 **Added 05/07/2026, expanded 06/07/2026, Guy's request:** Fable actively researches; Sonnet/Opus
 execute after. Guy explicitly wants topics he wouldn't know to ask about himself — "blind spots I'm
 not aware of and don't know how to phrase." This is distinct from Stage 15's "Missed Leverage" (which
 covered project strategy/ops) — these are categories a first-time solo founder typically never thinks
-to check until something goes wrong. Dispatch when Guy is ready (uses Fable quota — his call on timing).
-Claude (not Fable) identified and drafted this list, per the standing brain/executor split — Fable's
-job next is to actually investigate each one against this specific project, not to discover that these
-categories exist.
+to check until something goes wrong. Claude (not Fable) identified and drafted this list, per the
+standing brain/executor split.
 
 **A. External tooling (original ask):** skills/MCP servers/tools worth adding that nobody has proposed yet.
 
@@ -110,7 +132,7 @@ been asked anywhere in the project's 42 anti-recurrence protocols.
 | 3.3 | Single-pair price floor | Pricing pages, positioning (3.1) | Not started |
 | 3.5 | VISION.md A-numbering cleanup | Documentation consistency | Not started |
 | 1.1 | Shopify token — ✅ **DONE 05/07/2026** (see `SHOPIFY_TOKEN_RUNBOOK.md`) | Agents A2/A3/A5/A7/A9/A12 | **Done** |
-| 1.3 | Attorney packet send (`FABLE5_ATTORNEY_PREP.md`) | MG-2 publish, the only true external blocker | Not started |
+| 1.3 | Attorney packet send (`FABLE5_ATTORNEY_PREP.md`) | MG-2 publish, the only true external blocker | Not started — **⚠️ add Q8 before sending (Stage 19, 06/07/2026): a real UK company "Sock Academy Ltd" (Companies House 05743003) predates us and holds sockacademy.com — ask attorney to run a knock-out trademark search before this packet goes out, costs nothing extra since it hasn't been sent yet** |
 
 *Handoff:* ✅ **Memos drafted 05/07/2026** — `FABLE5_KEYSTONE_DECISION_MEMOS.md` (5 memos: 3.1, 3.2, 3.3, 3.5, 1.3 — each ≤half page, Hebrew, options/recommendation/consequences). Waiting on Guy to read and decide.
 
