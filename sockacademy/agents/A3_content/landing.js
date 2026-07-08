@@ -123,7 +123,7 @@ const LANDING_PAGE_HTML = `
         <div class="sa-proof-label">Expert categories — nothing outside them</div>
       </div>
       <div class="sa-proof-item">
-        <div class="sa-proof-number">$18+</div>
+        <div class="sa-proof-number">$22+</div>
         <div class="sa-proof-label">Minimum price — quality has a floor</div>
       </div>
       <div class="sa-proof-item">

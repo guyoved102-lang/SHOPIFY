@@ -89,7 +89,7 @@ async function generateAdCopy(campaign, product) {
     max_tokens: 500,
     messages: [{
       role: 'user',
-      content: `You are writing Meta ad copy for SockAcademy — the world's first dedicated sock authority. Premium socks for men, $18–$85. Think: Tom Ford's restraint meets Patagonia's conviction.
+      content: `You are writing Meta ad copy for SockAcademy — the world's first dedicated sock authority. Premium socks for men, $22–$85. Think: Tom Ford's restraint meets Patagonia's conviction.
 
 Campaign goal: ${campaign.goal}
 Format: ${campaign.format} ad

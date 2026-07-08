@@ -29,7 +29,7 @@ SockAcademy = האקדמיה הראשונה בעולם לגרביים פרמיו
 ## Price Floor — קשיח
 | קטגוריה | מינימום |
 |---|---|
-| Single Pair | $18 |
+| Single Pair | $22 |
 | Premium | $28 |
 | Merino/Tactical | $35 |
 | Gift Set | $65 |
@@ -97,6 +97,8 @@ Not a subscription. A protocol.
 ## Build Phases — System-First Mandate
 **Zero sales until the entire machine is built, tested, and fully synchronized.**
 
+**Phase numbering below follows `PHASE_ARCHITECTURE_SKELETON.md` — the canonical SA-Cluster Phase sequence (see `feedback_enterprise_rules.md` → Phase-Numbering Disambiguation). Decided 08/07/2026 (Keystone 3.5): where this doc and the skeleton ever disagree, the skeleton wins and this doc is updated to match.**
+
 ### Phase 1 — Core Machine (Current)
 Complete: A0, A1, A2, A3, A4, A5, A6, A7, A9, A10, A11, A12
 Immediate next: A15 CFO skeleton, A14 COO skeleton, A13 Global Competitive
@@ -105,10 +107,10 @@ Immediate next: A15 CFO skeleton, A14 COO skeleton, A13 Global Competitive
 A14 COO, A15 CFO, A8 Analytics, A16 CX Director
 Accounting: Google Sheets → Wave (free)
 
-### Phase 3 — Enterprise Protection ($5K MRR × 2 months)
+### Phase 3 — Enterprise Protection ($5K MRR × 2 consecutive months)
 A17 IP, A18 Fraud, A19 Returns, A20 Inventory, A21 Affiliate, A24 CRO, A26 Regulatory Watch
 
-### Scale Phase — Empire ($15K MRR)
+### Phase 4 — Scale / Brand Elevation ($15K MRR × 2 consecutive months)
 A23 Factory (Private Label), A28 SockAcademy Club, A27 PR
 Accounting: Wave → QuickBooks
 Notion workspace activation
@@ -118,5 +120,5 @@ SockAcademy begins as a curated dropshipping authority.
 The machine is built from day one to support the future pivot:
 - A1 tracks factory pricing (not just dropship)
 - A15 CFO models private label margins vs. dropship
-- A23 Factory Relations begins Alibaba intelligence at Phase 3
+- A23 Factory Relations begins Alibaba intelligence at Phase 4 (Scale, $15K MRR × 2 months)
 - Target: First private label SKU by Year 2

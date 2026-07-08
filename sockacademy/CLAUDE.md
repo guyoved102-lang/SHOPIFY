@@ -557,7 +557,7 @@ Frontend, עיצוב, דפים סטטיים, legacy CSS — **קפואים**. ל
 - תמונות Higgsfield ללא רפרנס מגיא — **BLOCKED**
 
 ### מחירים מינימליים (לא לרדת מתחת):
-- Single pair: $18+ | Premium: $28+ | Tactical/Merino: $35+ | Gift Set: $65+
+- Single pair: $22+ | Premium: $28+ | Tactical/Merino: $35+ | Gift Set: $65+
 
 ## ✅ הושלם הכל
 
@@ -697,7 +697,7 @@ Use WELCOME10 at checkout — and use it on something worth wearing.
 - אין מחיר אחיד — האקדמיה לגרביים = כל מוצר ייחודי
 - A1 מוצא מוצרים + רושם עלות ספק → גיא מחליט מחיר מכירה ביחד
 - קטגוריות מחיר משוערות (לאישור גיא בעתיד):
-  - גרביים בסיסיים פרימיום: $18–$28
+  - גרביים בסיסיים פרימיום: $22–$28
   - גרביים מיוחדים / Merino / Egyptian Cotton: $28–$45
   - סטים / מתנות: $45–$85
   - Tactical / ביצועים גבוהים: $25–$40

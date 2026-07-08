@@ -74,10 +74,11 @@ document order.
    Best done before the first real order.
 3. **Send the attorney packet** (tracker item 1.3 / Keystone B) — the single true external pre-launch
    blocker. Now includes Q8 (item 1 above).
-4. **Keystone Decision Week** (item B below — 3.1 positioning, 3.2 discounts, 3.3 price floor, 3.5
-   VISION numbering) — memos already drafted in `FABLE5_KEYSTONE_DECISION_MEMOS.md`, ≤1hr total. 3.1
-   unblocks the homepage rewrite (2.7) and the Design Freeze partial-lift batch (item C, which also
-   unblocks Sock Finder v2 + the new footer contrast fix found tonight).
+4. **Keystone Decision Week** (item B below) — **3.3 (price floor → $22) and 3.5 (VISION numbering →
+   skeleton canonical) decided and executed 08/07/2026.** Still open: 3.1 positioning (deferred by
+   Guy 05/07 — doesn't want to lock copy before real products are curated) and 3.2 discounts (blocked
+   on 3.1). 3.1 unblocks the homepage rewrite (2.7) and the Design Freeze partial-lift batch (item C,
+   which also unblocks Sock Finder v2 + the new footer contrast fix found tonight).
 5. **Remaining Stage 19 quick checks**, no particular order, ~5-30 min each: Shopify tax settings (no
    US collection enabled), GoDaddy 2FA/auto-renew/transfer-lock, continuity note + Google Inactive
    Account Manager, monthly manual Supabase dump, Israeli tax file via accountant.
@@ -183,7 +184,7 @@ code corrections queued, none implemented.
 
 | # | Item | Owner | Status | Notes |
 |---|------|-------|--------|-------|
-| S20-a | Read Part 1 before deciding 3.3 (and 3.1) — floor recommendation $24 | 🧑 | Not started | New decision-relevant input for the Keystone memos; supports memo 3.3-A, neutral on 3.1 |
+| S20-a | Read Part 1 before deciding 3.3 (and 3.1) — floor recommendation $24 | 🧑 | ✅ **Done 08/07/2026** | Guy decided $22 instead of the $24 recommendation — still clears the $18 novelty-overlap band. See 3.3 above. |
 | S20-b | Runbook pre-flight (~30 min): Shopify app push ON, Settings→Payments gateway check, Settings→Shipping <$50 rate check, CJ login/wallet, CJ-Shopify-app connection check, real-`cj_pid` check, D4 email-auth fix | 🧑 | Not started | Everything needed so order #1 is a 15-min non-event; D4 + cj_pid items already tracked elsewhere — no duplication, this is the bundle |
 | S20-c | Sample order (item K) also captures: CJ invoice lines (item/shipping/any fee), real payout fees, delivery days → replace every [EST] in the Part 1 model | 🧑 | Not started | Rides the already-tracked item K, zero extra effort |
 | S20-d | Fix margin math: A15 `getCatalogMargins` + A1 `suggestRetailPrice` → true-contribution formula via shared constants in `corp/core/pricing.js`; recalibrate A15's `<40%` alert | 🤖 (with Guy's go-ahead) | Queued | Bug-fix-class under the freeze but touches financial reporting — Guy approves timing; natural slot: A15's Phase 2 activation, earlier if Guy wants honest pre-revenue reports |
@@ -321,8 +322,8 @@ been asked anywhere in the project's 42 anti-recurrence protocols.
 |---|----------|--------|--------|
 | 3.1 | Brand positioning: premium-performance-now vs. luxury-claim-now | Homepage rewrite, article retirement, discount question, design batch (C) | **Deferred (Guy, 05/07/2026)** — leaning toward eventual luxury/"Rolex" framing, but explicitly does not want to lock copy language before real products are chosen/curated. Item I (homepage copy) stays untouched until this resolves — do not proceed on brand-voice copy without re-checking here first. |
 | 3.2 | Discount mechanics resolution | Product page copy (item C, #1) | Not started |
-| 3.3 | Single-pair price floor | Pricing pages, positioning (3.1) | Not started |
-| 3.5 | VISION.md A-numbering cleanup | Documentation consistency | Not started |
+| 3.3 | Single-pair price floor | Pricing pages, positioning (3.1) | ✅ **Done 08/07/2026** — Guy chose **$22** (not Stage 20's $24 recommendation, still above the $18 novelty-overlap floor). Applied to `A2_5_quality_control/agent.js` PRICE_MIN, `A10_trend_scout`, `A3_content/landing.js`, `A4_meta_ads`, `sock-finder.liquid`, `VISION.md`, `CLAUDE.md`, `README.md`. |
+| 3.5 | VISION.md A-numbering cleanup | Documentation consistency | ✅ **Done 08/07/2026** — Guy confirmed `PHASE_ARCHITECTURE_SKELETON.md` is canonical. `VISION.md` Build Phases section renumbered ("Scale Phase" → "Phase 4"), Private Label section's stale "at Phase 3" reference for A23 fixed to "Phase 4". |
 | 1.1 | Shopify token — ✅ **DONE 05/07/2026** (see `SHOPIFY_TOKEN_RUNBOOK.md`) | Agents A2/A3/A5/A7/A9/A12 | **Done** |
 | 1.3 | Attorney packet send (`FABLE5_ATTORNEY_PREP.md`) | MG-2 publish, the only true external blocker | Not started — **⚠️ add Q8 before sending (Stage 19, 06/07/2026): a real UK company "Sock Academy Ltd" (Companies House 05743003) predates us and holds sockacademy.com — ask attorney to run a knock-out trademark search before this packet goes out, costs nothing extra since it hasn't been sent yet** |
 
@@ -389,4 +390,13 @@ amendment text, code). Only re-dispatch Fable for genuinely new strategic/archit
 - 2026-07-05 — Stage 16 items I-N added: homepage copy re-cut (50-row table), A2.7/A16.5 constitutional amendment draft, GTM plan, and two new verified findings (Sock Finder recommends BLOCKED novelty products below the price floor; homepage carries two fabricated facts — false founding year, false category count). All Not Started.
 - 2026-07-05 — Stage 17 items O-S added: Claude Code/Desktop tooling audit (magic MCP key exposure + removal, MCP doc-vs-reality reconciliation, allowlist pruning, skills table gap). Security incident found and fixed same-pass: subagent printed a key fragment into its own doc, redacted before any commit, logged as ANTI_RECURRENCE #42.
 - 2026-07-06 (overnight, Guy asleep — standing authorization, see memory `project_fable5_overnight_run.md`) — Stage 18 landed (`bbe14b1`). Executed three already-fully-specified items from the pre-approved launch-plan execution order: **2.4** cron reschedule + collision splits + STALENESS_HOURS pairing (`8188fb6`, CI green); **2.2** QA-gate writer fixes in A3/A5 `agent.js` — raised token caps, removed the fallback that fabricated a guaranteed-fail caption, fixed A5's self-contradicting humanizer rule, added A3's missing rubric rules to its own prompt (`d6b6c24`, CI green); **G** doc-retirement banners on all 14 completed-stage FABLE5_*.md docs pointing back to this tracker. Dispatched Stage 19 (blind-spot discovery, categories A-E) in background — quota was available, no code risk (read-only). No Guy-only items touched.
+- 2026-07-08 — Guy away from the computer, asked to work the "Waiting on Guy" list in recommended
+  order adjusted for that constraint. Checked the attorney-packet Gmail draft directly (MCP): it still
+  has the placeholder `attorney@example.com` recipient and the internal delete-before-sending note —
+  contradicts this tracker's prior "Guy confirmed steps 1-3 done" note; flagged to Guy, no action taken
+  (needs the real attorney email + Guy's trigger phrase, both Guy-only regardless of device). D4 (GoDaddy
+  MX/email auth) also skipped — needs live browser clicks, no MCP available for GoDaddy. Keystone 3.3
+  and 3.5 do not require a screen, just a decision, so asked Guy directly: **3.3 → $22** (not Stage 20's
+  $24 recommendation); **3.5 → skeleton is canonical**, VISION.md updated to match. Both executed same
+  session — see rows above. 3.2 left open (blocked on 3.1, which Guy already deferred).
 - 2026-07-06 (same session as the trademark/D4 work) — Stage 21 dispatched and landed: Guy asked for a definitive "Connectivity Fabric" / Autonomous OS roadmap (MCP grading, multi-inbox, social HITL, phased blueprint, circuit breakers). Two read-only Explore passes mapped existing infra (`queue.js`/`hitl.js`/`self-heal.js`/`orchestration/index.js`/Stage 18/Stage 16/A5/CAPI/MCP table/tracker) before a Fable-model planning pass (honoring the brain/executor rule) produced the actual design, which Sonnet then reviewed against the live codebase and wrote into three new docs (`FABLE5_AUTONOMOUS_OS_ROADMAP.md`, `FABLE5_MULTI_INBOX_COMMAND_CENTER.md`, `FABLE5_CIRCUIT_BREAKER_MAP.md`) plus this Stage 21 table and a CLAUDE.md MCP-table reconciliation. Two real findings surfaced, not invented: (1) a standalone "Health-Check Agent" (as originally asked) would have duplicated four existing mechanisms and violated both the Freeze and Stage 18's own verdict — formalized as one system instead; (2) A5 (`agents/A5_social/agent.js`) publishes to Instagram fully autonomously today with zero Guy approval step — a live 10/10-rule violation, now the top-priority O-1 retrofit (CF-1b). Zero code shipped except the CLAUDE.md table edit (docs-only); everything else is gated behind O-1/O-2/O-3 and needs Guy's sign-off (CF-0a) plus a few small decisions (CF-3b canary, CF-3c legal-inbox address, CF-0d LangFuse-pilot go-ahead).

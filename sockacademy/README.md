@@ -52,7 +52,7 @@ SockAcademy is a production Shopify store powered by a suite of 13 autonomous AI
 
 ```
 BLOCKED: dog socks | children's socks | novelty/funny/cartoon socks
-PRICE FLOORS: single pair $18+ | premium $28+ | tactical/merino $35+ | gift set $65+
+PRICE FLOORS: single pair $22+ | premium $28+ | tactical/merino $35+ | gift set $65+
 RATING MINIMUM: 4.5 stars — never compromise on quality
 PRIVATE LABEL TRIGGER: $5,000/month × 3 consecutive months
 ```

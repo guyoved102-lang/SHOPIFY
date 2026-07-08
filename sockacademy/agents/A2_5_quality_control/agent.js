@@ -19,7 +19,7 @@ const { handleFatalError } = require('../../corp/core/self-heal.js');
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 
-const PRICE_MIN = 18;
+const PRICE_MIN = 22;
 const MIN_A1_SCORE = 50;
 const BORDERLINE_SCORE = 45;
 

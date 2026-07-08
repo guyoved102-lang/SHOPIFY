@@ -283,7 +283,7 @@ ${redditBlock}
 BRAND RULES — STRICT:
 - ALLOWED categories: Merino Wool, Performance (running/athletic/no-show), Tactical (hiking/military/boot)
 - BLOCKED: kids, novelty, funny, cartoon, animal-themed, cheap/fashion socks
-- Minimum retail price positioning: $18+ per pair
+- Minimum retail price positioning: $22+ per pair
 - Target customer: adult men and women who care about quality and durability
 
 Return a JSON array of exactly 5 trend objects, ranked #1 (strongest) to #5:
