@@ -325,6 +325,11 @@ async function sendReport(html) {
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 
 async function main() {
+  if (process.env.LAUNCH_MODE !== 'true') {
+    console.log('[A8] DORMANT — set LAUNCH_MODE=true to activate. No API calls made.');
+    process.exit(0);
+  }
+
   console.log('\nA8 — Analytics Reporter v1.0');
   console.log(`   ${new Date().toISOString()} | DRY_RUN=${DRY_RUN}`);
   console.log('─'.repeat(44));

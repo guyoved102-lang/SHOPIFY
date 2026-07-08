@@ -2,7 +2,7 @@ name: A8 — Analytics Reporter (Weekly)
 
 on:
   schedule:
-    - cron: '0 12 * * 0'  # Sunday 12:00 UTC — moved from 07:00 to avoid A5/A8 same-minute Supabase collision (FABLE5_CRON_EFFICIENCY.md issue 4)
+    - cron: '0 12 * * 0'  # Sunday 12:00 UTC — dormant until LAUNCH_MODE; moved from 07:00 to avoid A5/A8 same-minute Supabase collision (FABLE5_CRON_EFFICIENCY.md issue 4)
   workflow_dispatch:
     inputs:
       dry_run:
@@ -46,6 +46,7 @@ jobs:
           SUPABASE_URL:                 ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY:         ${{ secrets.SUPABASE_SERVICE_KEY }}
           DRY_RUN:                      ${{ github.event.inputs.dry_run || 'false' }}
+          LAUNCH_MODE:                  'false'
           TELEGRAM_BOT_TOKEN:           ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID:             ${{ secrets.TELEGRAM_CHAT_ID }}
           GH_PAT_SECRETS_WRITE: ${{ secrets.GH_PAT_SECRETS_WRITE }}
