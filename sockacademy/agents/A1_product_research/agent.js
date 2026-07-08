@@ -11,7 +11,7 @@ const nodemailer = require('nodemailer');
 const { createClient } = require('@supabase/supabase-js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
-const { RETAIL_CEILING, DEFAULT_CEILING } = require('../../corp/core/pricing.js');
+const { RETAIL_CEILING, DEFAULT_CEILING, trueContributionMargin } = require('../../corp/core/pricing.js');
 const { handleFatalError } = require('../../corp/core/self-heal.js');
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
@@ -583,7 +583,7 @@ function classifyStyle(name = '') {
 
 function suggestRetailPrice(product) {
   const { supplierPrice, category, materials } = product;
-  if (!supplierPrice || supplierPrice <= 0) return { retail: 28, margin: '0', marginPct: 0 };
+  if (!supplierPrice || supplierPrice <= 0) return { retail: 28, margin: '0', marginPct: 0, trueCM: 0, trueCMPct: 0 };
   let multiplier = 4;
   if (materials.some(m => ['Merino Wool', 'Cashmere', 'Egyptian Cotton'].includes(m))) multiplier = 5;
   else if (category === 'Premium Materials') multiplier = 4.8;
@@ -593,9 +593,13 @@ function suggestRetailPrice(product) {
   const premiumMat = materials.find(m => RETAIL_CEILING[m]);
   const ceiling = premiumMat ? RETAIL_CEILING[premiumMat] : (RETAIL_CEILING[category] ?? DEFAULT_CEILING);
   const retail = Math.min(Math.round(supplierPrice * multiplier), ceiling);
+  // "margin"/"marginPct" = naive (retail - supplierPrice) — no fees/shipping/refunds, overstates
+  // true margin by ~20-40 points per Stage 20. trueCM/trueCMPct is the honest figure Guy should
+  // actually curate by; both are shown so the gap itself stays visible, not hidden by a rename.
   const margin = (retail - supplierPrice).toFixed(2);
   const marginPct = Math.round(((retail - supplierPrice) / retail) * 100);
-  return { retail, margin, marginPct };
+  const { trueCM, trueCMPct } = trueContributionMargin({ retailPrice: retail, supplierCost: supplierPrice });
+  return { retail, margin, marginPct, trueCM, trueCMPct };
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -690,7 +694,7 @@ function buildHTMLEmail(top10, stats, date) {
           🏷️ <strong>${p.category}</strong>${p.materials.length > 0 ? ' &nbsp;|&nbsp; 🧵 ' + p.materials.join(', ') : ''}
         </div>
         <div style="font-size:13px;color:#059669;font-weight:600;margin-bottom:6px;">
-          💰 עלות: $${p.supplierPrice} &nbsp;→&nbsp; מכירה: ~$${priceInfo.retail} &nbsp;|&nbsp; רווח: ~$${priceInfo.margin} (${priceInfo.marginPct}%)
+          💰 עלות: $${p.supplierPrice} &nbsp;→&nbsp; מכירה: ~$${priceInfo.retail} &nbsp;|&nbsp; רווח גולמי: ~$${priceInfo.margin} (${priceInfo.marginPct}%) &nbsp;|&nbsp; תרומה אמיתית (אחרי עמלות/משלוח/זיכויים): ~$${priceInfo.trueCM} (${priceInfo.trueCMPct}%)
         </div>
         <div style="font-size:11px;color:#6b7280;margin-bottom:8px;">📌 ${p.reasons.join(' · ')}</div>
         <a href="${p.url}" style="background:#111827;color:white;text-decoration:none;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;">צפה במוצר →</a>
@@ -889,7 +893,7 @@ async function run() {
   top10.forEach((p, i) => {
     const pr = suggestRetailPrice(p);
     console.log(`${i+1}. [${p.score}/100] [${p.source}] ${p.name}`);
-    console.log(`   ⭐${p.rating} | 📦${p.orders.toLocaleString()} | $${p.supplierPrice}→$${pr.retail} (${pr.marginPct}%) | ${p.category}`);
+    console.log(`   ⭐${p.rating} | 📦${p.orders.toLocaleString()} | $${p.supplierPrice}→$${pr.retail} (naive ${pr.marginPct}%, true CM ${pr.trueCMPct}%) | ${p.category}`);
   });
 
   // שמירה

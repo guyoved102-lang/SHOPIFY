@@ -13,13 +13,13 @@ const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
-const { RETAIL_CEILING, DEFAULT_CEILING } = require('../../corp/core/pricing.js');
+const { RETAIL_CEILING, DEFAULT_CEILING, PRICE_FLOOR } = require('../../corp/core/pricing.js');
 const { handleFatalError } = require('../../corp/core/self-heal.js');
 
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 
-const PRICE_MIN = 22;
+const PRICE_MIN = PRICE_FLOOR; // single source of truth: corp/core/pricing.js (Keystone 3.3)
 const MIN_A1_SCORE = 50;
 const BORDERLINE_SCORE = 45;
 

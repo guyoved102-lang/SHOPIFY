@@ -16,6 +16,7 @@ const nodemailer = require('nodemailer');
 const { sendTelegram, notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
 const { handleFatalError } = require('../../corp/core/self-heal.js');
+const { trueContributionMargin } = require('../../corp/core/pricing.js');
 
 const DRY_RUN        = process.env.DRY_RUN === 'true';
 const ADMIN_EMAIL    = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
@@ -89,28 +90,41 @@ async function getCatalogMargins(supabase) {
 
   const margins = data
     .filter(p => p.supplier_price > 0 && p.retail_price > 0)
-    .map(p => ({
-      name:            p.product_name,
-      category:        p.category,
-      supplier_price:  parseFloat(p.supplier_price),
-      retail_price:    parseFloat(p.retail_price),
-      gross_margin_pct: Math.round(((p.retail_price - p.supplier_price) / p.retail_price) * 100),
-    }));
+    .map(p => {
+      const { trueCM, trueCMPct } = trueContributionMargin({
+        retailPrice: parseFloat(p.retail_price), supplierCost: parseFloat(p.supplier_price),
+      });
+      return {
+        name:            p.product_name,
+        category:        p.category,
+        supplier_price:  parseFloat(p.supplier_price),
+        retail_price:    parseFloat(p.retail_price),
+        // "product_cost_margin" = raw (retail - supplier_price)/retail — NOT a real contribution
+        // margin (no payment fees/shipping/refunds). Renamed honestly per Stage 20 finding that this
+        // number was overstating true margin by ~20-40 points fleet-wide. See true_cm_pct for the
+        // fee/shipping/refund-adjusted figure.
+        product_cost_margin_pct: Math.round(((p.retail_price - p.supplier_price) / p.retail_price) * 100),
+        true_cm_usd:     trueCM,
+        true_cm_pct:     trueCMPct,
+      };
+    });
 
   if (!margins.length) return null;
 
-  const avg_margin = Math.round(margins.reduce((s, m) => s + m.gross_margin_pct, 0) / margins.length);
-  const min_margin = Math.min(...margins.map(m => m.gross_margin_pct));
-  const max_margin = Math.max(...margins.map(m => m.gross_margin_pct));
+  const avg = (key) => Math.round(margins.reduce((s, m) => s + m[key], 0) / margins.length * 10) / 10;
+
   const potential_revenue_at_sell_through = margins.reduce((s, m) => s + m.retail_price, 0);
 
   return {
     products_analyzed: margins.length,
-    avg_gross_margin_pct: avg_margin,
-    min_gross_margin_pct: min_margin,
-    max_gross_margin_pct: max_margin,
+    avg_product_cost_margin_pct: avg('product_cost_margin_pct'),
+    min_product_cost_margin_pct: Math.min(...margins.map(m => m.product_cost_margin_pct)),
+    max_product_cost_margin_pct: Math.max(...margins.map(m => m.product_cost_margin_pct)),
+    avg_true_cm_pct: avg('true_cm_pct'),
+    min_true_cm_pct: Math.min(...margins.map(m => m.true_cm_pct)),
+    max_true_cm_pct: Math.max(...margins.map(m => m.true_cm_pct)),
     potential_revenue_at_sell_through: parseFloat(potential_revenue_at_sell_through.toFixed(2)),
-    top_margin_products: [...margins].sort((a, b) => b.gross_margin_pct - a.gross_margin_pct).slice(0, 3),
+    top_margin_products: [...margins].sort((a, b) => b.true_cm_pct - a.true_cm_pct).slice(0, 3),
   };
 }
 
@@ -149,8 +163,12 @@ function buildAlerts(stats7d, allTimeOrders, catalog) {
     alerts.push({ level: 'info', message: 'Pre-revenue phase — showing projected catalog margins' });
   if (stats7d.refunds > 0 && stats7d.revenue > 0 && (stats7d.refunds / stats7d.revenue) > 0.1)
     alerts.push({ level: 'critical', message: `High refund rate: ${Math.round((stats7d.refunds / stats7d.revenue) * 100)}% of revenue refunded this week` });
-  if (catalog && catalog.avg_gross_margin_pct < 40)
-    alerts.push({ level: 'warning', message: `Low avg catalog margin: ${catalog.avg_gross_margin_pct}% — review supplier pricing` });
+  // Threshold recalibrated against TRUE contribution margin (fees+shipping+refunds), not the naive
+  // product-cost margin the alert used before Stage 20 — the old 40% naive threshold never fired
+  // (naive margins run 72-79%) while true margins run 35-55%. 30% ~= the $18-floor-era true CM
+  // (34.9%), i.e. "back to how thin margins used to be before the 3.3 price-floor raise."
+  if (catalog && catalog.avg_true_cm_pct < 30)
+    alerts.push({ level: 'warning', message: `Low avg true contribution margin: ${catalog.avg_true_cm_pct}% — review supplier pricing` });
   const progress = phase2Progress(allTimeOrders, stats7d.revenue);
   if (progress.orderPct >= 100 || progress.mrrPct >= 100)
     alerts.push({ level: 'info', message: 'Phase 2 milestone reached — activate C-Suite cluster' });
@@ -246,7 +264,7 @@ async function sendTelegramReport(stats, allTimeOrders, ilsRate, catalog, alerts
 
   const progress   = phase2Progress(allTimeOrders, stats.revenue);
   const ilsStr     = ilsRate ? ` | ₪${(stats.revenue * ilsRate).toFixed(0)}` : '';
-  const marginStr  = catalog ? `${catalog.avg_gross_margin_pct}% שוליים ממוצעים (${catalog.products_analyzed} מוצרים)` : 'שוליים: אין נתון';
+  const marginStr  = catalog ? `${catalog.avg_true_cm_pct}% תרומה אמיתית ממוצעת (${catalog.products_analyzed} מוצרים)` : 'שוליים: אין נתון';
   const criticals  = alerts.filter(a => a.level === 'critical');
   const alertBlock = criticals.length > 0
     ? '\n\n⚠️ <b>התראות:</b>\n' + criticals.map(a => `• ${a.message}`).join('\n')
@@ -301,7 +319,7 @@ async function main() {
   console.log(`   Last 7 days: ${stats.count} orders | $${stats.revenue} revenue`);
   console.log(`   All-time orders: ${allTimeOrders}`);
   console.log(`   USD/ILS: ${ilsRate || 'unavailable'}`);
-  if (catalog) console.log(`   Catalog margins: avg ${catalog.avg_gross_margin_pct}% (${catalog.products_analyzed} products)`);
+  if (catalog) console.log(`   Catalog margins: avg true CM ${catalog.avg_true_cm_pct}% (naive product-cost margin ${catalog.avg_product_cost_margin_pct}%) — ${catalog.products_analyzed} products`);
   if (allTimeOrders === 0) console.log('   [PRE-REVENUE MODE] Reporting projected catalog metrics');
 
   // Write LAUNCH_MODE when Phase 2 is hit
@@ -340,9 +358,10 @@ async function main() {
       { name: 'phase2_mrr_pct',        value: progress.mrrPct,                                unit: 'pct' },
       ...(ilsRate ? [{ name: 'usd_ils_rate', value: ilsRate, unit: 'rate' }] : []),
       ...(catalog ? [
-        { name: 'catalog_avg_margin_pct', value: catalog.avg_gross_margin_pct,               unit: 'pct' },
-        { name: 'catalog_products',       value: catalog.products_analyzed,                   unit: 'count' },
-        { name: 'catalog_potential_rev',  value: catalog.potential_revenue_at_sell_through,   unit: 'usd' },
+        { name: 'catalog_avg_true_cm_pct',       value: catalog.avg_true_cm_pct,               unit: 'pct' },
+        { name: 'catalog_avg_product_cost_margin_pct', value: catalog.avg_product_cost_margin_pct, unit: 'pct' },
+        { name: 'catalog_products',               value: catalog.products_analyzed,             unit: 'count' },
+        { name: 'catalog_potential_rev',           value: catalog.potential_revenue_at_sell_through, unit: 'usd' },
       ] : []),
     ]);
   }

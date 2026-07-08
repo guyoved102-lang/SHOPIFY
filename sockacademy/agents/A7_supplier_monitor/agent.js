@@ -15,6 +15,7 @@ const { createClient } = require('@supabase/supabase-js');
 const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js');
 const { writeMetrics } = require('../../corp/core/metrics.js');
 const { handleFatalError } = require('../../corp/core/self-heal.js');
+const { clampRetailPrice } = require('../../corp/core/pricing.js');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 const DRY_RUN = process.env.DRY_RUN === 'true';
 
@@ -212,7 +213,7 @@ function buildMessage(change, product, current) {
   switch (change.type) {
     case 'OUT_OF_STOCK':   return 'Stock reached 0 — auto-drafted on Shopify';
     case 'LOW_STOCK':      return `Only ${current.stock} units remaining (threshold: ${CONFIG.STOCK_LOW_THRESHOLD})`;
-    case 'PRICE_CHANGED':  return `Supplier price ${change.pct > 0 ? '+' : ''}${change.pct.toFixed(1)}% → new retail: $${(currentPrice * CONFIG.MARKUP_MULTIPLIER).toFixed(2)}`;
+    case 'PRICE_CHANGED':  return `Supplier price ${change.pct > 0 ? '+' : ''}${change.pct.toFixed(1)}% → new retail: $${clampRetailPrice(currentPrice * CONFIG.MARKUP_MULTIPLIER, product.category).toFixed(2)}`;
     case 'PRICE_CRITICAL': return `CRITICAL: ${change.pct > 0 ? '+' : ''}${change.pct.toFixed(1)}% price shift → margin review required`;
     case 'DELISTED':       return 'Product removed from CJ — auto-drafted on Shopify';
     default:               return 'Unknown change';
@@ -265,7 +266,7 @@ async function handleChange(product, change, current) {
 
   if (change.type === 'PRICE_CHANGED' || change.type === 'PRICE_CRITICAL') {
     if (CONFIG.AUTO_UPDATE_SHOPIFY_PRICE) {
-      const newRetail = currentPrice * CONFIG.MARKUP_MULTIPLIER;
+      const newRetail = clampRetailPrice(currentPrice * CONFIG.MARKUP_MULTIPLIER, product.category);
       await updateShopifyPrice(product.shopify_id, product.variant_id, newRetail, product.name);
     }
   }
