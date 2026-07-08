@@ -31,7 +31,6 @@ const EXPECTED_NO_LAUNCH_MODE = {
   A5:    'pre-launch value (brand/social building) — exempt per Iron Law 7',
   A6:    'triggers on content push, not cron — exempt',
   A7:    'pre-launch value (supplier monitor) — exempt',
-  A8:    'read-only analytics, low risk — documented exception (F12), not gated',
   A9:    'frozen legal domain, one-shot tool — NOT gated pending Guy G-2/G-3',
   A11:   'pre-launch value (price intelligence) — exempt',
   A12:   'pre-launch value (review collector) — exempt',
