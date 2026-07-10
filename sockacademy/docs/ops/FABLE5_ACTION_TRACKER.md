@@ -11,7 +11,7 @@ status changes. New Fable dispatches append new items here rather than starting 
 
 ---
 
-## 📍 Waiting on Guy — prioritized, updated 06/07/2026
+## 📍 Waiting on Guy — prioritized, updated 10/07/2026
 
 Every 🤖-only item with zero decision-blocker has now been executed (see the Log at the bottom for
 the full 06/07/2026 overnight + Phase-1 batch). **Everything below requires Guy personally** — reading
@@ -20,6 +20,25 @@ sense of "the business breaks tomorrow" — but items 1-2 have the worst cost-of
 whole tracker (cheap now, potentially catastrophic later), so they're listed first on purpose, not by
 document order.
 
+0. **🔴 NEW 10/07/2026 — A5 (Instagram) is publishing fully autonomously RIGHT NOW, with zero approval
+   gate — the DRY_RUN patch was AGREED but NOT YET APPLIED.** Confirmed in code: `agents/A5_social/agent.js:45`
+   still reads `DRY_RUN = !ACCESS_TOKEN || !IG_USER_ID`, and `META_ACCESS_TOKEN`/`META_IG_USER_ID` are both
+   set in GitHub Secrets — so DRY_RUN evaluates `false` today. This was flagged in Stage 21 (CF-1b) as a
+   real violation of Guy's 10/10 human-in-the-loop rule. Guy's own "Legal & Autonomy Reset" prompt (10/07)
+   explicitly said: "Immediately set DRY_RUN=true on A5... Strategy: Option 2 — build the full HITL Retrofit."
+   **The immediate patch was never executed** — the conversation moved to the supplier-strategy discussion
+   before it landed. This is the single highest-priority open item: **do this before anything else next
+   session** (or this one, on Guy's go-ahead). Two-part plan, both already agreed:
+   1. **Immediate (🤖, one-line fix):** force `DRY_RUN` in the a5-social workflow env to `'true'` (same
+      pattern as `LAUNCH_MODE:'false'` on A16/A24/A8) — stops live posting today, zero behavior change to
+      anything else.
+   2. **Full retrofit (🤖, larger build, Guy chose "build it right"):** the HITL design already exists from
+      Stage 21 (CF-0f, `FABLE5_AUTONOMOUS_OS_ROADMAP.md` §4) — reuse `requestApproval()` + new
+      `action_type:'social_post'` in `hitl-execute.js` + `A5_ARM` guard mirroring the real `A9_ARM` pattern.
+      This is Stage 21 item **CF-1b**, currently gated to "O-1" (`PHASE_2_ACTIVATE_BY_GUY`) in the Stage 21
+      table below — **re-classify it as a bug-fix-class exception to the freeze** (like S20-d/e were),
+      since it fixes an active violation of an existing Iron Law, not a new feature. Needs Guy's explicit
+      go-ahead on timing, same as S20-d/e.
 1. **🔴 Trademark check — ESCALATED + RESOLVED (self-search phase) 06/07/2026** (`FABLE5_STAGE19_BLIND_SPOTS.md`
    §E2) — Guy ran the self-search himself and cross-verified via two independent sources (UK IPO direct +
    TMview/WIPO Global Brand DB): confirmed **REGISTERED** UK trademark `UK00003187452`, "Sock Academy"
@@ -102,6 +121,40 @@ document order.
    21, CF-0a below) — nothing builds before its named trigger either way, so this isn't urgent, but it's
    pure reading + a yes/no, and three small decisions ride along (CF-3b liveness canary, CF-3c
    legal-inbox address, CF-0d LangFuse-pilot go-ahead).
+8. **NEW 10/07/2026 — Legal "Emergency Patch" review, requested by Guy ("Legal & Autonomy Reset").**
+   Confirmed first: **the ToS/Privacy/Shipping/Refund pages are NOT live on the storefront today** —
+   `agents/A9_legal_compliance/agent.js` requires `A9_ARM=true` (frozen, never armed) + a Supabase
+   `pending_approvals` row manually approved by Guy before anything publishes (`publish` step at
+   `agent.js:509+`). So this is a review of the **draft `body_html` blocks already in the attorney-packet
+   email** (same content, not a separate live-site audit) — lower risk than it sounds, nothing a customer
+   can see today. Still queued: 🤖 vulnerability scan of the four draft documents + a plain-language
+   "emergency patch" proposal Guy can approve, **held per Guy's explicit instruction** ("Do not modify any
+   site-live content until we review the Emergency Patch proposal" — moot since nothing is live, but the
+   review-before-any-doc-edit discipline still applies to the draft text itself).
+9. **NEW 10/07/2026 — Supplier-quality upgrade (Guy's "Legal & Autonomy Reset," clarified).** Guy is
+   **not** abandoning the dropship model (no warehousing) and **not** re-attempting the 01/07/2026
+   Private-Label-now pivot that ANTI_RECURRENCE #31 walked back — confirmed directly with Guy, this
+   reads as the same pattern at first glance but isn't. The actual ask: swap CJ/AliExpress-tier quality
+   for higher-quality dropship platforms (Spocket named explicitly + others), while keeping Private
+   Label at Phase 4 ($15K MRR) exactly as `VISION.md`/`PHASE_ARCHITECTURE_SKELETON.md` already say — **no
+   doc supersession needed, this is Phase 1 execution, not a phase-order change.**
+   - **Good news, verified in code:** `agents/A1_product_research/agent.js` already has full, real
+     (non-stub) search implementations for **Spocket, EPROLO, Modalyst, Syncee, AppScenic** — all
+     graceful no-ops today, each needs only its own `*_API_KEY` in GitHub Secrets to activate. This is
+     an activation task, not a build task.
+   - **Caveat:** endpoint/auth shapes for all five were written against each platform's *published* API
+     docs, never tested against a real account — expect a short debug pass on first real key.
+   - **Research done 10/07/2026 (web search, sources in ledger):** recommended activation order —
+     **Spocket first** (best US/EU apparel fit, most established), then Modalyst/Syncee if Spocket's
+     sock inventory proves thin. Two platforms not yet in code (BrandsGateway — luxury-brand focus;
+     DropCommerce — vetted North American suppliers) noted but not recommended to add without a
+     concrete gap Spocket/Modalyst/Syncee don't cover.
+   - **For later (Phase 4 Private Label, NOT now):** shortlist of actual sock manufacturers researched
+     for future reference — DeadSoxy (US, vertically integrated), Sokisahtel (merino/alpaca, MOQ 100),
+     B2Bsox (direct factory), Walt Technology Group (OEM, MOQ 180). Zero action needed today — filed for
+     when Phase 4 triggers.
+   - **Guy's next step:** sign up for Spocket (or preferred alternative), confirm it carries usable sock
+     inventory, get an API key, hand it to Claude to activate + smoke-test.
 
 ---
 
@@ -251,7 +304,7 @@ and is this stage's highest-priority retrofit (CF-1b) — **A5 must stay DRY_RUN
 | CF-0e | Formalize the "Health-Check System" doc (composite of 4 existing mechanisms) | 🤖 | O-0 now | ✅ **Done 06/07** | Docs-only, in the roadmap §6 — explicitly NOT a new agent |
 | CF-0f | A5 HITL-retrofit design (code gated to O-1) | 🧠 | O-0 now | ✅ **Done 06/07** | See roadmap §4 — reuses `requestApproval` + new `action_type:'social_post'` + `A5_ARM` guard, mirroring the real `A9_ARM` pattern |
 | CF-1a | Q-HARDEN `queue.js` (ack-on-pop, `queue_log` lifecycle, dead-letter → `pending_approvals`) | 🤖 | O-1 | Blocked on `PHASE_2_ACTIVATE_BY_GUY` | = Stage 18 item S18-b; A2.7's first task |
-| CF-1b | A5 HITL retrofit code + `case 'social_post'` in `hitl-execute.js` + `A5_ARM` env | 🤖 | O-1 | Blocked | **A5 must stay DRY_RUN until this ships** — current live path is a real 10/10-rule violation |
+| CF-1b | A5 HITL retrofit code + `case 'social_post'` in `hitl-execute.js` + `A5_ARM` env | 🤖 | O-1 → **re-proposed 10/07 as bug-fix exception, see item 0 above** | Blocked pending Guy's go-ahead on timing | **A5 is still live today, not DRY_RUN** — the interim patch (force `DRY_RUN='true'` in the workflow) is separate and unblocked, should ship immediately regardless of when this full retrofit lands |
 | CF-1c | Meta CAPI server-side build (per the existing 3-doc spec, no redesign) | 🤖 | Phase 2 gate (= O-1) | Blocked | Alert via `notifyTelegram` on any failure — never silent |
 | CF-1d | Adopt `supermetrics` + `agent-browser` with their designed breakers (CFO/intel clusters) | 🤖 | O-1 | Blocked | Read-only scopes; `agent-browser` also gated on the Hallucination-Defense policy (roadmap §8) |
 | CF-1e | LangFuse fleet-wide rollout | 🤖 | O-1 | Blocked | Do while agent code is already open for O-1 work |
@@ -395,6 +448,21 @@ amendment text, code). Only re-dispatch Fable for genuinely new strategic/archit
 ---
 
 ## Log
+- 2026-07-10 — Guy free at the computer after several async exchanges. Full tracker re-scan + Hebrew
+  status report delivered (all open items across Stages 15-21). Guy sent a "Legal & Autonomy Reset"
+  prompt: (1) A5 DRY_RUN patch + commit to the full HITL retrofit ("Option 2," build it right) — **agreed
+  but not yet executed**, see item 0 (top priority for next turn); (2) legal emergency-patch review of
+  the draft ToS/Privacy/Shipping/Refund content — confirmed first that nothing is live on the storefront
+  yet, so this is lower-risk than it sounds (item 8); (3) a supplier-quality pivot away from CJ/AliExpress
+  that initially read as a repeat of the 01/07/2026 Private-Label-now incident (ANTI_RECURRENCE #31) —
+  flagged directly to Guy with the exact commit history, and Guy clarified it's actually much narrower:
+  stay dropship (no warehousing), upgrade supplier tier only, Private Label stays at Phase 4 unchanged —
+  no doc supersession needed (item 9). Verified `A1_product_research/agent.js` already has real
+  (untested-live) code for Spocket/EPROLO/Modalyst/Syncee/AppScenic — an activation task, not a build
+  task. Web research done for platform recommendation (Spocket first) + a separate future shortlist of
+  actual sock manufacturers for the eventual Phase 4 pivot. Nothing committed to git this pass — pure
+  documentation/planning sync, per Guy's explicit request to keep project systems synchronized before
+  continuing. **Next session/turn should open with item 0 (A5).**
 - 2026-07-05 — Tracker created after Stage 15. All items above are Not Started; nothing executed yet.
 - 2026-07-05 — Item B handoff done: `FABLE5_KEYSTONE_DECISION_MEMOS.md` drafted by Claude (Sonnet), 5 memos ready for Guy's read. Brain/executor model confirmed by Guy and saved to memory.
 - 2026-07-05 — Stage 16 items I-N added: homepage copy re-cut (50-row table), A2.7/A16.5 constitutional amendment draft, GTM plan, and two new verified findings (Sock Finder recommends BLOCKED novelty products below the price floor; homepage carries two fabricated facts — false founding year, false category count). All Not Started.
