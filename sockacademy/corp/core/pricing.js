@@ -23,16 +23,23 @@ const PRICE_FLOOR = 22;
 // item K) replaces them with measured values from a real CJ invoice + Shopify payout.
 const PAYMENT_FEE_PCT = 0.029;               // Shopify Payments standard rate — best case [EXT]
 const PAYMENT_FEE_FIXED = 0.30;
-const THIRD_PARTY_PAYMENT_FEE_PCT = 0.055;   // Shopify Payments unavailable in Israel; if the live
-const THIRD_PARTY_PAYMENT_FEE_FIXED = 0.49;  // gateway is 3rd-party, Shopify adds ~2% on top [EXT]
+const THIRD_PARTY_PAYMENT_FEE_PCT = 0.055;   // PayPal (~3.5%) + Shopify's 2% third-party surcharge
+const THIRD_PARTY_PAYMENT_FEE_FIXED = 0.49;  // [EXT], confirmed as the live scenario 10/07/2026
 const EST_SHIPPING_COST_USD = 5.00;          // CJ economy single-pair, China->US [EST]
 const REFUND_ALLOWANCE_PCT = 0.05;           // socks = low-return apparel category [EST]
+
+// [REPO/CONFIRMED 10/07/2026] Shopify Admin -> Settings -> Payments screenshot: no native Shopify
+// Payments provider configured ("Choose a provider" empty state) -- confirms Stage 20's suspicion
+// that it's unavailable for an Israel-based seller. PayPal is the only provider added, and its
+// setup is "Incomplete" -- no live gateway can process a real charge yet, separately from every
+// margin question below. Once PayPal setup completes, this is the correct fee tier to model against.
+const LIVE_GATEWAY_IS_THIRD_PARTY = true;
 
 /**
  * @param {{retailPrice:number, supplierCost:number, shippingCost?:number, thirdPartyGateway?:boolean}} p
  * @returns {{trueCM:number, trueCMPct:number}}
  */
-function trueContributionMargin({ retailPrice, supplierCost, shippingCost = EST_SHIPPING_COST_USD, thirdPartyGateway = false }) {
+function trueContributionMargin({ retailPrice, supplierCost, shippingCost = EST_SHIPPING_COST_USD, thirdPartyGateway = LIVE_GATEWAY_IS_THIRD_PARTY }) {
   if (!retailPrice || retailPrice <= 0) return { trueCM: 0, trueCMPct: 0 };
   const feePct = thirdPartyGateway ? THIRD_PARTY_PAYMENT_FEE_PCT : PAYMENT_FEE_PCT;
   const feeFixed = thirdPartyGateway ? THIRD_PARTY_PAYMENT_FEE_FIXED : PAYMENT_FEE_FIXED;
@@ -57,5 +64,6 @@ function clampRetailPrice(rawPrice, category) {
 module.exports = {
   RETAIL_CEILING, DEFAULT_CEILING, PRICE_FLOOR,
   PAYMENT_FEE_PCT, PAYMENT_FEE_FIXED, THIRD_PARTY_PAYMENT_FEE_PCT, THIRD_PARTY_PAYMENT_FEE_FIXED,
-  EST_SHIPPING_COST_USD, REFUND_ALLOWANCE_PCT, trueContributionMargin, clampRetailPrice,
+  EST_SHIPPING_COST_USD, REFUND_ALLOWANCE_PCT, LIVE_GATEWAY_IS_THIRD_PARTY,
+  trueContributionMargin, clampRetailPrice,
 };

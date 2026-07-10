@@ -74,6 +74,16 @@ document order.
    Best done before the first real order.
 3. **Send the attorney packet** (tracker item 1.3 / Keystone B) — the single true external pre-launch
    blocker. Now includes Q8 (item 1 above).
+2b. **🔴 NEW 10/07/2026 — Payment gateway confirmed unconfigured.** Guy checked Shopify Admin →
+   Settings → Payments (screenshot): no native Shopify Payments provider is set up ("Choose a
+   provider" empty state — confirms Stage 20's Israel-unavailability suspicion). PayPal is the only
+   provider added, but its own setup shows **"Setup incomplete."** This means **no live gateway can
+   process a real charge today** — a more fundamental gap than D4, independent of it (a customer could
+   have a working checkout email and still not be able to pay). Fix: finish PayPal account setup in
+   Shopify Admin (Guy-only, needs his PayPal business account credentials). Confirms the pricing model
+   should use the third-party fee tier — done same session, see `corp/core/pricing.js`
+   `LIVE_GATEWAY_IS_THIRD_PARTY = true` (commit pending). At the $22 floor this drops true CM from
+   45.3% to 41.8% — still healthy, alert threshold (`<30%`) unaffected.
 4. **Keystone Decision Week** (item B below) — **3.3 (price floor → $22) and 3.5 (VISION numbering →
    skeleton canonical) decided and executed 08/07/2026.** Still open: 3.1 positioning (deferred by
    Guy 05/07 — doesn't want to lock copy before real products are curated) and 3.2 discounts (blocked
