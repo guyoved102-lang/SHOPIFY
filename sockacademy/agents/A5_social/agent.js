@@ -1,7 +1,7 @@
 /**
  * A5 — Social Content Agent v2.1
  * Claude (caption) → DALL-E (image) → Google Drive (archive) → Shopify CDN (host) → Meta API (publish)
- * DRY-RUN: ללא META_ACCESS_TOKEN — captions + images + Drive backup + email only
+ * DRY-RUN: forced true (11/07/2026, pending HITL retrofit) — captions + images + Drive backup + email only, never auto-publishes
  */
 
 require('dotenv').config({ path: '../../.env' });
@@ -42,7 +42,11 @@ const IG_USER_ID  = process.env.META_IG_USER_ID;
 const ACCESS_TOKEN = process.env.META_ACCESS_TOKEN;
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
 const SHOPIFY_TOKEN  = process.env.SHOPIFY_MASTER_TOKEN;
-const DRY_RUN = !ACCESS_TOKEN || !IG_USER_ID;
+// Forced true 11/07/2026 (Guy, "Legal & Autonomy Reset" + tracker item 0) — credential-presence-based
+// DRY_RUN meant A5 went live the moment META_ACCESS_TOKEN/META_IG_USER_ID were added, with no explicit
+// human decision to flip it. Full HITL retrofit (approval-gated posting, tracker CF-1b) replaces this
+// hard stop later; until then A5 always drafts (captions + images + email), never auto-publishes.
+const DRY_RUN = true;
 if (!SHOPIFY_DOMAIN) { console.error('❌ SHOPIFY_SHOP_DOMAIN not set'); process.exit(1); }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

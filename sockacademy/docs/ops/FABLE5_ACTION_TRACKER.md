@@ -20,25 +20,24 @@ sense of "the business breaks tomorrow" — but items 1-2 have the worst cost-of
 whole tracker (cheap now, potentially catastrophic later), so they're listed first on purpose, not by
 document order.
 
-0. **🔴 NEW 10/07/2026 — A5 (Instagram) is publishing fully autonomously RIGHT NOW, with zero approval
-   gate — the DRY_RUN patch was AGREED but NOT YET APPLIED.** Confirmed in code: `agents/A5_social/agent.js:45`
-   still reads `DRY_RUN = !ACCESS_TOKEN || !IG_USER_ID`, and `META_ACCESS_TOKEN`/`META_IG_USER_ID` are both
-   set in GitHub Secrets — so DRY_RUN evaluates `false` today. This was flagged in Stage 21 (CF-1b) as a
-   real violation of Guy's 10/10 human-in-the-loop rule. Guy's own "Legal & Autonomy Reset" prompt (10/07)
-   explicitly said: "Immediately set DRY_RUN=true on A5... Strategy: Option 2 — build the full HITL Retrofit."
-   **The immediate patch was never executed** — the conversation moved to the supplier-strategy discussion
-   before it landed. This is the single highest-priority open item: **do this before anything else next
-   session** (or this one, on Guy's go-ahead). Two-part plan, both already agreed:
-   1. **Immediate (🤖, one-line fix):** force `DRY_RUN` in the a5-social workflow env to `'true'` (same
-      pattern as `LAUNCH_MODE:'false'` on A16/A24/A8) — stops live posting today, zero behavior change to
-      anything else.
-   2. **Full retrofit (🤖, larger build, Guy chose "build it right"):** the HITL design already exists from
-      Stage 21 (CF-0f, `FABLE5_AUTONOMOUS_OS_ROADMAP.md` §4) — reuse `requestApproval()` + new
+0. **🟡 Part 1 DONE 11/07/2026 — A5 live-posting stopped. Part 2 (full HITL retrofit) still open.**
+   Original problem (10/07): `agents/A5_social/agent.js:45` computed `DRY_RUN = !ACCESS_TOKEN || !IG_USER_ID`,
+   and once `META_ACCESS_TOKEN`/`META_IG_USER_ID` were set in GitHub Secrets, DRY_RUN silently evaluated
+   `false` — A5 was posting to Instagram live with zero human approval, a real violation of Guy's 10/10
+   human-in-the-loop rule (flagged Stage 21 CF-1b). Two-part remediation, both agreed in Guy's "Legal &
+   Autonomy Reset" prompt (10/07):
+   1. **✅ Done 11/07/2026 (Guy approved: "מאשר").** `agents/A5_social/agent.js:45` now reads
+      `const DRY_RUN = true;` (hardcoded, not env-derived — cannot silently flip back on when credentials
+      exist). A5 still drafts captions/images/email, never auto-publishes. Verified: `node --check` clean,
+      `node scripts/ci/verify-fleet-status.js` green (no drift — A5 still has a DRY_RUN guard, table
+      unaffected). Committed as part of this session.
+   2. **Still open — full retrofit (🤖, larger build, Guy chose "build it right"):** the HITL design already
+      exists from Stage 21 (CF-0f, `FABLE5_AUTONOMOUS_OS_ROADMAP.md` §4) — reuse `requestApproval()` + new
       `action_type:'social_post'` in `hitl-execute.js` + `A5_ARM` guard mirroring the real `A9_ARM` pattern.
       This is Stage 21 item **CF-1b**, currently gated to "O-1" (`PHASE_2_ACTIVATE_BY_GUY`) in the Stage 21
-      table below — **re-classify it as a bug-fix-class exception to the freeze** (like S20-d/e were),
-      since it fixes an active violation of an existing Iron Law, not a new feature. Needs Guy's explicit
-      go-ahead on timing, same as S20-d/e.
+      table below — re-classified as a bug-fix-class exception to the freeze (like S20-d/e), since it fixes
+      an active violation of an existing Iron Law, not a new feature. **Not urgent anymore** (live-posting
+      risk is now closed by Part 1's hardcoded `true`) — do this whenever Guy wants to schedule it.
 1. **🔴 Trademark check — ESCALATED + RESOLVED (self-search phase) 06/07/2026** (`FABLE5_STAGE19_BLIND_SPOTS.md`
    §E2) — Guy ran the self-search himself and cross-verified via two independent sources (UK IPO direct +
    TMview/WIPO Global Brand DB): confirmed **REGISTERED** UK trademark `UK00003187452`, "Sock Academy"
@@ -304,7 +303,7 @@ and is this stage's highest-priority retrofit (CF-1b) — **A5 must stay DRY_RUN
 | CF-0e | Formalize the "Health-Check System" doc (composite of 4 existing mechanisms) | 🤖 | O-0 now | ✅ **Done 06/07** | Docs-only, in the roadmap §6 — explicitly NOT a new agent |
 | CF-0f | A5 HITL-retrofit design (code gated to O-1) | 🧠 | O-0 now | ✅ **Done 06/07** | See roadmap §4 — reuses `requestApproval` + new `action_type:'social_post'` + `A5_ARM` guard, mirroring the real `A9_ARM` pattern |
 | CF-1a | Q-HARDEN `queue.js` (ack-on-pop, `queue_log` lifecycle, dead-letter → `pending_approvals`) | 🤖 | O-1 | Blocked on `PHASE_2_ACTIVATE_BY_GUY` | = Stage 18 item S18-b; A2.7's first task |
-| CF-1b | A5 HITL retrofit code + `case 'social_post'` in `hitl-execute.js` + `A5_ARM` env | 🤖 | O-1 → **re-proposed 10/07 as bug-fix exception, see item 0 above** | Blocked pending Guy's go-ahead on timing | **A5 is still live today, not DRY_RUN** — the interim patch (force `DRY_RUN='true'` in the workflow) is separate and unblocked, should ship immediately regardless of when this full retrofit lands |
+| CF-1b | A5 HITL retrofit code + `case 'social_post'` in `hitl-execute.js` + `A5_ARM` env | 🤖 | O-1 → re-proposed 10/07 as bug-fix exception, see item 0 above | Not started — no longer urgent | **✅ Interim patch done 11/07/2026** (`agents/A5_social/agent.js:45` hardcoded `DRY_RUN = true`) — live-posting risk closed. This full retrofit (real HITL approval flow, not just a hard stop) is now a normal-priority build, schedule whenever Guy wants |
 | CF-1c | Meta CAPI server-side build (per the existing 3-doc spec, no redesign) | 🤖 | Phase 2 gate (= O-1) | Blocked | Alert via `notifyTelegram` on any failure — never silent |
 | CF-1d | Adopt `supermetrics` + `agent-browser` with their designed breakers (CFO/intel clusters) | 🤖 | O-1 | Blocked | Read-only scopes; `agent-browser` also gated on the Hallucination-Defense policy (roadmap §8) |
 | CF-1e | LangFuse fleet-wide rollout | 🤖 | O-1 | Blocked | Do while agent code is already open for O-1 work |
@@ -448,6 +447,12 @@ amendment text, code). Only re-dispatch Fable for genuinely new strategic/archit
 ---
 
 ## Log
+- 2026-07-11 — Guy approved ("מאשר") executing item 0 Part 1. `agents/A5_social/agent.js:45` changed from
+  `DRY_RUN = !ACCESS_TOKEN || !IG_USER_ID` to a hardcoded `DRY_RUN = true` — A5 no longer auto-publishes to
+  Instagram under any credential state; live-posting risk flagged 10/07 is closed. `node --check` +
+  `node scripts/ci/verify-fleet-status.js` both clean, no other files needed changes (workflow env untouched
+  — the gate is in code, not env-derived, so it can't silently flip back on). Item 0 and CF-1b rows updated
+  to reflect Part 1 done / Part 2 (full HITL retrofit) now normal-priority, not urgent.
 - 2026-07-10 — Guy free at the computer after several async exchanges. Full tracker re-scan + Hebrew
   status report delivered (all open items across Stages 15-21). Guy sent a "Legal & Autonomy Reset"
   prompt: (1) A5 DRY_RUN patch + commit to the full HITL retrofit ("Option 2," build it right) — **agreed
