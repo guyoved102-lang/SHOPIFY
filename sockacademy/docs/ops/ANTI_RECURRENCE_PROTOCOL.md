@@ -646,6 +646,21 @@ curl -X PUT .../products/XXX.json -d '{"product":{"id":XXX,"published":true}}'
 
 ---
 
+## 44. DRY_RUN מבוסס נוכחות-credentials במקום flag מפורש — A5 פרסם לאינסטגרם בלי אישור אנושי (10-11/07/2026)
+
+**מה קרה:** `agents/A5_social/agent.js` חישב `DRY_RUN = !ACCESS_TOKEN || !IG_USER_ID`. ברגע ש-`META_ACCESS_TOKEN`/`META_IG_USER_ID` נוספו ל-GitHub Secrets (הכנה לעתיד, לא כוונה להפעיל), `DRY_RUN` התהפך ל-`false` בשקט — A5 החל לפרסם לאינסטגרם בפועל, ללא שום אישור אנושי, הפרה ישירה של חוק ה-Human-in-the-Loop.
+
+**למה קרה:** ה-safety flag הוגדר כביטוי **נגזר** ממשתנים אחרים (נוכחות credentials), במקום `env` מפורש שרק בן אדם קובע. זו מחלקת-בעיה שונה מ-#35 (שם פשוט שכחו להגדיר `DRY_RUN=true` בסמוק-טסט) — כאן הבעיה היא שה-flag עצמו יכול להתהפך אוטומטית, בלי כל כוונה אנושית, ברגע שתשתית לא-קשורה (הוספת secret) משתנה.
+
+**מה מונע חזרה:**
+1. תיקון מיידי (11/07): `DRY_RUN` הפך זמנית ל-hardcoded `true`.
+2. תיקון מלא, אותה שיחה: HITL retrofit מלא ל-A5 — פרסום ישיר הוסר לגמרי מ-`agent.js`; פוסט שעבר QA פותח `requestApproval()` (כמו A9), ופרסום אמיתי קורה רק ב-`corp/core/hitl-execute.js` אחרי אישור גיא. שכבת הגנה נוספת: `A5_ARM` (guard שני, בלתי-תלוי, env בלבד) מגן גם על עצם פתיחת הבקשה — מראה מדויקת של `A9_ARM`.
+3. **כלל כללי לכל agent עתידי:** `DRY_RUN`/`*_ARM` guards חייבים תמיד להיות `process.env.X === 'true'` ישירות — לעולם לא ביטוי נגזר ממשתנה אחר (נוכחות credentials, תוצאת פונקציה, וכו').
+
+**בדיקה:** `grep -n "DRY_RUN\s*=" agents/*/agent.js` — כל תוצאה חייבת להיות `process.env.DRY_RUN === 'true'` או hardcoded literal, לעולם לא ביטוי עם `!`/`?`/קריאת פונקציה אחרת.
+
+---
+
 ## SESSION CONTINUITY CHECKLIST — בכל שיחה
 
 **פתיחה:**
