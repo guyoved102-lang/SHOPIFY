@@ -33,6 +33,10 @@ jobs:
       - name: Run A5 Social Agent
         working-directory: sockacademy/agents/A5_social
         env:
+          # Explicit, not implicit (tracker item 0 Part 2, mirrors A9_ARM philosophy) — the scheduled
+          # cron must never accidentally go live. Going live requires a deliberate, separate edit here
+          # to DRY_RUN=false PLUS adding A5_ARM=true, never just a workflow_dispatch click.
+          DRY_RUN: 'true'
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}

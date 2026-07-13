@@ -142,6 +142,37 @@ async function execute(approvalId, decision) {
     return;
   }
 
+  if (action_type === 'social_post') {
+    const { caption, imageUrl, postType } = payload_json;
+    if (!process.env.META_ACCESS_TOKEN) throw new Error('META_ACCESS_TOKEN not set');
+    if (!process.env.META_IG_USER_ID) throw new Error('META_IG_USER_ID not set');
+    const META_API    = 'https://graph.facebook.com/v20.0';
+    const IG_USER_ID  = process.env.META_IG_USER_ID;
+    const ACCESS_TOKEN = process.env.META_ACCESS_TOKEN;
+
+    const mediaPayload = postType === 'REEL'
+      ? { image_url: imageUrl, caption, media_type: 'REELS', share_to_feed: true, access_token: ACCESS_TOKEN }
+      : { image_url: imageUrl, caption, access_token: ACCESS_TOKEN };
+
+    const mediaRes = await fetch(`${META_API}/${IG_USER_ID}/media`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(mediaPayload),
+    });
+    const media = await mediaRes.json();
+    if (media.error) throw new Error(`Meta media: ${media.error.message}`);
+
+    const publishRes = await fetch(`${META_API}/${IG_USER_ID}/media_publish`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ creation_id: media.id, access_token: ACCESS_TOKEN }),
+    });
+    const published = await publishRes.json();
+    if (published.error) throw new Error(`Meta publish: ${published.error.message}`);
+    console.log(`  ✓ Instagram post published — ID: ${published.id}`);
+    return;
+  }
+
   if (action_type === 'product_delete') {
     const { shopify_product_id } = payload_json;
     const headers = { 'X-Shopify-Access-Token': SHOPIFY_TOKEN };

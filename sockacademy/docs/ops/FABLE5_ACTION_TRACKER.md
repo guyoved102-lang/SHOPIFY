@@ -20,24 +20,35 @@ sense of "the business breaks tomorrow" — but items 1-2 have the worst cost-of
 whole tracker (cheap now, potentially catastrophic later), so they're listed first on purpose, not by
 document order.
 
-0. **🟡 Part 1 DONE 11/07/2026 — A5 live-posting stopped. Part 2 (full HITL retrofit) still open.**
+0. **✅ DONE 11/07/2026 — A5 live-posting stopped (Part 1) AND full HITL retrofit built (Part 2).**
    Original problem (10/07): `agents/A5_social/agent.js:45` computed `DRY_RUN = !ACCESS_TOKEN || !IG_USER_ID`,
    and once `META_ACCESS_TOKEN`/`META_IG_USER_ID` were set in GitHub Secrets, DRY_RUN silently evaluated
    `false` — A5 was posting to Instagram live with zero human approval, a real violation of Guy's 10/10
    human-in-the-loop rule (flagged Stage 21 CF-1b). Two-part remediation, both agreed in Guy's "Legal &
    Autonomy Reset" prompt (10/07):
-   1. **✅ Done 11/07/2026 (Guy approved: "מאשר").** `agents/A5_social/agent.js:45` now reads
-      `const DRY_RUN = true;` (hardcoded, not env-derived — cannot silently flip back on when credentials
-      exist). A5 still drafts captions/images/email, never auto-publishes. Verified: `node --check` clean,
-      `node scripts/ci/verify-fleet-status.js` green (no drift — A5 still has a DRY_RUN guard, table
-      unaffected). Committed as part of this session.
-   2. **Still open — full retrofit (🤖, larger build, Guy chose "build it right"):** the HITL design already
-      exists from Stage 21 (CF-0f, `FABLE5_AUTONOMOUS_OS_ROADMAP.md` §4) — reuse `requestApproval()` + new
-      `action_type:'social_post'` in `hitl-execute.js` + `A5_ARM` guard mirroring the real `A9_ARM` pattern.
-      This is Stage 21 item **CF-1b**, currently gated to "O-1" (`PHASE_2_ACTIVATE_BY_GUY`) in the Stage 21
-      table below — re-classified as a bug-fix-class exception to the freeze (like S20-d/e), since it fixes
-      an active violation of an existing Iron Law, not a new feature. **Not urgent anymore** (live-posting
-      risk is now closed by Part 1's hardcoded `true`) — do this whenever Guy wants to schedule it.
+   1. **Done 11/07/2026 (Guy approved: "מאשר").** Interim hard stop: `DRY_RUN = true;` hardcoded.
+      Superseded same day by Part 2's proper fix (below).
+   2. **Done 11/07/2026 (Guy approved: "מעולה תעשה את זה") — CF-1b closed.** Full HITL retrofit, mirroring
+      A9's exact pattern:
+      - `agent.js`: `DRY_RUN` is env-derived again; new `A5_ARM` env flag is a second, independent gate
+        (mirrors `A9_ARM`, ANTI_RECURRENCE #35) — both must be set before a real approval request opens.
+      - `agent.js`: direct `publishToInstagram()` Meta API call removed entirely from this file. A
+        QA-approved post now calls the shared `requestApproval()` (same one A9 uses) with
+        `actionType: 'social_post'` instead.
+      - `corp/core/hitl-execute.js`: new `action_type === 'social_post'` branch — this is the ONLY place
+        the real Instagram Graph API call happens now, and only after Guy approves via `hitl-approve.yml`.
+      - `.github/workflows/hitl-approve.yml`: added `META_IG_USER_ID` secret (had `META_ACCESS_TOKEN` only).
+      - `.github/workflows/a5-social.yml`: added explicit `DRY_RUN: 'true'` to the cron env (was implicit/
+        hardcoded before) — deliberately did **not** add `A5_ARM` here, so going live later requires Guy to
+        edit the workflow file directly (two deliberate changes: `DRY_RUN: 'false'` + `A5_ARM: 'true'`),
+        never just a workflow_dispatch button click. Exactly mirrors A9's `A9_ARM` omission from its YAML.
+      **Verified:** `node --check` clean on both changed .js files, `node scripts/ci/verify-fleet-status.js`
+      green (no drift). **Not verified:** a live end-to-end smoke test of the new `social_post` HITL path
+      was NOT run (would cost real Anthropic/OpenAI tokens and send Guy one real approval email) — the
+      scheduled cron stays `DRY_RUN=true` so production behavior is unchanged until Guy deliberately arms it.
+      If Guy wants a controlled test before trusting this in production, ask to run one with a `_test:true`
+      payload (already supported by `hitl-execute.js`'s generic short-circuit) so it stops before the real
+      Meta API call.
 1. **🔴 Trademark check — ESCALATED + RESOLVED (self-search phase) 06/07/2026** (`FABLE5_STAGE19_BLIND_SPOTS.md`
    §E2) — Guy ran the self-search himself and cross-verified via two independent sources (UK IPO direct +
    TMview/WIPO Global Brand DB): confirmed **REGISTERED** UK trademark `UK00003187452`, "Sock Academy"

@@ -1,7 +1,11 @@
 /**
- * A5 — Social Content Agent v2.1
- * Claude (caption) → DALL-E (image) → Google Drive (archive) → Shopify CDN (host) → Meta API (publish)
- * DRY-RUN: forced true (11/07/2026, pending HITL retrofit) — captions + images + Drive backup + email only, never auto-publishes
+ * A5 — Social Content Agent v2.2
+ * Claude (caption) → DALL-E (image) → Google Drive (archive) → Shopify CDN (host) → HITL approval → Meta API (publish)
+ * Publishing: HITL-gated (11/07/2026, tracker item 0 Part 2) — a QA-approved post opens a Supabase
+ * approval request (same requestApproval() A9 uses for legal pages) instead of calling the Meta API
+ * inline. Actual Instagram publish only happens in corp/core/hitl-execute.js after Guy approves via
+ * hitl-approve.yml. DRY_RUN (env) must be false AND A5_ARM (second, independent gate — mirrors A9_ARM,
+ * ANTI_RECURRENCE #35) must be true before a REAL approval request can ever be created.
  */
 
 require('dotenv').config({ path: '../../.env' });
@@ -15,6 +19,7 @@ const { notifyTelegram, heTelegramMsg } = require('../../corp/core/telegram.js')
 const { writeMetrics } = require('../../corp/core/metrics.js');
 const { reviewContent } = require('../../corp/core/qa-gate.js');
 const { handleFatalError } = require('../../corp/core/self-heal.js');
+const { requestApproval } = require('../../corp/core/hitl.js');
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'guyoved102@gmail.com';
 const MAX_QA_ROUNDS = 2;
 
@@ -38,15 +43,10 @@ async function logHealth(supabase, status, errorMsg = '', metadata = {}) {
 }
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-const IG_USER_ID  = process.env.META_IG_USER_ID;
-const ACCESS_TOKEN = process.env.META_ACCESS_TOKEN;
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_SHOP_DOMAIN;
 const SHOPIFY_TOKEN  = process.env.SHOPIFY_MASTER_TOKEN;
-// Forced true 11/07/2026 (Guy, "Legal & Autonomy Reset" + tracker item 0) — credential-presence-based
-// DRY_RUN meant A5 went live the moment META_ACCESS_TOKEN/META_IG_USER_ID were added, with no explicit
-// human decision to flip it. Full HITL retrofit (approval-gated posting, tracker CF-1b) replaces this
-// hard stop later; until then A5 always drafts (captions + images + email), never auto-publishes.
-const DRY_RUN = true;
+const DRY_RUN = process.env.DRY_RUN === 'true';
+const A5_ARM  = process.env.A5_ARM === 'true';
 if (!SHOPIFY_DOMAIN) { console.error('❌ SHOPIFY_SHOP_DOMAIN not set'); process.exit(1); }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -341,36 +341,6 @@ async function uploadToShopifyCDN(base64Data, filename) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// META API — publish to Instagram
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function publishToInstagram(caption, imageUrl, postType = 'FEED') {
-  if (DRY_RUN || !imageUrl) return null;
-
-  const META_API = 'https://graph.facebook.com/v20.0';
-
-  const mediaPayload = postType === 'REEL'
-    ? { image_url: imageUrl, caption, media_type: 'REELS', share_to_feed: true, access_token: ACCESS_TOKEN }
-    : { image_url: imageUrl, caption, access_token: ACCESS_TOKEN };
-
-  const mediaRes = await fetch(`${META_API}/${IG_USER_ID}/media`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(mediaPayload),
-  });
-  const media = await mediaRes.json();
-  if (media.error) throw new Error(`Meta media: ${media.error.message}`);
-
-  const publishRes = await fetch(`${META_API}/${IG_USER_ID}/media_publish`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ creation_id: media.id, access_token: ACCESS_TOKEN }),
-  });
-  const published = await publishRes.json();
-  if (published.error) throw new Error(`Meta publish: ${published.error.message}`);
-  return published.id;
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // EMAIL — weekly calendar with previews
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async function sendWeeklyCalendar(posts, weekNum, theme) {
@@ -431,11 +401,10 @@ async function sendWeeklyCalendar(posts, weekNum, theme) {
 
     ${DRY_RUN ? `
     <div style="background:#1a1a1a;border:1px solid #C9A84C33;border-radius:6px;padding:16px;margin-top:16px">
-      <div style="font-size:11px;color:#C9A84C;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">להפעלה מלאה</div>
+      <div style="font-size:11px;color:#C9A84C;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">מצב DRY-RUN — טיוטה בלבד</div>
       <div style="font-size:12px;color:#9ca3af;line-height:1.8">
-        META_ACCESS_TOKEN + META_IG_USER_ID → GitHub Secrets<br>
-        OPENAI_API_KEY → .env (לDall-E)<br>
-        SHOPIFY_MASTER_TOKEN → .env (כבר קיים ✓)
+        לא נפתחת שום בקשת אישור לפרסום. להפעלה: DRY_RUN=false + A5_ARM=true בהרצה ידנית מכוונת בלבד —<br>
+        ואז כל פוסט שעבר QA יפתח בקשת אישור בסופאבייס (כמו A9), אתה מאשר ב-hitl-approve.yml, ורק אז הוא מתפרסם.
       </div>
     </div>` : ''}
 
@@ -558,22 +527,34 @@ async function main() {
     await new Promise(r => setTimeout(r, 800));
   }
 
-  // Publish to Instagram (LIVE mode)
-  let publishedCount = 0;
+  // Request HITL approval to publish (tracker item 0 Part 2 — replaces direct Meta API call).
+  // Real publish happens only in corp/core/hitl-execute.js, after Guy approves via hitl-approve.yml.
+  let requestedCount = 0;
   if (!DRY_RUN) {
-    console.log('\n📤 Publishing to Instagram...');
-    for (const p of posts) {
-      if (p.imageUrl) {
-        const fullCaption = `${p.caption.hook}\n\n${p.caption.body}\n\n${p.caption.cta}\n\n${p.caption.hashtags}`;
-        try {
-          const id = await publishToInstagram(fullCaption, p.imageUrl, p.plan.type);
-          console.log(`  ✅ ${p.plan.day} published — ID: ${id}`);
-          publishedCount++;
-        } catch (e) {
-          console.error(`  ❌ ${p.plan.day}: ${e.message}`);
+    if (!A5_ARM) {
+      console.error('\n🛑 BLOCKED: about to open REAL HITL approval request(s) for Instagram publishing,');
+      console.error('but A5_ARM is not set to \'true\'. This mirrors the frozen A9 legal domain guard');
+      console.error('(ANTI_RECURRENCE #35) — re-run with DRY_RUN=false and A5_ARM=true only when intentional.');
+    } else {
+      console.log('\n📨 Requesting HITL approval to publish...');
+      for (const p of posts) {
+        if (p.imageUrl) {
+          const fullCaption = `${p.caption.hook}\n\n${p.caption.body}\n\n${p.caption.cta}\n\n${p.caption.hashtags}`;
+          try {
+            const approvalId = await requestApproval({
+              agentId:     'A5',
+              actionType:  'social_post',
+              description: `Publish ${p.plan.day} (${p.plan.type}) to Instagram:\n"${p.caption.hook}"`,
+              payload:     { caption: fullCaption, imageUrl: p.imageUrl, postType: p.plan.type },
+            });
+            console.log(`  ✅ ${p.plan.day} — approval requested (ID: ${approvalId})`);
+            requestedCount++;
+          } catch (e) {
+            console.error(`  ❌ ${p.plan.day}: ${e.message}`);
+          }
+        } else {
+          console.log(`  ⚠  ${p.plan.day}: ${p.qaHeld ? 'QA held' : 'no image'}, skipped`);
         }
-      } else {
-        console.log(`  ⚠  ${p.plan.day}: ${p.qaHeld ? 'QA held' : 'no image'}, skipped`);
       }
     }
   }
@@ -587,9 +568,9 @@ async function main() {
   if (!DRY_RUN && supabase) {
     const metricDate = new Date().toISOString().split('T')[0];
     await writeMetrics(supabase, 'A5', metricDate, [
-      { name: 'social_posts_generated', value: posts.length,    unit: 'count' },
-      { name: 'social_posts_published', value: publishedCount,  unit: 'count' },
-      { name: 'social_qa_held_count',   value: qaHeldCount,     unit: 'count' },
+      { name: 'social_posts_generated',          value: posts.length,     unit: 'count' },
+      { name: 'social_posts_approval_requested', value: requestedCount,  unit: 'count' },
+      { name: 'social_qa_held_count',            value: qaHeldCount,     unit: 'count' },
     ]);
   }
 
