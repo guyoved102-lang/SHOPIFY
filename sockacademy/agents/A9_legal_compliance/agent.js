@@ -128,6 +128,9 @@ function buildLegalPages() { return [
 <h2>17. Contact</h2>
 <p>For questions about these Terms, contact us at <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a>.</p>
 
+<h2>18. Legal Notice</h2>
+<p>${ENTITY} is the operator of this Site. <em>[Registered business name, company number, and postal address to be added here upon completion of company formation — required for compliance with certain jurisdictions' business-disclosure laws (e.g. Germany). Do not publish this Site to German customers before this section is completed.]</em></p>
+
 <p><em>⚠️ These Terms have been prepared as a professional template and must be reviewed by a certified attorney before use in commerce.</em></p>
 </div>
 `
@@ -177,9 +180,9 @@ function buildLegalPages() { return [
   <li><strong>Google LLC (Google Analytics 4)</strong> — website analytics. GA4 collects anonymized usage data via cookies. <a href="https://policies.google.com/privacy" target="_blank">Google Privacy Policy</a></li>
   <li><strong>Meta Platforms, Inc.</strong> — advertising and analytics via the Meta Pixel. The Meta Pixel collects data about your interactions with our Site to measure ad effectiveness and deliver personalized advertising on Facebook and Instagram. <a href="https://www.facebook.com/policy.php" target="_blank">Meta Data Policy</a></li>
   <li><strong>International fulfillment partners</strong> — name, address, and order details are shared with our logistics partners solely to fulfill your order.</li>
-  <li><strong>Stripe, Inc.</strong> — payment processing. <a href="https://stripe.com/privacy" target="_blank">Stripe Privacy Policy</a></li>
+  <li><strong>PayPal, Inc.</strong> — payment processing. <a href="https://www.paypal.com/us/legalhub/privacy-full" target="_blank">PayPal Privacy Policy</a></li>
 </ul>
-<p>We do not sell your personal information to third parties for their own marketing purposes.</p>
+<p>We do not sell your personal information to third parties for their own marketing purposes. To the extent our use of advertising cookies (Section 7) is considered "sharing" of personal information under California law, see Section 6.2 below for how to opt out.</p>
 
 <h2>5. International Data Transfers</h2>
 <p>Our service providers operate in the United States and other countries. When we transfer your personal data outside your country of residence, we rely on appropriate safeguards such as Standard Contractual Clauses (SCCs) approved by the European Commission, or equivalent mechanisms, to protect your data.</p>
@@ -198,8 +201,8 @@ function buildLegalPages() { return [
 </ul>
 <p>To exercise these rights, contact us at <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a>. We will respond within 30 days. You also have the right to lodge a complaint with your local supervisory authority.</p>
 
-<h3>6.2 CCPA Rights (California residents)</h3>
-<p>California residents have the right to: (a) know what personal information we collect and how it is used; (b) request deletion of personal information; (c) opt out of the sale of personal information (we do not sell personal information); and (d) non-discrimination for exercising these rights. To submit a request, email us at <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a>.</p>
+<h3>6.2 CCPA/CPRA Rights (California residents)</h3>
+<p>California residents have the right to: (a) know what personal information we collect and how it is used; (b) request deletion of personal information; (c) opt out of the <strong>sale or sharing</strong> of personal information — this includes cross-context behavioral advertising cookies such as the Meta Pixel described in Section 7, even though we do not sell data for money; (d) correct inaccurate personal information; and (e) non-discrimination for exercising these rights. <strong>To opt out of sale/sharing, or to submit any other CCPA/CPRA request, email us at <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a> with the subject line "CCPA Opt-Out"</strong> and we will disable advertising cookies for you and confirm within 15 business days.</p>
 
 <h2>7. Cookies</h2>
 <p>We use the following types of cookies:</p>
@@ -245,7 +248,7 @@ function buildLegalPages() { return [
 <p>Orders are processed within 1–3 business days (Monday through Friday, excluding public holidays) after payment is confirmed. You will receive an email confirmation once your order is placed, and a separate shipping notification with tracking information once your order has been dispatched.</p>
 
 <h2>Fulfillment</h2>
-<p>${BRAND} partners with international logistics providers for order fulfillment. Orders are shipped directly from our fulfillment network to your delivery address. This allows us to offer competitive pricing and global reach.</p>
+<p>${BRAND} partners with international logistics providers for order fulfillment. Orders are shipped directly from our fulfillment network — which may include fulfillment centers located outside your country of residence — to your delivery address. This allows us to offer competitive pricing and global reach, and is also why estimated delivery times (below) are longer than typical same-country e-commerce and why customs duties may apply to your order.</p>
 
 <h2>Estimated Delivery Times</h2>
 <table>
@@ -297,6 +300,11 @@ function buildLegalPages() { return [
 
 <h2>Return Window</h2>
 <p>You may request a return within <strong>30 days</strong> of the delivery date. Requests submitted after 30 days will not be accepted.</p>
+
+<h2>EU/UK Right of Withdrawal (14 Days)</h2>
+<p>If you are a consumer located in the European Union, the United Kingdom, or Switzerland, you have a separate, additional right under applicable consumer protection law (including the EU Consumer Rights Directive 2011/83/EU and the UK Consumer Contracts Regulations 2013) to withdraw from your purchase within <strong>14 days</strong> of receiving your order, <strong>for any reason, with no justification required</strong> — this right exists whether or not the item has been unpacked, and is separate from and in addition to the 30-day return window above.</p>
+<p>To exercise this right, notify us within 14 days of delivery by emailing <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a> with a clear statement that you wish to withdraw (for example: "I hereby withdraw from my contract for the purchase of the following goods: [order number]"). You must then return the goods to us without undue delay and in any event within 14 days of telling us you wish to withdraw. You will bear the direct cost of returning the goods unless the item is defective or was mis-shipped.</p>
+<p>Upon a valid withdrawal, we will refund the price you paid, including the standard/basic delivery cost you originally paid (if any), within 14 days of receiving the returned goods or evidence that you have shipped them, whichever is earlier, to your original payment method.</p>
 
 <h2>Eligibility</h2>
 <p>To be eligible for a return, items must be:</p>
@@ -477,6 +485,8 @@ async function sendConfirmation(results) {
       <li>Verify the arbitration clause meets your requirements</li>
       <li>Update ENTITY name (currently: "${ENTITY}") to your registered legal entity</li>
       <li>Check GDPR compliance with your EU customer volume</li>
+      <li>Complete the "Legal Notice" section (ToS §18) with a real registered address before selling to Germany</li>
+      <li>Have the attorney validate the EU/UK 14-day Right of Withdrawal wording (Refund Policy) and the Delaware/arbitration clause's interaction with EU/UK consumer-protection law</li>
     </ul>
   </div>
 
@@ -488,7 +498,7 @@ async function sendConfirmation(results) {
       Class action waiver: ✓ Included<br>
       GDPR: ✓ Compliant<br>
       CCPA: ✓ Compliant<br>
-      Data processors disclosed: Shopify, Klaviyo, GA4, Meta, Stripe
+      Data processors disclosed: Shopify, Klaviyo, GA4, Meta, PayPal
     </div>
   </div>
 
