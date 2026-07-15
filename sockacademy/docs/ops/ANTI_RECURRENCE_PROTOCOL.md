@@ -661,6 +661,22 @@ curl -X PUT .../products/XXX.json -d '{"product":{"id":XXX,"published":true}}'
 
 ---
 
+## 45. Storefront חי וגלוי לציבור בלי שום החלטת Go-Live מפורשת — לקוח מצא ופנה בעניין הזמנה (15/07/2026)
+
+**מה קרה:** לקוח שלח מייל ("Can u ship to Ohio?") ישירות לתיבה האישית של גיא, מה שחשף שהחנות שקופה ונגישה לציבור. בדיקה חיה (read-only) גילתה: (1) `sockacademy.store` מחזיר HTTP 200 מלא — password protection **מעולם לא הופעל** מאז שה-theme עלה ב-14/06; (2) `robots.txt` (ברירת מחדל Shopify) לא חוסם אינדוקס — האתר עשוי כבר להיות ממופה בגוגל; (3) `shop.email` (בעל חשבון Shopify) עדיין `guyoved100@gmail.com` — כתובת אישית שמוצגת ברמת הפלטפורמה, נפרדת לגמרי מ-`shop.customer_email` (שכן מוגדר נכון ל-`hello@sockacademy.store`); (4) MX records ל-`sockacademy.store` כן resolve עכשיו ל-ImprovMX (שינוי אמיתי מאז 10/07 — `FABLE5_ACTION_TRACKER.md` item 2 היה תקוע ב-"Continue לא נלחץ"), אבל לא אומת אם ה-alias `hello@` בפועל נוצר ב-improvmx.com ומעביר, אז ייתכן שמייל ל-`hello@sockacademy.store` עדיין nowhere-bound.
+
+**למה קרה:** Iron Law 1 ("אפס השקה עד שהמערכת מוכנה") הוא כלל *עסקי*, אבל מעולם לא תורגם לפעולה טכנית קונקרטית ("הפעל password protection ברגע שה-theme עולה ל-production"). Shopify כברירת מחדל — store פתוח לציבור אלא אם נועל אותו במפורש. ההנחה ש"לא פרסמנו אז אף אחד לא ימצא" הייתה שגויה: A3 (SEO blog) ו-A5 (social) נבנו **בכוונה** ליצור נראות אורגנית — בלי בקרת גישה מקבילה על product/checkout pages, הנראות הזו חושפת גם את מה שעדיין לא מוכן למכירה.
+
+**מה מונע חזרה:**
+1. בדיקה חדשה בכל boot/pre-launch check: `curl -s -o /dev/null -w "%{http_code}" https://sockacademy.store` — 200 = פתוח לציבור. לוודא שזו **החלטה מודעת**, לא ברירת מחדל שאיש לא בדק.
+2. `inventory_policy: 'deny'` על כל variant הוא ה-safety net האמיתי (חוסם רכישה גם אם הדף גלוי) — כל מוצר חדש עד Launch חייב `deny`, לא מספיק status draft/active לבד.
+3. `shop.email` (Shopify account owner, Account Settings) הוא כתובת **נפרדת** מ-SMTP sender ברמת קוד (פרוטוקול #7 מכסה רק nodemailer) — אף grep קיים לא תופס אותה כי היא לא בקוד. gap שדורש בדיקה ידנית תקופתית (🧑 גיא בלבד — Shopify Admin → Settings → Account).
+4. תיקון בפועל בשיחה זו: 4 מוצרים ב-status `active` הועברו ל-`draft` (Shopify Admin API `PUT`) — מסיר אותם לגמרי מה-storefront (collections page + direct product URL = 404) בלי לפגוע ב-blog/policy pages ש-SEO כבר תלוי בהם. שני המוצרים שהיו כבר `draft` (כולל ZQ Merino עם ה-Unicode handle, פרוטוקול #29) לא שונו.
+
+**בדיקה:** `curl -s https://sockacademy.store/collections/all | grep -c "No products found"` — חייב להחזיר 1 (אפס מוצרים גלויים) כל עוד Launch לא הוכרז במפורש. `curl -s -o /dev/null -w "%{http_code}" https://sockacademy.store/products/<handle>` על כל handle פעיל לשעבר — חייב 404.
+
+---
+
 ## SESSION CONTINUITY CHECKLIST — בכל שיחה
 
 **פתיחה:**
