@@ -11,7 +11,7 @@ status changes. New Fable dispatches append new items here rather than starting 
 
 ---
 
-## 📍 Waiting on Guy — prioritized, updated 10/07/2026
+## 📍 Waiting on Guy — prioritized, updated 15/07/2026
 
 Every 🤖-only item with zero decision-blocker has now been executed (see the Log at the bottom for
 the full 06/07/2026 overnight + Phase-1 batch). **Everything below requires Guy personally** — reading
@@ -165,6 +165,24 @@ document order.
      when Phase 4 triggers.
    - **Guy's next step:** sign up for Spocket (or preferred alternative), confirm it carries usable sock
      inventory, get an API key, hand it to Claude to activate + smoke-test.
+10. **🆕 NEW 15/07/2026 — WHOIS privacy leak, real customer contact evidence.** A customer ("Radex,"
+    `radexconsult74@gmail.com`) emailed Guy's **personal** Gmail directly, subject "Hello Guyoved" — a
+    name pattern that matches the `guyoved100`/`guyoved102` email prefixes, not anything shown on the
+    storefront. Verified live (Shopify Admin API, read-only): the native Contact form is correctly wired
+    (`shop.customer_email` = `hello@sockacademy.store`), so this did **not** come through the site's
+    contact flow. Most likely channel: GoDaddy WHOIS registrant record, not yet confirmed
+    privacy-protected — this overlaps the existing loose Stage 19 checklist line ("GoDaddy 2FA/auto-renew/
+    transfer-lock" in item 5 above) but had never been independently flagged as an active leak until this
+    incident. Two fixes, both 🧑-only, ~5 min combined:
+    1. GoDaddy → Domain Settings → Privacy Protection → Enable (closes the actual leak channel).
+    2. Shopify Admin → Settings → Account → change `shop.email` (account owner, currently
+       `guyoved100@gmail.com`) to `sockacademy.store@gmail.com` — so even a future WHOIS/account-level
+       exposure surfaces a business address, not a personal one.
+    Same-session fix already applied (see Log 15/07/2026): the 4 `active` products were switched to
+    Shopify `status: draft` via Admin API — closes the separate, independent risk of a customer browsing
+    a not-yet-ready storefront (`inventory_policy: deny` already prevented any real transaction, but the
+    visible browsing experience is now gone too). Blog/policy pages deliberately left live — SEO
+    investment preserved. Full writeup: `ANTI_RECURRENCE_PROTOCOL.md` #45.
 
 ---
 
@@ -458,6 +476,19 @@ amendment text, code). Only re-dispatch Fable for genuinely new strategic/archit
 ---
 
 ## Log
+- 2026-07-15 — Customer email ("Can u ship to Ohio?") reached Guy's personal Gmail, revealing the
+  storefront was fully public (Password Protection never enabled since theme launch 14/06). Verified live
+  via Shopify Admin API (read-only): all 6 products had `inventory_policy: deny` (zero real transaction
+  risk existed — no order could have completed regardless), the Contact form correctly routes to
+  `hello@sockacademy.store`, MX records for the domain now resolve to ImprovMX (progress since 10/07's
+  paused state — D4 item 2 above), but the `hello@` alias itself is still unconfirmed. Traced the actual
+  contact vector to a likely GoDaddy WHOIS leak (subject line "Hello Guyoved" matches the personal Gmail
+  prefix, not anything on the storefront) rather than the Contact form. Fix applied same session: 4
+  `active` products switched to Shopify `status: draft` via Admin API (one-off API call, not a new agent)
+  — removes storefront browsing/inquiry exposure while blog/policy pages stay live for SEO.
+  `ANTI_RECURRENCE_PROTOCOL.md` #45 added and pushed (`35add98`, CI green) documenting the full gap. Item
+  10 above queues the two remaining Guy-only fixes (GoDaddy WHOIS privacy toggle + Shopify account-owner
+  email change).
 - 2026-07-11 — Guy approved ("מאשר") executing item 0 Part 1. `agents/A5_social/agent.js:45` changed from
   `DRY_RUN = !ACCESS_TOKEN || !IG_USER_ID` to a hardcoded `DRY_RUN = true` — A5 no longer auto-publishes to
   Instagram under any credential state; live-posting risk flagged 10/07 is closed. `node --check` +
