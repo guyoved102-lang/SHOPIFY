@@ -677,6 +677,21 @@ curl -X PUT .../products/XXX.json -d '{"product":{"id":XXX,"published":true}}'
 
 ---
 
+## 46. MX Records הצביעו ל-ImprovMX חודשים — אבל הדומיין מעולם לא נוסף לחשבון, מייל היה יורד בשקט (18/07/2026)
+
+**מה קרה:** בזמן חקירת item 10 (WHOIS leak, ר' #45), התגלה שהתאוריה המקורית שגויה — GoDaddy Domain Privacy כבר היה "On" וה-Contact Info כבר הציג את המייל העסקי. תוך כדי המשך חקירת D4 (אימות `hello@sockacademy.store`), גיא נכנס בפועל ל-improvmx.com לבדוק את ה-alias — והתברר ש**לא היה שום חשבון ImprovMX פעיל עם הדומיין מוגדר בו כלל**. ה-MX records (`mx1`/`mx2.improvmx.com`) הוצבעו נכון ב-DNS כבר מ-10/07 (או קודם), אך אף פעם לא הושלמה הרשמה + הוספת domain + alias בצד ImprovMX עצמו. המשמעות: כל מייל שנשלח בפועל ל-`hello@sockacademy.store` (הכתובת שה-Contact form של השירות מפנה אליה!) היה עלול **לרדת בשקט** — אין bounce שגיא היה רואה, אין log, שום סימן. זו בדיוק אותה מחלקת-בעיה כמו #45: תשתית *שנראית* מוגדרת (DNS resolve תקין) לא בהכרח *באמת* פונקציונלית מקצה לקצה.
+
+**סיבה:** DNS MX record תקין מוכיח רק ש"מישהו הצביע לשם" — הוא לא מוכיח שהצד השני (ImprovMX) בכלל יודע על קיום הדומיין. שני המערכות (DNS registrar + forwarding provider) עצמאיות לחלוטין; שינוי באחת לא בודק את השנייה. אף session קודם לא בדק את **צד השירות** (רק ציין "MX resolve" כ-proof of progress ב-Primer מ-15/07 — ר' שורה 1219 בזיכרון), והנחה בטעות ש-resolve = מוגדר.
+
+**מה מונע חזרה:**
+1. **לעולם לא להסתפק ב-DNS resolve כהוכחת "השירות מוגדר".** לכל שירות חיצוני מבוסס-DNS (email forwarding, CDN, verification services) — לבדוק גם את **צד הפאנל של הספק עצמו** (login לחשבון, ולוודא שהדומיין/ה-alias קיימים שם בפועל), לא רק `nslookup`/`dig`.
+2. לפני שמסמנים "D4 — MX resolve, זה positive progress" ב-memory/tracker — לציין במפורש: "MX resolve בלבד ≠ forwarding מוגדר בפועל. נדרש אימות בפאנל הספק."
+3. לכל domain-based email setup עתידי (Klaviyo sending domain, SPF/DKIM records, וכו') — אותו כלל: DNS תקין הוא תנאי הכרחי, לא מספיק. בדיקה סופית = login לפאנל + בדיקת קבלה חיה (מייל טסט אמיתי).
+
+**בדיקה:** לפני שסוגרים "email deliverability verified" על כל דומיין — חובה screen-share/אימות ישיר של פאנל הספק (לא רק תוצאת DNS query) + מייל טסט חי שמגיע ליעד בפועל.
+
+---
+
 ## SESSION CONTINUITY CHECKLIST — בכל שיחה
 
 **פתיחה:**
