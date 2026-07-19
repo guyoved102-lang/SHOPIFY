@@ -184,6 +184,21 @@ document order.
     visible browsing experience is now gone too). Blog/policy pages deliberately left live — SEO
     investment preserved. Full writeup: `ANTI_RECURRENCE_PROTOCOL.md` #45.
 
+    **✅ RESOLVED 18/07/2026 — with a correction to the diagnosis above.** Guy checked GoDaddy
+    Registration Settings directly: Domain Privacy was **already "On"**, and the registrant Contact Info
+    already showed `sockacademy.store@gmail.com` — never the personal address. So GoDaddy WHOIS was
+    **not** the actual leak channel (fix #1 above turned out to be a non-issue; nothing to change there).
+    Tried to confirm via GoDaddy's Activity Log when Privacy/Contact were last set, to pin down the real
+    historical vector — that page is gated behind a paid "Domain Protection Plan" ("NO ACTIVE PLAN"), so
+    the exact leak timeline **stays unconfirmed**. Decision: not worth paying for the plan to solve one
+    already-mitigated incident; the sub-investigation is closed as inconclusive-but-safe going forward.
+    Fix #2 (Shopify `shop.email`) *was* real and is now done: Settings → Users → Store owner → the
+    account-owner email was `guyoved100@gmail.com` (not editable from the Users page itself — Shopify
+    routes this through the personal Shopify Account at accounts.shopify.com → General → Email → Update).
+    Verified live: Store owner now shows `sockacademy.store@gmail.com`. Note for later: a Google login
+    connected to `guyoved100@gmail.com` still shows under "Login service" on the account page — not
+    touched, flagged so a future session doesn't assume it was also migrated.
+
 ---
 
 ## Stage 18 — dispatched 06/07/2026: Target-state orchestration architecture
